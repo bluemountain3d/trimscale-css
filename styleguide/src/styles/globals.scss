@@ -1,0 +1,6 @@
+// Design system styling
+@use 'styles/trimscale';
+
+// Style-guide styling
+@forward './layouts';
+@forward './components';
