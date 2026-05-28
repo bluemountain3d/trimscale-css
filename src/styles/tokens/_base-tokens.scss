@@ -1,0 +1,46 @@
+/// @group Tokens
+/// @name Base Tokens
+/// @description Foundation CSS custom properties for fluid typography and spacing system
+/// ===========================================================================
+
+@use "styles/abstracts/functions/" as fn;
+@use "styles/abstracts/variables" as var;
+
+
+:root {
+  // ============================================================================
+  // Viewport Unit System
+  // ============================================================================
+
+  /// Custom viewport unit that adapts to ultrawide displays
+  /// Standard: 1vw (viewport width)
+  /// Ultrawide (≥21:9 & ≥ 2048px): 2vh to prevent excessive scaling
+  --vwx: 1vw;
+
+  /// Switch to height-based scaling on ultrawide displays
+  /// Prevents text from becoming too large on very wide screens
+  @media (min-aspect-ratio: 21/9) and (min-height: #{fn.pxToRem(var.$ultrawide-threshold-px)}) {
+    --vwx: 2vh;
+  }
+
+  // ==========================================================================
+  // Fluid Base Values
+  // ==========================================================================
+
+  /// Fluid base font size
+  /// Scales from 16px @ 384px viewport to 20px @ 1536px viewport
+  /// Formula: clamp(1rem, 0.9167rem + 0.3472 * var(--vwx), 1.25rem)
+  --fluid-base: #{fn.fluidFontSize(0, "vwx")};
+
+  /// Base spacing unit (1/4 of fluid base)
+  /// Used as foundation for all spacing tokens
+  /// At 16px base = 4px unit, at 20px base = 5px unit
+  --unit: calc(var(--fluid-base) / #{var.$base-grid-size});
+
+
+  // ==========================================================================
+  // Global sizing
+  // ==========================================================================
+
+  --header-height: calc(2.75rem + var(--space-3xl));
+}

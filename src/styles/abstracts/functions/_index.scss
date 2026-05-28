@@ -1,0 +1,11 @@
+/// @group Abstracts/Functions
+/// @name Functions Index
+/// @description Public API for all abstract functions.
+/// Forwards unit utilities, number utilities, OKLCH color functions,
+/// and fluid typography & spacing calculations.
+/// ===========================================================================
+
+@forward './fn_unit-utils';
+@forward './fn_number-utils';
+@forward './fn_color-oklch';
+@forward './fn_fluid-typography-and-spacing';

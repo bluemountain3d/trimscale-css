@@ -1,0 +1,54 @@
+/// @group Utilities
+/// @name Gap Utilities
+/// @description Utility classes for gap, row-gap, and column-gap using the fluid spacing system.
+/// Provides both t-shirt sizes (xs, sm, md...) and numeric scale (1-48).
+/// @example html
+///   <div class="gap-md">Grid with medium gap</div>
+///   <div class="row-gap-4 column-gap-8">Custom row/column gaps</div>
+/// ===========================================================================
+
+@use "styles/tokens/spacing-tokens" as *;
+
+.gap-none {
+  gap: 0;
+}
+.row-gap-none {
+  row-gap: 0;
+}
+.column-gap-none {
+  column-gap: 0;
+}
+
+// ==========================================================================
+// T-shirt Size Scale
+// ==========================================================================
+
+/// Semantic gap utility classes using t-shirt sizes
+@each $size, $factor in $space-values {
+  .gap-#{$size} {
+    gap: calc(var(--unit) * #{$factor});
+  }
+  .row-gap-#{$size} {
+    row-gap: calc(var(--unit) * #{$factor});
+  }
+  .column-gap-#{$size} {
+    column-gap: calc(var(--unit) * #{$factor});
+  }
+}
+
+// ==========================================================================
+// Numeric Scale (1-48)
+// ==========================================================================
+
+/// Numeric gap utility classes for fine-grained control
+@for $i from 1 through 48 {
+  .gap-#{$i} {
+    gap: calc(var(--unit) * #{$i});
+  }
+  .row-gap-#{$i} {
+    row-gap: calc(var(--unit) * #{$i});
+  }
+  .column-gap-#{$i} {
+    column-gap: calc(var(--unit) * #{$i});
+  }
+}

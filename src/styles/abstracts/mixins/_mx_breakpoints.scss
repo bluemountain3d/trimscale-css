@@ -1,0 +1,265 @@
+/// @group Abstracts/Mixins
+/// @name Responsive Breakpoints
+/// @description Auto-generated responsive breakpoint mixins
+/// Provides consistent media query patterns across the design system
+/// @example
+///   @use '@styles/abstracts/mixins/mx_breakpoints' as bp;
+///
+///   .component {
+///     padding: var(--space-sm);
+///
+///     @include bp.tablet-and-up {
+///       padding: var(--space-md);
+///     }
+///
+///     @include bp.desktop-and-up {
+///       padding: var(--space-lg);
+///     }
+///   }
+/// ===========================================================================
+
+@use "styles/abstracts/variables/breakpoints" as bp;
+@use "sass:map";
+
+// ============================================================================
+// And Up Mixins (includes breakpoint and larger)
+// ============================================================================
+
+/// Generate mixins for "and up" breakpoints
+/// Creates: mobile-and-up, phablet-and-up, tablet-and-up, laptop-and-up, desktop-and-up
+/// @example
+///   @include tablet-and-up {
+///     font-size: var(--text-lg);
+///   }
+///   // Output: @media (min-width: 48rem) { ... }
+
+@mixin mobile-and-up {
+  @media (min-width: map.get(bp.$breakpoints, "mobile")) {
+    @content;
+  }
+}
+
+@mixin phablet-and-up {
+  @media (min-width: map.get(bp.$breakpoints, "phablet")) {
+    @content;
+  }
+}
+
+@mixin tablet-and-up {
+  @media (min-width: map.get(bp.$breakpoints, "tablet")) {
+    @content;
+  }
+}
+
+@mixin tablet-lg-and-up {
+  @media (min-width: map.get(bp.$breakpoints, "tablet-lg")) {
+    @content;
+  }
+}
+
+@mixin laptop-and-up {
+  @media (min-width: map.get(bp.$breakpoints, "laptop")) {
+    @content;
+  }
+}
+
+@mixin desktop-and-up {
+  @media (min-width: map.get(bp.$breakpoints, "desktop")) {
+    @content;
+  }
+}
+
+// ============================================================================
+// Up To Mixins (excludes the breakpoint itself)
+// ============================================================================
+
+/// Generate mixins for "up to" breakpoints
+/// Creates: up-to-phablet, up-to-tablet, up-to-laptop, up-to-desktop
+/// @example
+///   @include up-to-tablet {
+///     display: none;
+///   }
+///   // Output: @media (max-width: 47.99rem) { ... }
+
+@mixin up-to-phablet {
+  @media #{bp.$bp-up-to-phablet} {
+    @content;
+  }
+}
+
+@mixin up-to-tablet {
+  @media #{bp.$bp-up-to-tablet} {
+    @content;
+  }
+}
+
+@mixin up-to-tablet-lg {
+  @media #{bp.$bp-up-to-tablet-lg} {
+    @content;
+  }
+}
+
+@mixin up-to-laptop {
+  @media #{bp.$bp-up-to-laptop} {
+    @content;
+  }
+}
+
+@mixin up-to-desktop {
+  @media #{bp.$bp-up-to-desktop} {
+    @content;
+  }
+}
+
+// ============================================================================
+// And Down Mixins (includes the breakpoint and smaller)
+// ============================================================================
+
+/// Generate mixins for "and down" breakpoints
+/// Creates: phablet-and-down, tablet-and-down, laptop-and-down, desktop-and-down
+/// @example
+///   @include tablet-and-down {
+///     grid-template-columns: 1fr;
+///   }
+///   // Output: @media (max-width: 48rem) { ... }
+
+@mixin phablet-and-down {
+  @media #{bp.$bp-phablet-and-down} {
+    @content;
+  }
+}
+
+@mixin tablet-and-down {
+  @media #{bp.$bp-tablet-and-down} {
+    @content;
+  }
+}
+
+@mixin tablet-lg-and-down {
+  @media #{bp.$bp-tablet-lg-and-down} {
+    @content;
+  }
+}
+
+@mixin laptop-and-down {
+  @media #{bp.$bp-laptop-and-down} {
+    @content;
+  }
+}
+
+@mixin desktop-and-down {
+  @media #{bp.$bp-desktop-and-down} {
+    @content;
+  }
+}
+
+// ============================================================================
+// Only Mixins (specific breakpoint range)
+// ============================================================================
+
+/// Generate mixins for "only" breakpoints
+/// Creates: mobile-only, phablet-only, tablet-only, laptop-only
+/// @example
+///   @include tablet-only {
+///     columns: 2;
+///   }
+///   // Output: @media (min-width: 48rem) and (max-width: 71.99rem) { ... }
+
+@mixin mobile-only {
+  @media #{bp.$bp-mobile-only} {
+    @content;
+  }
+}
+
+@mixin phablet-only {
+  @media #{bp.$bp-phablet-only} {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media #{bp.$bp-tablet-only} {
+    @content;
+  }
+}
+
+@mixin tablet-lg-only {
+  @media #{bp.$bp-tablet-lg-only} {
+    @content;
+  }
+}
+
+@mixin laptop-only {
+  @media #{bp.$bp-laptop-only} {
+    @content;
+  }
+}
+
+// ============================================================================
+// Usage Examples
+// ============================================================================
+
+/// @example scss - Mobile-first approach
+///   .card {
+///     // Base styles (mobile)
+///     padding: var(--space-sm);
+///     grid-template-columns: 1fr;
+///
+///     // Tablet and up
+///     @include tablet-and-up {
+///       padding: var(--space-md);
+///       grid-template-columns: repeat(2, 1fr);
+///     }
+///
+///     // Desktop and up
+///     @include desktop-and-up {
+///       padding: var(--space-lg);
+///       grid-template-columns: repeat(3, 1fr);
+///     }
+///   }
+
+/// @example scss - Desktop-first approach (less common)
+///   .sidebar {
+///     // Base styles (desktop)
+///     width: 300px;
+///
+///     // Tablet and down
+///     @include tablet-and-down {
+///       width: 200px;
+///     }
+///
+///     // Up to tablet (mobile + phablet)
+///     @include up-to-tablet {
+///       width: 100%;
+///     }
+///   }
+
+/// @example scss - Specific breakpoint only
+///   .feature {
+///     // Only visible on tablet
+///     @include tablet-only {
+///       display: block;
+///     }
+///   }
+
+/// @example scss - Complex responsive patterns
+///   .hero {
+///     font-size: var(--fs-500);
+///
+///     // Show different content on mobile
+///     @include mobile-only {
+///       .hero__subtitle {
+///         display: none;
+///       }
+///     }
+///
+///     // Medium screens get medium size
+///     @include tablet-and-up {
+///       font-size: var(--fs-600);
+///     }
+///
+///     // Large screens get large size
+///     @include laptop-and-up {
+///       font-size: var(--fs-700);
+///     }
+///   }

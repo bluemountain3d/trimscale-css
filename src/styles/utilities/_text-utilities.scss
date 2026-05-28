@@ -1,0 +1,154 @@
+/// @group Utilities
+/// @name Text Utilities
+/// @description Utility classes for font family, size, weight, style, and alignment.
+/// Font size classes override --_font-size for use within the fontSetup system.
+/// Font family classes map to semantic roles defined in abstracts/variables/typography.
+/// @example html
+///   <p class="font-family-body font-weight-medium text-align-center">Styled text</p>
+/// ===========================================================================
+
+@use "styles/abstracts/variables" as var;
+@use 'styles/tokens/leading-trim' as *;
+
+/// Font Families
+// Primary/Secondary/Tertiary
+.font-family-primary {@extend %primary-text;}
+.font-family-secondary {@extend %secondary-text;}
+.font-family-tertiary {@extend %tertiary-text;}
+// Categories
+.font-family-sans {@extend %sans-text;}
+.font-family-serif {@extend %serif-text;}
+.font-family-mono {@extend %mono-text;}
+// Contextual
+.font-family-display {@extend %display-text;}
+.font-family-heading {@extend %heading-text;}
+.font-family-subheading {@extend %subheading-text;}
+.font-family-body {@extend %body-text;}
+.font-family-quote {@extend %quote-text;}
+.font-family-code {@extend %code-text;}
+.font-family-ui {@extend %ui-text;}
+
+/// Font Size
+.font-size-display-1 {
+  --_font-size: var(--display-1); 
+  --_line-height: 1.1;
+}
+.font-size-display-2 {
+  --_font-size: var(--display-2); 
+  --_line-height: 1.1;
+}
+.font-size-heading-1 {
+  --_font-size: var(--heading-1);
+  --_line-height: 1.15;
+}
+.font-size-heading-2 {
+  --_font-size: var(--heading-2);
+  --_line-height: 1.2;
+}
+.font-size-heading-3 {
+  --_font-size: var(--heading-3);
+  --_line-height: 1.3;
+}
+.font-size-heading-4 {
+  --_font-size: var(--heading-4);
+  --_line-height: 1.4;
+}
+.font-size-text-lg {
+  --_font-size: var(--text-lg);
+  --_line-height: 1.4;
+}
+.font-size-text-md {
+  --_font-size: var(--text-md);
+  --_line-height: 1.45;
+}
+.font-size-text-base {
+  --_font-size: var(--text-base);
+  --_line-height: 1.5;
+}
+.font-size-text-sm {
+  --_font-size: var(--text-sm);
+  --_line-height: 1.55;
+}
+.font-size-text-xs {
+  --_font-size: var(--text-xs);
+  --_line-height: 1.6;
+  --_letter-spacing: 0.02em;
+}
+
+/// Line-height | Leading
+.line-height-100 {--_line-height: var(--line-height-100)}
+.line-height-105 {--_line-height: var(--line-height-105)}
+.line-height-110 {--_line-height: var(--line-height-110)}
+.line-height-115 {--_line-height: var(--line-height-115)}
+.line-height-120 {--_line-height: var(--line-height-120)}
+.line-height-125 {--_line-height: var(--line-height-125)}
+.line-height-130 {--_line-height: var(--line-height-130)}
+.line-height-135 {--_line-height: var(--line-height-135)}
+.line-height-140 {--_line-height: var(--line-height-140)}
+.line-height-145 {--_line-height: var(--line-height-145)}
+.line-height-150 {--_line-height: var(--line-height-150)}
+.line-height-155 {--_line-height: var(--line-height-155)}
+.line-height-160 {--_line-height: var(--line-height-160)}
+.line-height-165 {--_line-height: var(--line-height-165)}
+.line-height-170 {--_line-height: var(--line-height-170)}
+.line-height-175 {--_line-height: var(--line-height-175)}
+.line-height-180 {--_line-height: var(--line-height-180)}
+.line-height-185 {--_line-height: var(--line-height-185)}
+.line-height-190 {--_line-height: var(--line-height-190)}
+.line-height-195 {--_line-height: var(--line-height-195)}
+.line-height-200 {--_line-height: var(--line-height-200)}
+
+/// Font Weights
+.font-weight-thin {--_font-weight: var(--font-weight-thin)}
+.font-weight-extralight {--_font-weight: var(--font-weight-extralight)}
+.font-weight-light {--_font-weight: var(--font-weight-light)}
+.font-weight-normal {--_font-weight: var(--font-weight-normal)}
+.font-weight-medium {--_font-weight: var(--font-weight-medium)}
+.font-weight-semibold {--_font-weight: var(--font-weight-semibold)}
+.font-weight-bold {--_font-weight: var(--font-weight-bold)}
+.font-weight-extrabold {--_font-weight: var(--font-weight-extrabold)}
+.font-weight-black {--_font-weight: var(--font-weight-black)}
+
+/// Text Styles
+.font-style-normal {
+  --_font-style: normal;
+}
+.font-style-italic {
+  --_font-style: italic;
+  --_letter-spacing: 0.02em;
+}
+
+/// Text Transform
+.text-transform-capitalize {--_text-transform: capitalize}
+.text-transform-uppercase {--_text-transform: uppercase}
+.text-transform-lowercase {--_text-transform: lowercase}
+
+/// Text Align
+.text-align-left {text-align: left;}
+.text-align-center {text-align: center; margin-inline: auto;}
+.text-align-right {text-align: right;}
+
+/// Text color variants
+// .color-text-primary {
+//   color: var(--color-text-primary);
+// }
+
+.text-color-inherit {
+  color: inherit;
+}
+.text-color-primary {
+  color: var(--color-text-primary);
+}
+.text-color-muted {
+  color: var(--color-text-muted);
+}
+.text-color-bright {
+  color: var(--color-text-bright);
+}
+.text-color-accent {
+  color: var(--color-accent);
+}
+.text-color-action {
+  color: var(--color-action);
+}
+

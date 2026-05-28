@@ -1,0 +1,125 @@
+/// @group Base
+/// @name Typography
+/// @description Typographic styles for HTML elements using the font setup system
+///
+/// IMPLEMENTATION LAYER - Applies typography system to actual HTML elements
+///
+/// This file uses the fontSetup mixin to apply:
+/// - Font families with precise metrics from font-metrics.scss
+/// - Leading trim for optical alignment
+/// - Typography properties (size, weight, line-height, etc.)
+///
+/// @requires abstracts/variables For CSS custom properties and font configuration
+/// @requires abstracts/mixins For fontSetup mixin (primary API)
+/// @requires tokens/leading-trim For %text-properties and font-specific placeholders
+/// @see abstracts/variables/font-metrics For raw font data
+/// @see abstracts/mixins/mx_font-setup For mixin documentation
+/// ===========================================================================
+
+@use "styles/abstracts/variables" as var;
+@use "styles/abstracts/mixins/" as mx;
+@use "styles/tokens/leading-trim" as *;
+
+// ============================================================================
+// Document & Body Typography
+// ============================================================================
+
+body {
+  font-family: var(--font-family-body);
+  line-height: 1.5;
+}
+
+// ============================================================================
+// Text element spacing
+// ============================================================================
+
+.flow-em {
+  ul,
+  ol {
+    padding-inline-start: 1.5em;
+  }
+  ol {
+    list-style-type: decimal;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  dl {
+    padding-inline-start: 0;
+  }
+
+  // Content blocks - medium spacing
+  > :is(p, ul, ol, dl, blockquote, figure, div:not(.no-flow))
+    + :is(p, ul, ol, dl, blockquote, figure, span, div:not(.no-flow)) {
+    margin-block-start: 1.5em;
+  }
+
+  // List items - tight spacing
+  & :is(ul, ol) > li + li {
+    margin-block-start: 0.6em;
+  }
+
+  // Definition list items - custom spacing
+  & dl > dt {
+    font-weight: 600;
+  }
+
+  & dl > dt + dd {
+    margin-block-start: 0.375em;
+  }
+
+  & dl > dd + dt {
+    margin-block-start: 1.5em;
+  }
+
+  & dl > dd + dd {
+    margin-block-start: 0.6em;
+  }
+
+  // Nested lists
+  & li > :is(ul, ol) {
+    margin-block-start: 0.6em;
+  }
+
+  // Large gap before headings
+  & > * + :is(h1, h2, h3, h4, h5, h6) {
+    margin-block-start: 2.5em;
+  }
+
+  // Sequential headings (tighter)
+  & > :is(h1, h2, h3, h4, h5, h6) + :is(h1, h2, h3, h4, h5, h6) {
+    margin-block-start: 0.75em;
+  }
+
+  // Heading to content
+  &
+    > :is(h1, h2, h3, h4, h5, h6):has(
+      + :is(p, ul, ol, dl, blockquote, figure, span, div:not(.no-flow))
+    ) {
+    margin-block-end: max(0.8em, calc(var(--text-base) * 2));
+  }
+}
+
+// ============================================================================
+// Prose Elements
+// ============================================================================
+
+strong,
+b {
+  font-weight: 700;
+}
+
+em,
+i {
+  font-style: italic;
+}
+
+small {
+  font-size: var(--text-sm);
+}
+
+sup {
+  font-feature-settings: "sups";
+}

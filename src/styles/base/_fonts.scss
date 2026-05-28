@@ -1,0 +1,45 @@
+// Roboto
+@font-face {
+  font-family: "Roboto";
+  src: url('/fonts/Roboto-VariableFont_wght-100-900_subset-minimal-western-plus.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Roboto";
+  src: url('/fonts/Roboto-VariableFont_wght-100-900-Italic_subset-minimal-western-plus.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+// Roboto Serif
+@font-face {
+  font-family: "Roboto Serif";
+  src: url('/fonts/RobotoSerif-VariableFont_wght-100-900_subset-minimal-western-plus.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Roboto Serif";
+  src: url('/fonts/RobotoSerif-VariableFont_wght-100-900-Italic_subset-minimal-western-plus.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+// Roboto Mono
+@font-face {
+  font-family: "Roboto Mono";
+  src: url('/fonts/RobotoMono-VariableFont_wght-100-700_subset-minimal-western-plus.woff2') format('woff2');
+  font-weight: 100 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Roboto Mono";
+  src: url('/fonts/RobotoMono-VariableFont_wght-100-700-Italic_subset-minimal-western-plus.woff2') format('woff2');
+  font-weight: 100 700;
+  font-style: italic;
+  font-display: swap;
+}

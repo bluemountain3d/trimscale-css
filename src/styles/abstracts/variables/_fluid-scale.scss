@@ -1,0 +1,45 @@
+/// @group Abstracts/Variables
+/// @name Fluid Typography Scale
+/// @description Configuration for fluid typography system
+/// Controls how font sizes scale between viewport sizes using modular scale
+/// ===========================================================================
+
+// No imports needed - pure configuration data
+
+// ============================================================================
+// Fluid Typography Configuration
+// ============================================================================
+
+/// Fluid typography scale configuration
+/// @type Map
+/// @prop {Number} min-width - Minimum viewport width in pixels (384px)
+/// @prop {Number} max-width - Maximum viewport width in pixels (1536px)
+/// @prop {Number} min-font-size - Base font size at min viewport (16px)
+/// @prop {Number} max-font-size - Base font size at max viewport (20px)
+/// @prop {Number} min-type-scale - Modular scale ratio at min viewport (1.2 - Minor Third)
+/// @prop {Number} max-type-scale - Modular scale ratio at max viewport (1.333 - Perfect Fourth)
+/// @prop {Number} precision - Decimal precision for calculations (4)
+/// @link https://type-scale.com/ Type scale calculator
+/// @example
+///   // At 384px viewport: base = 16px, scale = 1.2
+///   // Level 1: 16 * 1.2 = 19.2px
+///   // Level 2: 16 * 1.2^2 = 23.04px
+///
+///   // At 1536px viewport: base = 20px, scale = 1.333
+///   // Level 1: 20 * 1.333 = 26.66px
+///   // Level 2: 20 * 1.333^2 = 35.54px
+$fluid-scale: (
+  "min-width": 360,
+  // Smartphone portrait
+  "max-width": 1440,
+  // Desktop
+  "min-font-size": 16,
+  // Standard base size
+  "max-font-size": 20,
+  // Comfortable reading size
+  "min-type-scale": 1.2,
+  // Minor Third (compact)
+  "max-type-scale": 1.333,
+  // Perfect Fourth (generous)
+  "precision": 4, // Decimal places for rounding
+) !default;

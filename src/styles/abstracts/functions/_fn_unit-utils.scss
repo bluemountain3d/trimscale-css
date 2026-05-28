@@ -1,0 +1,66 @@
+/// @group Abstracts/Functions
+/// @name Unit Utilities
+/// @description Utility functions for working with CSS units
+/// ===========================================================================
+
+@use "styles/abstracts/variables" as var;
+// Only import functions from function files to avoid dependency cycle
+// @use '../functions/fn-other-function' as *;
+
+// Sass built-in modules - Only import what you actually use
+@use "sass:math";
+
+/// Strip unit from a value
+/// @param {Number} $value - Value with or without unit
+/// @return {Number} Unitless number
+/// @example
+///   $unitless: stripUnit(16px); // Returns: 16
+///   $already-unitless: stripUnit(16); // Returns: 16
+@function stripUnit($value) {
+  // Return early if already unitless
+  @if math.is-unitless($value) {
+    @return $value;
+  }
+
+  // Strip unit by dividing by (value * 0 + 1)
+  // This creates a value of "1" with the same unit as $value
+  @return math.div($value, ($value * 0 + 1));
+}
+
+/// Convert pixels to rem
+/// @param {Number} $px - Pixel value to convert
+/// @param {Number} $base [$var.base-font-size] - Base font size in pixels
+/// @return {Number} Value in rem
+/// @example
+///   font-size: pxToRem(24px); // Returns: 1.5rem
+///   font-size: pxToRem(24); // Returns: 1.5rem
+@function pxToRem($px, $base: var.$base-font-size) {
+  // Validate input
+  @if math.is-unitless($px) {
+    $px: $px * 1px;
+  }
+
+  @if math.is-unitless($base) {
+    $base: $base * 1px;
+  }
+
+  @return math.div(stripUnit($px), stripUnit($base)) * 1rem;
+}
+
+/// Convert rem to pixels
+/// @param {Number} $rem - Rem value to convert
+/// @param {Number} $base [$var.base-font-size] - Base font size in pixels
+/// @return {Number} Value in pixels
+/// @example
+///   max-width: remToPx(48rem); // Returns: 768px
+@function remToPx($rem, $base: var.$base-font-size) {
+  @if math.is-unitless($rem) {
+    $rem: $rem * 1rem;
+  }
+
+  @if math.is-unitless($base) {
+    $base: $base * 1px;
+  }
+
+  @return stripUnit($rem) * stripUnit($base) * 1px;
+}

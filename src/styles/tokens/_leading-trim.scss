@@ -1,0 +1,339 @@
+/// @group Tokens
+/// @name Leading Trim - Text Box Trim Polyfill
+/// @description Emulates CSS text-box-trim by removing excess vertical space
+///
+/// TOKEN LAYER - Placeholder selectors with font-specific metrics applied
+///
+/// How it works:
+/// 1. Extract trim values from font metrics (ascender/descender to cap-height/baseline)
+/// 2. Apply negative margins on ::before/::after pseudo-elements to remove space
+/// 3. Automatically upgrades to native text-box-trim when browser support arrives
+///
+/// Browser Compatibility:
+/// - Chrome/Edge: Fully supported (Chromium 88+)
+/// - Firefox: Fully supported (Firefox 78+)
+/// - Safari: Fully supported (Safari 14+)
+///
+/// CRITICAL: Units must be included in CSS custom properties
+/// Firefox requires explicit unit specification (e.g., '0.196em' not '0.196')
+/// This is stricter than Chrome's more forgiving calc() implementation
+///
+/// Available placeholders for each font role:
+/// - Hierarchical: %primary-text, %secondary-text, %tertiary-text
+/// - Category: %sans-text, %serif-text, %mono-text
+/// - Contextual: %display-text, %heading-text, %body-text, %quote-text, %code-text, %ui-text
+///
+/// Base placeholder:
+/// - %text-properties: Core typography properties without font-specific metrics
+///
+/// Usage: Extend placeholders OR use fontSetup mixin (recommended)
+///
+/// @requires abstracts/functions
+/// @requires abstracts/variables
+/// @requires CSS custom properties support (2016+)
+/// @see abstracts/mixins/mx_font-setup For convenient API
+/// @see abstracts/variables/font-metrics For source data
+///
+/// @example scss - Direct usage (not recommended)
+///   .heading {
+///     @extend %heading-text;
+///     --_font-size: var(--heading-1);
+///     --_line-height: 1.1;
+///     --_font-weight: 700;
+///   }
+///
+/// @example scss - Via mixin (recommended)
+///   .heading {
+///     @include mx.fontSetup($font: 'heading', $font-size: var(--heading-1));
+///   }
+/// ===========================================================================
+
+@use "styles/abstracts/functions" as fn;
+@use "styles/abstracts/variables" as var;
+@use "sass:map";
+@use "sass:math";
+
+/// Get font metric value for a given font role and property
+/// @access private
+/// @param {String} $font-key - Font role key (e.g., 'primary', 'body', 'heading')
+/// @param {String} $property - Metric property name (e.g., 'top-trim', 'bottom-trim')
+/// @return {Number} Normalized metric value from font data
+@function _getFontMetric($font-key, $property) {
+  $font-name: map.get(var.$fonts, $font-key);
+  @return map.get(map.get(var.$font-metrics, $font-name), $property);
+}
+
+/// Apply font-specific leading trim metrics
+///
+/// CRITICAL: Units are appended to values for cross-browser compatibility
+/// Firefox requires explicit units in CSS custom properties used in calc()
+/// Chrome is more forgiving but Firefox will not compute unitless values
+///
+/// @access private
+/// @param {String} $font ['primary'] - Font role key from $fonts map
+/// @output CSS custom properties with em units for trim values and side bearings
+///
+/// @example scss - Output
+///   --_top-trim: 0.196em;
+///   --_bottom-trim: 0.144em;
+///   --_lsb-adjust: -0.0841em;
+///   --_rsb-adjust: -0.0789em;
+///
+@mixin leading-trim($font: "primary") {
+  $_fontName: map.get(var.$fonts, $font);
+
+  /// Font-specific cap-height ratio
+  // --_cap-ratio: #{_getFontMetric($font, "cap-height")}em;
+
+  /// Font-specific vertical metrics (normalized to em units)
+  /// Calculate from font file: (hhea ascender - cap-height) / UPM
+  /// Units (em) appended here for Firefox calc() compatibility
+  --_top-trim: #{math.abs(_getFontMetric($font, "top-trim"))}em;
+
+  /// Calculate from font file: abs(hhea descender) / UPM
+  /// Units (em) appended here for Firefox calc() compatibility
+  --_bottom-trim: #{math.abs(_getFontMetric($font, "bottom-trim"))}em;
+
+  /// Left side bearing (LSB) adjustment
+  /// Units (em) appended here for Firefox calc() compatibility
+  --_lsb-adjust: #{_getFontMetric($font, "lsb-adjust")}em;
+
+  /// Right side bearing (RSB) adjustment
+  /// Units (em) appended here for Firefox calc() compatibility
+  --_rsb-adjust: #{_getFontMetric($font, "rsb-adjust")}em;
+}
+
+/// Base text properties placeholder
+/// Provides core typography system without font-specific metrics
+/// All properties controllable via CSS custom properties
+///
+/// IMPLEMENTATION NOTES:
+/// - Pseudo-elements (::before, ::after) use simplified calc() formulas
+/// - Formula: (line-height - 1) * -0.5em subtracts half the leading space
+/// - trim values are already in em units from leading-trim mixin
+/// - Firefox requires explicit units; Chrome is more forgiving
+///
+/// @property {String} --_font-size [var(--text-base)] - Font size
+/// @property {Number} --_line-height [1.5] - Line height multiplier (unitless)
+/// @property {Number} --_font-weight [400] - Font weight
+/// @property {String} --_font-style [normal] - Font style
+/// @property {String} --_letter-spacing [0] - Letter spacing
+/// @property {String} --_text-transform [none] - Text transform
+/// @property {Length} --_top-trim [0] - Top trim value in em (set by font placeholders)
+/// @property {Length} --_bottom-trim [0] - Bottom trim value in em (set by font placeholders)
+/// @property {Length} --_lsb-adjust [0] - Left side bearing adjustment in em
+/// @property {Length} --_rsb-adjust [0] - Right side bearing adjustment in em
+%text-properties {
+  /// Default typography values, overridable via CSS custom properties
+  --_font-size: var(--text-base);
+  --_line-height: 1.5;
+  --_font-weight: var(--font-weight-normal);
+  --_font-style: normal;
+  --_letter-spacing: 0;
+  --_text-transform: none;
+
+  /// Default metrics
+  // --_cap-ratio: 0.75;
+  --_top-trim: 0;
+  --_bottom-trim: 0;
+  --_lsb-adjust: 0;
+  --_rsb-adjust: 0;
+
+  /// Creates block formatting context to prevent margin collapse
+  display: flow-root;
+
+  /// Apply typography values
+  font-size: var(--_font-size);
+  line-height: var(--_line-height);
+  font-weight: var(--_font-weight);
+  font-style: var(--_font-style);
+  letter-spacing: var(--_letter-spacing);
+  text-transform: var(--_text-transform);
+  text-rendering: geometricPrecision;
+  margin-left: var(--_lsb-adjust);
+  margin-right: var(--_rsb-adjust);
+
+  /// Fallback implementation for browsers without native text-box-trim
+  /// Uses negative margins on pseudo-elements to trim excess vertical space
+  @supports not (text-box-trim: trim-both) {
+    /// Trim excess space above cap-height
+    ///
+    /// Formula breakdown:
+    /// 1. (var(--_line-height) - 1) = excess leading space (unitless)
+    /// 2. * -0.5em = convert to negative half-leading in em
+    /// 3. - var(--_top-trim) = subtract font's cap-to-ascender space (already in em)
+    ///
+    /// Example: line-height: 1.5, top-trim: 0.196em
+    /// = (1.5 - 1) * -0.5em - 0.196em
+    /// = 0.5 * -0.5em - 0.196em
+    /// = -0.25em - 0.196em
+    /// = -0.446em (removes this space above cap-height)
+    &::before {
+      content: "";
+      display: table; /// Prevents margin collapse
+      margin-bottom: calc(
+        (var(--_line-height) - 1) * -0.5em - var(--_top-trim)
+      );
+    }
+
+    /// Trim excess space below baseline
+    ///
+    /// Formula breakdown:
+    /// 1. (var(--_line-height) - 1) = excess leading space (unitless)
+    /// 2. * -0.5em = convert to negative half-leading in em
+    /// 3. - var(--_bottom-trim) = subtract font's descender-to-baseline space (already in em)
+    ///
+    /// Example: line-height: 1.5, bottom-trim: 0.144em
+    /// = (1.5 - 1) * -0.5em - 0.144em
+    /// = -0.25em - 0.144em
+    /// = -0.394em (removes this space below baseline)
+    &::after {
+      content: "";
+      display: table; /// Prevents margin collapse
+      margin-bottom: calc(
+        (var(--_line-height) - 1) * -0.5em - var(--_bottom-trim)
+      );
+    }
+
+    /// Enhanced version using 'lh' unit for simpler calculations
+    /// The 'lh' unit equals the computed line-height of the element
+    ///
+    /// Browser support for 'lh' unit:
+    /// - Chrome 113+ (May 2023)
+    /// - Firefox 120+ (November 2023)
+    /// - Safari 16.4+ (March 2023)
+    ///
+    /// Formula using 'lh':
+    /// - (1lh - 1em) = total leading space
+    /// - * 0.5 = half-leading
+    /// - * -1 = negative (to remove space)
+    /// - - var(--_top-trim/bottom-trim) = subtract font metrics
+    ///
+    /// Benefits over em-based calc:
+    /// - More accurate for complex line-height values
+    /// - Simpler formula (no manual line-height - 1 calculation)
+    /// - Automatically respects computed line-height
+    @supports (margin: 1lh) {
+      &::before {
+        margin-bottom: calc(-1 * ((1lh - 1em) * 0.5) - var(--_top-trim));
+      }
+
+      &::after {
+        margin-bottom: calc(-1 * ((1lh - 1em) * 0.5) - var(--_bottom-trim));
+      }
+    }
+  }
+
+  /// Native text-box-trim implementation (future-proof)
+  /// Automatically handles font metrics when browser support arrives
+  @supports (text-box-trim: trim-both) {
+    text-box-trim: trim-both;
+    text-box-edge: cap alphabetic;
+  }
+}
+
+// ============================================================================
+// Font-Specific Placeholders
+// ============================================================================
+// Each placeholder extends %text-properties and applies font-specific metrics
+//
+// IMPORTANT: All placeholders must @extend %text-properties BEFORE the mixin
+// This ensures ::before and ::after pseudo-elements are inherited
+// Sass does not allow @extend inside mixins across files
+//
+// Use these directly OR via fontSetup mixin (recommended)
+
+// Hierarchical font roles
+/// Primary font with leading trim applied
+/// Extends base text properties and applies primary font metrics
+%primary-text {
+  @extend %text-properties;
+  @include leading-trim("primary");
+  font-family: var(--font-family-primary);
+}
+
+/// Secondary font with leading trim applied
+%secondary-text {
+  @extend %text-properties;
+  @include leading-trim("secondary");
+  font-family: var(--font-family-secondary);
+}
+
+/// Tertiary font with leading trim applied
+%tertiary-text {
+  @extend %text-properties;
+  @include leading-trim("tertiary");
+  font-family: var(--font-family-tertiary);
+}
+
+// Category font roles
+/// Sans-serif font with leading trim applied
+%sans-text {
+  @extend %text-properties;
+  @include leading-trim("sans");
+  font-family: var(--font-family-sans);
+}
+
+/// Serif font with leading trim applied
+%serif-text {
+  @extend %text-properties;
+  @include leading-trim("serif");
+  font-family: var(--font-family-serif);
+}
+
+/// Monospace font with leading trim applied
+%mono-text {
+  @extend %text-properties;
+  @include leading-trim("mono");
+  font-family: var(--font-family-mono);
+}
+
+// Contextual font roles
+/// Display text font with leading trim applied
+%display-text {
+  @extend %text-properties;
+  @include leading-trim("display");
+  font-family: var(--font-family-display);
+}
+
+/// Heading text font with leading trim applied
+%heading-text {
+  @extend %text-properties;
+  @include leading-trim("heading");
+  font-family: var(--font-family-heading);
+}
+
+/// Heading text font with leading trim applied
+%subheading-text {
+  @extend %text-properties;
+  @include leading-trim("subheading");
+  font-family: var(--font-family-subheading);
+}
+
+/// Body text font with leading trim applied
+%body-text {
+  @extend %text-properties;
+  @include leading-trim("body");
+  font-family: var(--font-family-body);
+}
+
+/// Quote text font with leading trim applied
+%quote-text {
+  @extend %text-properties;
+  @include leading-trim("quote");
+  font-family: var(--font-family-quote);
+}
+
+/// Code text font with leading trim applied
+%code-text {
+  @extend %text-properties;
+  @include leading-trim("code");
+  font-family: var(--font-family-code);
+}
+
+/// UI text font with leading trim applied
+%ui-text {
+  @extend %text-properties;
+  @include leading-trim("ui");
+  font-family: var(--font-family-ui);
+}

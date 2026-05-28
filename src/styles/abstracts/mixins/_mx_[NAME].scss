@@ -1,0 +1,62 @@
+/// @group Abstracts/Mixins
+/// @name <Mixin Name>
+/// @description Brief description of what this mixin does
+/// @param {Type} $param-name - Description of parameter
+/// @param {Type} $optional-param [default] - Optional parameter description
+/// @content Accepts content block for additional styles
+/// @example
+///   .example {
+///     @include my-mixin($param) {
+///       // Optional content
+///     }
+///   }
+/// ===========================================================================
+
+@use "styles/abstracts/variables" as var;
+@use "styles/abstracts/functions" as fn;
+// Only import mixins from mixin files to avoid dependency cycle
+// @use '../mixins/mx_other-mixin' as *;
+
+// Sass built-in modules - Only import what you actually use
+// @use 'sass:color';
+// @use 'sass:list';
+@use "sass:map";
+@use "sass:math";
+// @use 'sass:meta';
+// @use 'sass:selector';
+// @use 'sass:string';
+
+/// Mixin implementation
+/// @param {String} $my-param ['default-value'] - Parameter description
+/// @content Optional content block for custom styles
+@mixin my-mixin($my-param: "default-value") {
+  // Validate input
+  @if type-of($my-param) != "string" {
+    @error 'my-mixin() expects a string, got #{type-of($my-param)}';
+  }
+
+  // Base styles
+  property: $my-param;
+
+  // Accept content block
+  @content;
+}
+
+/// Example: Media query mixin
+/// @param {String} $breakpoint - Breakpoint name from $breakpoints map
+/// @content Styles to apply at this breakpoint
+/// @example
+///   .element {
+///     @include respond-to('medium') {
+///       font-size: 2rem;
+///     }
+///   }
+@mixin respond-to($breakpoint) {
+  @if not map.has-key(var.$breakpoints, $breakpoint) {
+    @error 'Unknown breakpoint: #{$breakpoint}. Available: #{map.keys(var.$breakpoints)}';
+  }
+
+  @media (min-width: map.get(var.$breakpoints, $breakpoint)) {
+    @content;
+  }
+}

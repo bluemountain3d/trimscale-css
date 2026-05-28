@@ -1,0 +1,62 @@
+/// @group Abstracts/Functions
+/// @name Number Utilities
+/// @description Utility functions for number manipulation and rounding
+/// ===========================================================================
+
+// Only import functions from function files to avoid dependency cycle
+// @use '../functions/fn_other-function' as *;
+
+// Sass built-in modules - Only import what you actually use
+@use "sass:math";
+
+/// Round a number to specified decimal places
+/// @param {Number} $number - Number to round
+/// @param {Number} $decimals [4] - Number of decimal places (0-10)
+/// @return {Number} Rounded number
+/// @example
+///   $rounded: round(3.14159, 2); // Returns: 3.14
+///   $rounded: round(1.23456789, 4); // Returns: 1.2346
+///   $rounded: round(42.7, 0); // Returns: 43
+@function round($number, $decimals: 4) {
+  // Calculate multiplier (10^decimals)
+  $n: 1;
+
+  @for $i from 1 through $decimals {
+    $n: $n * 10;
+  }
+
+  // Round: multiply, round, divide
+  @return math.div(math.round($number * $n), $n);
+}
+
+/// Alias for consistency with Sass built-in math functions
+/// @param {Number} $number - Number to round
+/// @param {Number} $decimals [4] - Number of decimal places
+/// @return {Number} Rounded number
+/// @example
+///   $rounded: precision(3.14159, 2); // Returns: 3.14
+@function precision($number, $decimals: 4) {
+  @return round($number, $decimals);
+}
+
+/// Clamp a number between min and max values
+/// Named 'clamp-number' to avoid conflict with CSS clamp() function
+/// @param {Number} $value - Value to clamp
+/// @param {Number} $min - Minimum value
+/// @param {Number} $max - Maximum value
+/// @return {Number} Clamped value
+/// @example
+///   $clamped: clamp-number(150, 0, 100); // Returns: 100
+@function clamp-number($value, $min, $max) {
+  @return math.max($min, math.min($max, $value));
+}
+
+/// Convert number to percentage
+/// @param {Number} $value - Value to convert
+/// @param {Number} $total [1] - Total value (denominator)
+/// @return {Number} Percentage value
+/// @example
+///   $percent: to-percent(3, 4); // Returns: 75%
+@function to-percent($value, $total: 1) {
+  @return math.div($value, $total) * 100%;
+}

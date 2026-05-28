@@ -1,0 +1,64 @@
+/// @group Base
+/// @name Base Styles
+/// @description Absolute minimum - just colors
+/// All interactive elements are React components
+/// ===========================================================================
+
+// Abstracts - Project-specific utilities
+@use 'styles/abstracts/variables' as var;
+@use 'styles/abstracts/mixins' as mx;
+
+:root {
+  interpolate-size: allow-keywords;
+}
+
+html {
+  position: relative;
+  overflow-x: hidden;
+  background-color: var(--color-surface-base, #fff);
+  color-interpolation-filters: sRGB;
+}
+
+body {
+  font-size: var(--text-base, 1rem);
+  color: var(--color-text-primary, #000);
+}
+
+/// Scrollbar Styling
+/// Modern approach using standard properties + WebKit fallback
+// Modern standard — all browsers that support scrollbar-width
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scroll-thumb, #a8a8a8) var(--color-scroll-background, #f1f1f1);
+}
+
+// WebKit fallback — only if scrollbar-width is not supported
+@supports not (scrollbar-width: thin) {
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-scroll-background, #f1f1f1);
+    border-radius: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-scroll-thumb, #a8a8a8);
+    border-radius: 6px;
+    border: 2px solid var(--color-scroll-background, #f1f1f1);
+
+    &:hover {
+      background: var(--color-scroll-thumb-hover, #888888);
+    }
+
+    &:active {
+      background: var(--color-scroll-thumb-active, #555555);
+    }
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: var(--color-scroll-background, #f1f1f1);
+  }
+}

@@ -1,0 +1,9 @@
+/// @group Abstracts/Mixins
+/// @name Mixins Index
+/// @description Public API for all abstract mixins.
+/// Forwards spacing system, font setup, and responsive breakpoint mixins.
+/// ===========================================================================
+
+@forward "./mx_spacing-system";
+@forward "./mx_font-setup";
+@forward "./mx_breakpoints";

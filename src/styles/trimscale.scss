@@ -1,0 +1,24 @@
+/// @group Globals
+/// @name Global Styles
+/// @description Main entry point for all global styles.
+/// Import order is significant:
+/// 1. Tokens — CSS custom properties must be available before base styles
+/// 2. Utilities — utility classes available globally
+/// 3. Base — HTML element defaults, reset, and typography
+/// 4. Components — global component styles (uncomment when folder exists)
+/// ===========================================================================
+
+// Tokens - CSS custom properties
+@forward 'styles/tokens/';
+
+// Utilities - Utility classes
+@forward 'styles/utilities/';
+
+// Base - Global HTML element styling
+@forward 'styles/base/';
+
+// Layouts - Global layouts styling (add when ready)
+// @forward 'styles/layouts/';
+
+// Components - Global components styling (add when ready)
+// @forward 'styles/components/';

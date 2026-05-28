@@ -1,0 +1,10 @@
+/// @group Utilities
+/// @name Utilities Index
+/// @description Entry point for all utility classes.
+/// Forwards spacing, gap, text, and layout utilities.
+/// ===========================================================================
+
+@forward "./spacing-utilities";
+@forward "./gap-utilities";
+@forward "./text-utilities";
+@forward "./layout-utilities";

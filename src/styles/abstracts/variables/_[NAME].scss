@@ -1,0 +1,120 @@
+/// @group Abstracts/Variables
+/// @name <Variable Group Name>
+/// @description Brief description of this variable group's purpose
+/// ===========================================================================
+
+// No @use statements needed in variable files to avoid circular dependencies
+// Variables should be pure data - no functions or mixins
+
+// ============================================================================
+// Configuration
+// ============================================================================
+
+/// Primary configuration values
+/// @type String
+$config-value: "default" !default;
+
+/// Enable/disable feature flag
+/// @type Boolean
+$feature-enabled: true !default;
+
+// ============================================================================
+// <Category Name> (e.g., Colors, Typography, Spacing)
+// ============================================================================
+
+/// Primary brand color
+/// @type Color
+$color-primary: #0066cc !default;
+
+/// Secondary brand color
+/// @type Color
+$color-secondary: #6b7280 !default;
+
+/// Color palette map
+/// @type Map
+$colors: (
+  "primary": $color-primary,
+  "secondary": $color-secondary,
+  "success": #10b981,
+  "warning": #f59e0b,
+  "error": #ef4444,
+) !default;
+
+// ============================================================================
+// Typography Scale
+// ============================================================================
+
+/// Base font size
+/// @type Number
+$font-size-base: 1rem !default;
+
+/// Typography scale map
+/// @type Map
+$font-sizes: (
+  "xs": 0.75rem,
+  "sm": 0.875rem,
+  "base": 1rem,
+  "lg": 1.125rem,
+  "xl": 1.25rem,
+  "2xl": 1.5rem,
+  "3xl": 1.875rem,
+  "4xl": 2.25rem,
+) !default;
+
+// ============================================================================
+// Spacing Scale
+// ============================================================================
+
+/// Base spacing unit
+/// @type Number
+$spacing-unit: 0.25rem !default;
+
+/// Spacing scale map (based on spacing unit)
+/// @type Map
+$spacing: (
+  "0": 0,
+  "1": $spacing-unit,
+  "2": $spacing-unit * 2,
+  "3": $spacing-unit * 3,
+  "4": $spacing-unit * 4,
+  "6": $spacing-unit * 6,
+  "8": $spacing-unit * 8,
+  "12": $spacing-unit * 12,
+  "16": $spacing-unit * 16,
+) !default;
+
+// ============================================================================
+// Breakpoints
+// ============================================================================
+
+/// Responsive breakpoints map
+/// @type Map
+$breakpoints: (
+  "xs": 20rem,
+  // 320px
+  "sm": 36rem,
+  // 576px
+  "md": 48rem,
+  // 768px
+  "lg": 62rem,
+  // 992px
+  "xl": 75rem,
+  // 1200px
+  "2xl": 90rem, // 1440px
+) !default;
+
+// ============================================================================
+// Z-index Scale
+// ============================================================================
+
+/// Z-index scale for stacking contexts
+/// @type Map
+$z-index: (
+  "dropdown": 1000,
+  "sticky": 1020,
+  "fixed": 1030,
+  "modal-backdrop": 1040,
+  "modal": 1050,
+  "popover": 1060,
+  "tooltip": 1070,
+) !default;

@@ -1,0 +1,91 @@
+/// @group Abstracts/Variables
+/// @name Breakpoints
+/// @description Responsive breakpoints and typography scale configuration
+/// ===========================================================================
+
+// No @use statements - variables should be pure data
+@use "sass:map";
+
+// ============================================================================
+// Pixel Values (for reference/documentation only)
+// ============================================================================
+
+$min-width-px: 360px;
+$tablet-width-px: 720px;
+$laptop-width-px: 1200px;
+$max-width-px: 1440px;
+$ultrawide-threshold-px: 944px; // viewport height
+
+// ============================================================================
+// Grid System
+// ============================================================================
+
+/// Base font size — matches min-font-size in $fluid-scale
+/// Used as the rem base for unit conversion functions
+/// @type Number
+$base-font-size: 16px !default;
+
+/// Base grid unit
+/// @type Number
+$base-grid-size: 4 !default; // 4px grid
+
+// ============================================================================
+// Breakpoints
+// ============================================================================
+
+/// Responsive breakpoints map (in rem)
+/// @type Map
+$breakpoints: (
+  "mobile": 22.5rem,  // 360px
+  "phablet": 30rem,   // 480px
+  "tablet": 45rem,    // 720px
+  "tablet-lg": 60rem, // 960px
+  "laptop": 75rem,    // 1200px
+  "desktop": 90rem,   // 1440px
+  "ultrawide": 59rem, // viewport height
+) !default;
+
+// ============================================================================
+// Breakpoint Shortcuts (Modern Range Syntax)
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Up to (excludes the breakpoint itself)
+// ----------------------------------------------------------------------------
+
+$bp-up-to-phablet: "(width < #{map.get($breakpoints, 'phablet')})";
+$bp-up-to-tablet: "(width < #{map.get($breakpoints, 'tablet')})";
+$bp-up-to-tablet-lg: "(width < #{map.get($breakpoints, 'tablet-lg')})";
+$bp-up-to-laptop: "(width < #{map.get($breakpoints, 'laptop')})";
+$bp-up-to-desktop: "(width < #{map.get($breakpoints, 'desktop')})";
+
+// ----------------------------------------------------------------------------
+// And up (includes the breakpoint and larger)
+// ----------------------------------------------------------------------------
+
+$bp-mobile-and-up: "(width >= #{map.get($breakpoints, 'mobile')})";
+$bp-phablet-and-up: "(width >= #{map.get($breakpoints, 'phablet')})";
+$bp-tablet-and-up: "(width >= #{map.get($breakpoints, 'tablet')})";
+$bp-tablet-lg-and-up: "(width >= #{map.get($breakpoints, 'tablet-lg')})";
+$bp-laptop-and-up: "(width >= #{map.get($breakpoints, 'laptop')})";
+$bp-desktop-and-up: "(width >= #{map.get($breakpoints, 'desktop')})";
+
+// ----------------------------------------------------------------------------
+// And down (includes the breakpoint and smaller)
+// ----------------------------------------------------------------------------
+
+$bp-mobile-and-down: "(width < #{map.get($breakpoints, 'phablet')})";
+$bp-phablet-and-down: "(width < #{map.get($breakpoints, 'tablet')})";
+$bp-tablet-and-down: "(width < #{map.get($breakpoints, 'tablet-lg')})";
+$bp-tablet-lg-and-down: "(width < #{map.get($breakpoints, 'laptop')})";
+$bp-laptop-and-down: "(width < #{map.get($breakpoints, 'desktop')})";
+
+// ----------------------------------------------------------------------------
+// Only (specific breakpoint range)
+// ----------------------------------------------------------------------------
+
+$bp-mobile-only: "(#{map.get($breakpoints, 'mobile')} <= width < #{map.get($breakpoints, 'phablet')})";
+$bp-phablet-only: "(#{map.get($breakpoints, 'phablet')} <= width < #{map.get($breakpoints, 'tablet')})";
+$bp-tablet-only: "(#{map.get($breakpoints, 'tablet')} <= width < #{map.get($breakpoints, 'tablet-lg')})";
+$bp-tablet-lg-only: "(#{map.get($breakpoints, 'tablet-lg')} <= width < #{map.get($breakpoints, 'laptop')})";
+$bp-laptop-only: "(#{map.get($breakpoints, 'laptop')} <= width < #{map.get($breakpoints, 'desktop')})";

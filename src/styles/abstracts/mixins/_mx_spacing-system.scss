@@ -1,0 +1,81 @@
+/// @group Abstracts/Mixins
+/// @name Spacing System
+/// @description Mixins for fluid spacing based on container queries and CSS custom properties
+/// ===========================================================================
+
+@use "styles/abstracts/variables" as var;
+@use "styles/abstracts/functions" as fn;
+
+// Sass built-in modules - Only import what you actually use
+// @use 'sass:math';
+// @use 'sass:map';
+
+// Only import from mixin files to avoid dependency cycle
+// @use '../mixins/mx_other-mixin' as *;
+
+// ============================================================================
+// Container-based Spacing
+// ============================================================================
+
+/// Create a container spacing context with fluid units based on container width
+/// @param {String} $unit-key ['cqw'] - Unit type: 'cqw' (container), 'vwx', 'vw'
+/// @param {ArgList} $content - Optional additional styles passed as a content block
+/// @output Sets container-type, --fluid-base, and --unit CSS custom properties
+/// @content Accepts content block for additional container styles
+/// @example
+///   .card {
+///     @include container-spacing-provider('cqw') {
+///       border-radius: var(--space-2);
+///     }
+///   }
+///   // Result: Spacing scales relative to card width, not viewport
+/// @example
+///   .sidebar {
+///     @include container-spacing-provider('cqw');
+///     padding: var(--space-4);
+///     gap: var(--space-2);
+///   }
+///   // Result: Sidebar spacing scales with sidebar width
+@mixin container-spacing-provider($unit-key: "cqw") {
+  // Enable container queries for inline-size (width)
+  container-type: inline-size;
+
+  // Remap CSS variables locally for this element and its children
+  // Base font size scales with container width
+  --fluid-base: #{fn.fluidFontSize(0, $unit-key)};
+
+  // Unit is 1/4 of base (matching grid system)
+  --unit: calc(var(--fluid-base) / #{var.$base-grid-size});
+
+  // All --space-* variables in :root that reference var(--unit)
+  // will now use this local container-relative unit
+
+  // Accept additional styles
+  @content;
+}
+
+/// Apply container spacing with custom container name
+/// @param {String} $name - Container name for @container queries
+/// @param {String} $unit-key ['cqw'] - Unit type
+/// @param {ArgList} $content - Optional additional styles passed as a content block
+/// @output Sets container-type, container-name, --fluid-base, and --unit CSS custom properties
+/// @content Accepts content block for additional styles
+/// @example
+///   .sidebar {
+///     @include container-spacing-provider-named('sidebar', 'cqw');
+///
+///     .widget {
+///       @container sidebar (min-width: 300px) {
+///         padding: var(--space-8);
+///       }
+///     }
+///   }
+@mixin container-spacing-provider-named($name, $unit-key: "cqw") {
+  container-type: inline-size;
+  container-name: $name;
+
+  --fluid-base: #{fn.fluidFontSize(0, $unit-key)};
+  --unit: calc(var(--fluid-base) / #{var.$base-grid-size});
+
+  @content;
+}

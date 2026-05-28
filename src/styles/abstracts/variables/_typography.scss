@@ -1,0 +1,258 @@
+/// @group Abstracts/Variables
+/// @name Typography Configuration
+/// @description Font role mappings and exported font-family variables
+///
+/// CONFIGURATION LAYER - Maps semantic roles to actual fonts
+///
+/// Font Role Philosophy:
+/// - Hierarchical (primary/secondary/tertiary): Core system - use these by default
+/// - Category (sans/serif/mono): Type classification - use when type matters
+/// - Contextual (display/body/heading/etc): Convenience aliases - use when it improves clarity
+///
+/// All roles map to fonts defined in $font-metrics (font-metrics.scss)
+/// Font family strings are automatically extracted from metrics data
+///
+/// @requires abstracts/variables/font-metrics
+/// @see abstracts/mixins/mx_font-setup For applying these fonts with metrics
+/// ===========================================================================
+
+@use "./font-metrics" as metrics;
+@use "sass:map";
+
+// ============================================================================
+// Font Role Mapping
+// ============================================================================
+
+/// Semantic font assignments
+/// @type Map
+$fonts: (
+  // Hierarchical
+  "primary": "Roboto",
+  "secondary": "Roboto Serif",
+  "tertiary": "Roboto Mono",
+
+  // Category
+  "sans": "Roboto",
+  "serif": "Roboto Serif",
+  "mono": "Roboto Mono",
+
+  // Contextual
+  "display": "Roboto Serif",
+  "heading": "Roboto Serif",
+  "subheading": "Roboto",
+  "body": "Roboto",
+  "quote": "Roboto Serif",
+  "code": "Roboto Mono",
+  "ui": "Roboto"
+) !default;
+
+// ============================================================================
+// Exported Metric Variables
+// ============================================================================
+
+/// Get font metric from font-metrics
+/// @access private
+@function _get-metric($font-key, $metric-key) {
+  $font-name: map.get($fonts, $font-key);
+  @return map.get(map.get(metrics.$font-metrics, $font-name), $metric-key);
+}
+
+/// Font Families
+// Primary/Secondary/Tertiary
+$ff-primary: _get-metric("primary", "family") !default;
+$ff-secondary: _get-metric("secondary", "family") !default;
+$ff-tertiary: _get-metric("tertiary", "family") !default;
+
+// Categories
+$ff-sans: _get-metric("sans", "family") !default;
+$ff-serif: _get-metric("serif", "family") !default;
+$ff-mono: _get-metric("mono", "family") !default;
+
+// Contextual
+$ff-display: _get-metric("display", "family") !default;
+$ff-heading: _get-metric("heading", "family") !default;
+$ff-subheading: _get-metric("subheading", "family") !default;
+$ff-body: _get-metric("body", "family") !default;
+$ff-quote: _get-metric("quote", "family") !default;
+$ff-code: _get-metric("code", "family") !default;
+$ff-ui: _get-metric("ui", "family") !default;
+
+/// Cap Height
+// Primary/Secondary/Tertiary
+$capHeight-primary: _get-metric("primary", "cap-height") !default;
+$capHeight-secondary: _get-metric("secondary", "cap-height") !default;
+$capHeight-tertiary: _get-metric("tertiary", "cap-height") !default;
+
+// Categories
+$capHeight-sans: _get-metric("sans", "cap-height") !default;
+$capHeight-serif: _get-metric("serif", "cap-height") !default;
+$capHeight-mono: _get-metric("mono", "cap-height") !default;
+
+// Contextual
+$capHeight-display: _get-metric("display", "cap-height") !default;
+$capHeight-heading: _get-metric("heading", "cap-height") !default;
+$capHeight-subheading: _get-metric("subheading", "cap-height") !default;
+$capHeight-body: _get-metric("body", "cap-height") !default;
+$capHeight-quote: _get-metric("quote", "cap-height") !default;
+$capHeight-code: _get-metric("code", "cap-height") !default;
+$capHeight-ui: _get-metric("ui", "cap-height") !default;
+
+/// x-Height
+// Primary/Secondary/Tertiary
+$xHeight-primary: _get-metric("primary", "x-height") !default;
+$xHeight-secondary: _get-metric("secondary", "x-height") !default;
+$xHeight-tertiary: _get-metric("tertiary", "x-height") !default;
+
+// Categories
+$xHeight-sans: _get-metric("sans", "x-height") !default;
+$xHeight-serif: _get-metric("serif", "x-height") !default;
+$xHeight-mono: _get-metric("mono", "x-height") !default;
+
+// Contextual
+$xHeight-display: _get-metric("display", "x-height") !default;
+$xHeight-heading: _get-metric("heading", "x-height") !default;
+$xHeight-subheading: _get-metric("subheading", "x-height") !default;
+$xHeight-body: _get-metric("body", "x-height") !default;
+$xHeight-quote: _get-metric("quote", "x-height") !default;
+$xHeight-code: _get-metric("code", "x-height") !default;
+$xHeight-ui: _get-metric("ui", "x-height") !default;
+
+/// em-Ascender
+// Primary/Secondary/Tertiary
+$emAscender-primary: _get-metric("primary", "ascender") !default;
+$emAscender-secondary: _get-metric("secondary", "ascender") !default;
+$emAscender-tertiary: _get-metric("tertiary", "ascender") !default;
+
+// Categories
+$emAscender-sans: _get-metric("sans", "ascender") !default;
+$emAscender-serif: _get-metric("serif", "ascender") !default;
+$emAscender-mono: _get-metric("mono", "ascender") !default;
+
+// Contextual
+$emAscender-display: _get-metric("display", "ascender") !default;
+$emAscender-heading: _get-metric("heading", "ascender") !default;
+$emAscender-subheading: _get-metric("subheading", "ascender") !default;
+$emAscender-body: _get-metric("body", "ascender") !default;
+$emAscender-quote: _get-metric("quote", "ascender") !default;
+$emAscender-code: _get-metric("code", "ascender") !default;
+$emAscender-ui: _get-metric("ui", "ascender") !default;
+
+/// em-Descender
+// Primary/Secondary/Tertiary
+$emDescender-primary: _get-metric("primary", "descender") !default;
+$emDescender-secondary: _get-metric("secondary", "descender") !default;
+$emDescender-tertiary: _get-metric("tertiary", "descender") !default;
+
+// Categories
+$emDescender-sans: _get-metric("sans", "descender") !default;
+$emDescender-serif: _get-metric("serif", "descender") !default;
+$emDescender-mono: _get-metric("mono", "descender") !default;
+
+// Contextual
+$emDescender-display: _get-metric("display", "descender") !default;
+$emDescender-heading: _get-metric("heading", "descender") !default;
+$emDescender-subheading: _get-metric("subheading", "descender") !default;
+$emDescender-body: _get-metric("body", "descender") !default;
+$emDescender-quote: _get-metric("quote", "descender") !default;
+$emDescender-code: _get-metric("code", "descender") !default;
+$emDescender-ui: _get-metric("ui", "descender") !default;
+
+/// Avarage Character Width
+// Primary/Secondary/Tertiary
+$avgCharWidth-primary: _get-metric("primary", "avg-char-width") !default;
+$avgCharWidth-secondary: _get-metric("secondary", "avg-char-width") !default;
+$avgCharWidth-tertiary: _get-metric("tertiary", "avg-char-width") !default;
+
+// Categories
+$avgCharWidth-sans: _get-metric("sans", "avg-char-width") !default;
+$avgCharWidth-serif: _get-metric("serif", "avg-char-width") !default;
+$avgCharWidth-mono: _get-metric("mono", "avg-char-width") !default;
+
+// Contextual
+$avgCharWidth-display: _get-metric("display", "avg-char-width") !default;
+$avgCharWidth-heading: _get-metric("heading", "avg-char-width") !default;
+$avgCharWidth-subheading: _get-metric("subheading", "avg-char-width") !default;
+$avgCharWidth-body: _get-metric("body", "avg-char-width") !default;
+$avgCharWidth-quote: _get-metric("quote", "avg-char-width") !default;
+$avgCharWidth-code: _get-metric("code", "avg-char-width") !default;
+$avgCharWidth-ui: _get-metric("ui", "avg-char-width") !default;
+
+/// Top Trim
+// Primary/Secondary/Tertiary
+$topTrim-primary: _get-metric("primary", "top-trim") !default;
+$topTrim-secondary: _get-metric("secondary", "top-trim") !default;
+$topTrim-tertiary: _get-metric("tertiary", "top-trim") !default;
+
+// Categories
+$topTrim-sans: _get-metric("sans", "top-trim") !default;
+$topTrim-serif: _get-metric("serif", "top-trim") !default;
+$topTrim-mono: _get-metric("mono", "top-trim") !default;
+
+// Contextual
+$topTrim-display: _get-metric("display", "top-trim") !default;
+$topTrim-heading: _get-metric("heading", "top-trim") !default;
+$topTrim-subheading: _get-metric("subheading", "top-trim") !default;
+$topTrim-body: _get-metric("body", "top-trim") !default;
+$topTrim-quote: _get-metric("quote", "top-trim") !default;
+$topTrim-code: _get-metric("code", "top-trim") !default;
+$topTrim-ui: _get-metric("ui", "top-trim") !default;
+
+/// Bottom Trim
+// Primary/Secondary/Tertiary
+$bottomTrim-primary: _get-metric("primary", "bottom-trim") !default;
+$bottomTrim-secondary: _get-metric("secondary", "bottom-trim") !default;
+$bottomTrim-tertiary: _get-metric("tertiary", "bottom-trim") !default;
+
+// Categories
+$bottomTrim-sans: _get-metric("sans", "bottom-trim") !default;
+$bottomTrim-serif: _get-metric("serif", "bottom-trim") !default;
+$bottomTrim-mono: _get-metric("mono", "bottom-trim") !default;
+
+// Contextual
+$bottomTrim-display: _get-metric("display", "bottom-trim") !default;
+$bottomTrim-heading: _get-metric("heading", "bottom-trim") !default;
+$bottomTrim-subheading: _get-metric("subheading", "bottom-trim") !default;
+$bottomTrim-body: _get-metric("body", "bottom-trim") !default;
+$bottomTrim-quote: _get-metric("quote", "bottom-trim") !default;
+$bottomTrim-code: _get-metric("code", "bottom-trim") !default;
+$bottomTrim-ui: _get-metric("ui", "bottom-trim") !default;
+
+/// LSB-Adjust
+// Primary/Secondary/Tertiary
+$lsbAdjust-primary: _get-metric("primary", "lsb-adjust") !default;
+$lsbAdjust-secondary: _get-metric("secondary", "lsb-adjust") !default;
+$lsbAdjust-tertiary: _get-metric("tertiary", "lsb-adjust") !default;
+
+// Categories
+$lsbAdjust-sans: _get-metric("sans", "lsb-adjust") !default;
+$lsbAdjust-serif: _get-metric("serif", "lsb-adjust") !default;
+$lsbAdjust-mono: _get-metric("mono", "lsb-adjust") !default;
+
+// Contextual
+$lsbAdjust-display: _get-metric("display", "lsb-adjust") !default;
+$lsbAdjust-heading: _get-metric("heading", "lsb-adjust") !default;
+$lsbAdjust-subheading: _get-metric("subheading", "lsb-adjust") !default;
+$lsbAdjust-body: _get-metric("body", "lsb-adjust") !default;
+$lsbAdjust-quote: _get-metric("quote", "lsb-adjust") !default;
+$lsbAdjust-code: _get-metric("code", "lsb-adjust") !default;
+$lsbAdjust-ui: _get-metric("ui", "lsb-adjust") !default;
+
+/// LSB-Adjust
+// Primary/Secondary/Tertiary
+$rsbAdjust-primary: _get-metric("primary", "rsb-adjust") !default;
+$rsbAdjust-secondary: _get-metric("secondary", "rsb-adjust") !default;
+$rsbAdjust-tertiary: _get-metric("tertiary", "rsb-adjust") !default;
+
+// Categories
+$rsbAdjust-sans: _get-metric("sans", "rsb-adjust") !default;
+$rsbAdjust-serif: _get-metric("serif", "rsb-adjust") !default;
+$rsbAdjust-mono: _get-metric("mono", "rsb-adjust") !default;
+
+// Contextual
+$rsbAdjust-display: _get-metric("display", "rsb-adjust") !default;
+$rsbAdjust-heading: _get-metric("heading", "rsb-adjust") !default;
+$rsbAdjust-subheading: _get-metric("subheading", "rsb-adjust") !default;
+$rsbAdjust-body: _get-metric("body", "rsb-adjust") !default;
+$rsbAdjust-quote: _get-metric("quote", "rsb-adjust") !default;
+$rsbAdjust-code: _get-metric("code", "rsb-adjust") !default;
+$rsbAdjust-ui: _get-metric("ui", "rsb-adjust") !default;

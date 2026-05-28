@@ -1,0 +1,103 @@
+/// @group Abstracts/Variables
+/// @name Font Metrics Database
+/// @description Raw font metrics extracted from font files using fontkit/opentype.js
+///
+/// DATA LAYER - Pure metrics data with no dependencies
+///
+/// Metrics are normalized to em units (divided by units-per-em from font file):
+/// - cap-height: Height of capital letters
+/// - x-height: Height of lowercase x
+/// - ascender: Top of tallest glyphs
+/// - descender: Bottom of lowest glyphs (stored as positive value)
+/// - avg-char-width: Average character width
+/// - top-trim: Space from ascender to cap-height (for leading-trim)
+/// - bottom-trim: Space from baseline to descender (for leading-trim)
+/// - lsb-adjust: Left side bearing adjustment
+/// - rsb-adjust: Right side bearing adjustment
+///
+/// @see tokens/_leading-trim.scss For usage of these metrics
+///
+/// @example scss - Access via typography variables (recommended)
+///   // In _typography.scss — use the _get-metric() helper
+///   $capHeight-body: _get-metric("body", "cap-height"); // Returns: 0.66
+///
+/// @example scss - Direct map access (internal use only)
+///   @use 'styles/abstracts/variables/font-metrics' as metrics;
+///   @use 'sass:map';
+///   $cap: map.get(map.get(metrics.$font-metrics, "Source Sans 3"), "cap-height");
+/// ===========================================================================
+
+// No imports needed - pure data
+
+// ============================================================================
+// Font Metrics Database
+// ============================================================================
+
+/// Font metrics for precise vertical rhythm and optical alignment
+/// @type Map
+$font-metrics: (
+  "Roboto": (
+    "family": '"Roboto", sans-serif',
+    "category": "sans-serif",
+    "cap-height": 0.711,
+    "x-height": 0.528,
+    "ascender": 0.75,
+    "descender": 0.25,
+    "avg-char-width": 0.564,
+    "top-trim": 0.039,
+    "bottom-trim": 0.25,
+    "lsb-adjust": -0.061,
+    "rsb-adjust": -0.0547,
+  ),
+  "Roboto Serif": (
+    "family": '"Roboto Serif", serif',
+    "category": "serif",
+    "cap-height": 0.710,
+    "x-height": 0.518,
+    "ascender": 0.927,
+    "descender": 0.244,
+    "avg-char-width": 0.647,
+    "top-trim": 0.132,
+    "bottom-trim": 0.159,
+    "lsb-adjust": -0.046,
+    "rsb-adjust": -0.032,
+  ),
+  "Roboto Mono": (
+    "family": '"Roboto Mono", monospace',
+    "category": "monospace",
+    "cap-height": 0.711,
+    "x-height": 0.528,
+    "ascender": 1.048,
+    "descender": 0.271,
+    "avg-char-width": 0.6,
+    "top-trim": 0.178,
+    "bottom-trim": 0.112,
+    "lsb-adjust": -0.0859,
+    "rsb-adjust": -0.0669,
+  ),
+  "Inter": ("family": '"Inter", "Inter Variable", sans-serif',
+    "category": "sans-serif",
+    "cap-height": 0.728,
+    "x-height": 0.546,
+    "ascender": 0.969,
+    "descender": 0.241,
+    "avg-char-width": 0.641,
+    "top-trim": 0.136,
+    "bottom-trim": 0.136,
+    "lsb-adjust": -0.0645,
+    "rsb-adjust": -0.0615,
+  ),
+  "Newsreader Text": ("family": '"Newsreader Text", serif',
+    "category": "serif",
+    "cap-height": 0.67,
+    "x-height": 0.426,
+    "ascender": 0.735,
+    "descender": 0.265,
+    "avg-char-width": 0.5435,
+    "top-trim": 0.065,
+    "bottom-trim": 0.265,
+    "lsb-adjust": -0.02825,
+    "rsb-adjust": -0.0173,
+  ),
+  // ... More fonts will be added
+) !default;

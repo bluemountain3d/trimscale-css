@@ -1,0 +1,16 @@
+/// @group Utilities
+/// @name Layout Utilities
+/// @description Utility classes for width and layout control.
+/// @example html
+///   <div class="width-fit-content">Shrinks to content width</div>
+/// ===========================================================================
+
+.width-fit-content {
+  width: fit-content;
+}
+.width-max-content {
+  width: max-content;
+}
+.width-min-content {
+  width: min-content;
+}

@@ -1,0 +1,86 @@
+/// @group Tokens
+/// @name Colors
+/// @description Maps abstract Sass variables to OKLCH CSS Custom Properties
+/// using light-dark() for automatic light/dark mode switching.
+/// ===========================================================================
+
+// Abstracts
+@use 'styles/abstracts/variables' as var;
+@use 'styles/abstracts/functions' as fn;
+
+// ============================================================================
+// CSS CUSTOM PROPERTIES (:root)
+// ============================================================================
+
+:root {
+  color-scheme: light dark;
+
+  // Surface Solids
+  --color-surface-base: light-dark(
+    oklch(from #{var.$color-surface-base-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-surface-base-dark} l calc(c * 1.05) h));
+  --color-surface-elevated: light-dark(
+    oklch(from #{var.$color-surface-elevated-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-surface-elevated-dark} l calc(c * 1.05) h));
+  --color-surface-mid: light-dark(
+    oklch(from #{var.$color-surface-mid-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-surface-mid-dark} l calc(c * 1.05) h));
+
+  // Gold / Slate Solids
+  --color-gold-light: light-dark(
+    oklch(from #{var.$color-gold-light-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-gold-light-dark} l calc(c * 1.05) h));
+  --color-gold-dark: light-dark(
+    oklch(from #{var.$color-gold-dark-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-gold-dark-dark} l calc(c * 1.05) h));
+
+  // Accent
+  --color-accent: light-dark(
+    oklch(from #{var.$color-accent-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-accent-dark} l calc(c * 1.05) h));
+  --color-accent-hover: var(--color-gold-light);
+  --color-accent-muted: color-mix(in oklch, var(--color-accent) 50%, transparent);
+
+  // Action
+  --color-action: light-dark(
+    oklch(from #{var.$color-action-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-action-dark} l calc(c * 1.05) h));
+  --color-action-hover: light-dark(
+    oklch(from #{var.$color-action-hover-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-action-hover-dark} l calc(c * 1.05) h));
+  --color-action-muted: light-dark(
+    oklch(from #{var.$color-action-muted-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-action-muted-dark} l calc(c * 1.05) h));
+
+  // Text
+  --color-text-primary: light-dark(
+    oklch(from #{var.$color-text-primary-light} l calc(c * 1) h),
+    oklch(from #{var.$color-text-primary-dark} l calc(c * 1) h));
+  --color-text-muted: light-dark(
+    oklch(from #{var.$color-text-muted-light} l calc(c * 1) h),
+    oklch(from #{var.$color-text-muted-dark} l calc(c * 1) h));
+  --color-text-bright: light-dark(
+    oklch(from #{var.$color-text-bright-light} l calc(c * 1) h),
+    oklch(from #{var.$color-text-bright-dark} l calc(c * 1) h));
+
+  // Scrollbar
+  --color-scroll-thumb: var(--color-action);
+  --color-scroll-thumb-hover: var(--color-action-hover);
+  --color-scroll-thumb-active: var(--color-action-muted);
+  --color-scroll-background: var(--color-surface-base);
+}
+
+
+// ============================================================================
+// Manual theme overrides
+// Overrides prefers-color-scheme by forcing color-scheme on :root.
+// light-dark() resolves automatically — no token duplication needed.
+// ============================================================================
+
+:root.theme-light {
+  color-scheme: light;
+}
+
+:root.theme-dark {
+  color-scheme: dark;
+}

@@ -1,0 +1,191 @@
+/// @group Abstracts/Functions
+/// @name OKLCH Color Utilities
+/// @description Functions for working with OKLCH color space
+/// OKLCH provides better perceptual uniformity than LCH, especially for blues
+/// Converts Sass colors to OKLCH format and provides manipulation utilities
+/// @link https://oklch.com/ OKLCH color picker and documentation
+/// ===========================================================================
+
+@use "sass:color";
+@use "sass:math";
+@use "sass:string";
+
+// ============================================================================
+// Core OKLCH Conversion Functions
+// ============================================================================
+
+/// Convert Sass color to OKLCH string
+/// @param {Color} $color - Sass color value (hex, rgb, etc.)
+/// @return {String} OKLCH color string
+/// @example
+///   $oklch: toOklch(#E4DCCA);
+///   // Returns: "oklch(90% 0.05 85)"
+@function toOklch($color) {
+  $l: math.div(color.channel($color, "lightness", $space: oklch), 1%);
+  $c: math.div(color.channel($color, "chroma", $space: oklch), 1);
+  $h: math.div(color.channel($color, "hue", $space: oklch), 1deg);
+
+  @return string.unquote("oklch(#{$l}% #{$c} #{$h})");
+}
+
+/// Convert Sass color to OKLCH with alpha
+/// @param {Color} $color - Sass color value
+/// @param {Number} $alpha [1] - Alpha value (0 to 1)
+/// @return {String} OKLCH color string with alpha
+/// @example
+///   $oklch: toOklchAlpha(#201715, 0.65);
+///   // Returns: "oklch(0.2 0.02 30 / 0.65)"
+@function toOklchAlpha($color, $alpha: 1) {
+  $l: math.div(color.channel($color, "lightness", $space: oklch), 1%);
+  $c: math.div(color.channel($color, "chroma", $space: oklch), 1);
+  $h: math.div(color.channel($color, "hue", $space: oklch), 1deg);
+
+  @return string.unquote("oklch(#{$l}% #{$c} #{$h} / #{$alpha})");
+}
+
+// ============================================================================
+// OKLCH Manipulation Functions
+// ============================================================================
+
+/// Adjust lightness of a color in OKLCH space
+/// @param {Color} $color - Sass color value
+/// @param {Number} $adjustment - Lightness adjustment (-100 to 100)
+/// @return {String} Adjusted OKLCH color string
+/// @example
+///   $lighter: adjustOklchLightness(#E4DCCA, 10);
+///   // Returns: "oklch(100% 0.05 85)"
+///   $darker: adjustOklchLightness(#E4DCCA, -15);
+///   // Returns: "oklch(75% 0.05 85)"
+@function adjustOklchLightness($color, $adjustment) {
+  $l: math.div(color.channel($color, "lightness", $space: oklch), 1%);
+  $c: math.div(color.channel($color, "chroma", $space: oklch), 1);
+  $h: math.div(color.channel($color, "hue", $space: oklch), 1deg);
+
+  $l-adjusted: $l + $adjustment;
+
+  @return string.unquote("oklch(#{$l-adjusted}% #{$c} #{$h})");
+}
+
+/// Adjust chroma of a color in OKLCH space
+/// @param {Color} $color - Sass color value
+/// @param {Number} $multiplier - Chroma multiplier (e.g., 1.2 for +20%)
+/// @return {String} Adjusted OKLCH color string
+/// @example
+///   $vibrant: adjustOklchChroma(#E4DCCA, 1.5);
+///   // Returns: "oklch(90% 0.075 85)"
+@function adjustOklchChroma($color, $multiplier) {
+  $l: math.div(color.channel($color, "lightness", $space: oklch), 1%);
+  $c: math.div(color.channel($color, "chroma", $space: oklch), 1);
+  $h: math.div(color.channel($color, "hue", $space: oklch), 1deg);
+
+  $c-adjusted: $c * $multiplier;
+
+  @return string.unquote("oklch(#{$l}% #{$c-adjusted} #{$h})");
+}
+
+/// Adjust both lightness and chroma
+/// @param {Color} $color - Sass color value
+/// @param {Number} $l-adjustment - Lightness adjustment (-100 to 100)
+/// @param {Number} $c-multiplier [1] - Chroma multiplier
+/// @return {String} Adjusted OKLCH color string
+/// @example
+///   $adjusted: adjustOklch(#E4DCCA, -15, 0.8);
+///   // Returns: "oklch(75% 0.04 85)"
+@function adjustOklch($color, $l-adjustment, $c-multiplier: 1) {
+  $l: math.div(color.channel($color, "lightness", $space: oklch), 1%);
+  $c: math.div(color.channel($color, "chroma", $space: oklch), 1);
+  $h: math.div(color.channel($color, "hue", $space: oklch), 1deg);
+
+  $l-adjusted: $l + $l-adjustment;
+  $c-adjusted: $c * $c-multiplier;
+
+  @return string.unquote("oklch(#{$l-adjusted}% #{$c-adjusted} #{$h})");
+}
+
+/// Adjust lightness and chroma with alpha
+/// @param {Color} $color - Sass color value
+/// @param {Number} $l-adjustment - Lightness adjustment (-100 to 100)
+/// @param {Number} $c-multiplier [1] - Chroma multiplier (e.g., 1.2 for +20%)
+/// @param {Number} $alpha - Alpha value (0 to 1)
+/// @return {String} Adjusted OKLCH color string with alpha
+/// @example
+///   $overlay: adjustOklchAlpha(#009700, 40, 1.2, 0.2);
+///   // Returns: "oklch(86% 0.17 142 / 0.2)"
+@function adjustOklchAlpha($color, $l-adjustment, $c-multiplier: 1, $alpha) {
+  $l: getOklchLightness($color);
+  $c: getOklchChroma($color);
+  $h: getOklchHue($color);
+
+  $l-adjusted: math.clamp(0, $l + $l-adjustment, 100);
+  $c-adjusted: $c * $c-multiplier;
+  $alpha-safe: math.clamp(0, $alpha, 1);
+
+  @return string.unquote(
+    "oklch(#{$l-adjusted}% #{$c-adjusted} #{$h} / #{$alpha-safe})"
+  );
+}
+
+/// Rotate hue in OKLCH space
+/// @param {Color} $color - Sass color value
+/// @param {Number} $degrees - Hue rotation in degrees (-360 to 360)
+/// @return {String} OKLCH color string with rotated hue
+/// @example
+///   $rotated: rotateOklchHue(#E4DCCA, 180);
+///   // Returns: "oklch(90% 0.05 265)" (complementary color)
+@function rotateOklchHue($color, $degrees) {
+  $l: getOklchLightness($color);
+  $c: getOklchChroma($color);
+  $h: getOklchHue($color);
+
+  $h-rotated: ($h + $degrees) % 360;
+
+  @if $h-rotated < 0 {
+    $h-rotated: $h-rotated + 360;
+  }
+
+  @return string.unquote("oklch(#{$l}% #{$c} #{$h-rotated})");
+}
+
+/// Set OKLCH hue from source using HSL saturation/lightness values
+/// @param {Color} $source-color - Color to extract OKLCH hue from
+/// @param {Number} $target-s - HSL saturation percentage (0-100, from Figma)
+/// @param {Number} $target-l - HSL lightness percentage (0-100, from Figma)
+/// @return {Color} OKLCH color with source hue and target saturation/lightness
+/// @example
+///   $new-color: set-oklch-hue(#3B82F6, 70, 60);
+///   // Returns: OKLCH color with blue hue at 70% saturation and 60% lightness
+@function setOklchHue($source-color, $target-s, $target-l) {
+  $temp-hsl: hsl(0, $target-s, $target-l);
+  $new-hue: color.channel($source-color, "hue", $space: oklch);
+
+  @return color.oklch(
+    color.channel($temp-hsl, "lightness", $space: oklch),
+    color.channel($temp-hsl, "chroma", $space: oklch),
+    $new-hue
+  );
+}
+
+// ============================================================================
+// OKLCH Value Extraction Functions
+// ============================================================================
+
+/// Get lightness value from color in OKLCH space
+/// @param {Color} $color - Sass color value
+/// @return {Number} Lightness value (0-100)
+@function getOklchLightness($color) {
+  @return math.div(color.channel($color, "lightness", $space: oklch), 1%);
+}
+
+/// Get chroma value from color in OKLCH space
+/// @param {Color} $color - Sass color value
+/// @return {Number} Chroma value (0-0.4 typically)
+@function getOklchChroma($color) {
+  @return math.div(color.channel($color, "chroma", $space: oklch), 1);
+}
+
+/// Get hue value from color in OKLCH space
+/// @param {Color} $color - Sass color value
+/// @return {Number} Hue value (0-360)
+@function getOklchHue($color) {
+  @return math.div(color.channel($color, "hue", $space: oklch), 1deg);
+}

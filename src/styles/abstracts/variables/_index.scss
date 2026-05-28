@@ -1,0 +1,11 @@
+/// @group Abstracts/Variables
+/// @name Variables Index
+/// @description Public API for all abstract variables.
+/// Forwards breakpoints, fluid scale, font metrics, colors and typography configuration.
+/// ===========================================================================
+
+@forward "./breakpoints";
+@forward "./fluid-scale";
+@forward "./font-metrics";
+@forward "./typography";
+@forward "./colors";

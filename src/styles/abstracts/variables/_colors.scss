@@ -1,0 +1,121 @@
+/// @group Abstracts/Variables
+/// @name Colors
+/// @description Raw Sass color variables (hex) for the design system palette.
+/// Light mode: cool slate-blue tone with warm off-white surfaces.
+/// Dark mode: retains original deep navy/gold palette.
+/// These are converted to OKLCH CSS custom properties in tokens/_color-tokens.scss.
+/// ===========================================================================
+
+// ============================================================================
+// Configuration
+// ============================================================================
+
+// ============================================================================
+// Dark mode (original palette — unchanged)
+// ============================================================================
+
+/// Surface Base — dark
+/// @type Color
+$color-surface-base-dark: #18191D;
+
+/// Surface Elevated — dark
+/// @type Color
+$color-surface-elevated-dark: #272B36;
+
+/// Surface Mid — dark
+/// @type Color
+/// For use with gradient only
+$color-surface-mid-dark: #20222A;
+
+/// Gold Light — dark
+/// @type Color
+/// Hover color for Accent and Bright in Gold Gradient
+$color-gold-light-dark: #EFE7B1;
+
+/// Gold Dark — dark
+/// @type Color
+/// Dark in Gold Gradient
+$color-gold-dark-dark: #4B352A;
+
+/// Accent — dark
+/// @type Color
+$color-accent-dark: #BAA58A;
+
+/// Action — dark
+/// @type Color
+$color-action-dark: #8491B6;
+
+/// Action Hover — dark
+/// @type Color
+$color-action-hover-dark: #A7B6E3;
+
+/// Action Muted — dark
+/// @type Color
+$color-action-muted-dark: #697391;
+
+/// Text Primary — dark
+/// @type Color
+$color-text-primary-dark: #ECECEC;
+
+/// Text Muted — dark
+/// @type Color
+$color-text-muted-dark: #B8B8B8;
+
+/// Text Bright — dark
+/// @type Color
+$color-text-bright-dark: #FFFFFF;
+
+// ============================================================================
+// Light mode (slate-blue palette)
+// ============================================================================
+
+/// Surface Base — light
+/// @type Color
+$color-surface-base-light: #F5F6F8;
+
+/// Surface Elevated — light
+/// @type Color
+$color-surface-elevated-light: #FFFFFF;
+
+/// Surface Mid — light
+/// @type Color
+/// For use with gradient only
+$color-surface-mid-light: #ECEEF4;
+
+/// Slate Light — light
+/// @type Color
+/// Hover color for Accent and Bright in Slate Gradient
+$color-gold-light-light: #9CA8C5;
+
+/// Slate Warm — light
+/// @type Color
+/// Warm tan — analogous to gold dark, for gradient use
+$color-gold-dark-light: #C4A882;
+
+/// Accent — light
+/// @type Color
+$color-accent-light: #5B6BAB;
+
+/// Action — light
+/// @type Color
+$color-action-light: #4A5A9A;
+
+/// Action Hover — light
+/// @type Color
+$color-action-hover-light: #7B8DC4;
+
+/// Action Muted — light
+/// @type Color
+$color-action-muted-light: #9BA8CC;
+
+/// Text Primary — light
+/// @type Color
+$color-text-primary-light: #1A1C23;
+
+/// Text Muted — light
+/// @type Color
+$color-text-muted-light: #4B5060;
+
+/// Text Bright — light
+/// @type Color
+$color-text-bright-light: #000000;

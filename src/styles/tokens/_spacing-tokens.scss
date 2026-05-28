@@ -1,0 +1,71 @@
+/// @group Tokens
+/// @name Spacing Tokens
+/// @description Fluid spacing scale based on --unit from base tokens
+/// Provides both t-shirt sizes (xs, sm, md...) and numeric scale (1-48)
+/// ===========================================================================
+
+// ============================================================================
+// T-shirt Size Scale Configuration
+// ============================================================================
+
+/// Spacing scale multipliers
+/// @type Map
+/// Each value is a multiplier of --unit (which is 1/4 of --fluid-base)
+/// Example: --space-sm = calc(var(--unit) * 4) = 1rem at base font size
+$space-values: (
+  "3xs": 1,
+  // 0.25rem base (4px)
+  "2xs": 2,
+  // 0.5rem base (8px)
+  "xs": 3,
+  // 0.75rem base (12px)
+  "sm": 4,
+  // 1rem base (16px)
+  "md": 5,
+  // 1.25rem base (20px)
+  "lg": 6,
+  // 1.5rem base (24px)
+  "xl": 8,
+  // 2rem base (32px)
+  "2xl": 12,
+  // 3rem base (48px)
+  "3xl": 16,
+  // 4rem base (64px)
+  "4xl": 20,
+  // 5rem base (80px)
+  "5xl": 24,
+  // 6rem base (96px)
+  "6xl": 28,
+  // 7rem base (112px)
+  "7xl": 32,
+  // 8rem base (128px)
+  "8xl": 40,
+  // 10rem base (160px)
+  "9xl": 48, // 12rem base (192px)
+) !default;
+
+// ============================================================================
+// CSS Custom Properties
+// ============================================================================
+
+:root {
+  // ==========================================================================
+  // T-shirt Size Scale
+  // ==========================================================================
+
+  /// Semantic spacing tokens using t-shirt sizes
+  /// Usage: padding: var(--space-sm); gap: var(--space-lg);
+  @each $size, $factor in $space-values {
+    --space-#{$size}: calc(var(--unit) * #{$factor});
+  }
+
+  // ==========================================================================
+  // Numeric Scale (1-48)
+  // ==========================================================================
+
+  /// Numeric spacing tokens for fine-grained control
+  /// Usage: margin-block: var(--space-5); padding-inline: var(--space-12);
+  @for $i from 1 through 48 {
+    --space-#{$i}: calc(var(--unit) * #{$i});
+  }
+}

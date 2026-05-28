@@ -1,0 +1,132 @@
+/// @group Utilities
+/// @name Spacing Utilities
+/// @description Utility classes for margin and padding using the fluid spacing system.
+/// Provides both t-shirt sizes (xs, sm, md...) and numeric scale (1-48).
+/// All values are multiples of --unit which scales fluidly with viewport width.
+/// @example html
+///   <div class="px-md py-sm">Padded box</div>
+///   <div class="mt-8 mb-4">Numeric margin</div>
+/// ===========================================================================
+
+@use "styles/tokens/spacing-tokens" as *;
+
+.m-none {
+  margin: 0;
+}
+.mx-auto {
+  margin-inline: auto;
+}
+.my-auto {
+  margin-block: auto;
+}
+.mr-auto {
+  margin-inline-end: auto;
+}
+.ml-auto {
+  margin-inline-start: auto;
+}
+.p-none {
+  padding: 0;
+}
+
+// ==========================================================================
+// T-shirt Size Scale
+// ==========================================================================
+
+/// Semantic spacing utility classes using t-shirt sizes
+@each $size, $factor in $space-values {
+  .m-#{$size} {
+    margin: calc(var(--unit) * #{$factor});
+  }
+  .mx-#{$size} {
+    margin-inline: calc(var(--unit) * #{$factor});
+  }
+  .my-#{$size} {
+    margin-block: calc(var(--unit) * #{$factor});
+  }
+  .mt-#{$size} {
+    margin-top: calc(var(--unit) * #{$factor});
+  }
+  .ml-#{$size} {
+    margin-left: calc(var(--unit) * #{$factor});
+  }
+  .mb-#{$size} {
+    margin-bottom: calc(var(--unit) * #{$factor});
+  }
+  .mr-#{$size} {
+    margin-right: calc(var(--unit) * #{$factor});
+  }
+
+  .p-#{$size} {
+    padding: calc(var(--unit) * #{$factor});
+  }
+  .px-#{$size} {
+    padding-inline: calc(var(--unit) * #{$factor});
+  }
+  .py-#{$size} {
+    padding-block: calc(var(--unit) * #{$factor});
+  }
+  .pt-#{$size} {
+    padding-top: calc(var(--unit) * #{$factor});
+  }
+  .pl-#{$size} {
+    padding-left: calc(var(--unit) * #{$factor});
+  }
+  .pb-#{$size} {
+    padding-bottom: calc(var(--unit) * #{$factor});
+  }
+  .pr-#{$size} {
+    padding-right: calc(var(--unit) * #{$factor});
+  }
+}
+
+// ==========================================================================
+// Numeric Scale (1-48)
+// ==========================================================================
+
+/// Numeric spacing utility classes for fine-grained control
+@for $i from 1 through 48 {
+  .m-#{$i} {
+    margin: calc(var(--unit) * #{$i});
+  }
+  .mx-#{$i} {
+    margin-inline: calc(var(--unit) * #{$i});
+  }
+  .my-#{$i} {
+    margin-block: calc(var(--unit) * #{$i});
+  }
+  .mt-#{$i} {
+    margin-top: calc(var(--unit) * #{$i});
+  }
+  .ml-#{$i} {
+    margin-left: calc(var(--unit) * #{$i});
+  }
+  .mb-#{$i} {
+    margin-bottom: calc(var(--unit) * #{$i});
+  }
+  .mr-#{$i} {
+    margin-right: calc(var(--unit) * #{$i});
+  }
+
+  .p-#{$i} {
+    padding: calc(var(--unit) * #{$i});
+  }
+  .px-#{$i} {
+    padding-inline: calc(var(--unit) * #{$i});
+  }
+  .py-#{$i} {
+    padding-block: calc(var(--unit) * #{$i});
+  }
+  .pt-#{$i} {
+    padding-top: calc(var(--unit) * #{$i});
+  }
+  .pl-#{$i} {
+    padding-left: calc(var(--unit) * #{$i});
+  }
+  .pb-#{$i} {
+    padding-bottom: calc(var(--unit) * #{$i});
+  }
+  .pr-#{$i} {
+    padding-right: calc(var(--unit) * #{$i});
+  }
+}
