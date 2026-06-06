@@ -32,9 +32,9 @@ A framework-agnostic SCSS design system with fluid typography, leading-trim prec
 
 trimscale-css is built around three core ideas:
 
-1. **Fluid typography** — font sizes and spacing scale continuously across viewports using `clamp()`. No breakpoint jumps.
-2. **Leading-trim precision** — removes excess vertical whitespace above and below text using font metrics, giving you true cap-height-to-baseline control.
-3. **OKLCH color tokens** — perceptually uniform colors with automatic light/dark mode switching via the CSS `light-dark()` function.
+1. **Fluid typography:** font sizes and spacing scale continuously across viewports using `clamp()`. No breakpoint jumps.
+2. **Leading-trim precision:** removes excess vertical whitespace above and below text using font metrics, giving you true cap-height-to-baseline control.
+3. **OKLCH color tokens:** perceptually uniform colors with automatic light/dark mode switching via the CSS `light-dark()` function.
 
 The system is pure SCSS. It generates CSS custom properties, utility classes, and base styles. No JavaScript required for styles.
 
@@ -46,10 +46,10 @@ The system is pure SCSS. It generates CSS custom properties, utility classes, an
 - Fluid spacing on a `--unit` grid that scales 4 px → 5 px across the same range
 - Leading-trim via CSS pseudo-elements, with a progressive enhancement to native `text-box-trim` where supported
 - OKLCH color system with semantic tokens for surfaces, text, accent, and action states
-- Light/dark mode via `prefers-color-scheme` — zero JavaScript
+- Light/dark mode via `prefers-color-scheme`, no JavaScript required
 - Modern responsive breakpoints using CSS range syntax (`width <`, `width >=`)
 - Semantic (t-shirt sizes) and numeric (1–48) spacing scales
-- Framework-agnostic — works with any JS framework or plain HTML
+- Framework-agnostic, works with any JS framework or plain HTML
 
 ---
 
@@ -80,7 +80,7 @@ trimscale-css/
 
 The system is consumed as SCSS source. Add the `src/styles` directory to your project and configure your SCSS compiler with its load path.
 
-**Vite + sass-embedded example:**
+**Vite + sass-embedded:**
 
 ```ts
 // vite.config.ts
@@ -94,6 +94,8 @@ export default {
   },
 };
 ```
+
+**Next.js:** see [using-with-nextjs.md](src/docs/using-with-nextjs.md) for the full setup, including `next/font` integration and the required changes to `_font-metrics.scss`.
 
 ---
 
@@ -176,7 +178,7 @@ Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewpor
 
 ### Typography Tokens
 
-**Modular scale levels** — all computed with `clamp()` from Minor Third at mobile to Perfect Fourth at desktop:
+**Modular scale levels,** all computed with `clamp()` from Minor Third at mobile to Perfect Fourth at desktop:
 
 | Token | Scale step | Role |
 |-------|------------|------|
@@ -201,10 +203,12 @@ Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewpor
 | `--heading-3` | `--fs-500` |
 | `--heading-4` | `--fs-400` |
 | `--text-lg` | `--fs-400` |
-| `--text-md` | `fluidFontSize(0.5)` — half-step between `--fs-300` and `--fs-400` |
+| `--text-md` | `fluidFontSize(0.5)`, a half-step between `--fs-300` and `--fs-400` |
 | `--text-base` | `--fs-300` |
 | `--text-sm` | `--fs-300 × 0.875` |
 | `--text-xs` | `--fs-300 × 0.75` |
+
+The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively — at mobile with a 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables.
 
 **Font families:**
 
@@ -225,7 +229,7 @@ Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewpor
 
 **Font weights:** `--font-weight-thin` (100) through `--font-weight-black` (900).
 
-**Line heights:** `--line-height-100` through `--line-height-200` — named by value × 100. Examples: `--line-height-100` = 1.0, `--line-height-115` = 1.15, `--line-height-150` = 1.5, `--line-height-200` = 2.0. All steps of 0.05 are defined.
+**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100. Examples: `--line-height-100` = 1.0, `--line-height-115` = 1.15, `--line-height-150` = 1.5, `--line-height-200` = 2.0. All steps of 0.05 are defined.
 
 ### Color Tokens
 
@@ -425,7 +429,7 @@ Examples:
 
 ### Gap
 
-Pattern: `.gap-{size}` — t-shirt and numeric scales.
+Pattern: `.gap-{size}`, using t-shirt and numeric scales.
 
 ```html
 <div class="flex gap-md">…</div>
@@ -453,26 +457,26 @@ npm run build    # production build
 npm run preview  # preview production build
 ```
 
-The styleguide uses a Vite alias `@trimscale` → `../src/styles`, so imports look like:
+The styleguide sets `loadPaths` to `../src`, so SCSS imports work the same way as in any consuming project:
 
 ```scss
-@use '@trimscale/trimscale';
+@use 'styles/trimscale';
 ```
 
 ---
 
 ## Customization
 
-All configuration lives in `src/styles/abstracts/variables/`. Each file uses `!default` flags, so you can override values by setting them before the `@use` call.
+All configuration lives in `src/styles/abstracts/variables/`. Edit the relevant file directly; the system derives everything else from these values at compile time.
 
 Key configuration files:
 
-| File | Controls |
-|------|----------|
-| `_breakpoints.scss` | Viewport breakpoints |
-| `_fluid-scale.scss` | Min/max viewport, base font size, modular scale ratios |
-| `_font-metrics.scss` | Per-font cap-height, ascender, descender, trim values |
-| `_typography.scss` | Font role → family mappings |
-| `_colors.scss` | Raw hex/OKLCH color values for light and dark themes |
+| File | Controls | Guide |
+|------|----------|-------|
+| `_breakpoints.scss` | Viewport breakpoints and shortcut variables | [customizing-breakpoints.md](src/docs/customizing-breakpoints.md) |
+| `_fluid-scale.scss` | Viewport range, base font sizes, modular scale ratios | [customizing-type-scale.md](src/docs/customizing-type-scale.md) |
+| `_font-metrics.scss` | Per-font cap-height, ascender, descender, trim values | [adding-a-font.md](src/docs/adding-a-font.md) |
+| `_typography.scss` | Font role → family mappings | [adding-a-font.md](src/docs/adding-a-font.md) |
+| `_colors.scss` | Raw OKLCH color values for light and dark themes | N/A |
 
 Use the `_[NAME].scss` template files in each `abstracts/` subdirectory as a starting point for adding your own variables, functions, or mixins.

@@ -75,10 +75,10 @@
   // ==========================================================================
 
   /// Lead paragraph / intro text
-  --text-lg: var(--fs-400); //calc(var(--fs-300) * 1.25);
+  --text-lg: var(--fs-400);
 
   /// Slightly emphasized body text
-  --text-md: #{fn.fluidFontSize(0.5, "vwx")};// calc(var(--fs-300) + ((var(--fs-400) - var(--fs-300)) / 2));
+  --text-md: #{fn.fluidFontSize(0.5, "vwx")};
 
   /// Default body text size
   --text-base: var(--fs-300);

@@ -1,6 +1,6 @@
 # Adding a Font
 
-This guide covers every step needed to integrate a new typeface into trimscale-css — from extracting font metrics to assigning the font to roles in the system.
+This guide covers every step needed to integrate a new typeface into trimscale-css, from extracting font metrics to assigning the font to roles in the system.
 
 ## Overview
 
@@ -14,7 +14,7 @@ Four files are always involved. A fifth is optional if you want to swap an exist
 
 ---
 
-## Step 1 — Extract the font metrics
+## Step 1: Extract the font metrics
 
 The metrics database requires nine values per font. Use [precisionspec.dev](https://precisionspec.dev) to extract them:
 
@@ -42,7 +42,7 @@ Existing fonts in the system for reference:
 
 ---
 
-## Step 2 — Add the metrics entry
+## Step 2: Add the metrics entry
 
 Open [`_font-metrics.scss`](../styles/abstracts/variables/_font-metrics.scss) and add a new entry to the `$font-metrics` map. The key must exactly match the font family name you'll use in `@font-face`.
 
@@ -67,13 +67,13 @@ $font-metrics: (
 
 **Rules:**
 
-- The map key (`"Source Sans 3"`) is the canonical name used internally — it must match exactly what `_typography.scss` will reference.
-- The `"family"` value is the CSS `font-family` stack — quote the font name and add a generic fallback.
+- The map key (`"Source Sans 3"`) is the canonical name used internally. It must match exactly what `_typography.scss` will reference.
+- The `"family"` value is the CSS `font-family` stack. Quote the font name and add a generic fallback.
 - All metric values are unitless ratios (em fractions). Do not add units here; the leading-trim system appends `em` where needed.
 
 ---
 
-## Step 3 — Add `@font-face` declarations
+## Step 3: Add `@font-face` declarations
 
 Open [`_fonts.scss`](../styles/base/_fonts.scss) and add one declaration per style variant you're loading. For a variable font (covers all weights in one file):
 
@@ -112,9 +112,9 @@ Place font files in your project's public fonts directory. The path in `src:` sh
 
 ---
 
-## Step 4 — Assign the font to a role
+## Step 4: Assign the font to a role
 
-Open [`_typography.scss`](../styles/abstracts/variables/_typography.scss) and update the `$fonts` map. This step is required — `tokens/_leading-trim.scss` looks up font metrics by role name, so a font that isn't mapped to at least one role will have no trim values applied.
+Open [`_typography.scss`](../styles/abstracts/variables/_typography.scss) and update the `$fonts` map. This step is required: `tokens/_leading-trim.scss` looks up font metrics by role name, so a font that isn't mapped to at least one role will have no trim values applied.
 
 ```scss
 $fonts: (
@@ -135,7 +135,7 @@ $fonts: (
 
 The map value must match the key in `$font-metrics` exactly. After this change, any call to `fontSetup($font: 'secondary')` or `fontSetup($font: 'body')` will automatically use the new font with its correct metrics.
 
-You do not need to touch `_leading-trim.scss` or `_mx_font-setup.scss` — the system reads the metrics from the map at compile time.
+You do not need to touch `_leading-trim.scss` or `_mx_font-setup.scss`; the system reads the metrics from the map at compile time.
 
 ---
 
@@ -143,9 +143,9 @@ You do not need to touch `_leading-trim.scss` or `_mx_font-setup.scss` — the s
 
 After all changes, check three things:
 
-1. **Compile without errors** — run the dev server (`cd styleguide && npm run dev`) and confirm no SCSS errors.
-2. **Leading trim is working** — open a heading in the browser and inspect the element. The `::before` and `::after` pseudo-elements should have negative `margin-bottom` values. If they both show `0`, the font key in `$fonts` doesn't match the key in `$font-metrics`.
-3. **Side bearings look right** — view a large display heading. The first letter's left edge should sit flush with the container. If there's a visible gap, decrease `lsb-adjust` (make it more negative) by increments of `0.005`.
+1. **Compile without errors.** Run the dev server (`cd styleguide && npm run dev`) and confirm no SCSS errors.
+2. **Leading trim is working.** Open a heading in the browser and inspect the element. The `::before` and `::after` pseudo-elements should have negative `margin-bottom` values. If they both show `0`, the font key in `$fonts` doesn't match the key in `$font-metrics`.
+3. **Side bearings look right.** View a large display heading. The first letter's left edge should sit flush with the container. If there's a visible gap, decrease `lsb-adjust` (make it more negative) by increments of `0.005`.
 
 ---
 
@@ -157,6 +157,6 @@ After all changes, check three things:
 - [ ] `bottom-trim` = `descender`
 - [ ] `@font-face` added in `_fonts.scss` with a matching `font-family` string
 - [ ] Font files are present in the public fonts directory
-- [ ] Role mapped in `$fonts` (required — leading-trim depends on it)
+- [ ] Role mapped in `$fonts` (required: leading-trim depends on it)
 - [ ] Dev server compiles without errors
 - [ ] `::before`/`::after` pseudo-elements have non-zero margins at runtime
