@@ -68,6 +68,10 @@
   --color-scroll-thumb-hover: var(--color-action-hover);
   --color-scroll-thumb-active: var(--color-action-muted);
   --color-scroll-background: var(--color-surface-base);
+
+  // A11y
+  --color-a11y-focus: light-dark(oklch(from #{var.$color-a11y-focus-light} l calc(c * 1.05) h),
+    oklch(from #{var.$color-a11y-focus-dark} l calc(c * 1.05) h));
 }
 
 

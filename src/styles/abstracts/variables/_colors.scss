@@ -65,6 +65,10 @@ $color-text-muted-dark: #B8B8B8;
 /// @type Color
 $color-text-bright-dark: #FFFFFF;
 
+/// A11y Focus — dark
+/// @type Color
+$color-a11y-focus-dark: #5E9ED6;
+
 // ============================================================================
 // Light mode (slate-blue palette)
 // ============================================================================
@@ -119,3 +123,7 @@ $color-text-muted-light: #4B5060;
 /// Text Bright — light
 /// @type Color
 $color-text-bright-light: #000000;
+
+/// A11y Focus — light
+/// @type Color
+$color-a11y-focus-light: #1E6DB5;

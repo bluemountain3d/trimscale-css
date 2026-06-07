@@ -62,7 +62,7 @@
 }
 
 :focus-visible {
-  outline: 4px solid var(--color-focus-ring, #5E9ED6);
+  outline: 4px solid var(--color-a11y-focus, #5E9ED6);
   outline-offset: 2px;
 }
 
@@ -122,7 +122,7 @@
   left: 0;
   z-index: 9999;
   padding: 1rem 2rem;
-  background: var(--color-background, #fff);
+  background: var(--color-surface-base, #fff);
   color: var(--color-text, #000);
   text-decoration: none;
   transform: translateY(-100%);
