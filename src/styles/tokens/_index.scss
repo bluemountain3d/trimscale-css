@@ -4,7 +4,7 @@
 /// Forwards base, spacing, leading trim, typography, and color tokens.
 /// Import order matters — base-tokens must come first as other tokens depend on --unit and --fluid-base.
 /// ===========================================================================
-///
+
 @forward "./base-tokens";
 @forward "./spacing-tokens";
 @forward "./leading-trim";
