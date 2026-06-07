@@ -110,6 +110,7 @@ Import once at your app's entry point to load all tokens, base styles, and utili
 ```
 
 This single import includes:
+
 - All CSS custom property tokens
 - HTML element defaults and reset
 - Utility classes (spacing, gap, text, layout)
@@ -143,12 +144,12 @@ All tokens are CSS custom properties scoped to `:root`.
 
 ### Base Tokens
 
-| Token | Description |
-|-------|-------------|
-| `--vwx` | Adaptive viewport unit. `1vw` normally; switches to `2vh` on ultrawide screens (≥ 21:9 ratio + ≥ 2048 px height) to prevent runaway scaling |
-| `--fluid-base` | Base font size. Scales from `16px` at 360 px viewport to `20px` at 1440 px using `clamp()` |
-| `--unit` | Base spacing unit = `--fluid-base / 4`. Scales 4 px → 5 px fluidly |
-| `--header-height` | Global header height: `2.75rem + var(--space-3xl)` |
+| Token             | Description                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--vwx`           | Adaptive viewport unit. `1vw` normally; switches to `2vh` on ultrawide screens (≥ 21:9 ratio + ≥ 2048 px height) to prevent runaway scaling |
+| `--fluid-base`    | Base font size. Scales from `16px` at 360 px viewport to `20px` at 1440 px using `clamp()`                                                  |
+| `--unit`          | Base spacing unit = `--fluid-base / 4`. Scales 4 px → 5 px fluidly                                                                          |
+| `--header-height` | Global header height: `2.75rem + var(--space-3xl)`                                                                                          |
 
 ### Spacing Tokens
 
@@ -156,23 +157,23 @@ Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewpor
 
 **T-shirt sizes:**
 
-| Token | Multiplier | Base value (at 16 px) |
-|-------|------------|-----------------------|
-| `--space-3xs` | × 1 | 4 px |
-| `--space-2xs` | × 2 | 8 px |
-| `--space-xs` | × 3 | 12 px |
-| `--space-sm` | × 4 | 16 px |
-| `--space-md` | × 5 | 20 px |
-| `--space-lg` | × 6 | 24 px |
-| `--space-xl` | × 8 | 32 px |
-| `--space-2xl` | × 12 | 48 px |
-| `--space-3xl` | × 16 | 64 px |
-| `--space-4xl` | × 20 | 80 px |
-| `--space-5xl` | × 24 | 96 px |
-| `--space-6xl` | × 28 | 112 px |
-| `--space-7xl` | × 32 | 128 px |
-| `--space-8xl` | × 40 | 160 px |
-| `--space-9xl` | × 48 | 192 px |
+| Token         | Multiplier | Base value (at 16 px) |
+| ------------- | ---------- | --------------------- |
+| `--space-3xs` | × 1        | 4 px                  |
+| `--space-2xs` | × 2        | 8 px                  |
+| `--space-xs`  | × 3        | 12 px                 |
+| `--space-sm`  | × 4        | 16 px                 |
+| `--space-md`  | × 5        | 20 px                 |
+| `--space-lg`  | × 6        | 24 px                 |
+| `--space-xl`  | × 8        | 32 px                 |
+| `--space-2xl` | × 12       | 48 px                 |
+| `--space-3xl` | × 16       | 64 px                 |
+| `--space-4xl` | × 20       | 80 px                 |
+| `--space-5xl` | × 24       | 96 px                 |
+| `--space-6xl` | × 28       | 112 px                |
+| `--space-7xl` | × 32       | 128 px                |
+| `--space-8xl` | × 40       | 160 px                |
+| `--space-9xl` | × 48       | 192 px                |
 
 **Numeric scale:** `--space-1` through `--space-48`, each equal to `calc(var(--unit) * N)`.
 
@@ -180,52 +181,52 @@ Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewpor
 
 **Modular scale levels,** all computed with `clamp()` from Minor Third at mobile to Perfect Fourth at desktop:
 
-| Token | Scale step | Role |
-|-------|------------|------|
-| `--fs-100` | −2 | Smallest (legal, captions) |
-| `--fs-200` | −1 | Small (secondary info, metadata) |
-| `--fs-300` | 0 | Base font size |
-| `--fs-400` | +1 | Emphasized text |
-| `--fs-500` | +2 | Small heading |
-| `--fs-600` | +3 | Medium heading |
-| `--fs-700` | +4 | Large heading |
-| `--fs-800` | +5 | Extra large heading |
-| `--fs-900` | +6 | Display heading |
+| Token      | Scale step | Role                             |
+| ---------- | ---------- | -------------------------------- |
+| `--fs-100` | −2         | Smallest (legal, captions)       |
+| `--fs-200` | −1         | Small (secondary info, metadata) |
+| `--fs-300` | 0          | Base font size                   |
+| `--fs-400` | +1         | Emphasized text                  |
+| `--fs-500` | +2         | Small heading                    |
+| `--fs-600` | +3         | Medium heading                   |
+| `--fs-700` | +4         | Large heading                    |
+| `--fs-800` | +5         | Extra large heading              |
+| `--fs-900` | +6         | Display heading                  |
 
 **Semantic size aliases:**
 
-| Token | Value |
-|-------|-------|
-| `--display-1` | `--fs-900` |
-| `--display-2` | `--fs-800` |
-| `--heading-1` | `--fs-700` |
-| `--heading-2` | `--fs-600` |
-| `--heading-3` | `--fs-500` |
-| `--heading-4` | `--fs-400` |
-| `--text-lg` | `--fs-400` |
-| `--text-md` | `fluidFontSize(0.5)`, a half-step between `--fs-300` and `--fs-400` |
-| `--text-base` | `--fs-300` |
-| `--text-sm` | `--fs-300 × 0.875` |
-| `--text-xs` | `--fs-300 × 0.75` |
+| Token         | Value                                                               |
+| ------------- | ------------------------------------------------------------------- |
+| `--display-1` | `--fs-900`                                                          |
+| `--display-2` | `--fs-800`                                                          |
+| `--heading-1` | `--fs-700`                                                          |
+| `--heading-2` | `--fs-600`                                                          |
+| `--heading-3` | `--fs-500`                                                          |
+| `--heading-4` | `--fs-400`                                                          |
+| `--text-lg`   | `--fs-400`                                                          |
+| `--text-md`   | `fluidFontSize(0.5)`, a half-step between `--fs-300` and `--fs-400` |
+| `--text-base` | `--fs-300`                                                          |
+| `--text-sm`   | `--fs-300 × 0.875`                                                  |
+| `--text-xs`   | `--fs-300 × 0.75`                                                   |
 
 The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively — at mobile with a 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables.
 
 **Font families:**
 
-| Token | Description |
-|-------|-------------|
-| `--font-family-primary` | Primary brand typeface |
-| `--font-family-secondary` | Secondary typeface |
-| `--font-family-tertiary` | Tertiary typeface |
-| `--font-family-sans` | Sans-serif stack |
-| `--font-family-serif` | Serif stack |
-| `--font-family-mono` | Monospace stack |
-| `--font-family-display` | Display / headline font |
-| `--font-family-heading` | Heading font |
-| `--font-family-body` | Body text font |
-| `--font-family-quote` | Blockquote font |
-| `--font-family-code` | Code / pre font |
-| `--font-family-ui` | UI elements font |
+| Token                     | Description             |
+| ------------------------- | ----------------------- |
+| `--font-family-primary`   | Primary brand typeface  |
+| `--font-family-secondary` | Secondary typeface      |
+| `--font-family-tertiary`  | Tertiary typeface       |
+| `--font-family-sans`      | Sans-serif stack        |
+| `--font-family-serif`     | Serif stack             |
+| `--font-family-mono`      | Monospace stack         |
+| `--font-family-display`   | Display / headline font |
+| `--font-family-heading`   | Heading font            |
+| `--font-family-body`      | Body text font          |
+| `--font-family-quote`     | Blockquote font         |
+| `--font-family-code`      | Code / pre font         |
+| `--font-family-ui`        | UI elements font        |
 
 **Font weights:** `--font-weight-thin` (100) through `--font-weight-black` (900).
 
@@ -236,29 +237,33 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 Colors use `light-dark()` for automatic theme switching driven by `prefers-color-scheme`. You can override the automatic detection by adding a class to `:root`:
 
 ```html
-<html class="theme-light">  <!-- force light -->
-<html class="theme-dark">   <!-- force dark -->
+<html class="theme-light">
+  <!-- force light -->
+  <html class="theme-dark">
+    <!-- force dark -->
+  </html>
+</html>
 ```
 
-| Token | Description |
-|-------|-------------|
-| `--color-surface-base` | Page background |
-| `--color-surface-elevated` | Card / modal background |
-| `--color-surface-mid` | Subtle container background |
+| Token                                      | Description                            |
+| ------------------------------------------ | -------------------------------------- |
+| `--color-surface-base`                     | Page background                        |
+| `--color-surface-elevated`                 | Card / modal background                |
+| `--color-surface-mid`                      | Subtle container background            |
 | `--color-gold-light` / `--color-gold-dark` | Slate in light mode, gold in dark mode |
-| `--color-accent` | Brand accent |
-| `--color-accent-hover` | Accent hover state |
-| `--color-accent-muted` | Subtle accent fill |
-| `--color-action` | Interactive / CTA color |
-| `--color-action-hover` | Action hover state |
-| `--color-action-muted` | Subtle action fill |
-| `--color-text-primary` | Default body text |
-| `--color-text-muted` | Secondary / subdued text |
-| `--color-text-bright` | High-contrast text |
-| `--color-scroll-thumb` | Scrollbar thumb |
-| `--color-scroll-thumb-hover` | Scrollbar thumb hover |
-| `--color-scroll-thumb-active` | Scrollbar thumb active |
-| `--color-scroll-background` | Scrollbar track |
+| `--color-accent`                           | Brand accent                           |
+| `--color-accent-hover`                     | Accent hover state                     |
+| `--color-accent-muted`                     | Subtle accent fill                     |
+| `--color-action`                           | Interactive / CTA color                |
+| `--color-action-hover`                     | Action hover state                     |
+| `--color-action-muted`                     | Subtle action fill                     |
+| `--color-text-primary`                     | Default body text                      |
+| `--color-text-muted`                       | Secondary / subdued text               |
+| `--color-text-bright`                      | High-contrast text                     |
+| `--color-scroll-thumb`                     | Scrollbar thumb                        |
+| `--color-scroll-thumb-hover`               | Scrollbar thumb hover                  |
+| `--color-scroll-thumb-active`              | Scrollbar thumb active                 |
+| `--color-scroll-background`                | Scrollbar track                        |
 
 ---
 
@@ -273,7 +278,7 @@ Import via `@use 'styles/abstracts/functions' as fn`.
 Returns a `clamp()` value for a type step on the modular scale.
 
 ```scss
-font-size: fn.fluidFontSize(2);       // 2 steps up from base, uses vwx unit
+font-size: fn.fluidFontSize(2); // 2 steps up from base, uses vwx unit
 font-size: fn.fluidFontSize(2, 'vw'); // same, using plain vw
 ```
 
@@ -282,7 +287,7 @@ font-size: fn.fluidFontSize(2, 'vw'); // same, using plain vw
 Returns a `clamp()` value for a spacing multiplier on the grid.
 
 ```scss
-padding: fn.fluidSpacing(6);  // --unit × 6
+padding: fn.fluidSpacing(6); // --unit × 6
 ```
 
 #### `fluidSpaceStep($min-level, $max-level, $unit-key)`
@@ -307,11 +312,12 @@ Import via `@use 'styles/abstracts/mixins' as mx`.
 
 #### `fontSetup`
 
-Applies a font role with leading-trim metrics and full typographic config:
+`fontSetup` is the **SCSS component API** for the typography system. Use it when writing component SCSS and you want to apply a font role together with size, weight, and line-height in a single declaration. For HTML-level styling, use the `.font-family-*` and other [text utility](#text) classes instead.
 
 ```scss
 @include mx.fontSetup(
-  $font: 'primary',          // font role (see Font Families table)
+  $font: 'primary',
+  // font role (see Font Families table)
   $font-size: var(--heading-1),
   $line-height: 1.1,
   $font-weight: 700,
@@ -321,23 +327,23 @@ Applies a font role with leading-trim metrics and full typographic config:
 
 Parameters:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `$font` | string | `'primary'` | Font role key (see list below) |
-| `$font-size` | value | `var(--text-base)` | CSS font-size value |
-| `$line-height` | number | `1.5` | Line height (unitless) |
-| `$font-weight` | number | `400` | Font weight |
-| `$font-style` | string | `normal` | Font style (`normal`, `italic`, `oblique`) |
-| `$letter-spacing` | value | `normal` | Letter spacing |
-| `$text-transform` | string | `none` | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
+| Parameter         | Type   | Default            | Description                                                     |
+| ----------------- | ------ | ------------------ | --------------------------------------------------------------- |
+| `$font`           | string | `'primary'`        | Font role key (see list below)                                  |
+| `$font-size`      | value  | `var(--text-base)` | CSS font-size value                                             |
+| `$line-height`    | number | `1.5`              | Line height (unitless)                                          |
+| `$font-weight`    | number | `400`              | Font weight                                                     |
+| `$font-style`     | string | `normal`           | Font style (`normal`, `italic`, `oblique`)                      |
+| `$letter-spacing` | value  | `normal`           | Letter spacing                                                  |
+| `$text-transform` | string | `none`             | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
 
 Valid `$font` roles:
 
-| Category | Values |
-|----------|--------|
-| Hierarchical | `primary`, `secondary`, `tertiary` |
-| Classification | `sans`, `serif`, `mono` |
-| Contextual | `display`, `heading`, `subheading`, `body`, `quote`, `code`, `ui` |
+| Category       | Values                                                            |
+| -------------- | ----------------------------------------------------------------- |
+| Hierarchical   | `primary`, `secondary`, `tertiary`                                |
+| Classification | `sans`, `serif`, `mono`                                           |
+| Contextual     | `display`, `heading`, `subheading`, `body`, `quote`, `code`, `ui` |
 
 The mixin sets font metrics as CSS custom properties (`--_top-trim`, `--_bottom-trim`, `--_lsb-adjust`, `--_rsb-adjust`) and applies leading-trim via `::before` / `::after` pseudo-elements. When the browser supports `text-box-trim`, native trimming is used instead.
 
@@ -347,57 +353,57 @@ Import via `@use 'styles/abstracts/variables' as var`.
 
 **Breakpoint values:**
 
-| Name | Value |
-|------|-------|
-| `$bp-mobile` | `22.5rem` (360 px) |
-| `$bp-phablet` | `30rem` (480 px) |
-| `$bp-tablet` | `45rem` (720 px) |
-| `$bp-tablet-lg` | `60rem` (960 px) |
-| `$bp-laptop` | `75rem` (1200 px) |
-| `$bp-desktop` | `90rem` (1440 px) |
+| Name            | Value              |
+| --------------- | ------------------ |
+| `$bp-mobile`    | `22.5rem` (360 px) |
+| `$bp-phablet`   | `30rem` (480 px)   |
+| `$bp-tablet`    | `45rem` (720 px)   |
+| `$bp-tablet-lg` | `60rem` (960 px)   |
+| `$bp-laptop`    | `75rem` (1200 px)  |
+| `$bp-desktop`   | `90rem` (1440 px)  |
 
 **Predefined shortcut media query strings:**
 
 Up-to (excludes the breakpoint):
 
-| Variable | Query |
-|----------|-------|
-| `$bp-up-to-phablet` | `(width < 30rem)` |
-| `$bp-up-to-tablet` | `(width < 45rem)` |
+| Variable              | Query             |
+| --------------------- | ----------------- |
+| `$bp-up-to-phablet`   | `(width < 30rem)` |
+| `$bp-up-to-tablet`    | `(width < 45rem)` |
 | `$bp-up-to-tablet-lg` | `(width < 60rem)` |
-| `$bp-up-to-laptop` | `(width < 75rem)` |
-| `$bp-up-to-desktop` | `(width < 90rem)` |
+| `$bp-up-to-laptop`    | `(width < 75rem)` |
+| `$bp-up-to-desktop`   | `(width < 90rem)` |
 
 And-up (includes the breakpoint and larger):
 
-| Variable | Query |
-|----------|-------|
-| `$bp-mobile-and-up` | `(width >= 22.5rem)` |
-| `$bp-phablet-and-up` | `(width >= 30rem)` |
-| `$bp-tablet-and-up` | `(width >= 45rem)` |
-| `$bp-tablet-lg-and-up` | `(width >= 60rem)` |
-| `$bp-laptop-and-up` | `(width >= 75rem)` |
-| `$bp-desktop-and-up` | `(width >= 90rem)` |
+| Variable               | Query                |
+| ---------------------- | -------------------- |
+| `$bp-mobile-and-up`    | `(width >= 22.5rem)` |
+| `$bp-phablet-and-up`   | `(width >= 30rem)`   |
+| `$bp-tablet-and-up`    | `(width >= 45rem)`   |
+| `$bp-tablet-lg-and-up` | `(width >= 60rem)`   |
+| `$bp-laptop-and-up`    | `(width >= 75rem)`   |
+| `$bp-desktop-and-up`   | `(width >= 90rem)`   |
 
 And-down (includes the breakpoint and smaller):
 
-| Variable | Query |
-|----------|-------|
-| `$bp-mobile-and-down` | `(width < 30rem)` |
-| `$bp-phablet-and-down` | `(width < 45rem)` |
-| `$bp-tablet-and-down` | `(width < 60rem)` |
+| Variable                 | Query             |
+| ------------------------ | ----------------- |
+| `$bp-mobile-and-down`    | `(width < 30rem)` |
+| `$bp-phablet-and-down`   | `(width < 45rem)` |
+| `$bp-tablet-and-down`    | `(width < 60rem)` |
 | `$bp-tablet-lg-and-down` | `(width < 75rem)` |
-| `$bp-laptop-and-down` | `(width < 90rem)` |
+| `$bp-laptop-and-down`    | `(width < 90rem)` |
 
 Only (a specific range):
 
-| Variable | Query |
-|----------|-------|
-| `$bp-mobile-only` | `(22.5rem <= width < 30rem)` |
-| `$bp-phablet-only` | `(30rem <= width < 45rem)` |
-| `$bp-tablet-only` | `(45rem <= width < 60rem)` |
-| `$bp-tablet-lg-only` | `(60rem <= width < 75rem)` |
-| `$bp-laptop-only` | `(75rem <= width < 90rem)` |
+| Variable             | Query                        |
+| -------------------- | ---------------------------- |
+| `$bp-mobile-only`    | `(22.5rem <= width < 30rem)` |
+| `$bp-phablet-only`   | `(30rem <= width < 45rem)`   |
+| `$bp-tablet-only`    | `(45rem <= width < 60rem)`   |
+| `$bp-tablet-lg-only` | `(60rem <= width < 75rem)`   |
+| `$bp-laptop-only`    | `(75rem <= width < 90rem)`   |
 
 Usage:
 
@@ -441,7 +447,50 @@ Flex, grid, display, and visibility utilities from `_layout-utilities.scss`.
 
 ### Text
 
-Text alignment, decoration, color, and shadow utilities from `_text-utilities.scss`.
+Text utility classes from `_text-utilities.scss`. They form the **HTML-level API** for the typography system — compose them in markup to apply font roles, sizes, weights, and alignment without writing any SCSS.
+
+**Font family** — applies a font role with its leading-trim metrics:
+
+| Class                     | Role                   |
+| ------------------------- | ---------------------- |
+| `.font-family-primary`    | Primary brand typeface |
+| `.font-family-secondary`  | Secondary typeface     |
+| `.font-family-tertiary`   | Tertiary typeface      |
+| `.font-family-sans`       | Sans-serif category    |
+| `.font-family-serif`      | Serif category         |
+| `.font-family-mono`       | Monospace category     |
+| `.font-family-display`    | Display / hero context |
+| `.font-family-heading`    | Heading context        |
+| `.font-family-subheading` | Subheading context     |
+| `.font-family-body`       | Body text context      |
+| `.font-family-quote`      | Blockquote context     |
+| `.font-family-code`       | Code / pre context     |
+| `.font-family-ui`         | UI elements context    |
+
+**Font size** (also sets a matching default line-height):
+`.font-size-display-1`, `.font-size-display-2`, `.font-size-heading-1` → `.font-size-heading-4`, `.font-size-text-lg`, `.font-size-text-md`, `.font-size-text-base`, `.font-size-text-sm`, `.font-size-text-xs`
+
+**Font weight:** `.font-weight-thin` → `.font-weight-black` (thin, extralight, light, normal, medium, semibold, bold, extrabold, black)
+
+**Line height:** `.line-height-100` → `.line-height-200` (steps of 5, e.g. `.line-height-150` = 1.5)
+
+**Font style:** `.font-style-normal`, `.font-style-italic`
+
+**Text transform:** `.text-transform-capitalize`, `.text-transform-uppercase`, `.text-transform-lowercase`
+
+**Text alignment:** `.text-align-left`, `.text-align-center`, `.text-align-right`
+
+**Text color:** `.text-color-inherit`, `.text-color-primary`, `.text-color-muted`, `.text-color-bright`, `.text-color-accent`, `.text-color-action`
+
+```html
+<h1
+  class="font-family-heading font-size-heading-1 font-weight-bold text-color-primary">
+  Page heading
+</h1>
+<p class="font-family-body font-size-text-base text-color-muted">
+  Body copy in muted tone.
+</p>
+```
 
 ---
 
@@ -471,12 +520,12 @@ All configuration lives in `src/styles/abstracts/variables/`. Edit the relevant 
 
 Key configuration files:
 
-| File | Controls | Guide |
-|------|----------|-------|
-| `_breakpoints.scss` | Viewport breakpoints and shortcut variables | [customizing-breakpoints.md](src/docs/customizing-breakpoints.md) |
-| `_fluid-scale.scss` | Viewport range, base font sizes, modular scale ratios | [customizing-type-scale.md](src/docs/customizing-type-scale.md) |
-| `_font-metrics.scss` | Per-font cap-height, ascender, descender, trim values | [adding-a-font.md](src/docs/adding-a-font.md) |
-| `_typography.scss` | Font role → family mappings | [adding-a-font.md](src/docs/adding-a-font.md) |
-| `_colors.scss` | Raw OKLCH color values for light and dark themes | N/A |
+| File                 | Controls                                              | Guide                                                             |
+| -------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- |
+| `_breakpoints.scss`  | Viewport breakpoints and shortcut variables           | [customizing-breakpoints.md](src/docs/customizing-breakpoints.md) |
+| `_fluid-scale.scss`  | Viewport range, base font sizes, modular scale ratios | [customizing-type-scale.md](src/docs/customizing-type-scale.md)   |
+| `_font-metrics.scss` | Per-font cap-height, ascender, descender, trim values | [adding-a-font.md](src/docs/adding-a-font.md)                     |
+| `_typography.scss`   | Font role → family mappings                           | [adding-a-font.md](src/docs/adding-a-font.md)                     |
+| `_colors.scss`       | Raw OKLCH color values for light and dark themes      | N/A                                                               |
 
 Use the `_[NAME].scss` template files in each `abstracts/` subdirectory as a starting point for adding your own variables, functions, or mixins.
