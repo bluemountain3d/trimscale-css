@@ -211,6 +211,8 @@ Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewpor
 
 The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively — at mobile with a 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables.
 
+The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively — at mobile with a 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables.
+
 **Font families:**
 
 | Token                     | Description             |
