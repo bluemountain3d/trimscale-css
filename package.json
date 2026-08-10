@@ -1,0 +1,27 @@
+{
+  "name": "trimscale-css",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.1.2",
+      "onFail": "download"
+    }
+  },
+  "type": "module",
+	"devDependencies": {
+		"@storybook/html-vite": "^10.4.2",
+		"@storybook/addon-essentials": "^8.6.14",
+		"storybook": "^10.4.2"
+	}
+
+}
