@@ -1,0 +1,63 @@
+@use 'sass:math' as math;
+
+/// @group Abstracts/Functions
+/// @name Dynamic line-height
+/// 
+/// Fluid, self-scaling line-height using em-based clamp bounds.
+/// Set once on %text-properties — automatically pairs with ANY font-size,
+/// including sizes outside the modular scale, since em/rem resolve against
+/// each element's own computed font-size at render time.
+///
+/// @access public
+/// @param {Number} $base-font-size [16] - Pin point (px, unitless): the font-size where $ratio-at-base applies exactly
+/// @param {Number} $ratio-at-base [1.5] - Line-height ratio at $base-font-size
+/// @param {Number} $font-size-ceiling [64] - Font-size (px) at and beyond which the ratio bottoms out at $ratio-at-ceiling
+/// @param {Number} $ratio-at-ceiling [1.05] - Ratio for large font-sizes (at/beyond $font-size-ceiling)
+/// @param {Number} $ratio-cap [1.6] - Ratio for small font-sizes (below the natural crossover point)
+/// @param {Number} $root-font-size [16] - Root font-size in px, for converting the px intercept to rem
+/// @return {String} CSS clamp() expression in em, self-scaling per element
+///
+/// @example scss
+///   %text-properties { --_line-height: #{dynamic-line-height()}; }
+/// @example scss - Custom bounds
+///   .display-1 { --_line-height: #{dynamic-line-height($ratio-at-ceiling: 1.05, $font-size-ceiling: 64)}; }
+///
+@function dynamic-line-height($base-font-size: 16,
+  $ratio-at-base: 1.5,
+  $font-size-ceiling: 64,
+  $ratio-at-ceiling: 1.05,
+  $ratio-cap: 1.6,
+  $root-font-size: 16) {
+
+  @if $font-size-ceiling ==$base-font-size {
+    @error "dynamic-line-height(): $font-size-ceiling must differ from $base-font-size";
+  }
+
+  @if $ratio-at-ceiling >$ratio-cap {
+    @error "dynamic-line-height(): $ratio-at-ceiling cannot exceed $ratio-cap";
+  }
+
+  @if $base-font-size <=0 or $font-size-ceiling <=0 or $root-font-size <=0 {
+    @error "dynamic-line-height(): font-size and root-font-size parameters must be positive";
+  }
+
+  @if $ratio-at-base <=0 or $ratio-at-ceiling <=0 or $ratio-cap <=0 {
+    @error "dynamic-line-height(): line-height ratios must be positive";
+  }
+
+  /// 1. Absolute row-height (px) at the two pinned breakpoints
+  $height-at-base: $base-font-size * $ratio-at-base;
+  $height-at-ceiling: $font-size-ceiling * $ratio-at-ceiling;
+
+  /// 2. Slope: change in row-height (px) per change in font-size (px)
+  $slope: math.div($height-at-ceiling - $height-at-base, $font-size-ceiling - $base-font-size);
+
+  /// 3. Row-height (px) at a theoretical font-size of 0 — the em-intercept
+  $intercept-px: $height-at-base - ($base-font-size * $slope);
+  $intercept-rem: math.div($intercept-px, $root-font-size);
+
+  /// 4. Self-scaling clamp: em resolves against the element's own font-size,
+  ///    rem resolves against $root-font-size — together they trace the
+  ///    correct ratio at every font-size without any lookup table
+  @return clamp(#{$ratio-at-ceiling}em, #{$slope}em + #{$intercept-rem}rem, #{$ratio-cap}em);
+}
