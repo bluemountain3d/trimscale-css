@@ -1,0 +1,78 @@
+/// @group Abstracts/Mixins
+/// @name Generate Color Tokens
+/// Emits CSS custom properties for every token in $color-tokens with a
+/// progressive-enhancement fallback chain:
+///
+///   1. Plain hex          — works everywhere, no color-scheme awareness
+///   2. Static oklch()     — for browsers that support oklch() but not light-dark()
+///                           (split light/dark via prefers-color-scheme)
+///   3. light-dark(oklch)  — for browsers that support both
+///
+/// Later blocks win the cascade on :root, so support is layered on top
+/// rather than branched — no duplicated logic per browser tier.
+/// ===========================================================================
+
+@use "styles/abstracts/variables" as var;
+@use "styles/abstracts/functions" as fn;
+
+@use 'sass:map';
+
+@mixin generate-color-tokens($tokens: var.$color-tokens, $defaultScheme: light, $prefix: var.$css-prefix) {
+
+  @each $name, $modes in $tokens {
+    @property --#{$prefix}-#{$name} {
+      syntax: "<color>";
+      inherits: true;
+      initial-value: #ccc;
+    }
+  }
+
+  // ==========================================================================
+  // 1. Hex fallback — Always applied, works in 100% of all web browsers.
+  // ==========================================================================
+  :root,
+  .app-theme-container {
+    @each $name, $modes in $tokens {
+      $light-hex: map.get(map.get($modes, light), hex);
+      $dark-hex: map.get(map.get($modes, dark), hex);
+
+      // Sets the default theme as a fallback for older browsers
+      $fallback-hex: if(sass($defaultScheme ==dark): $dark-hex; else: $light-hex);
+      --#{$prefix}-#{$name}: #{$fallback-hex};
+    }
+  }
+
+  // ==========================================================================
+  // 2. OKLCH utan light-dark() — For browsers that support OKLCH but not
+  // the new light-dark() function (e.g., Safari 16.4–17.4)
+  // ==========================================================================
+  @supports (color: oklch(0% 0 0)) and (not (color: light-dark(#fff, #000))) {
+
+    :root,
+    .app-theme-container {
+      @each $name, $modes in $tokens {
+        $light-oklch: map.get(map.get($modes, light), oklch);
+        $dark-oklch: map.get(map.get($modes, dark), oklch);
+
+        $fallback-oklch: if(sass($defaultScheme ==dark): $dark-oklch; else: $light-oklch);
+        --#{$prefix}-#{$name}: #{$fallback-oklch};
+      }
+    }
+  }
+
+  // ==========================================================================
+  // 3. Full support — light-dark() handles automatic switching via color scheme
+  // ==========================================================================
+  @supports (color: light-dark(#fff, #000)) {
+
+    :root,
+    .app-theme-container {
+      @each $name, $modes in $tokens {
+        $light-oklch: map.get(map.get($modes, light), oklch);
+        $dark-oklch: map.get(map.get($modes, dark), oklch);
+
+        --#{$prefix}-#{$name}: light-dark(#{$light-oklch}, #{$dark-oklch});
+      }
+    }
+  }
+}
