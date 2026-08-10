@@ -53,6 +53,8 @@
 @use "sass:map";
 @use "sass:math";
 
+
+
 /// Get font metric value for a given font role and property
 /// @access private
 /// @param {String} $font-key - Font role key (e.g., 'primary', 'body', 'heading')
@@ -82,9 +84,6 @@
 @mixin leading-trim($font: "primary") {
   $_fontName: map.get(var.$fonts, $font);
 
-  /// Font-specific cap-height ratio
-  // --_cap-ratio: #{_getFontMetric($font, "cap-height")}em;
-
   /// Font-specific vertical metrics (normalized to em units)
   /// Calculate from font file: (hhea ascender - cap-height) / UPM
   /// Units (em) appended here for Firefox calc() compatibility
@@ -101,6 +100,66 @@
   /// Right side bearing (RSB) adjustment
   /// Units (em) appended here for Firefox calc() compatibility
   --_rsb-adjust: #{_getFontMetric($font, "rsb-adjust")}em;
+}
+
+@property --_font-size {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1rem;
+}
+
+@property --_line-height {
+  syntax: "<number> | <length>";
+  inherits: true;
+  initial-value: 1.5;
+}
+
+@property --_font-weight {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 400;
+}
+
+@property --_font-style {
+  syntax: "normal | italic | oblique";
+  inherits: true;
+  initial-value: normal;
+}
+
+@property --_letter-spacing {
+  syntax: "<length>| normal";
+  inherits: true;
+  initial-value: normal;
+}
+
+@property --_text-transform {
+  syntax: "none | capitalize | uppercase | lowercase";
+  inherits: true;
+  initial-value: none;
+}
+
+@property --_top-trim {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0em;
+}
+
+@property --_bottom-trim {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0em;
+}
+
+@property --_lsb-adjust {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0em;
+}
+
+@property --_rsb-adjust {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0em;
 }
 
 /// Base text properties placeholder
@@ -125,15 +184,14 @@
 /// @property {Length} --_rsb-adjust [0] - Right side bearing adjustment in em
 %text-properties {
   /// Default typography values, overridable via CSS custom properties
-  --_font-size: var(--text-base);
-  --_line-height: 1.5;
+  --_font-size: var(--text-base); // Clamps
+  --_line-height: #{fn.dynamic-line-height()}; // Clamps
   --_font-weight: var(--font-weight-normal);
   --_font-style: normal;
   --_letter-spacing: 0;
   --_text-transform: none;
 
   /// Default metrics
-  // --_cap-ratio: 0.75;
   --_top-trim: 0;
   --_bottom-trim: 0;
   --_lsb-adjust: 0;
@@ -156,6 +214,7 @@
   /// Fallback implementation for browsers without native text-box-trim
   /// Uses negative margins on pseudo-elements to trim excess vertical space
   @supports not (text-box-trim: trim-both) {
+
     /// Trim excess space above cap-height
     ///
     /// Formula breakdown:
@@ -171,9 +230,7 @@
     &::before {
       content: "";
       display: table; /// Prevents margin collapse
-      margin-bottom: calc(
-        (var(--_line-height) - 1) * -0.5em - var(--_top-trim)
-      );
+      margin-bottom: calc((var(--_line-height) - 1) * -0.5em - var(--_top-trim));
     }
 
     /// Trim excess space below baseline
@@ -190,9 +247,7 @@
     &::after {
       content: "";
       display: table; /// Prevents margin collapse
-      margin-bottom: calc(
-        (var(--_line-height) - 1) * -0.5em - var(--_bottom-trim)
-      );
+      margin-bottom: calc((var(--_line-height) - 1) * -0.5em - var(--_bottom-trim));
     }
 
     /// Enhanced version using 'lh' unit for simpler calculations
