@@ -30,49 +30,37 @@
 
 /// Font Size
 .font-size-display-1 {
-  --_font-size: var(--display-1); 
-  --_line-height: 1.1;
+  --_font-size: var(--display-1);
 }
 .font-size-display-2 {
-  --_font-size: var(--display-2); 
-  --_line-height: 1.1;
+  --_font-size: var(--display-2);
 }
 .font-size-heading-1 {
-  --_font-size: var(--heading-1);
-  --_line-height: 1.15;
+  --_font-size: var(--heading-1)
 }
 .font-size-heading-2 {
-  --_font-size: var(--heading-2);
-  --_line-height: 1.2;
+  --_font-size: var(--heading-2)
 }
 .font-size-heading-3 {
-  --_font-size: var(--heading-3);
-  --_line-height: 1.3;
+  --_font-size: var(--heading-3)
 }
 .font-size-heading-4 {
-  --_font-size: var(--heading-4);
-  --_line-height: 1.4;
+  --_font-size: var(--heading-4)
 }
 .font-size-text-lg {
-  --_font-size: var(--text-lg);
-  --_line-height: 1.4;
+  --_font-size: var(--text-lg)
 }
 .font-size-text-md {
-  --_font-size: var(--text-md);
-  --_line-height: 1.45;
+  --_font-size: var(--text-md)
 }
 .font-size-text-base {
-  --_font-size: var(--text-base);
-  --_line-height: 1.5;
+  --_font-size: var(--text-base)
 }
 .font-size-text-sm {
-  --_font-size: var(--text-sm);
-  --_line-height: 1.55;
+  --_font-size: var(--text-sm)
 }
 .font-size-text-xs {
-  --_font-size: var(--text-xs);
-  --_line-height: 1.6;
-  --_letter-spacing: 0.02em;
+  --_font-size: var(--text-xs)
 }
 
 /// Line-height | Leading
