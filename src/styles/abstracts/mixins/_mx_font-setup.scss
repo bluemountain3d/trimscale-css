@@ -29,7 +29,7 @@
 ///     @include fontSetup(
 ///       $font: 'display',
 ///       $font-size: var(--display-1),
-///       $line-height: 1.1,
+///       $line-height: null,
 ///       $font-weight: 700,
 ///       $letter-spacing: -0.02em
 ///     ) {
@@ -76,31 +76,43 @@ $_valid-font-roles: (
 
 /// Apply complete font setup with metrics and typography properties
 /// @param {String} $font ['primary'] - Font role key (primary/secondary/tertiary or any defined role)
-/// @param {String} $font-size [var(--text-base)] - Font size (CSS value or custom property)
-/// @param {Number} $line-height [1.5] - Line height multiplier (unitless)
-/// @param {Number} $font-weight [400] - Font weight (100-900)
-/// @param {String} $font-style [normal] - Font style (normal, italic, oblique)
-/// @param {String} $letter-spacing [normal] - Letter spacing (CSS value)
-/// @param {String} $text-transform [none] - Text transform (none, uppercase, lowercase, capitalize)
+/// @param {Null | String} $font-size [null] - Font size (CSS value or custom property)
+/// @param {Null | Number} $line-height [null] - Line height multiplier (unitless number)
+/// @param {Null | Number} $font-weight [null] - Font weight (100-900)
+/// @param {Null | String} $font-style [null] - Font style (normal, italic, oblique)
+/// @param {Null | String} $letter-spacing [null] - Letter spacing (CSS value)
+/// @param {Null | String} $text-transform [null] - Text transform (none, uppercase, lowercase, capitalize)
 /// @param {ArgList} $content - Optional additional styles passed as a content block
 /// @content Optional additional styles
 /// @output Complete typography setup including font family, metrics, and trim values
 @mixin fontSetup(
   $font: "primary",
-  $font-size: var(--text-base),
-  $line-height: 1.5,
-  $font-weight: 400,
-  $font-style: normal,
-  $letter-spacing: normal,
-  $text-transform: none
+  $font-size: null,
+  $line-height: null,
+  $font-weight: null,
+  $font-style: null,
+  $letter-spacing: null,
+  $text-transform: null
 ) {
   // Set CSS custom properties for font configuration
-  --_font-size: #{$font-size};
-  --_line-height: #{fn.stripUnit($line-height)};
-  --_font-weight: #{$font-weight};
-  --_font-style: #{$font-style};
-  --_letter-spacing: #{$letter-spacing};
-  --_text-transform: #{$text-transform};
+  @if $font-size != null {
+    --_font-size: #{$font-size};
+  }
+  @if $line-height != null {
+    --_line-height: #{fn.stripUnit($line-height)};
+  }
+  @if $font-weight != null {
+    --_font-weight: #{$font-weight};
+  }
+  @if $font-style != null {
+    --_font-style: #{$font-style};
+  }
+  @if $letter-spacing != null {
+    --_letter-spacing: #{$letter-spacing};
+  }
+  @if $text-transform != null {
+    --_text-transform: #{$text-transform};
+  }
 
   // Validate and extend font-specific placeholder
   @if list.index($_valid-font-roles, $font) {
