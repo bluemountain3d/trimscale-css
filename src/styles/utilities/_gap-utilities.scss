@@ -26,13 +26,13 @@
 /// Semantic gap utility classes using t-shirt sizes
 @each $size, $factor in $space-values {
   .gap-#{$size} {
-    gap: calc(var(--unit) * #{$factor});
+    gap: var(--space-#{$size});
   }
   .row-gap-#{$size} {
-    row-gap: calc(var(--unit) * #{$factor});
+    row-gap: var(--space-#{$size});
   }
   .column-gap-#{$size} {
-    column-gap: calc(var(--unit) * #{$factor});
+    column-gap: var(--space-#{$size});
   }
 }
 
@@ -43,12 +43,12 @@
 /// Numeric gap utility classes for fine-grained control
 @for $i from 1 through 48 {
   .gap-#{$i} {
-    gap: calc(var(--unit) * #{$i});
+    gap: var(--space-#{$i});
   }
   .row-gap-#{$i} {
-    row-gap: calc(var(--unit) * #{$i});
+    row-gap: var(--space-#{$i});
   }
   .column-gap-#{$i} {
-    column-gap: calc(var(--unit) * #{$i});
+    column-gap: var(--space-#{$i});
   }
 }

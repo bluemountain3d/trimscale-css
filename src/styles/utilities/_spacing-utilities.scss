@@ -36,47 +36,46 @@
 /// Semantic spacing utility classes using t-shirt sizes
 @each $size, $factor in $space-values {
   .m-#{$size} {
-    margin: calc(var(--unit) * #{$factor});
+    margin: var(--space-#{$size});
   }
   .mx-#{$size} {
-    margin-inline: calc(var(--unit) * #{$factor});
+    margin-inline: var(--space-#{$size});
   }
   .my-#{$size} {
-    margin-block: calc(var(--unit) * #{$factor});
+    margin-block: var(--space-#{$size});
   }
   .mt-#{$size} {
-    margin-top: calc(var(--unit) * #{$factor});
+    margin-block-start: var(--space-#{$size});
   }
   .ml-#{$size} {
-    margin-left: calc(var(--unit) * #{$factor});
+    margin-inline-start: var(--space-#{$size});
   }
   .mb-#{$size} {
-    margin-bottom: calc(var(--unit) * #{$factor});
+    margin-block-end: var(--space-#{$size});
   }
   .mr-#{$size} {
-    margin-right: calc(var(--unit) * #{$factor});
+    margin-inline-end: var(--space-#{$size});
   }
-
   .p-#{$size} {
-    padding: calc(var(--unit) * #{$factor});
+    padding: var(--space-#{$size});
   }
   .px-#{$size} {
-    padding-inline: calc(var(--unit) * #{$factor});
+    padding-inline: var(--space-#{$size});
   }
   .py-#{$size} {
-    padding-block: calc(var(--unit) * #{$factor});
+    padding-block: var(--space-#{$size});
   }
   .pt-#{$size} {
-    padding-top: calc(var(--unit) * #{$factor});
+    padding-block-start: var(--space-#{$size});
   }
   .pl-#{$size} {
-    padding-left: calc(var(--unit) * #{$factor});
+    padding-inline-start: var(--space-#{$size});
   }
   .pb-#{$size} {
-    padding-bottom: calc(var(--unit) * #{$factor});
+    padding-block-end: var(--space-#{$size});
   }
   .pr-#{$size} {
-    padding-right: calc(var(--unit) * #{$factor});
+    padding-inline-end: var(--space-#{$size});
   }
 }
 
@@ -87,46 +86,45 @@
 /// Numeric spacing utility classes for fine-grained control
 @for $i from 1 through 48 {
   .m-#{$i} {
-    margin: calc(var(--unit) * #{$i});
+    margin: var(--space-#{$i});
   }
   .mx-#{$i} {
-    margin-inline: calc(var(--unit) * #{$i});
+    margin-inline: var(--space-#{$i});
   }
   .my-#{$i} {
-    margin-block: calc(var(--unit) * #{$i});
+    margin-block: var(--space-#{$i});
   }
   .mt-#{$i} {
-    margin-top: calc(var(--unit) * #{$i});
+    margin-block-start: var(--space-#{$i});
   }
   .ml-#{$i} {
-    margin-left: calc(var(--unit) * #{$i});
+    margin-inline-start: var(--space-#{$i});
   }
   .mb-#{$i} {
-    margin-bottom: calc(var(--unit) * #{$i});
+    margin-block-end: var(--space-#{$i});
   }
   .mr-#{$i} {
-    margin-right: calc(var(--unit) * #{$i});
+    margin-inline-end: var(--space-#{$i});
   }
-
   .p-#{$i} {
-    padding: calc(var(--unit) * #{$i});
+    padding: var(--space-#{$i});
   }
   .px-#{$i} {
-    padding-inline: calc(var(--unit) * #{$i});
+    padding-inline: var(--space-#{$i});
   }
   .py-#{$i} {
-    padding-block: calc(var(--unit) * #{$i});
+    padding-block: var(--space-#{$i});
   }
   .pt-#{$i} {
-    padding-top: calc(var(--unit) * #{$i});
+    padding-block-start: var(--space-#{$i});
   }
   .pl-#{$i} {
-    padding-left: calc(var(--unit) * #{$i});
+    padding-inline-start: var(--space-#{$i});
   }
   .pb-#{$i} {
-    padding-bottom: calc(var(--unit) * #{$i});
+    padding-block-end: var(--space-#{$i});
   }
   .pr-#{$i} {
-    padding-right: calc(var(--unit) * #{$i});
+    padding-inline-end: var(--space-#{$i});
   }
 }

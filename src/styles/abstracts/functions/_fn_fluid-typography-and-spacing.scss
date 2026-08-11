@@ -26,27 +26,30 @@
 ///   $unit: _getUnitSyntax('vwx'); // Returns: var(--vwx)
 ///   $unit: _getUnitSyntax('vw');  // Returns: 1vw
 @function _getUnitSyntax($type) {
-  @if $type == "vwx" {
+  @if $type =="vwx" {
     @return var(--vwx);
   }
 
-  @if $type == "cqw" {
+  @if $type =="cqw" {
     @return 1cqw;
   }
 
-  @if $type == "cqi" {
+  @if $type =="cqi" {
     @return 1cqi;
   }
 
-  @if $type == "vw" {
+  @if $type =="vw" {
     @return 1vw;
   }
 
   @return $type; // Fallback if passing a custom unit
 }
 
+// ============================================================================
+// Public API Functions
+// ============================================================================
+
 /// Calculate fluid clamp value with linear interpolation
-/// @access private
 /// @param {Number} $min-size - Minimum size in pixels
 /// @param {Number} $max-size - Maximum size in pixels
 /// @param {String} $value-key ['vwx'] - Unit type for viewport calculation
@@ -54,9 +57,14 @@
 /// @example
 ///   $value: _getFluidClamp(16, 24);
 ///   // Returns: "clamp(1rem, 0.5rem + 1.0417 * var(--vwx), 1.5rem)"
-@function _getFluidClamp($min-size, $max-size, $value-key: "vwx") {
+@function getFluidClamp($min-size, $max-size, $value-key: "vwx") {
   $min-width: map.get(var.$fluid-scale, "min-width");
   $max-width: map.get(var.$fluid-scale, "max-width");
+
+  // Check if the clamp is unnecessary or if we risk division by zero
+  @if $min-size ==$max-size or $min-width ==$max-width {
+    @return pxToRem($min-size);
+  }
 
   // Get correct CSS syntax (e.g. var(--vwx))
   $unit-syntax: _getUnitSyntax($value-key);
@@ -70,16 +78,10 @@
   $max-rem: pxToRem($max-size);
 
   // Multiply slope by 100 because we start from 1 unit (1% of width)
-  @return clamp(
-    #{$min-rem},
+  @return clamp(#{$min-rem},
     #{$intercept-rem} + #{round($slope * 100, 4)} * #{$unit-syntax},
-    #{$max-rem}
-  );
+    #{$max-rem});
 }
-
-// ============================================================================
-// Public API Functions
-// ============================================================================
 
 /// Generate fluid font size using modular scale
 /// @param {Number} $level [0] - Scale level (negative for smaller, positive for larger)
@@ -101,17 +103,20 @@
   $min-size: $min-base * math.pow($min-ratio, $level);
   $max-size: $max-base * math.pow($max-ratio, $level);
 
+  // Return static value if clamp is redundant
+  @if $min-size ==$max-size or $min-w ==$max-w {
+    @return #{round(pxToRem($min-size))};
+  }
+
   // Linear interpolation: y = mx + b
   $slope: math.div($max-size - $min-size, $max-w - $min-w);
   $intercept: $min-size - $slope * $min-w;
 
   $unit: _getUnitSyntax($unit-key);
 
-  @return clamp(
-    #{round(pxToRem($min-size))},
+  @return clamp(#{round(pxToRem($min-size))},
     #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit},
-    #{round(pxToRem($max-size))}
-  );
+    #{round(pxToRem($max-size))});
 }
 
 /// Generate fluid spacing based on grid system
@@ -132,16 +137,19 @@
   $min-size: $min-base * $multiplier;
   $max-size: $max-base * $multiplier;
 
+  // Return static value if clamp is redundant
+  @if $min-size ==$max-size or $min-w ==$max-w {
+    @return #{round(pxToRem($min-size))};
+  }
+
   $slope: math.div($max-size - $min-size, $max-w - $min-w);
   $intercept: $min-size - $slope * $min-w;
 
   $unit: _getUnitSyntax($unit-key);
 
-  @return clamp(
-    #{round(pxToRem($min-size))},
+  @return clamp(#{round(pxToRem($min-size))},
     #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit},
-    #{round(pxToRem($max-size))}
-  );
+    #{round(pxToRem($max-size))});
 }
 
 /// Generate fluid spacing between two different grid levels
@@ -162,14 +170,17 @@
   $min-size: $min-base * math.div($min-level, var.$base-grid-size);
   $max-size: $max-base * math.div($max-level, var.$base-grid-size);
 
+  // Return static value if clamp is redundant
+  @if $min-size ==$max-size or $min-w ==$max-w {
+    @return #{round(pxToRem($min-size))};
+  }
+
   $slope: math.div($max-size - $min-size, $max-w - $min-w);
   $intercept: $min-size - $slope * $min-w;
 
   $unit: _getUnitSyntax($unit-key);
 
-  @return clamp(
-    #{round(pxToRem($min-size))},
+  @return clamp(#{round(pxToRem($min-size))},
     #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit},
-    #{round(pxToRem($max-size))}
-  );
+    #{round(pxToRem($max-size))});
 }
