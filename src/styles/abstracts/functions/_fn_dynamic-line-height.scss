@@ -22,7 +22,8 @@
 /// @example scss - Custom bounds
 ///   .display-1 { --_line-height: #{dynamic-line-height($ratio-at-ceiling: 1.05, $font-size-ceiling: 64)}; }
 ///
-@function dynamic-line-height($base-font-size: 16,
+@function dynamic-line-height(
+  $base-font-size: 16,
   $ratio-at-base: 1.5,
   $font-size-ceiling: 64,
   $ratio-at-ceiling: 1.05,
