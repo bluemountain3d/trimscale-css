@@ -103,7 +103,9 @@
 }
 .font-style-italic {
   --_font-style: italic;
-  --_letter-spacing: 0.02em;
+}
+.font-style-oblique {
+  --_font-style: oblique;
 }
 
 /// Text Transform
@@ -113,30 +115,18 @@
 
 /// Text Align
 .text-align-left {text-align: left;}
-.text-align-center {text-align: center; margin-inline: auto;}
+.text-align-center {text-align: center;}
 .text-align-right {text-align: right;}
 
-/// Text color variants
-// .color-text-primary {
-//   color: var(--color-text-primary);
-// }
-
+/// Text color
+/// Only `.text-color-inherit` ships by default. Unlike font roles, color
+/// token names aren't a contract enforced anywhere else in the system (see
+/// fontSetup's required $fonts roles for contrast) — a project is free to
+/// name its $color-tokens however it likes, so a fixed set of
+/// `.text-color-*` classes here would risk going silently dead the moment
+/// a project doesn't use these exact token names. Add your own next to your
+/// project's palette instead.
 .text-color-inherit {
   color: inherit;
-}
-.text-color-primary {
-  color: var(--color-text-primary);
-}
-.text-color-muted {
-  color: var(--color-text-muted);
-}
-.text-color-bright {
-  color: var(--color-text-bright);
-}
-.text-color-accent {
-  color: var(--color-accent);
-}
-.text-color-action {
-  color: var(--color-action);
 }
 
