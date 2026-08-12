@@ -1,3 +1,8 @@
+// Direct partial import (not the functions index) — the index also forwards
+// fn_fluid-typography-and-spacing, which @uses this very variables module,
+// and going through it here would create a circular dependency.
+@use "styles/abstracts/functions/fn_get-color-token" as fn;
+
 /// @group Abstracts/Variables
 /// @name Colors
 /// @description Raw Sass color variables (hex) for the design system palette.
@@ -10,6 +15,18 @@
 // Configuration
 // ============================================================================
 
+/// @group Abstracts/Variables
+/// @name Color Tokens
+/// @type Map
+/// @example scss
+///   $color-tokens: (
+///     "surface-base": (
+///       light: (oklch: oklch(0.973 0.003 264), hex: #f5f6f8),
+///       dark: (oklch: oklch(0.214 0.008 274), hex: #18191d),
+///     ),
+///     // ...
+///   );
+///
 $color-tokens: (
   // Surface
   "surface-base": (
@@ -61,7 +78,7 @@ $color-tokens: (
     dark: (oklch: oklch(0.943 0 0), hex: #ececec),
   ),
   "text-muted": (
-    light: (oklch:, hex:),
+    light: (oklch: oklch(0.39 0 0), hex: #454545),
     dark: (oklch: oklch(0.783 0 0), hex: #b8b8b8),
   ),
   "text-contrast": (
@@ -76,12 +93,13 @@ $color-tokens: (
   ),
 );
 
-
 /// @group Abstracts/Variables
-/// @name Aliases
-///
+/// @name Alias Tokens
 /// @type Map
-/// 
+/// @example scss
+///   "scroll-thumb": get-color-token("action", $color-tokens),
+///   // → reuses the "action" entry's full light/dark oklch+hex shape
+///
 $color-semantic-aliases: (
   // "alias name": "token-name";
   "scroll-thumb": fn.get-color-token("action", $color-tokens),

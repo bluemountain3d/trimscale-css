@@ -2,7 +2,8 @@
 /// @name Tokens Index
 /// @description Entry point for all design tokens.
 /// Forwards base, spacing, leading trim, typography, and color tokens.
-/// Import order matters — base-tokens must come first as other tokens depend on --unit and --fluid-base.
+/// Import order matters — base-tokens must come first as other tokens depend
+/// on --unit-micro/--unit-macro and --fluid-base.
 /// ===========================================================================
 
 @forward "./base-tokens";
