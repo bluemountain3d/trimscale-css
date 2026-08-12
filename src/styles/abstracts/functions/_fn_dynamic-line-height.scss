@@ -9,56 +9,55 @@
 /// each element's own computed font-size at render time.
 ///
 /// @access public
-/// @param {Number} $base-font-size [16] - Pin point (px, unitless): the font-size where $ratio-at-base applies exactly
-/// @param {Number} $ratio-at-base [1.5] - Line-height ratio at $base-font-size
-/// @param {Number} $font-size-ceiling [64] - Font-size (px) at and beyond which the ratio bottoms out at $ratio-at-ceiling
-/// @param {Number} $ratio-at-ceiling [1.05] - Ratio for large font-sizes (at/beyond $font-size-ceiling)
+/// @param {Number} $fs-base [16] - Pin point (px, unitless): the font-size where $ratio-base applies exactly
+/// @param {Number} $ratio-base [1.5] - Line-height ratio at $fs-base
+/// @param {Number} $fs-ceil [64] - Font-size (px) at and beyond which the ratio bottoms out at $ratio-ceil
+/// @param {Number} $ratio-ceil [1.05] - Ratio for large font-sizes (at/beyond $fs-ceil)
 /// @param {Number} $ratio-cap [1.6] - Ratio for small font-sizes (below the natural crossover point)
-/// @param {Number} $root-font-size [16] - Root font-size in px, for converting the px intercept to rem
+/// @param {Number} $root [16] - Root font-size in px, for converting the px intercept to rem
 /// @return {String} CSS clamp() expression in em, self-scaling per element
 ///
 /// @example scss
 ///   %text-properties { --_line-height: #{dynamic-line-height()}; }
 /// @example scss - Custom bounds
-///   .display-1 { --_line-height: #{dynamic-line-height($ratio-at-ceiling: 1.05, $font-size-ceiling: 64)}; }
+///   .display-1 { --_line-height: #{dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
 ///
-@function dynamic-line-height(
-  $base-font-size: 16,
-  $ratio-at-base: 1.5,
-  $font-size-ceiling: 64,
-  $ratio-at-ceiling: 1.05,
+@function dynamic-line-height($fs-base: 16,
+  $ratio-base: 1.5,
+  $fs-ceil: 64,
+  $ratio-ceil: 1.05,
   $ratio-cap: 1.6,
-  $root-font-size: 16) {
+  $root: 16) {
 
-  @if $font-size-ceiling ==$base-font-size {
-    @error "dynamic-line-height(): $font-size-ceiling must differ from $base-font-size";
+  @if $fs-ceil ==$fs-base {
+    @error "dynamic-line-height(): $fs-ceil must differ from $fs-base";
   }
 
-  @if $ratio-at-ceiling >$ratio-cap {
-    @error "dynamic-line-height(): $ratio-at-ceiling cannot exceed $ratio-cap";
+  @if $ratio-ceil >$ratio-cap {
+    @error "dynamic-line-height(): $ratio-ceil cannot exceed $ratio-cap";
   }
 
-  @if $base-font-size <=0 or $font-size-ceiling <=0 or $root-font-size <=0 {
-    @error "dynamic-line-height(): font-size and root-font-size parameters must be positive";
+  @if $fs-base <=0 or $fs-ceil <=0 or $root <=0 {
+    @error "dynamic-line-height(): font-size and root parameters must be positive";
   }
 
-  @if $ratio-at-base <=0 or $ratio-at-ceiling <=0 or $ratio-cap <=0 {
+  @if $ratio-base <=0 or $ratio-ceil <=0 or $ratio-cap <=0 {
     @error "dynamic-line-height(): line-height ratios must be positive";
   }
 
   /// 1. Absolute row-height (px) at the two pinned breakpoints
-  $height-at-base: $base-font-size * $ratio-at-base;
-  $height-at-ceiling: $font-size-ceiling * $ratio-at-ceiling;
+  $h-base: $fs-base * $ratio-base;
+  $h-ceil: $fs-ceil * $ratio-ceil;
 
   /// 2. Slope: change in row-height (px) per change in font-size (px)
-  $slope: math.div($height-at-ceiling - $height-at-base, $font-size-ceiling - $base-font-size);
+  $slope: math.div($h-ceil - $h-base, $fs-ceil - $fs-base);
 
-  /// 3. Row-height (px) at a theoretical font-size of 0 — the em-intercept
-  $intercept-px: $height-at-base - ($base-font-size * $slope);
-  $intercept-rem: math.div($intercept-px, $root-font-size);
+  /// 3. Row-height at a theoretical font-size of 0 (the em-intercept),
+  ///    divided by $root to convert directly from px to rem
+  $intercept: math.div($h-base - $fs-base * $slope, $root);
 
   /// 4. Self-scaling clamp: em resolves against the element's own font-size,
-  ///    rem resolves against $root-font-size — together they trace the
+  ///    rem resolves against $root — together they trace the
   ///    correct ratio at every font-size without any lookup table
-  @return clamp(#{$ratio-at-ceiling}em, #{$slope}em + #{$intercept-rem}rem, #{$ratio-cap}em);
+  @return clamp(#{$ratio-ceil}em, #{$slope}em + #{$intercept}rem, #{$ratio-cap}em);
 }
