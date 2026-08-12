@@ -20,7 +20,7 @@
 /// Create a container spacing context with fluid units based on container width
 /// @param {String} $unit-key ['cqw'] - Unit type: 'cqw' (container), 'vwx', 'vw'
 /// @param {ArgList} $content - Optional additional styles passed as a content block
-/// @output Sets container-type, --fluid-base, and --unit CSS custom properties
+/// @output Sets container-type, --fluid-base, --unit-micro, and --unit-macro CSS custom properties
 /// @content Accepts content block for additional container styles
 /// @example
 ///   .card {
@@ -44,11 +44,12 @@
   // Base font size scales with container width
   --fluid-base: #{fn.fluidFontSize(0, $unit-key)};
 
-  // Unit is 1/4 of base (matching grid system)
-  --unit: calc(var(--fluid-base) / #{var.$base-grid-size});
+  // Micro/macro units, matching the grid system's :root computation
+  --unit-micro: calc(var(--fluid-base) / #{var.$base-grid-size});
+  --unit-macro: #{fn.getFluidClamp(4, 8, $unit-key)};
 
-  // All --space-* variables in :root that reference var(--unit)
-  // will now use this local container-relative unit
+  // All --space-* variables in :root that reference var(--unit-micro)/var(--unit-macro)
+  // will now use these local container-relative units
 
   // Accept additional styles
   @content;
@@ -58,7 +59,7 @@
 /// @param {String} $name - Container name for @container queries
 /// @param {String} $unit-key ['cqw'] - Unit type
 /// @param {ArgList} $content - Optional additional styles passed as a content block
-/// @output Sets container-type, container-name, --fluid-base, and --unit CSS custom properties
+/// @output Sets container-type, container-name, --fluid-base, --unit-micro, and --unit-macro CSS custom properties
 /// @content Accepts content block for additional styles
 /// @example
 ///   .sidebar {
@@ -75,7 +76,8 @@
   container-name: $name;
 
   --fluid-base: #{fn.fluidFontSize(0, $unit-key)};
-  --unit: calc(var(--fluid-base) / #{var.$base-grid-size});
+  --unit-micro: calc(var(--fluid-base) / #{var.$base-grid-size});
+  --unit-macro: #{fn.getFluidClamp(4, 8, $unit-key)};
 
   @content;
 }

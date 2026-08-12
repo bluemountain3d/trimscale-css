@@ -25,44 +25,54 @@
 // And Up Mixins (includes breakpoint and larger)
 // ============================================================================
 
-/// Generate mixins for "and up" breakpoints
-/// Creates: mobile-and-up, phablet-and-up, tablet-and-up, laptop-and-up, desktop-and-up
+/// Media query: `(width >= 22.5rem)` / 360px and up
+/// @content Styles to apply at this breakpoint and wider
 /// @example
 ///   @include tablet-and-up {
 ///     font-size: var(--text-lg);
 ///   }
 ///   // Output: @media (min-width: 48rem) { ... }
-
+///
 @mixin mobile-and-up {
   @media (min-width: map.get(bp.$breakpoints, "mobile")) {
     @content;
   }
 }
 
+/// Media query: `(width >= 30rem)` / 480px and up
+/// @content Styles to apply at this breakpoint and wider
 @mixin phablet-and-up {
   @media (min-width: map.get(bp.$breakpoints, "phablet")) {
     @content;
   }
 }
 
+/// Media query: `(width >= 45rem)` / 720px and up
+/// @content Styles to apply at this breakpoint and wider
 @mixin tablet-and-up {
   @media (min-width: map.get(bp.$breakpoints, "tablet")) {
     @content;
   }
 }
 
+/// Media query: `(width >= 60rem)` / 960px and up
+/// @content Styles to apply at this breakpoint and wider
 @mixin tablet-lg-and-up {
   @media (min-width: map.get(bp.$breakpoints, "tablet-lg")) {
     @content;
   }
 }
 
+/// Media query: `(width >= 75rem)` / 1200px and up
+/// @content Styles to apply at this breakpoint and wider
 @mixin laptop-and-up {
   @media (min-width: map.get(bp.$breakpoints, "laptop")) {
     @content;
   }
 }
 
+/// Media query: `(width >= 90rem)` / 1440px and up
+/// @content Styles to apply at this breakpoint and wider
 @mixin desktop-and-up {
   @media (min-width: map.get(bp.$breakpoints, "desktop")) {
     @content;
@@ -73,38 +83,46 @@
 // Up To Mixins (excludes the breakpoint itself)
 // ============================================================================
 
-/// Generate mixins for "up to" breakpoints
-/// Creates: up-to-phablet, up-to-tablet, up-to-laptop, up-to-desktop
+/// Media query: `(width < 30rem)` — below phablet
+/// @content Styles to apply below this breakpoint
 /// @example
 ///   @include up-to-tablet {
 ///     display: none;
 ///   }
 ///   // Output: @media (max-width: 47.99rem) { ... }
-
+///
 @mixin up-to-phablet {
   @media #{bp.$bp-up-to-phablet} {
     @content;
   }
 }
 
+/// Media query: `(width < 45rem)` — below tablet
+/// @content Styles to apply below this breakpoint
 @mixin up-to-tablet {
   @media #{bp.$bp-up-to-tablet} {
     @content;
   }
 }
 
+/// Media query: `(width < 60rem)` — below tablet-lg
+/// @content Styles to apply below this breakpoint
 @mixin up-to-tablet-lg {
   @media #{bp.$bp-up-to-tablet-lg} {
     @content;
   }
 }
 
+/// Media query: `(width < 75rem)` — below laptop
+/// @content Styles to apply below this breakpoint
 @mixin up-to-laptop {
   @media #{bp.$bp-up-to-laptop} {
     @content;
   }
 }
 
+/// Media query: `(width < 90rem)` — below desktop
+/// @content Styles to apply below this breakpoint
 @mixin up-to-desktop {
   @media #{bp.$bp-up-to-desktop} {
     @content;
@@ -115,40 +133,41 @@
 // And Down Mixins (includes the breakpoint and smaller)
 // ============================================================================
 
-/// Generate mixins for "and down" breakpoints
-/// Creates: phablet-and-down, tablet-and-down, laptop-and-down, desktop-and-down
+/// Media query: `(width < 45rem)` — mobile and phablet only
+/// (there is no desktop-and-down — desktop is the largest breakpoint, use up-to-desktop instead)
+/// @content Styles to apply at this breakpoint and smaller
 /// @example
 ///   @include tablet-and-down {
 ///     grid-template-columns: 1fr;
 ///   }
 ///   // Output: @media (max-width: 48rem) { ... }
-
+///
 @mixin phablet-and-down {
   @media #{bp.$bp-phablet-and-down} {
     @content;
   }
 }
 
+/// Media query: `(width < 60rem)` — tablet and smaller
+/// @content Styles to apply at this breakpoint and smaller
 @mixin tablet-and-down {
   @media #{bp.$bp-tablet-and-down} {
     @content;
   }
 }
 
+/// Media query: `(width < 75rem)` — tablet-lg and smaller
+/// @content Styles to apply at this breakpoint and smaller
 @mixin tablet-lg-and-down {
   @media #{bp.$bp-tablet-lg-and-down} {
     @content;
   }
 }
 
+/// Media query: `(width < 90rem)` — laptop and smaller
+/// @content Styles to apply at this breakpoint and smaller
 @mixin laptop-and-down {
   @media #{bp.$bp-laptop-and-down} {
-    @content;
-  }
-}
-
-@mixin desktop-and-down {
-  @media #{bp.$bp-desktop-and-down} {
     @content;
   }
 }
@@ -157,38 +176,46 @@
 // Only Mixins (specific breakpoint range)
 // ============================================================================
 
-/// Generate mixins for "only" breakpoints
-/// Creates: mobile-only, phablet-only, tablet-only, laptop-only
+/// Media query: `(22.5rem <= width < 30rem)` — mobile range only
+/// @content Styles to apply only within this breakpoint's range
 /// @example
 ///   @include tablet-only {
 ///     columns: 2;
 ///   }
 ///   // Output: @media (min-width: 48rem) and (max-width: 71.99rem) { ... }
-
+///
 @mixin mobile-only {
   @media #{bp.$bp-mobile-only} {
     @content;
   }
 }
 
+/// Media query: `(30rem <= width < 45rem)` — phablet range only
+/// @content Styles to apply only within this breakpoint's range
 @mixin phablet-only {
   @media #{bp.$bp-phablet-only} {
     @content;
   }
 }
 
+/// Media query: `(45rem <= width < 60rem)` — tablet range only
+/// @content Styles to apply only within this breakpoint's range
 @mixin tablet-only {
   @media #{bp.$bp-tablet-only} {
     @content;
   }
 }
 
+/// Media query: `(60rem <= width < 75rem)` — tablet-lg range only
+/// @content Styles to apply only within this breakpoint's range
 @mixin tablet-lg-only {
   @media #{bp.$bp-tablet-lg-only} {
     @content;
   }
 }
 
+/// Media query: `(75rem <= width < 90rem)` — laptop range only
+/// @content Styles to apply only within this breakpoint's range
 @mixin laptop-only {
   @media #{bp.$bp-laptop-only} {
     @content;

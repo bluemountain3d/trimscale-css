@@ -2,7 +2,7 @@
 /// @name Spacing Utilities
 /// @description Utility classes for margin and padding using the fluid spacing system.
 /// Provides both t-shirt sizes (xs, sm, md...) and numeric scale (1-48).
-/// All values are multiples of --unit which scales fluidly with viewport width.
+/// All values are multiples of --unit-micro/--unit-macro, which scale fluidly with viewport width.
 /// @example html
 ///   <div class="px-md py-sm">Padded box</div>
 ///   <div class="mt-8 mb-4">Numeric margin</div>

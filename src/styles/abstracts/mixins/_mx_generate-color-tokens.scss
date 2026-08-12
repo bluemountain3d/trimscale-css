@@ -17,7 +17,21 @@
 
 @use 'sass:map';
 
-@mixin generate-color-tokens($tokens: var.$color-tokens, $defaultScheme: light, $prefix: var.$css-prefix) {
+/// @access public
+/// @param {Map} $tokens [var.$color-tokens] - Map shaped `(name: (light: (oklch:, hex:), dark: (oklch:, hex:)))`
+/// @param {String} $defaultScheme [light] - Which scheme (`light` or `dark`) backs the plain-hex fallback tier
+/// @param {String} $prefix ["color"] - Custom-property prefix, i.e. `--#{$prefix}-#{name}`
+/// @example scss - Extend the palette with a project-specific token
+///   $brand-tokens: (
+///     "brand-primary": (
+///       light: (oklch: oklch(0.55 0.15 250), hex: #4a5fc1),
+///       dark: (oklch: oklch(0.7 0.12 250), hex: #8fa0e8),
+///     ),
+///   );
+///   @include generate-color-tokens($tokens: $brand-tokens, $defaultScheme: dark);
+///   // → --color-brand-primary, with the full hex/oklch/light-dark fallback chain
+///
+@mixin generate-color-tokens($tokens: var.$color-tokens, $defaultScheme: light, $prefix: "color") {
 
   @each $name, $modes in $tokens {
     @property --#{$prefix}-#{$name} {

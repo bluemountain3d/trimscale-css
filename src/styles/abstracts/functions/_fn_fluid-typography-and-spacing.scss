@@ -50,12 +50,13 @@
 // ============================================================================
 
 /// Calculate fluid clamp value with linear interpolation
+/// @access public
 /// @param {Number} $min-size - Minimum size in pixels
 /// @param {Number} $max-size - Maximum size in pixels
 /// @param {String} $value-key ['vwx'] - Unit type for viewport calculation
 /// @return {String} CSS clamp() expression
 /// @example
-///   $value: _getFluidClamp(16, 24);
+///   $value: getFluidClamp(16, 24);
 ///   // Returns: "clamp(1rem, 0.5rem + 1.0417 * var(--vwx), 1.5rem)"
 @function getFluidClamp($min-size, $max-size, $value-key: "vwx") {
   $min-width: map.get(var.$fluid-scale, "min-width");
@@ -84,6 +85,7 @@
 }
 
 /// Generate fluid font size using modular scale
+/// @access public
 /// @param {Number} $level [0] - Scale level (negative for smaller, positive for larger)
 /// @param {String} $unit-key ['vwx'] - Unit type: 'vwx', 'cqw', 'cqi', 'vw'
 /// @return {String} CSS clamp() expression
@@ -120,6 +122,7 @@
 }
 
 /// Generate fluid spacing based on grid system
+/// @access public
 /// @param {Number} $level [4] - Grid level (multiples of base grid size)
 /// @param {String} $unit-key ['vwx'] - Unit type: 'vwx', 'cqw', 'cqi', 'vw'
 /// @return {String} CSS clamp() expression
@@ -153,6 +156,7 @@
 }
 
 /// Generate fluid spacing between two different grid levels
+/// @access public
 /// @param {Number} $min-level [4] - Minimum grid level
 /// @param {Number} $max-level [12] - Maximum grid level
 /// @param {String} $unit-key ['vwx'] - Unit type: 'vwx', 'cqw', 'cqi', 'vw'

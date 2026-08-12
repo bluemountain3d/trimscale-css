@@ -1,0 +1,55 @@
+// @use "styles/abstracts/variables/colors" as colors;
+@use "sass:map";
+@use "sass:color";
+@use "sass:meta";
+
+/// @group Abstracts/Functions
+/// @name Get Color Token
+///
+/// Retrieves a color token from $color-tokens by name, returning its full
+/// light/dark (oklch + hex) structure. Optionally overrides the alpha
+/// channel on all four values (light/dark × oklch/hex) via color.change(),
+/// without mutating the original entry in $tokens.
+///
+/// @access public
+/// @param {String} $token - Token name to look up (e.g. "panel-scroll-thumb")
+/// @param {Map} $tokens - Source map to look up $token in
+/// @param {Number | null} $alpha [null] - Optional alpha (0-1) applied to all
+///   oklch/hex variants. Token is returned unchanged if null.
+/// @return {Map} Shape: (light: (oklch:, hex:), dark: (oklch:, hex:))
+/// @throws Error if $token doesn't exist in $tokens
+///
+/// @example scss
+///   $color-semantic-aliases: (
+///     "scroll-thumb": get-color-token("panel-scroll-thumb"),
+///     "scrim": get-color-token("bg-canvas", $alpha: 0.5),
+///   );
+/// ===========================================================================
+///
+@function get-color-token($token, $tokens, $alpha: null) {
+
+  @if meta.type-of($tokens) !=map {
+    @error "$tokens must be a map, got #{meta.type-of($tokens)}.";
+  }
+
+  @if not map.has-key($tokens, $token) {
+    @error "Token \"#{$token}\" does not exist in $tokens.";
+  }
+
+  $value: map.get($tokens, $token);
+
+  @if $alpha ==null {
+    @return $value;
+  }
+
+  $light: map.get($value, light);
+  $dark: map.get($value, dark);
+
+  @return (light: (oklch: color.change(map.get($light, oklch), $alpha: $alpha),
+      hex: color.change(map.get($light, hex), $alpha: $alpha),
+    ),
+    dark: (oklch: color.change(map.get($dark, oklch), $alpha: $alpha),
+      hex: color.change(map.get($dark, hex), $alpha: $alpha),
+    ),
+  );
+}

@@ -172,6 +172,9 @@
 /// Get lightness value from color in OKLCH space
 /// @param {Color} $color - Sass color value
 /// @return {Number} Lightness value (0-100)
+/// @example
+///   $l: getOklchLightness(#E4DCCA);
+///   // Returns: 90
 @function getOklchLightness($color) {
   @return math.div(color.channel($color, "lightness", $space: oklch), 1%);
 }
@@ -179,6 +182,9 @@
 /// Get chroma value from color in OKLCH space
 /// @param {Color} $color - Sass color value
 /// @return {Number} Chroma value (0-0.4 typically)
+/// @example
+///   $c: getOklchChroma(#E4DCCA);
+///   // Returns: 0.05
 @function getOklchChroma($color) {
   @return math.div(color.channel($color, "chroma", $space: oklch), 1);
 }
@@ -186,6 +192,9 @@
 /// Get hue value from color in OKLCH space
 /// @param {Color} $color - Sass color value
 /// @return {Number} Hue value (0-360)
+/// @example
+///   $h: getOklchHue(#E4DCCA);
+///   // Returns: 85
 @function getOklchHue($color) {
   @return math.div(color.channel($color, "hue", $space: oklch), 1deg);
 }

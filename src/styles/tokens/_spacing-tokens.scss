@@ -2,7 +2,7 @@
 
 /// @group Tokens
 /// @name Spacing Tokens
-/// @description Fluid spacing scale based on --unit from base tokens
+/// @description Fluid spacing scale based on --unit-micro/--unit-macro from base tokens
 /// Provides both t-shirt sizes (xs, sm, md...) and numeric scale (1-48)
 /// ===========================================================================
 
@@ -12,8 +12,9 @@
 
 /// Spacing scale multipliers
 /// @type Map
-/// Each value is a multiplier of --unit (which is 1/4 of --fluid-base)
-/// Example: --space-sm = calc(var(--unit) * 4) = 1rem at base font size
+/// $space-micro values are multipliers of --unit-micro (1/4 of --fluid-base);
+/// $space-macro values are multipliers of --unit-macro (an independent 4px → 8px fluid clamp)
+/// Example: --space-sm = calc(var(--unit-micro) * 4) = 1rem at base font size
 $space-micro: (
   "3xs": 1,
   "2xs": 2,
@@ -62,9 +63,6 @@ $space-values: map.merge($space-micro, $space-macro) !default;
 
   /// Semantic spacing tokens using t-shirt sizes
   /// Usage: padding: var(--space-sm); gap: var(--space-lg);
-  // @each $size, $factor in $space-values {
-  //   --space-#{$size}: calc(var(--unit) * #{$factor});
-  // }
   @each $size, $factor in $space-micro {
     --space-#{$size}: calc(var(--unit-micro) * #{$factor}
     );
@@ -80,9 +78,6 @@ $space-values: map.merge($space-micro, $space-macro) !default;
 
   /// Numeric spacing tokens for fine-grained control
   /// Usage: margin-block: var(--space-5); padding-inline: var(--space-12);
-  // @for $i from 1 through 48 {
-  //   --space-#{$i}: calc(var(--unit) * #{$i});
-  // }
   @for $i from 1 through 6 {
     --space-#{$i}: calc(var(--unit-micro) * #{$i});
   }

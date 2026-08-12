@@ -45,7 +45,7 @@
 }
 
 @each $name, $value in var.$font-weights {
-  @property --font-weight-#{$name} {
+  @property --font-weight-#{"" + $name} {
     syntax: "<number>";
     inherits: true;
     initial-value: 400;
@@ -143,7 +143,7 @@
   // ==========================================================================
 
   @each $name, $value in var.$font-weights {
-    --font-weight-#{$name}: #{$value};
+    --font-weight-#{"" + $name}: #{$value};
   }
 
   // ==========================================================================

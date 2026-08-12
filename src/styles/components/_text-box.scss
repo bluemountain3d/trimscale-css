@@ -6,6 +6,12 @@
 /// Intended to wrap mixed typography — headings, paragraphs, lists, figures.
 ///
 /// @group Components
+/// @example html - Structured content with a capped line length
+///   <div class="text-box text-box--flow text-box-65 text-box--center-content">
+///     <h2>Heading</h2>
+///     <p>Paragraph…</p>
+///     <ul>…</ul>
+///   </div>
 
 @use 'styles/abstracts/variables' as var;
 
@@ -19,6 +25,12 @@
   /// - Content → content: `1.5em` after block
   ///
   /// Mutually exclusive with `--prose`.
+  /// @example html
+  ///   <div class="text-box text-box--flow">
+  ///     <h2>Heading</h2>
+  ///     <p>Paragraph…</p>
+  ///   </div>
+  ///
   &--flow {
 
     // Heading to content
@@ -63,6 +75,12 @@
   /// Override the default spacing via the `--prose-flow` custom property.
   ///
   /// Mutually exclusive with `--flow`.
+  /// @example html
+  ///   <div class="text-box text-box--prose" style="--prose-flow: 2em;">
+  ///     <p>Paragraph…</p>
+  ///     <p>Paragraph…</p>
+  ///   </div>
+  ///
   &--prose > * + * {
     margin-block-start: var(--prose-flow, 1.5em);
   }
@@ -70,6 +88,9 @@
   /// Constrains line length by character count.
   /// Computed from `--text-base` and the average body character width.
   /// Available steps: 45, 50, 55, 60, 65, 70, 75.
+  /// @example html
+  ///   <div class="text-box text-box-65">…</div>
+  ///
   @each $chars in (45, 50, 55, 60, 65, 70, 75) {
     &-#{$chars} {
       max-width: calc(var(--text-base) * #{var.$avgCharWidth-body * $chars});
@@ -77,9 +98,10 @@
   }
 
   /// Centers the text box horizontally within its parent via `margin-inline: auto`.
-  /// Typically combined with a `--max-width-*` modifier.
+  /// Typically combined with a character-count modifier (e.g. `.text-box-65`).
+  /// @example html
+  ///   <div class="text-box text-box-65 text-box--center-content">…</div>
   ///
-  /// @modifier --center-content
   &--center-content {
     margin-inline: auto;
   }

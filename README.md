@@ -23,6 +23,7 @@ A framework-agnostic SCSS design system with fluid typography, leading-trim prec
   - [Mixins](#mixins)
   - [Breakpoints](#breakpoints)
 - [Utility Classes](#utility-classes)
+- [Components](#components)
 - [Styleguide](#styleguide)
 - [Customization](#customization)
 
@@ -42,8 +43,8 @@ The system is pure SCSS. It generates CSS custom properties, utility classes, an
 
 ## Features
 
-- Fluid typography using a modular scale that expands from Minor Third (1.2×) at 360 px to Perfect Fourth (1.333×) at 1440 px
-- Fluid spacing on a `--unit` grid that scales 4 px → 5 px across the same range
+- Fluid typography using a modular scale — Minor Third (1.2×) at 360 px expanding to Perfect Fourth (1.333×) at 1440 px by default, tunable per project
+- Fluid spacing on a `--unit-micro`/`--unit-macro` grid that scales 4 px → 5 px/8 px across the same range
 - Leading-trim via CSS pseudo-elements, with a progressive enhancement to native `text-box-trim` where supported
 - OKLCH color system with semantic tokens for surfaces, text, accent, and action states
 - Light/dark mode via `prefers-color-scheme`, no JavaScript required
@@ -64,13 +65,14 @@ trimscale-css/
 │   │   ├── functions/              # Fluid size calc, OKLCH helpers, unit utils
 │   │   └── mixins/                 # fontSetup, breakpoints, spacing system
 │   ├── tokens/                     # CSS custom properties
-│   │   ├── _base-tokens.scss       # --fluid-base, --unit, --vwx
+│   │   ├── _base-tokens.scss       # --fluid-base, --unit-micro/-macro, --vwx
 │   │   ├── _spacing-tokens.scss    # --space-* (t-shirt + 1–48 numeric)
 │   │   ├── _typography-tokens.scss # --fs-100 to --fs-900, font families, weights
 │   │   ├── _color-tokens.scss      # OKLCH colors with light-dark()
 │   │   └── _leading-trim.scss      # %text-properties placeholder selectors
 │   ├── base/                       # HTML defaults: reset, fonts, typography, a11y
-│   └── utilities/                  # Spacing, gap, text, and layout utility classes
+│   ├── utilities/                  # Spacing, gap, text, and layout utility classes
+│   └── components/                 # Global component styles (e.g. text-box)
 └── styleguide/                     # Vite dev app for visual testing
 ```
 
@@ -146,14 +148,20 @@ All tokens are CSS custom properties scoped to `:root`.
 
 | Token             | Description                                                                                                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--vwx`           | Adaptive viewport unit. `1vw` normally; switches to `2vh` on ultrawide screens (≥ 21:9 ratio + ≥ 2048 px height) to prevent runaway scaling |
+| `--vwx`           | Adaptive viewport unit. `1vw` normally; switches to `2vh` on ultrawide screens (≥ 21:9 ratio + ≥ 944 px height, `$ultrawide-threshold-px`) to prevent runaway scaling |
 | `--fluid-base`    | Base font size. Scales from `16px` at 360 px viewport to `20px` at 1440 px using `clamp()`                                                  |
-| `--unit`          | Base spacing unit = `--fluid-base / 4`. Scales 4 px → 5 px fluidly                                                                          |
+| `--unit-micro`    | Base spacing unit for small steps = `--fluid-base / 4`. Scales 4 px → 5 px fluidly                                                          |
+| `--unit-macro`    | Base spacing unit for large steps, an independent fluid clamp (`getFluidClamp(4, 8)`). Scales 4 px → 8 px, a wider range than `--unit-micro` |
 | `--header-height` | Global header height: `2.75rem + var(--space-3xl)`                                                                                          |
+
+There is no single `--unit` token anymore; it was split into `--unit-micro` and `--unit-macro`. See [Spacing Tokens](#spacing-tokens) for which sizes use which.
 
 ### Spacing Tokens
 
-Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewport.
+Spacing tokens are multiples of `--unit-micro` or `--unit-macro`, so they scale fluidly with the viewport. Both units are `4px` at the 360 px/16 px end of the fluid range, so the table below is accurate for all sizes at minimum viewport — they only diverge as the viewport widens:
+
+- `--space-3xs` through `--space-md` (and `--space-1` through `--space-6`) use `--unit-micro`, which tops out at `5px`.
+- `--space-lg` through `--space-9xl` (and `--space-7` through `--space-48`) use `--unit-macro`, which tops out at `8px` — so large spacing grows proportionally more than small spacing on wide screens, rather than everything scaling off one shared unit.
 
 **T-shirt sizes:**
 
@@ -175,11 +183,11 @@ Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewpor
 | `--space-8xl` | × 40       | 160 px                |
 | `--space-9xl` | × 48       | 192 px                |
 
-**Numeric scale:** `--space-1` through `--space-48`, each equal to `calc(var(--unit) * N)`.
+**Numeric scale:** `--space-1` through `--space-48`. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`.
 
 ### Typography Tokens
 
-**Modular scale levels,** all computed with `clamp()` from Minor Third at mobile to Perfect Fourth at desktop:
+**Modular scale levels,** all computed with `clamp()` from Minor Third at mobile to Perfect Fourth at desktop by default. Like the color palette, this is a starting configuration in `$fluid-scale` (`_fluid-scale.scss`), not a fixed characteristic of the system — the ratios, base sizes, and viewport range are all meant to be tuned per project. See [customizing-type-scale.md](src/docs/customizing-type-scale.md).
 
 | Token      | Scale step | Role                             |
 | ---------- | ---------- | -------------------------------- |
@@ -209,9 +217,7 @@ Spacing tokens are multiples of `--unit`, so they scale fluidly with the viewpor
 | `--text-sm`   | `--fs-300 × 0.875`                                                  |
 | `--text-xs`   | `--fs-300 × 0.75`                                                   |
 
-The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively — at mobile with a 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables.
-
-The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively — at mobile with a 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables.
+The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively — at mobile with the default 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables.
 
 **Font families:**
 
@@ -234,7 +240,11 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 
 **Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100. Examples: `--line-height-100` = 1.0, `--line-height-115` = 1.15, `--line-height-150` = 1.5, `--line-height-200` = 2.0. All steps of 0.05 are defined.
 
+These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a *dynamic*, self-scaling line-height instead — computed per element by the `dynamic-line-height()` Sass function (see [Functions](#functions)) unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
+
 ### Color Tokens
+
+The token *names* below (`surface-base`, `accent`, `text-muted`, etc.) are the stable, semantic part of the system — the actual color values are just a starter palette in `$color-tokens` (`_colors.scss`) and are meant to be replaced per project, not treated as brand colors. See [Mixins](#mixins) for how to swap them.
 
 Colors use `light-dark()` for automatic theme switching driven by `prefers-color-scheme`. You can override the automatic detection by adding a class to `:root`:
 
@@ -254,18 +264,19 @@ Colors use `light-dark()` for automatic theme switching driven by `prefers-color
 | `--color-surface-mid`                      | Subtle container background            |
 | `--color-gold-light` / `--color-gold-dark` | Slate in light mode, gold in dark mode |
 | `--color-accent`                           | Brand accent                           |
-| `--color-accent-hover`                     | Accent hover state                     |
-| `--color-accent-muted`                     | Subtle accent fill                     |
 | `--color-action`                           | Interactive / CTA color                |
 | `--color-action-hover`                     | Action hover state                     |
 | `--color-action-muted`                     | Subtle action fill                     |
 | `--color-text-primary`                     | Default body text                      |
 | `--color-text-muted`                       | Secondary / subdued text               |
-| `--color-text-bright`                      | High-contrast text                     |
+| `--color-text-contrast`                    | Maximum-contrast text (pure black/white) |
+| `--color-a11y-focus`                       | Focus ring color                       |
 | `--color-scroll-thumb`                     | Scrollbar thumb                        |
 | `--color-scroll-thumb-hover`               | Scrollbar thumb hover                  |
 | `--color-scroll-thumb-active`              | Scrollbar thumb active                 |
 | `--color-scroll-background`                | Scrollbar track                        |
+
+Every token gets a triple-layered fallback (plain hex → static `oklch()` → `light-dark(oklch(), oklch())`) so the palette degrades gracefully on older browsers. See [Mixins](#mixins) for how these are generated and how to extend the palette with your own tokens.
 
 ---
 
@@ -274,6 +285,17 @@ Colors use `light-dark()` for automatic theme switching driven by `prefers-color
 ### Functions
 
 Import via `@use 'styles/abstracts/functions' as fn`.
+
+#### `getFluidClamp($min-size, $max-size, $value-key)`
+
+Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range — the general-purpose building block the other fluid functions below are built on. Unlike `fluidSpacing`/`fluidSpaceStep`, it isn't pinned to the spacing grid, so it's useful for one-off fluid values (e.g. a component's own min/max size). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`.
+
+```scss
+--custom-size: #{fn.getFluidClamp(4, 8)}; // clamp() between 4px and 8px
+--icon-size: #{fn.getFluidClamp(24, 32, 'vw')}; // same, using plain vw
+```
+
+This is also what the `--unit-macro` spacing token is built from — see [Base Tokens](#base-tokens).
 
 #### `fluidFontSize($level, $unit-key)`
 
@@ -286,10 +308,10 @@ font-size: fn.fluidFontSize(2, 'vw'); // same, using plain vw
 
 #### `fluidSpacing($level, $unit-key)`
 
-Returns a `clamp()` value for a spacing multiplier on the grid.
+Returns a `clamp()` value for a spacing multiplier on the base grid (independent of the `--unit-micro`/`--unit-macro` split — it computes its own clamp directly from `min-font-size`/`max-font-size`, not from the CSS custom properties).
 
 ```scss
-padding: fn.fluidSpacing(6); // --unit × 6
+padding: fn.fluidSpacing(6); // grid level × 6
 ```
 
 #### `fluidSpaceStep($min-level, $max-level, $unit-key)`
@@ -297,7 +319,7 @@ padding: fn.fluidSpacing(6); // --unit × 6
 Returns a `clamp()` value that spans between two grid levels.
 
 ```scss
-gap: fn.fluidSpaceStep(4, 8); // between --unit × 4 and --unit × 8
+gap: fn.fluidSpaceStep(4, 8); // between grid level 4 and grid level 8
 ```
 
 #### `pxToRem($px)`
@@ -307,6 +329,18 @@ Converts a pixel value to rem (assumes 16 px root).
 ```scss
 margin: fn.pxToRem(24); // → 1.5rem
 ```
+
+#### `dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap, $root)`
+
+Returns a self-scaling `clamp()` line-height expressed in `em`, not `rem`/px — so it re-resolves against *any* element's own computed font-size at render time instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. This is the mechanism behind the default line-height — see the note under [Typography Tokens](#typography-tokens).
+
+```scss
+%text-properties { --_line-height: #{fn.dynamic-line-height()}; }
+// Custom bounds for a display heading:
+.display-1 { --_line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
+```
+
+Prefer the static `--line-height-*` tokens (or `fontSetup`'s `$line-height` param) for most component work; reach for `dynamic-line-height` directly only when you need to change the *default* curve itself.
 
 ### Mixins
 
@@ -329,15 +363,17 @@ Import via `@use 'styles/abstracts/mixins' as mx`.
 
 Parameters:
 
-| Parameter         | Type   | Default            | Description                                                     |
-| ----------------- | ------ | ------------------ | --------------------------------------------------------------- |
-| `$font`           | string | `'primary'`        | Font role key (see list below)                                  |
-| `$font-size`      | value  | `var(--text-base)` | CSS font-size value                                             |
-| `$line-height`    | number | `1.5`              | Line height (unitless)                                          |
-| `$font-weight`    | number | `400`              | Font weight                                                     |
-| `$font-style`     | string | `normal`           | Font style (`normal`, `italic`, `oblique`)                      |
-| `$letter-spacing` | value  | `normal`           | Letter spacing                                                  |
-| `$text-transform` | string | `none`             | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
+| Parameter         | Type   | Default      | Description                                                     |
+| ----------------- | ------ | ------------ | --------------------------------------------------------------- |
+| `$font`           | string | `'primary'`  | Font role key (see list below)                                  |
+| `$font-size`      | value  | `null`       | CSS font-size value                                              |
+| `$line-height`    | number | `null`       | Line height (unitless)                                          |
+| `$font-weight`    | number | `null`       | Font weight                                                     |
+| `$font-style`     | string | `null`       | Font style (`normal`, `italic`, `oblique`)                      |
+| `$letter-spacing` | value  | `null`       | Letter spacing                                                  |
+| `$text-transform` | string | `null`       | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
+
+Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` is passed through `stripUnit()` before being stored, so pass a bare unitless number (`1.1`), not a value with a unit.
 
 Valid `$font` roles:
 
@@ -348,6 +384,34 @@ Valid `$font` roles:
 | Contextual     | `display`, `heading`, `subheading`, `body`, `quote`, `code`, `ui` |
 
 The mixin sets font metrics as CSS custom properties (`--_top-trim`, `--_bottom-trim`, `--_lsb-adjust`, `--_rsb-adjust`) and applies leading-trim via `::before` / `::after` pseudo-elements. When the browser supports `text-box-trim`, native trimming is used instead.
+
+#### `generate-color-tokens($tokens, $defaultScheme, $prefix)`
+
+Emits CSS custom properties for every entry in a color-token map, with a progressive-enhancement fallback chain layered on `:root` / `.app-theme-container`: plain hex first (works everywhere), then static `oklch()` behind an `@supports` check for browsers without `light-dark()`, then full `light-dark(oklch(), oklch())` where supported. Later blocks win the cascade, so support is layered rather than branched.
+
+This is the actual mechanism behind [Color Tokens](#color-tokens), and it's how you replace or extend the shipped example palette — call it again with your own map to add project-specific tokens alongside (or instead of) the defaults:
+
+```scss
+$brand-tokens: (
+  "brand-primary": (
+    light: (oklch: oklch(0.55 0.15 250), hex: #4a5fc1),
+    dark: (oklch: oklch(0.7 0.12 250), hex: #8fa0e8),
+  ),
+);
+
+@include mx.generate-color-tokens($tokens: $brand-tokens, $defaultScheme: dark);
+// → --color-brand-primary, with the full hex/oklch/light-dark fallback chain
+```
+
+Parameters:
+
+| Parameter        | Type   | Default              | Description                                                        |
+| ---------------- | ------ | --------------------- | ------------------------------------------------------------------- |
+| `$tokens`        | map    | `var.$color-tokens`   | Map shaped `(name: (light: (oklch:, hex:), dark: (oklch:, hex:)))` |
+| `$defaultScheme` | string | `light`               | Which scheme's value backs the plain-hex fallback tier              |
+| `$prefix`        | string | `"color"`              | Custom-property prefix, i.e. `--#{$prefix}-#{name}`                 |
+
+Each token also gets a typed `@property --#{$prefix}-#{name} { syntax: "<color>"; }` registration, so invalid overrides fail safe to the fallback color instead of silently breaking the cascade.
 
 ### Breakpoints
 
@@ -428,6 +492,8 @@ Pattern: `.{property}-{side?}-{size}`
 - **Sizes:** t-shirt (`3xs` → `9xl`) and numeric (`1` → `48`)
 - **Special:** `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`
 
+All directional sides map to **logical properties**, not physical ones: `t`/`b` use `margin-block-start`/`-end`, and `l`/`r` use `margin-inline-start`/`-end` (same for padding). In a left-to-right document this behaves like top/right/bottom/left, but `l`/`r` flip automatically in `dir="rtl"` content since they follow inline flow direction rather than a fixed side.
+
 Examples:
 
 ```html
@@ -476,23 +542,51 @@ Text utility classes from `_text-utilities.scss`. They form the **HTML-level API
 
 **Line height:** `.line-height-100` → `.line-height-200` (steps of 5, e.g. `.line-height-150` = 1.5)
 
-**Font style:** `.font-style-normal`, `.font-style-italic`
+**Font style:** `.font-style-normal`, `.font-style-italic`, `.font-style-oblique`
 
 **Text transform:** `.text-transform-capitalize`, `.text-transform-uppercase`, `.text-transform-lowercase`
 
 **Text alignment:** `.text-align-left`, `.text-align-center`, `.text-align-right`
 
-**Text color:** `.text-color-inherit`, `.text-color-primary`, `.text-color-muted`, `.text-color-bright`, `.text-color-accent`, `.text-color-action`
+**Text color:** `.text-color-inherit` only — unlike font roles, color token names aren't a contract enforced anywhere else in the system, so fixed `.text-color-*` classes would risk going silently dead the moment a project renames its `$color-tokens` keys. Add your own next to your project's palette.
 
 ```html
 <h1
-  class="font-family-heading font-size-heading-1 font-weight-bold text-color-primary">
+  class="font-family-heading font-size-heading-1 font-weight-bold">
   Page heading
 </h1>
-<p class="font-family-body font-size-text-base text-color-muted">
+<p class="font-family-body font-size-text-base" style="color: var(--color-text-muted);">
   Body copy in muted tone.
 </p>
 ```
+
+---
+
+## Components
+
+Global component styles live in `src/styles/components/` and ship as part of `@use 'styles/trimscale'` — no separate import needed.
+
+### `text-box`
+
+A typographic prose container: it handles flow spacing between block elements, character-count-based line lengths, and horizontal centering. Uses `em`-based spacing throughout, so rhythm scales with the local font size rather than the viewport.
+
+```html
+<div class="text-box text-box--flow text-box-65 text-box--center-content">
+  <h2>Heading</h2>
+  <p>Paragraph…</p>
+  <ul>…</ul>
+</div>
+```
+
+| Class                       | Effect                                                                                                                                                                          |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.text-box`                 | Base container (`width: 100%`)                                                                                                                                                 |
+| `.text-box--flow`           | Structured `margin-block` rhythm for **mixed content** (headings + paragraphs/lists/figures), using `:has()` to vary spacing by context (e.g. `2em` before a heading, `0.8em` after one). Mutually exclusive with `--prose`. |
+| `.text-box--prose`          | Uniform `margin-block-start` between every direct child, for **continuous prose**. Override the spacing via the `--prose-flow` custom property (default `1.5em`). Mutually exclusive with `--flow`. |
+| `.text-box-45` … `-75`      | Caps line length by character count (steps of 5: `45, 50, 55, 60, 65, 70, 75`), computed as `max-width: calc(var(--text-base) * avg-char-width * N)`                          |
+| `.text-box--center-content` | `margin-inline: auto`, typically paired with a character-count modifier                                                                                                        |
+
+To add another global component, create a new `_[name].scss` file in `src/styles/components/` and add `@forward './[name]';` to `components/_index.scss`.
 
 ---
 
@@ -528,6 +622,6 @@ Key configuration files:
 | `_fluid-scale.scss`  | Viewport range, base font sizes, modular scale ratios | [customizing-type-scale.md](src/docs/customizing-type-scale.md)   |
 | `_font-metrics.scss` | Per-font cap-height, ascender, descender, trim values | [adding-a-font.md](src/docs/adding-a-font.md)                     |
 | `_typography.scss`   | Font role → family mappings                           | [adding-a-font.md](src/docs/adding-a-font.md)                     |
-| `_colors.scss`       | Raw OKLCH color values for light and dark themes      | N/A                                                               |
+| `_colors.scss`       | `$color-tokens` — the project's color palette (light/dark, oklch + hex per token). Ships with a placeholder palette; replace the values (or add your own tokens and pass them to `mx.generate-color-tokens`) rather than treating them as fixed brand colors | [Color Tokens](#color-tokens), [Mixins](#mixins) |
 
 Use the `_[NAME].scss` template files in each `abstracts/` subdirectory as a starting point for adding your own variables, functions, or mixins.
