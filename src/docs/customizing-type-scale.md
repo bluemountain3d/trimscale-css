@@ -10,7 +10,7 @@ All type scale configuration lives in one file:
 |------|-------------------|
 | [`src/styles/abstracts/variables/_fluid-scale.scss`](../styles/abstracts/variables/_fluid-scale.scss) | Edit the `$fluid-scale` map |
 
-All CSS custom properties (`--fs-100` through `--fs-900`, `--unit`, `--fluid-base`) are derived from this map at compile time. Changing the map is the only step required.
+All CSS custom properties (`--fs-100` through `--fs-900`, `--unit-micro`, `--fluid-base`) are derived from this map at compile time. Changing the map is the only step required. (`--unit-macro` is an independent 4px → 8px clamp keyed only to `min-width`/`max-width`, not to the font-size keys below — see [Base Tokens](../../README.md#base-tokens).)
 
 ---
 
@@ -52,11 +52,11 @@ min-width (360px) ──── fluid range ──── max-width (1440px)
 
 ### `min-font-size` and `max-font-size`
 
-The base font size (in pixels) at the two ends of the viewport range. Every scale step is a power of the type scale ratio multiplied by this base. The `--fluid-base` and `--unit` tokens track this value at runtime.
+The base font size (in pixels) at the two ends of the viewport range. Every scale step is a power of the type scale ratio multiplied by this base. The `--fluid-base` and `--unit-micro` tokens track this value at runtime (`--unit-macro` does not — it's a separate 4px → 8px clamp tied only to the viewport range, not to these font-size values).
 
 ```
-Viewport 360px → base = 16px → --unit = 4px
-Viewport 1440px → base = 20px → --unit = 5px
+Viewport 360px → base = 16px → --unit-micro = 4px
+Viewport 1440px → base = 20px → --unit-micro = 5px
 ```
 
 **Change when:** your typeface reads smaller or larger than average and you need to compensate, or your layout grid should start from a different base unit.
@@ -129,7 +129,7 @@ size at level N = base-font-size × ratio^N
 
 ## Effect on spacing
 
-The `--unit` token is `--fluid-base / 4`, so it inherits the same base range. Changing `min-font-size` and `max-font-size` proportionally changes all spacing tokens too. A base of 15–18 px gives a `--unit` range of 3.75–4.5 px rather than 4–5 px.
+The `--unit-micro` token is `--fluid-base / 4`, so it inherits the same base range. Changing `min-font-size` and `max-font-size` proportionally changes the small spacing tokens (`--space-3xs` through `--space-md`, `--space-1` through `--space-6`) too. A base of 15–18 px gives a `--unit-micro` range of 3.75–4.5 px rather than 4–5 px. The large spacing tokens (`--space-lg` and up) use `--unit-macro`, which is unaffected — it's a fixed 4px → 8px clamp tied to `min-width`/`max-width` only.
 
 If you change the base sizes, verify that your spacing scale still feels right in the styleguide.
 
