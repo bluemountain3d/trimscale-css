@@ -65,12 +65,18 @@
     --_line-height: var(--line-height-#{$key})
   }
 }
+.trim-line-height-dynamic {
+  --_line-height: var(--line-height-dynamic);
+}
 
 /// Line Height — sets line-height directly, no trim system dependency
 @each $key, $value in var.$line-heights {
   .line-height-#{$key} {
     line-height: var(--line-height-#{$key})
   }
+}
+.line-height-dynamic {
+  line-height: var(--line-height-dynamic);
 }
 
 /// Trim Font Weight — sets --_font-weight, consumed by %text-properties (Text Trim classes only)

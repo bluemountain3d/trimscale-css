@@ -238,9 +238,9 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 
 **Font weights:** `--font-weight-thin` (100) through `--font-weight-black` (900).
 
-**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100. Examples: `--line-height-100` = 1.0, `--line-height-115` = 1.15, `--line-height-150` = 1.5, `--line-height-200` = 2.0. All steps of 0.05 are defined.
+**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100, stored as `<length>` in `em` (e.g. `--line-height-150` = `1.5em`). All steps of 0.05 are defined.
 
-These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a *dynamic*, self-scaling line-height instead — computed per element by the `dynamic-line-height()` Sass function (see [Functions](#functions)) unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
+These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a *dynamic*, self-scaling line-height instead — computed once by the `dynamic-line-height()` Sass function (see [Functions](#functions)) and exposed as the `--line-height-dynamic` token, unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
 
 ### Color Tokens
 
@@ -332,11 +332,12 @@ margin: fn.pxToRem(24); // → 1.5rem
 
 #### `dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap, $root)`
 
-Returns a self-scaling `clamp()` line-height expressed in `em`, not `rem`/px — so it re-resolves against *any* element's own computed font-size at render time instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. This is the mechanism behind the default line-height — see the note under [Typography Tokens](#typography-tokens).
+Returns a self-scaling `clamp()` line-height expressed in `em`, not `rem`/px — so it re-resolves against *any* element's own computed font-size at render time instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [Typography Tokens](#typography-tokens)); call the function directly only when you need a custom curve.
 
 ```scss
-%text-properties { --_line-height: #{fn.dynamic-line-height()}; }
-// Custom bounds for a display heading:
+// Default curve — prefer the token instead:
+%text-properties { --_line-height: var(--line-height-dynamic); }
+// Custom bounds for a display heading — call the function directly:
 .display-1 { --_line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
 ```
 
@@ -367,13 +368,13 @@ Parameters:
 | ----------------- | ------ | ------------ | --------------------------------------------------------------- |
 | `$font`           | string | `'primary'`  | Font role key (see list below)                                  |
 | `$font-size`      | value  | `null`       | CSS font-size value                                              |
-| `$line-height`    | number | `null`       | Line height (unitless)                                          |
+| `$line-height`    | number \| length | `null` | Line height multiplier; unitless numbers are treated as an em multiplier |
 | `$font-weight`    | number | `null`       | Font weight                                                     |
 | `$font-style`     | string | `null`       | Font style (`normal`, `italic`, `oblique`)                      |
 | `$letter-spacing` | value  | `null`       | Letter spacing                                                  |
 | `$text-transform` | string | `null`       | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
 
-Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` is passed through `stripUnit()` before being stored, so pass a bare unitless number (`1.1`), not a value with a unit.
+Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` accepts a bare unitless number (`1.1`) — converted to `em` internally — or an explicit length (`1.1em`); both end up stored as `--_line-height`, which is always a `<length>`.
 
 Valid `$font` roles:
 
@@ -551,7 +552,7 @@ Every property below font-family comes in two families: **`.trim-{property}-*`**
 `.trim-font-weight-*` and plain `.font-weight-*` — `thin` → `black` (thin, extralight, light, normal, medium, semibold, bold, extrabold, black)
 
 **Line height:**
-`.trim-line-height-*` and plain `.line-height-*` — `100` → `200` (steps of 5, e.g. `150` = 1.5)
+`.trim-line-height-*` and plain `.line-height-*` — `100` → `200` (steps of 5, e.g. `150` = 1.5), plus `dynamic` (the self-scaling default, e.g. `.trim-line-height-dynamic` resets a component's line-height back to it)
 
 **Font style:**
 `.trim-font-style-*` and plain `.font-style-*` — `normal`, `italic`, `oblique`

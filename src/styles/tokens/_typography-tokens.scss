@@ -59,6 +59,11 @@
     initial-value: 1em;
   }
 }
+@property --line-height-dynamic {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1em;
+}
 
 
 :root {
@@ -153,6 +158,7 @@
   @each $name, $value in var.$line-heights {
     --line-height-#{$name}: #{$value}em;
   }
+  --line-height-dynamic: #{fn.dynamic-line-height()};
 
   // ==========================================================================
   // Font Families

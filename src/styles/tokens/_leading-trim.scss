@@ -48,7 +48,6 @@
 ///   }
 /// ===========================================================================
 
-@use "styles/abstracts/functions" as fn;
 @use "styles/abstracts/variables" as var;
 @use "sass:map";
 @use "sass:math";
@@ -185,7 +184,7 @@
 %text-properties {
   /// Default typography values, overridable via CSS custom properties
   --_font-size: var(--text-base); // Clamps
-  --_line-height: #{fn.dynamic-line-height()}; // Clamps
+  --_line-height: var(--line-height-dynamic); // Clamps
   --_font-weight: var(--font-weight-normal);
   --_font-style: normal;
   --_letter-spacing: 0;
