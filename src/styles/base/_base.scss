@@ -19,10 +19,7 @@ html {
   color-interpolation-filters: sRGB;
 }
 
-body {
-  font-size: var(--text-base, 1rem);
-  color: var(--color-text-primary, #000);
-}
+// body {}
 
 /// Scrollbar Styling
 /// Modern approach using standard properties + WebKit fallback

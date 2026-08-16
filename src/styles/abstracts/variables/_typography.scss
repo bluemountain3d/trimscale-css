@@ -47,19 +47,25 @@ $fonts: (
 ) !default;
 
 // ============================================================================
-// Typography maps
+// Typography lists and maps
 // ============================================================================
 
+$font-sizes: (
+  "display-1", "display-2",
+  "heading-1", "heading-2", "heading-3", "heading-4",
+  "text-lg", "text-md", "text-base", "text-sm", "text-xs"
+) !default;
+
 $font-weights: (
-  thin: 100,
-  extralight: 200,
-  light: 300,
-  normal: 400,
-  medium: 500,
-  semibold: 600,
-  bold: 700,
-  extrabold: 800,
-  black: 900
+  "thin": 100,
+  "extralight": 200,
+  "light": 300,
+  "normal": 400,
+  "medium": 500,
+  "semibold": 600,
+  "bold": 700,
+  "extrabold": 800,
+  "black": 900
 ) !default;
 
 $line-heights: (

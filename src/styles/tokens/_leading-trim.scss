@@ -38,7 +38,7 @@
 ///   .heading {
 ///     @extend %heading-text;
 ///     --_font-size: var(--heading-1);
-///     --_line-height: 1.1;
+///     --_line-height: 1.1em;
 ///     --_font-weight: 700;
 ///   }
 ///
@@ -109,9 +109,9 @@
 }
 
 @property --_line-height {
-  syntax: "<number> | <length>";
+  syntax: "<length>";
   inherits: true;
-  initial-value: 1.5;
+  initial-value: 1.5em;
 }
 
 @property --_font-weight {
@@ -230,7 +230,7 @@
     &::before {
       content: "";
       display: table; /// Prevents margin collapse
-      margin-bottom: calc((var(--_line-height) - 1) * -0.5em - var(--_top-trim));
+      margin-bottom: calc((var(--_line-height) - 1em) * -0.5 - var(--_top-trim));
     }
 
     /// Trim excess space below baseline
@@ -247,7 +247,7 @@
     &::after {
       content: "";
       display: table; /// Prevents margin collapse
-      margin-bottom: calc((var(--_line-height) - 1) * -0.5em - var(--_bottom-trim));
+      margin-bottom: calc((var(--_line-height) - 1em) * -0.5 - var(--_bottom-trim));
     }
 
     /// Enhanced version using 'lh' unit for simpler calculations
