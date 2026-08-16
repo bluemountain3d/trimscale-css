@@ -44,7 +44,7 @@ The system is pure SCSS. It generates CSS custom properties, utility classes, an
 ## Features
 
 - Fluid typography using a modular scale — Minor Third (1.2×) at 360 px expanding to Perfect Fourth (1.333×) at 1440 px by default, tunable per project
-- Fluid spacing on a `--unit-micro`/`--unit-macro` grid that scales 4 px → 5 px/8 px across the same range
+- Spacing on a fixed `--unit-micro` grid step plus a `--unit-macro` grid that scales 4 px → 8 px with the viewport, both snapped to whole pixels
 - Leading-trim via CSS pseudo-elements, with a progressive enhancement to native `text-box-trim` where supported
 - OKLCH color system with semantic tokens for surfaces, text, accent, and action states
 - Light/dark mode via `prefers-color-scheme`, no JavaScript required
@@ -150,18 +150,18 @@ All tokens are CSS custom properties scoped to `:root`.
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--vwx`           | Adaptive viewport unit. `1vw` normally; switches to `2vh` on ultrawide screens (≥ 21:9 ratio + ≥ 944 px height, `$ultrawide-threshold-px`) to prevent runaway scaling |
 | `--fluid-base`    | Base font size. Scales from `16px` at 360 px viewport to `20px` at 1440 px using `clamp()`                                                  |
-| `--unit-micro`    | Base spacing unit for small steps = `--fluid-base / 4`. Scales 4 px → 5 px fluidly                                                          |
-| `--unit-macro`    | Base spacing unit for large steps, an independent fluid clamp (`getFluidClamp(4, 8)`). Scales 4 px → 8 px, a wider range than `--unit-micro` |
+| `--unit-micro`    | Base spacing unit for small steps — fixed at `$base-grid-size` (default `4`), not fluid. Always a whole pixel                               |
+| `--unit-macro`    | Base spacing unit for large steps, an independent fluid clamp (`getFluidClamp(4, 8)`), rounded to the nearest pixel. Scales 4 px → 8 px      |
 | `--header-height` | Global header height: `2.75rem + var(--space-3xl)`                                                                                          |
 
 There is no single `--unit` token anymore; it was split into `--unit-micro` and `--unit-macro`. See [Spacing Tokens](#spacing-tokens) for which sizes use which.
 
 ### Spacing Tokens
 
-Spacing tokens are multiples of `--unit-micro` or `--unit-macro`, so they scale fluidly with the viewport. Both units are `4px` at the 360 px/16 px end of the fluid range, so the table below is accurate for all sizes at minimum viewport — they only diverge as the viewport widens:
+Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro` is fixed, so sizes built from it are fixed too; `--unit-macro` is a fluid clamp, so sizes built from it scale with the viewport. Both units are `4px` at their minimum, so the table below is accurate for all sizes at the low end — only the macro-based sizes grow from there:
 
-- `--space-3xs` through `--space-md` (and `--space-1` through `--space-6`) use `--unit-micro`, which tops out at `5px`.
-- `--space-lg` through `--space-9xl` (and `--space-7` through `--space-48`) use `--unit-macro`, which tops out at `8px` — so large spacing grows proportionally more than small spacing on wide screens, rather than everything scaling off one shared unit.
+- `--space-3xs` through `--space-md` (and `--space-1` through `--space-6`) use `--unit-micro` — fixed at `4px` (`$base-grid-size`), no viewport scaling.
+- `--space-lg` through `--space-9xl` (and `--space-7` through `--space-48`) use `--unit-macro`, which grows fluidly and tops out at `8px` — so large spacing grows with the viewport while small spacing stays put, rather than everything scaling off one shared unit.
 
 **T-shirt sizes:**
 
@@ -238,9 +238,9 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 
 **Font weights:** `--font-weight-thin` (100) through `--font-weight-black` (900).
 
-**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100. Examples: `--line-height-100` = 1.0, `--line-height-115` = 1.15, `--line-height-150` = 1.5, `--line-height-200` = 2.0. All steps of 0.05 are defined.
+**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100, stored as `<length>` in `em` (e.g. `--line-height-150` = `1.5em`). All steps of 0.05 are defined.
 
-These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a *dynamic*, self-scaling line-height instead — computed per element by the `dynamic-line-height()` Sass function (see [Functions](#functions)) unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
+These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a *dynamic*, self-scaling line-height instead — computed once by the `dynamic-line-height()` Sass function (see [Functions](#functions)) and exposed as the `--line-height-dynamic` token, unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
 
 ### Color Tokens
 
@@ -332,11 +332,12 @@ margin: fn.pxToRem(24); // → 1.5rem
 
 #### `dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap, $root)`
 
-Returns a self-scaling `clamp()` line-height expressed in `em`, not `rem`/px — so it re-resolves against *any* element's own computed font-size at render time instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. This is the mechanism behind the default line-height — see the note under [Typography Tokens](#typography-tokens).
+Returns a self-scaling `clamp()` line-height expressed in `em`, not `rem`/px — so it re-resolves against *any* element's own computed font-size at render time instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [Typography Tokens](#typography-tokens)); call the function directly only when you need a custom curve.
 
 ```scss
-%text-properties { --_line-height: #{fn.dynamic-line-height()}; }
-// Custom bounds for a display heading:
+// Default curve — prefer the token instead:
+%text-properties { --_line-height: var(--line-height-dynamic); }
+// Custom bounds for a display heading — call the function directly:
 .display-1 { --_line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
 ```
 
@@ -348,7 +349,7 @@ Import via `@use 'styles/abstracts/mixins' as mx`.
 
 #### `fontSetup`
 
-`fontSetup` is the **SCSS component API** for the typography system. Use it when writing component SCSS and you want to apply a font role together with size, weight, and line-height in a single declaration. For HTML-level styling, use the `.font-family-*` and other [text utility](#text) classes instead.
+`fontSetup` is the **SCSS component API** for the typography system. Use it when writing component SCSS and you want to apply a font role together with size, weight, and line-height in a single declaration. For HTML-level styling, use `.trim-text-*` and the other [text utility](#text) classes instead — `.trim-text-*` is the class-based equivalent of `fontSetup`'s font-role preset.
 
 ```scss
 @include mx.fontSetup(
@@ -367,13 +368,13 @@ Parameters:
 | ----------------- | ------ | ------------ | --------------------------------------------------------------- |
 | `$font`           | string | `'primary'`  | Font role key (see list below)                                  |
 | `$font-size`      | value  | `null`       | CSS font-size value                                              |
-| `$line-height`    | number | `null`       | Line height (unitless)                                          |
+| `$line-height`    | number \| length | `null` | Line height multiplier; unitless numbers are treated as an em multiplier |
 | `$font-weight`    | number | `null`       | Font weight                                                     |
 | `$font-style`     | string | `null`       | Font style (`normal`, `italic`, `oblique`)                      |
 | `$letter-spacing` | value  | `null`       | Letter spacing                                                  |
 | `$text-transform` | string | `null`       | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
 
-Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` is passed through `stripUnit()` before being stored, so pass a bare unitless number (`1.1`), not a value with a unit.
+Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` accepts a bare unitless number (`1.1`) — converted to `em` internally — or an explicit length (`1.1em`); both end up stored as `--_line-height`, which is always a `<length>`.
 
 Valid `$font` roles:
 
@@ -517,34 +518,47 @@ Flex, grid, display, and visibility utilities from `_layout-utilities.scss`.
 
 Text utility classes from `_text-utilities.scss`. They form the **HTML-level API** for the typography system — compose them in markup to apply font roles, sizes, weights, and alignment without writing any SCSS.
 
-**Font family** — applies a font role with its leading-trim metrics:
+Every property below font-family comes in two families: **`.trim-{property}-*`** sets the `--_{property}` custom property consumed by `%text-properties`, so it only has an effect combined with a Trim Text class. Plain **`.{property}-*`** sets the real CSS property directly and works anywhere, trim system or not.
 
-| Class                     | Role                   |
-| ------------------------- | ---------------------- |
-| `.font-family-primary`    | Primary brand typeface |
-| `.font-family-secondary`  | Secondary typeface     |
-| `.font-family-tertiary`   | Tertiary typeface      |
-| `.font-family-sans`       | Sans-serif category    |
-| `.font-family-serif`      | Serif category         |
-| `.font-family-mono`       | Monospace category     |
-| `.font-family-display`    | Display / hero context |
-| `.font-family-heading`    | Heading context        |
-| `.font-family-subheading` | Subheading context     |
-| `.font-family-body`       | Body text context      |
-| `.font-family-quote`      | Blockquote context     |
-| `.font-family-code`       | Code / pre context     |
-| `.font-family-ui`         | UI elements context    |
+**Trim text** — applies the full typography preset for a font role: font-family, dynamic line-height, and leading-trim metrics together. Font-size is *not* role-specific — every role shares the `--text-base` default, so pair with a Trim Font Size class for role-appropriate sizing:
 
-**Font size** (also sets a matching default line-height):
-`.font-size-display-1`, `.font-size-display-2`, `.font-size-heading-1` → `.font-size-heading-4`, `.font-size-text-lg`, `.font-size-text-md`, `.font-size-text-base`, `.font-size-text-sm`, `.font-size-text-xs`
+| Class                  | Role                   |
+| ---------------------- | ---------------------- |
+| `.trim-text-primary`   | Primary brand typeface |
+| `.trim-text-secondary` | Secondary typeface     |
+| `.trim-text-tertiary`  | Tertiary typeface      |
+| `.trim-text-sans`      | Sans-serif category    |
+| `.trim-text-serif`     | Serif category         |
+| `.trim-text-mono`      | Monospace category     |
+| `.trim-text-display`   | Display / hero context |
+| `.trim-text-heading`   | Heading context        |
+| `.trim-text-subheading`| Subheading context     |
+| `.trim-text-body`      | Body text context      |
+| `.trim-text-quote`     | Blockquote context     |
+| `.trim-text-code`      | Code / pre context     |
+| `.trim-text-ui`        | UI elements context    |
 
-**Font weight:** `.font-weight-thin` → `.font-weight-black` (thin, extralight, light, normal, medium, semibold, bold, extrabold, black)
+```html
+<h1 class="trim-text-heading trim-font-size-heading-1">Sized heading</h1>
+```
 
-**Line height:** `.line-height-100` → `.line-height-200` (steps of 5, e.g. `.line-height-150` = 1.5)
+**Font family** — sets only `font-family`, nothing else; use this to swap typeface without touching size/line-height/trim:
+`.font-family-primary`, `.font-family-secondary`, `.font-family-tertiary`, `.font-family-sans`, `.font-family-serif`, `.font-family-mono`, `.font-family-display`, `.font-family-heading`, `.font-family-subheading`, `.font-family-body`, `.font-family-quote`, `.font-family-code`, `.font-family-ui`
 
-**Font style:** `.font-style-normal`, `.font-style-italic`, `.font-style-oblique`
+**Font size:**
+`.trim-font-size-*` (sets `--_font-size`, pair with a Trim Text class) and plain `.font-size-*` (sets `font-size` directly) — both come in: `display-1`, `display-2`, `heading-1` → `heading-4`, `text-lg`, `text-md`, `text-base`, `text-sm`, `text-xs`
 
-**Text transform:** `.text-transform-capitalize`, `.text-transform-uppercase`, `.text-transform-lowercase`
+**Font weight:**
+`.trim-font-weight-*` and plain `.font-weight-*` — `thin` → `black` (thin, extralight, light, normal, medium, semibold, bold, extrabold, black)
+
+**Line height:**
+`.trim-line-height-*` and plain `.line-height-*` — `100` → `200` (steps of 5, e.g. `150` = 1.5), plus `dynamic` (the self-scaling default, e.g. `.trim-line-height-dynamic` resets a component's line-height back to it)
+
+**Font style:**
+`.trim-font-style-*` and plain `.font-style-*` — `normal`, `italic`, `oblique`
+
+**Text transform:**
+`.trim-text-transform-*` and plain `.text-transform-*` — `capitalize`, `uppercase`, `lowercase`
 
 **Text alignment:** `.text-align-left`, `.text-align-center`, `.text-align-right`
 
@@ -552,10 +566,10 @@ Text utility classes from `_text-utilities.scss`. They form the **HTML-level API
 
 ```html
 <h1
-  class="font-family-heading font-size-heading-1 font-weight-bold">
+  class="trim-text-heading trim-font-size-heading-1 trim-font-weight-bold">
   Page heading
 </h1>
-<p class="font-family-body font-size-text-base" style="color: var(--color-text-muted);">
+<p class="trim-text-body trim-font-size-text-base" style="color: var(--color-text-muted);">
   Body copy in muted tone.
 </p>
 ```

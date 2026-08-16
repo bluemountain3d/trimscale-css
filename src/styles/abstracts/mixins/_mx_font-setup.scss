@@ -40,7 +40,6 @@
 /// ===========================================================================
 
 @use "styles/abstracts/variables" as var;
-@use "styles/abstracts/functions" as fn;
 @use "styles/tokens/leading-trim" as *;
 // Only import mixins from mixin files to avoid dependency cycle
 // @use '../mixins/mx_other-mixin' as *;
@@ -48,6 +47,7 @@
 // Sass built-in modules
 @use "sass:string";
 @use "sass:list";
+@use "sass:math";
 
 // ============================================================================
 // Font Setup Mixin
@@ -77,7 +77,7 @@ $_valid-font-roles: (
 /// Apply complete font setup with metrics and typography properties
 /// @param {String} $font ['primary'] - Font role key (primary/secondary/tertiary or any defined role)
 /// @param {Null | String} $font-size [null] - Font size (CSS value or custom property)
-/// @param {Null | Number} $line-height [null] - Line height multiplier (unitless number)
+/// @param {Null | Number | Length} $line-height [null] - Line height multiplier; unitless numbers are treated as an em multiplier
 /// @param {Null | Number} $font-weight [null] - Font weight (100-900)
 /// @param {Null | String} $font-style [null] - Font style (normal, italic, oblique)
 /// @param {Null | String} $letter-spacing [null] - Letter spacing (CSS value)
@@ -99,7 +99,11 @@ $_valid-font-roles: (
     --_font-size: #{$font-size};
   }
   @if $line-height != null {
-    --_line-height: #{fn.stripUnit($line-height)};
+    @if math.is-unitless($line-height) {
+      --_line-height: #{$line-height}em;
+    } @else {
+      --_line-height: #{$line-height};
+    }
   }
   @if $font-weight != null {
     --_font-weight: #{$font-weight};

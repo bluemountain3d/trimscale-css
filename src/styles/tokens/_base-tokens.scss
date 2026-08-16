@@ -61,12 +61,14 @@
   /// Formula: clamp(1rem, 0.9167rem + 0.3472 * var(--vwx), 1.25rem)
   --fluid-base: #{fn.fluidFontSize(0, "vwx")};
 
-  /// Base spacing unit for small steps (1/4 of fluid base)
-  /// At 16px base = 4px unit, at 20px base = 5px unit
-  --unit-micro: calc(var(--fluid-base) / #{var.$base-grid-size});
+  /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid
+  /// The old fluid-base/4 formula only ever rounded to 4px or 5px, so the
+  /// continuous interpolation bought nothing once snapped to a pixel grid.
+  /// container-spacing-provider still derives its own fluid version of this. // TODO: revisit rounding there
+  --unit-micro: #{fn.pxToRem(var.$base-grid-size)};
 
   /// Base spacing unit for large steps, an independent 4px → 8px fluid clamp
-  --unit-macro: #{fn.getFluidClamp(4, 8, "vwx")};
+  --unit-macro: round(#{fn.getFluidClamp(4, 8, "vwx")}, 1px);
 
 
   // ==========================================================================

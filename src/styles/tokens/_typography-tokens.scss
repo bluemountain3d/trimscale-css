@@ -48,16 +48,21 @@
   @property --font-weight-#{"" + $name} {
     syntax: "<number>";
     inherits: true;
-    initial-value: 400;
+    initial-value: #{$value};
   }
 }
 
 @each $name, $value in var.$line-heights {
   @property --line-height-#{$name} {
-    syntax: "<number>";
+    syntax: "<length>";
     inherits: true;
-    initial-value: 1;
+    initial-value: 1em;
   }
+}
+@property --line-height-dynamic {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1em;
 }
 
 
@@ -151,8 +156,9 @@
   // ==========================================================================
 
   @each $name, $value in var.$line-heights {
-    --line-height-#{$name}: #{$value};
+    --line-height-#{$name}: #{$value}em;
   }
+  --line-height-dynamic: #{fn.dynamic-line-height()};
 
   // ==========================================================================
   // Font Families
@@ -169,6 +175,7 @@
   --font-family-display: #{var.$ff-display};
   --font-family-body: #{var.$ff-body};
   --font-family-heading: #{var.$ff-heading};
+  --font-family-subheading: #{var.$ff-subheading};
   --font-family-quote: #{var.$ff-quote};
   --font-family-code: #{var.$ff-code};
   --font-family-ui: #{var.$ff-ui};
