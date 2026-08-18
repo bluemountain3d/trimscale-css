@@ -6,13 +6,6 @@
 @use "styles/abstracts/variables" as var;
 @use "styles/abstracts/functions" as fn;
 
-// Sass built-in modules - Only import what you actually use
-// @use 'sass:math';
-// @use 'sass:map';
-
-// Only import from mixin files to avoid dependency cycle
-// @use '../mixins/mx_other-mixin' as *;
-
 // ============================================================================
 // Container-based Spacing
 // ============================================================================
@@ -44,12 +37,16 @@
   // Base font size scales with container width
   --fluid-base: #{fn.fluidFontSize(0, $unit-key)};
 
-  // Micro/macro units, matching the grid system's :root computation
-  --unit-micro: calc(var(--fluid-base) / #{var.$base-grid-size});
-  --unit-macro: #{fn.getFluidClamp(4, 8, $unit-key)};
+  // Micro unit is static, matching :root — its fluid range only ever rounds
+  // to 4px or 5px regardless of unit-key, so interpolating per-container buys nothing.
+  --unit-micro: #{fn.pxToRem(var.$base-grid-size)};
+  // Macro unit stays container-fluid (4px -> 8px), rounded to the nearest pixel
+  // at the source like :root, so derived --space-* tokens stay whole-pixel.
+  --unit-macro: round(#{fn.getFluidClamp(4, 8, $unit-key)}, 1px);
 
   // All --space-* variables in :root that reference var(--unit-micro)/var(--unit-macro)
-  // will now use these local container-relative units
+  // will now use these local values — --unit-macro is container-relative,
+  // --unit-micro is the same static value as :root
 
   // Accept additional styles
   @content;
@@ -76,8 +73,8 @@
   container-name: $name;
 
   --fluid-base: #{fn.fluidFontSize(0, $unit-key)};
-  --unit-micro: calc(var(--fluid-base) / #{var.$base-grid-size});
-  --unit-macro: #{fn.getFluidClamp(4, 8, $unit-key)};
+  --unit-micro: #{fn.pxToRem(var.$base-grid-size)};
+  --unit-macro: round(#{fn.getFluidClamp(4, 8, $unit-key)}, 1px);
 
   @content;
 }
