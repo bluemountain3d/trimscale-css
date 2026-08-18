@@ -54,15 +54,16 @@
 
 @each $name, $value in var.$line-heights {
   @property --line-height-#{$name} {
-    syntax: "<length>";
+    syntax: "<number>";
     inherits: true;
-    initial-value: 1em;
+    initial-value: 1;
   }
 }
+
 @property --line-height-dynamic {
-  syntax: "<length>";
+  syntax: "<number>";
   inherits: true;
-  initial-value: 1em;
+  initial-value: 1;
 }
 
 
@@ -156,7 +157,7 @@
   // ==========================================================================
 
   @each $name, $value in var.$line-heights {
-    --line-height-#{$name}: #{$value}em;
+    --line-height-#{$name}: #{$value};
   }
   --line-height-dynamic: #{fn.dynamic-line-height()};
 

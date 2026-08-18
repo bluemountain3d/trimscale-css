@@ -3,10 +3,11 @@
 /// @group Abstracts/Functions
 /// @name Dynamic line-height
 /// 
-/// Fluid, self-scaling line-height using em-based clamp bounds.
+/// Fluid, self-scaling line-height using a unitless clamp() ratio.
 /// Set once on %text-properties — automatically pairs with ANY font-size,
-/// including sizes outside the modular scale, since em/rem resolve against
-/// each element's own computed font-size at render time.
+/// including sizes outside the modular scale, since the underlying
+/// tan(atan2()) division resolves against each element's own computed
+/// font-size at render time.
 ///
 /// @access public
 /// @param {Number} $fs-base [16] - Pin point (px, unitless): the font-size where $ratio-base applies exactly
@@ -14,20 +15,20 @@
 /// @param {Number} $fs-ceil [64] - Font-size (px) at and beyond which the ratio bottoms out at $ratio-ceil
 /// @param {Number} $ratio-ceil [1.05] - Ratio for large font-sizes (at/beyond $fs-ceil)
 /// @param {Number} $ratio-cap [1.6] - Ratio for small font-sizes (below the natural crossover point)
-/// @param {Number} $root [16] - Root font-size in px, for converting the px intercept to rem
-/// @return {String} CSS clamp() expression in em, self-scaling per element
+/// @return {String} Unitless CSS clamp() expression, self-scaling per element
 ///
 /// @example scss
 ///   %text-properties { --_line-height: #{dynamic-line-height()}; }
 /// @example scss - Custom bounds
 ///   .display-1 { --_line-height: #{dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
 ///
-@function dynamic-line-height($fs-base: 16,
+@function dynamic-line-height(
+  $fs-base: 16,
   $ratio-base: 1.5,
   $fs-ceil: 64,
   $ratio-ceil: 1.05,
   $ratio-cap: 1.6,
-  $root: 16) {
+) {
 
   @if $fs-ceil ==$fs-base {
     @error "dynamic-line-height(): $fs-ceil must differ from $fs-base";
@@ -37,8 +38,8 @@
     @error "dynamic-line-height(): $ratio-ceil cannot exceed $ratio-cap";
   }
 
-  @if $fs-base <=0 or $fs-ceil <=0 or $root <=0 {
-    @error "dynamic-line-height(): font-size and root parameters must be positive";
+  @if $fs-base <=0 or $fs-ceil <=0 {
+    @error "dynamic-line-height(): font-size parameters must be positive";
   }
 
   @if $ratio-base <=0 or $ratio-ceil <=0 or $ratio-cap <=0 {
@@ -52,12 +53,14 @@
   /// 2. Slope: change in row-height (px) per change in font-size (px)
   $slope: math.div($h-ceil - $h-base, $fs-ceil - $fs-base);
 
-  /// 3. Row-height at a theoretical font-size of 0 (the em-intercept),
-  ///    divided by $root to convert directly from px to rem
-  $intercept: math.div($h-base - $fs-base * $slope, $root);
+  /// 3. Row-height at a theoretical font-size of 0 (the px-intercept of the
+  ///    linear model) — kept as a raw length so tan(atan2()) can divide it by
+  ///    the element's own font-size at render time (calc() can't divide two
+  ///    lengths directly)
+  $intercept-px: $h-base - $fs-base * $slope;
 
-  /// 4. Self-scaling clamp: em resolves against the element's own font-size,
-  ///    rem resolves against $root — together they trace the
+  /// 4. Self-scaling clamp: a unitless number — tan(atan2()) divides the px
+  ///    intercept by the element's own font-size at render time, tracing the
   ///    correct ratio at every font-size without any lookup table
-  @return clamp(#{$ratio-ceil}em, #{$slope}em + #{$intercept}rem, #{$ratio-cap}em);
+  @return clamp(#{$ratio-ceil}, #{$slope} + tan(atan2(#{$intercept-px}px, 1em)), #{$ratio-cap});
 }
