@@ -238,7 +238,7 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 
 **Font weights:** `--font-weight-thin` (100) through `--font-weight-black` (900).
 
-**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100, stored as `<length>` in `em` (e.g. `--line-height-150` = `1.5em`). All steps of 0.05 are defined.
+**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100, stored as a unitless `<number>` (e.g. `--line-height-150` = `1.5`). All steps of 0.05 are defined.
 
 These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a *dynamic*, self-scaling line-height instead — computed once by the `dynamic-line-height()` Sass function (see [Functions](#functions)) and exposed as the `--line-height-dynamic` token, unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
 
@@ -330,9 +330,9 @@ Converts a pixel value to rem (assumes 16 px root).
 margin: fn.pxToRem(24); // → 1.5rem
 ```
 
-#### `dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap, $root)`
+#### `dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap)`
 
-Returns a self-scaling `clamp()` line-height expressed in `em`, not `rem`/px — so it re-resolves against *any* element's own computed font-size at render time instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [Typography Tokens](#typography-tokens)); call the function directly only when you need a custom curve.
+Returns a self-scaling, unitless `clamp()` line-height ratio — it re-resolves against *any* element's own computed font-size at render time via `tan(atan2())` (dividing the curve's px intercept by the element's own `1em`), instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [Typography Tokens](#typography-tokens)); call the function directly only when you need a custom curve.
 
 ```scss
 // Default curve — prefer the token instead:
@@ -368,13 +368,13 @@ Parameters:
 | ----------------- | ------ | ------------ | --------------------------------------------------------------- |
 | `$font`           | string | `'primary'`  | Font role key (see list below)                                  |
 | `$font-size`      | value  | `null`       | CSS font-size value                                              |
-| `$line-height`    | number \| length | `null` | Line height multiplier; unitless numbers are treated as an em multiplier |
+| `$line-height`    | number | `null` | Line height multiplier (unitless) |
 | `$font-weight`    | number | `null`       | Font weight                                                     |
 | `$font-style`     | string | `null`       | Font style (`normal`, `italic`, `oblique`)                      |
 | `$letter-spacing` | value  | `null`       | Letter spacing                                                  |
 | `$text-transform` | string | `null`       | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
 
-Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` accepts a bare unitless number (`1.1`) — converted to `em` internally — or an explicit length (`1.1em`); both end up stored as `--_line-height`, which is always a `<length>`.
+Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` accepts a unitless number (`1.1`), stored as-is in `--_line-height`, which is always a `<number>`.
 
 Valid `$font` roles:
 
