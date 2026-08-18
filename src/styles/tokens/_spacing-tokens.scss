@@ -20,19 +20,19 @@ $space-micro: (
   "2xs": 2,
   "xs": 3,
   "sm": 4,
-  "md": 5) !default;
+  "md": 5,
+  "lg": 6) !default;
 
 $space-macro: (
-  "lg": 6,
-  "xl": 8,
-  "2xl": 12,
-  "3xl": 16,
-  "4xl": 20,
-  "5xl": 24,
-  "6xl": 28,
-  "7xl": 32,
-  "8xl": 40,
-  "9xl": 48) !default;
+  "xl": 6,
+  "2xl": 8,
+  "3xl": 10,
+  "4xl": 12,
+  "5xl": 16,
+  "6xl": 20,
+  "7xl": 24,
+  "8xl": 28,
+  "9xl": 32) !default;
 
 $space-values: map.merge($space-micro, $space-macro) !default;
 

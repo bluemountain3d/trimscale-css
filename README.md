@@ -160,8 +160,10 @@ There is no single `--unit` token anymore; it was split into `--unit-micro` and 
 
 Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro` is fixed, so sizes built from it are fixed too; `--unit-macro` is a fluid clamp, so sizes built from it scale with the viewport. Both units are `4px` at their minimum, so the table below is accurate for all sizes at the low end — only the macro-based sizes grow from there:
 
-- `--space-3xs` through `--space-md` (and `--space-1` through `--space-6`) use `--unit-micro` — fixed at `4px` (`$base-grid-size`), no viewport scaling.
-- `--space-lg` through `--space-9xl` (and `--space-7` through `--space-48`) use `--unit-macro`, which grows fluidly and tops out at `8px` — so large spacing grows with the viewport while small spacing stays put, rather than everything scaling off one shared unit.
+- `--space-3xs` through `--space-lg` (and `--space-1` through `--space-6`) use `--unit-micro` — fixed at `4px` (`$base-grid-size`), no viewport scaling.
+- `--space-xl` through `--space-9xl` (and `--space-7` through `--space-48`) use `--unit-macro`, which grows fluidly and tops out at `8px` — so large spacing grows with the viewport while small spacing stays put, rather than everything scaling off one shared unit.
+
+`--space-lg` and `--space-xl` are both `24px` at minimum viewport by design — `lg` is the fixed ceiling of the micro range, `xl` is the fluid floor of the macro range, chosen to meet exactly so the size scale has no visible seam at the micro/macro boundary. `xl` then grows to `48px` as the viewport widens; `lg` stays put.
 
 **T-shirt sizes:**
 
@@ -172,16 +174,16 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 | `--space-xs`  | × 3        | 12 px                 |
 | `--space-sm`  | × 4        | 16 px                 |
 | `--space-md`  | × 5        | 20 px                 |
-| `--space-lg`  | × 6        | 24 px                 |
-| `--space-xl`  | × 8        | 32 px                 |
-| `--space-2xl` | × 12       | 48 px                 |
-| `--space-3xl` | × 16       | 64 px                 |
-| `--space-4xl` | × 20       | 80 px                 |
-| `--space-5xl` | × 24       | 96 px                 |
-| `--space-6xl` | × 28       | 112 px                |
-| `--space-7xl` | × 32       | 128 px                |
-| `--space-8xl` | × 40       | 160 px                |
-| `--space-9xl` | × 48       | 192 px                |
+| `--space-lg`  | × 6        | 24 px (fixed)         |
+| `--space-xl`  | × 6        | 24 px                 |
+| `--space-2xl` | × 8        | 32 px                 |
+| `--space-3xl` | × 10       | 40 px                 |
+| `--space-4xl` | × 12       | 48 px                 |
+| `--space-5xl` | × 16       | 64 px                 |
+| `--space-6xl` | × 20       | 80 px                 |
+| `--space-7xl` | × 24       | 96 px                 |
+| `--space-8xl` | × 28       | 112 px                |
+| `--space-9xl` | × 32       | 128 px                |
 
 **Numeric scale:** `--space-1` through `--space-48`. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`.
 
