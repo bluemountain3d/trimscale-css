@@ -126,6 +126,33 @@
 .text-align-center {text-align: center;}
 .text-align-right {text-align: right;}
 
+/// Lining figures (default) — baseline-aligned, for UI/values
+.num-lining-tabular {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.num-lining-proportional {
+  font-variant-numeric: lining-nums proportional-nums;
+}
+
+/// Oldstyle figures — varying baseline, for running text/editorial contexts
+.num-oldstyle-tabular {
+  font-variant-numeric: oldstyle-nums tabular-nums;
+}
+
+.num-oldstyle-proportional {
+  font-variant-numeric: oldstyle-nums proportional-nums;
+}
+
+/// Ordinal
+.num-ordinal-tabular {
+  font-variant-numeric: ordinal-nums tabular-nums;
+}
+
+.num-ordinal-proportional {
+  font-variant-numeric: ordinal-nums proportional-nums;
+}
+
 /// Text color
 /// Only `.text-color-inherit` ships by default. Unlike font roles, color
 /// token names aren't a contract enforced anywhere else in the system (see

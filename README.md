@@ -160,8 +160,10 @@ There is no single `--unit` token anymore; it was split into `--unit-micro` and 
 
 Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro` is fixed, so sizes built from it are fixed too; `--unit-macro` is a fluid clamp, so sizes built from it scale with the viewport. Both units are `4px` at their minimum, so the table below is accurate for all sizes at the low end — only the macro-based sizes grow from there:
 
-- `--space-3xs` through `--space-md` (and `--space-1` through `--space-6`) use `--unit-micro` — fixed at `4px` (`$base-grid-size`), no viewport scaling.
-- `--space-lg` through `--space-9xl` (and `--space-7` through `--space-48`) use `--unit-macro`, which grows fluidly and tops out at `8px` — so large spacing grows with the viewport while small spacing stays put, rather than everything scaling off one shared unit.
+- `--space-3xs` through `--space-lg` (and `--space-1` through `--space-6`) use `--unit-micro` — fixed at `4px` (`$base-grid-size`), no viewport scaling.
+- `--space-xl` through `--space-9xl` (and `--space-7` through `--space-48`) use `--unit-macro`, which grows fluidly and tops out at `8px` — so large spacing grows with the viewport while small spacing stays put, rather than everything scaling off one shared unit.
+
+`--space-lg` and `--space-xl` are both `24px` at minimum viewport by design — `lg` is the fixed ceiling of the micro range, `xl` is the fluid floor of the macro range, chosen to meet exactly so the size scale has no visible seam at the micro/macro boundary. `xl` then grows to `48px` as the viewport widens; `lg` stays put.
 
 **T-shirt sizes:**
 
@@ -172,16 +174,16 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 | `--space-xs`  | × 3        | 12 px                 |
 | `--space-sm`  | × 4        | 16 px                 |
 | `--space-md`  | × 5        | 20 px                 |
-| `--space-lg`  | × 6        | 24 px                 |
-| `--space-xl`  | × 8        | 32 px                 |
-| `--space-2xl` | × 12       | 48 px                 |
-| `--space-3xl` | × 16       | 64 px                 |
-| `--space-4xl` | × 20       | 80 px                 |
-| `--space-5xl` | × 24       | 96 px                 |
-| `--space-6xl` | × 28       | 112 px                |
-| `--space-7xl` | × 32       | 128 px                |
-| `--space-8xl` | × 40       | 160 px                |
-| `--space-9xl` | × 48       | 192 px                |
+| `--space-lg`  | × 6        | 24 px (fixed)         |
+| `--space-xl`  | × 6        | 24 px                 |
+| `--space-2xl` | × 8        | 32 px                 |
+| `--space-3xl` | × 10       | 40 px                 |
+| `--space-4xl` | × 12       | 48 px                 |
+| `--space-5xl` | × 16       | 64 px                 |
+| `--space-6xl` | × 20       | 80 px                 |
+| `--space-7xl` | × 24       | 96 px                 |
+| `--space-8xl` | × 28       | 112 px                |
+| `--space-9xl` | × 32       | 128 px                |
 
 **Numeric scale:** `--space-1` through `--space-48`. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`.
 
@@ -238,7 +240,7 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 
 **Font weights:** `--font-weight-thin` (100) through `--font-weight-black` (900).
 
-**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100, stored as `<length>` in `em` (e.g. `--line-height-150` = `1.5em`). All steps of 0.05 are defined.
+**Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100, stored as a unitless `<number>` (e.g. `--line-height-150` = `1.5`). All steps of 0.05 are defined.
 
 These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a *dynamic*, self-scaling line-height instead — computed once by the `dynamic-line-height()` Sass function (see [Functions](#functions)) and exposed as the `--line-height-dynamic` token, unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
 
@@ -330,9 +332,9 @@ Converts a pixel value to rem (assumes 16 px root).
 margin: fn.pxToRem(24); // → 1.5rem
 ```
 
-#### `dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap, $root)`
+#### `dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap)`
 
-Returns a self-scaling `clamp()` line-height expressed in `em`, not `rem`/px — so it re-resolves against *any* element's own computed font-size at render time instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [Typography Tokens](#typography-tokens)); call the function directly only when you need a custom curve.
+Returns a self-scaling, unitless `clamp()` line-height ratio — it re-resolves against *any* element's own computed font-size at render time via `tan(atan2())` (dividing the curve's px intercept by the element's own `1em`), instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [Typography Tokens](#typography-tokens)); call the function directly only when you need a custom curve.
 
 ```scss
 // Default curve — prefer the token instead:
@@ -368,13 +370,13 @@ Parameters:
 | ----------------- | ------ | ------------ | --------------------------------------------------------------- |
 | `$font`           | string | `'primary'`  | Font role key (see list below)                                  |
 | `$font-size`      | value  | `null`       | CSS font-size value                                              |
-| `$line-height`    | number \| length | `null` | Line height multiplier; unitless numbers are treated as an em multiplier |
+| `$line-height`    | number | `null` | Line height multiplier (unitless) |
 | `$font-weight`    | number | `null`       | Font weight                                                     |
 | `$font-style`     | string | `null`       | Font style (`normal`, `italic`, `oblique`)                      |
 | `$letter-spacing` | value  | `null`       | Letter spacing                                                  |
 | `$text-transform` | string | `null`       | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
 
-Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` accepts a bare unitless number (`1.1`) — converted to `em` internally — or an explicit length (`1.1em`); both end up stored as `--_line-height`, which is always a `<length>`.
+Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` accepts a unitless number (`1.1`), stored as-is in `--_line-height`, which is always a `<number>`.
 
 Valid `$font` roles:
 

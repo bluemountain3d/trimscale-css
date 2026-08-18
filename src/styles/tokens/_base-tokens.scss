@@ -64,7 +64,7 @@
   /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid
   /// The old fluid-base/4 formula only ever rounded to 4px or 5px, so the
   /// continuous interpolation bought nothing once snapped to a pixel grid.
-  /// container-spacing-provider still derives its own fluid version of this. // TODO: revisit rounding there
+  /// container-spacing-provider mirrors this same static value.
   --unit-micro: #{fn.pxToRem(var.$base-grid-size)};
 
   /// Base spacing unit for large steps, an independent 4px → 8px fluid clamp

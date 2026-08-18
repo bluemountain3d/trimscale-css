@@ -77,7 +77,7 @@ $_valid-font-roles: (
 /// Apply complete font setup with metrics and typography properties
 /// @param {String} $font ['primary'] - Font role key (primary/secondary/tertiary or any defined role)
 /// @param {Null | String} $font-size [null] - Font size (CSS value or custom property)
-/// @param {Null | Number | Length} $line-height [null] - Line height multiplier; unitless numbers are treated as an em multiplier
+/// @param {Null | Number} $line-height [null] - Line height multiplier (unitless numbers)
 /// @param {Null | Number} $font-weight [null] - Font weight (100-900)
 /// @param {Null | String} $font-style [null] - Font style (normal, italic, oblique)
 /// @param {Null | String} $letter-spacing [null] - Letter spacing (CSS value)
@@ -99,11 +99,7 @@ $_valid-font-roles: (
     --_font-size: #{$font-size};
   }
   @if $line-height != null {
-    @if math.is-unitless($line-height) {
-      --_line-height: #{$line-height}em;
-    } @else {
-      --_line-height: #{$line-height};
-    }
+    --_line-height: #{$line-height};
   }
   @if $font-weight != null {
     --_font-weight: #{$font-weight};
