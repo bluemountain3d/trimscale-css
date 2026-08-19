@@ -4,24 +4,26 @@
 /// @group Utilities
 /// @name Text Utilities
 /// @description Utility classes for font family, size, weight, style, and alignment.
-/// Two families for every property below font-family: `.trim-{property}-*` sets
-/// the --_{property} custom property consumed by %text-properties, so it only has
-/// an effect combined with a Trim Text class (below) — e.g.
-/// `.trim-text-heading.trim-font-size-heading-1`. Plain `.{property}-*` sets the
-/// real CSS property directly and works anywhere, trim system or not. Trim Text
-/// classes apply a font-family, dynamic line-height, and leading-trim metrics for
-/// the given role — font-size stays the shared default (--text-base) across every
-/// role. Roles are defined in abstracts/variables/typography.
+/// `.trim-text-{role}` applies a font-family, leading-trim metrics (margins +
+/// pseudo-element formulas), and a bare font-size/line-height baseline
+/// (--text-base / --line-height-dynamic) for the given role. Font-weight,
+/// font-style, letter-spacing, and text-transform are left unset — pair it
+/// with the plain `.{property}-*` utility classes below (or with fontSetup,
+/// for component authoring) for role-specific sizing or anything beyond the
+/// baseline. Plain `.{property}-*` classes set the real CSS property
+/// directly and work anywhere, trim system or not. Roles are defined in
+/// abstracts/variables/typography.
 /// @example html
-///   <h1 class="trim-text-heading trim-font-size-heading-1">Sized heading</h1>
+///   <h1 class="trim-text-heading font-size-heading-1">Sized heading</h1>
 ///   <span class="font-family-mono">inline code-style snippet</span>
 ///   <span class="font-size-text-sm">plain, no trim system involved</span>
 /// ===========================================================================
 @layer utilities {
   /// =========================================================================
-  /// Trim Text — font-family, dynamic line-height, and leading-trim metrics per
-  /// font role. Font-size is NOT role-specific — it's the shared --text-base
-  /// default for every role; pair with a Trim Font Size class for role-appropriate sizing.
+  /// Trim Text — font-family, leading-trim metrics, and a bare font-size/
+  /// line-height baseline per font role. Weight, style, letter-spacing, and
+  /// text-transform are left unset — pair with a plain utility class below,
+  /// or use fontSetup, for those.
   /// =========================================================================
   // Primary/Secondary/Tertiary
   .trim-text-primary {@extend %primary-text;}
@@ -39,45 +41,6 @@
   .trim-text-quote {@extend %quote-text;}
   .trim-text-code {@extend %code-text;}
   .trim-text-ui {@extend %ui-text;}
-
-  /// Trim Font Size — sets --_font-size, consumed by %text-properties (Text Trim classes only)
-  @each $item in var.$font-sizes {
-    .trim-font-size-#{$item} {
-      --_font-size: var(--#{$item});
-    }
-  }
-
-  /// Trim Line Height — sets --_line-height, consumed by %text-properties (Text Trim classes only)
-  @each $key, $value in var.$line-heights {
-    .trim-line-height-#{$key} {
-      --_line-height: var(--line-height-#{$key})
-    }
-  }
-
-  .trim-line-height-dynamic {
-    --_line-height: var(--line-height-dynamic);
-  }
-
-  /// Trim Font Weight — sets --_font-weight, consumed by %text-properties (Text Trim classes only)
-  @each $key, $value in var.$font-weights {
-    .trim-font-weight-#{$key} {
-      --_font-weight: var(--font-weight-#{$key})
-    }
-  }
-
-  /// Trim Font Style — sets --_font-style, consumed by %text-properties (Text Trim classes only)
-  @each $item in (normal, italic, oblique) {
-    .trim-font-style-#{$item} {
-      --_font-style: #{$item};
-    }
-  }
-
-  /// Trim Text Transform — sets --_text-transform, consumed by %text-properties (Text Trim classes only)
-  @each $item in (capitalize, uppercase, lowercase) {
-    .trim-text-transform-#{$item} {
-      --_text-transform: #{$item};
-    }
-  }
 
   /// =========================================================================
   /// Non "trim" specific utility classes
