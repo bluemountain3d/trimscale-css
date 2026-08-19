@@ -1,3 +1,6 @@
+@use "styles/abstracts/variables" as var;
+@use 'styles/tokens/leading-trim' as *;
+
 /// @group Utilities
 /// @name Text Utilities
 /// @description Utility classes for font family, size, weight, style, and alignment.
@@ -14,153 +17,158 @@
 ///   <span class="font-family-mono">inline code-style snippet</span>
 ///   <span class="font-size-text-sm">plain, no trim system involved</span>
 /// ===========================================================================
+@layer utilities {
+  /// =========================================================================
+  /// Trim Text — font-family, dynamic line-height, and leading-trim metrics per
+  /// font role. Font-size is NOT role-specific — it's the shared --text-base
+  /// default for every role; pair with a Trim Font Size class for role-appropriate sizing.
+  /// =========================================================================
+  // Primary/Secondary/Tertiary
+  .trim-text-primary {@extend %primary-text;}
+  .trim-text-secondary {@extend %secondary-text;}
+  .trim-text-tertiary {@extend %tertiary-text;}
+  // Categories
+  .trim-text-sans {@extend %sans-text;}
+  .trim-text-serif {@extend %serif-text;}
+  .trim-text-mono {@extend %mono-text;}
+  // Contextual
+  .trim-text-display {@extend %display-text;}
+  .trim-text-heading {@extend %heading-text;}
+  .trim-text-subheading {@extend %subheading-text;}
+  .trim-text-body {@extend %body-text;}
+  .trim-text-quote {@extend %quote-text;}
+  .trim-text-code {@extend %code-text;}
+  .trim-text-ui {@extend %ui-text;}
 
-@use "styles/abstracts/variables" as var;
-@use 'styles/tokens/leading-trim' as *;
-
-/// Trim Text — font-family, dynamic line-height, and leading-trim metrics per
-/// font role. Font-size is NOT role-specific — it's the shared --text-base
-/// default for every role; pair with a Trim Font Size class for role-appropriate sizing.
-// Primary/Secondary/Tertiary
-.trim-text-primary {@extend %primary-text;}
-.trim-text-secondary {@extend %secondary-text;}
-.trim-text-tertiary {@extend %tertiary-text;}
-// Categories
-.trim-text-sans {@extend %sans-text;}
-.trim-text-serif {@extend %serif-text;}
-.trim-text-mono {@extend %mono-text;}
-// Contextual
-.trim-text-display {@extend %display-text;}
-.trim-text-heading {@extend %heading-text;}
-.trim-text-subheading {@extend %subheading-text;}
-.trim-text-body {@extend %body-text;}
-.trim-text-quote {@extend %quote-text;}
-.trim-text-code {@extend %code-text;}
-.trim-text-ui {@extend %ui-text;}
-
-/// Font Family — sets only font-family, nothing else
-@each $key, $value in var.$fonts {
-  .font-family-#{$key} {
-    font-family: var(--font-family-#{$key});
+  /// Trim Font Size — sets --_font-size, consumed by %text-properties (Text Trim classes only)
+  @each $item in var.$font-sizes {
+    .trim-font-size-#{$item} {
+      --_font-size: var(--#{$item});
+    }
   }
-}
 
-/// Trim Font Size — sets --_font-size, consumed by %text-properties (Text Trim classes only)
-@each $item in var.$font-sizes {
-  .trim-font-size-#{$item} {
-    --_font-size: var(--#{$item});
+  /// Trim Line Height — sets --_line-height, consumed by %text-properties (Text Trim classes only)
+  @each $key, $value in var.$line-heights {
+    .trim-line-height-#{$key} {
+      --_line-height: var(--line-height-#{$key})
+    }
   }
-}
 
-/// Font Size — sets font-size directly, no trim system dependency
-@each $item in var.$font-sizes {
-  .font-size-#{$item} {
-    font-size: var(--#{$item});
+  .trim-line-height-dynamic {
+    --_line-height: var(--line-height-dynamic);
   }
-}
 
-/// Trim Line Height — sets --_line-height, consumed by %text-properties (Text Trim classes only)
-@each $key, $value in var.$line-heights {
-  .trim-line-height-#{$key} {
-    --_line-height: var(--line-height-#{$key})
+  /// Trim Font Weight — sets --_font-weight, consumed by %text-properties (Text Trim classes only)
+  @each $key, $value in var.$font-weights {
+    .trim-font-weight-#{$key} {
+      --_font-weight: var(--font-weight-#{$key})
+    }
   }
-}
-.trim-line-height-dynamic {
-  --_line-height: var(--line-height-dynamic);
-}
 
-/// Line Height — sets line-height directly, no trim system dependency
-@each $key, $value in var.$line-heights {
-  .line-height-#{$key} {
-    line-height: var(--line-height-#{$key})
+  /// Trim Font Style — sets --_font-style, consumed by %text-properties (Text Trim classes only)
+  @each $item in (normal, italic, oblique) {
+    .trim-font-style-#{$item} {
+      --_font-style: #{$item};
+    }
   }
-}
-.line-height-dynamic {
-  line-height: var(--line-height-dynamic);
-}
 
-/// Trim Font Weight — sets --_font-weight, consumed by %text-properties (Text Trim classes only)
-@each $key, $value in var.$font-weights {
-  .trim-font-weight-#{$key} {
-    --_font-weight: var(--font-weight-#{$key})
+  /// Trim Text Transform — sets --_text-transform, consumed by %text-properties (Text Trim classes only)
+  @each $item in (capitalize, uppercase, lowercase) {
+    .trim-text-transform-#{$item} {
+      --_text-transform: #{$item};
+    }
   }
-}
 
-/// Font Weight — sets font-weight directly, no trim system dependency
-@each $key, $value in var.$font-weights {
-  .font-weight-#{$key} {
-    font-weight: var(--font-weight-#{$key})
+  /// =========================================================================
+  /// Non "trim" specific utility classes
+  /// =========================================================================
+
+  /// Font Family — sets only font-family, nothing else
+  @each $key, $value in var.$fonts {
+    .font-family-#{$key} {
+      font-family: var(--font-family-#{$key});
+    }
   }
-}
 
-/// Trim Font Style — sets --_font-style, consumed by %text-properties (Text Trim classes only)
-@each $item in (normal, italic, oblique) {
-  .trim-font-style-#{$item} {
-    --_font-style: #{$item};
+  /// Font Size — sets font-size directly, no trim system dependency
+  @each $item in var.$font-sizes {
+    .font-size-#{$item} {
+      font-size: var(--#{$item});
+    }
   }
-}
 
-/// Font Style — sets font-style directly, no trim system dependency
-@each $item in (normal, italic, oblique) {
-  .font-style-#{$item} {
-    font-style: #{$item};
+  /// Line Height — sets line-height directly, no trim system dependency
+  @each $key, $value in var.$line-heights {
+    .line-height-#{$key} {
+      line-height: var(--line-height-#{$key})
+    }
   }
-}
-
-/// Trim Text Transform — sets --_text-transform, consumed by %text-properties (Text Trim classes only)
-@each $item in (capitalize, uppercase, lowercase) {
-  .trim-text-transform-#{$item} {
-    --_text-transform: #{$item};
+  .line-height-dynamic {
+    line-height: var(--line-height-dynamic);
   }
-}
 
-/// Text Transform — sets text-transform directly, no trim system dependency
-@each $item in (capitalize, uppercase, lowercase) {
-  .text-transform-#{$item} {
-    text-transform: #{$item};
+  /// Font Weight — sets font-weight directly, no trim system dependency
+  @each $key, $value in var.$font-weights {
+    .font-weight-#{$key} {
+      font-weight: var(--font-weight-#{$key})
+    }
   }
-}
 
-/// Text Align
-.text-align-left {text-align: left;}
-.text-align-center {text-align: center;}
-.text-align-right {text-align: right;}
+  /// Font Style — sets font-style directly, no trim system dependency
+  @each $item in (normal, italic, oblique) {
+    .font-style-#{$item} {
+      font-style: #{$item};
+    }
+  }
 
-/// Lining figures (default) — baseline-aligned, for UI/values
-.num-lining-tabular {
-  font-variant-numeric: lining-nums tabular-nums;
-}
+  /// Text Transform — sets text-transform directly, no trim system dependency
+  @each $item in (capitalize, uppercase, lowercase) {
+    .text-transform-#{$item} {
+      text-transform: #{$item};
+    }
+  }
 
-.num-lining-proportional {
-  font-variant-numeric: lining-nums proportional-nums;
-}
+  /// Text Align
+  .text-align-left {text-align: left;}
+  .text-align-center {text-align: center;}
+  .text-align-right {text-align: right;}
 
-/// Oldstyle figures — varying baseline, for running text/editorial contexts
-.num-oldstyle-tabular {
-  font-variant-numeric: oldstyle-nums tabular-nums;
-}
+  /// Lining figures (default) — baseline-aligned, for UI/values
+  .num-lining-tabular {
+    font-variant-numeric: lining-nums tabular-nums;
+  }
 
-.num-oldstyle-proportional {
-  font-variant-numeric: oldstyle-nums proportional-nums;
-}
+  .num-lining-proportional {
+    font-variant-numeric: lining-nums proportional-nums;
+  }
 
-/// Ordinal
-.num-ordinal-tabular {
-  font-variant-numeric: ordinal-nums tabular-nums;
-}
+  /// Oldstyle figures — varying baseline, for running text/editorial contexts
+  .num-oldstyle-tabular {
+    font-variant-numeric: oldstyle-nums tabular-nums;
+  }
 
-.num-ordinal-proportional {
-  font-variant-numeric: ordinal-nums proportional-nums;
-}
+  .num-oldstyle-proportional {
+    font-variant-numeric: oldstyle-nums proportional-nums;
+  }
 
-/// Text color
-/// Only `.text-color-inherit` ships by default. Unlike font roles, color
-/// token names aren't a contract enforced anywhere else in the system (see
-/// fontSetup's required $fonts roles for contrast) — a project is free to
-/// name its $color-tokens however it likes, so a fixed set of
-/// `.text-color-*` classes here would risk going silently dead the moment
-/// a project doesn't use these exact token names. Add your own next to your
-/// project's palette instead.
-.text-color-inherit {
-  color: inherit;
+  /// Ordinal
+  .num-ordinal-tabular {
+    font-variant-numeric: ordinal-nums tabular-nums;
+  }
+
+  .num-ordinal-proportional {
+    font-variant-numeric: ordinal-nums proportional-nums;
+  }
+
+  /// Text color
+  /// Only `.text-color-inherit` ships by default. Unlike font roles, color
+  /// token names aren't a contract enforced anywhere else in the system (see
+  /// fontSetup's required $fonts roles for contrast) — a project is free to
+  /// name its $color-tokens however it likes, so a fixed set of
+  /// `.text-color-*` classes here would risk going silently dead the moment
+  /// a project doesn't use these exact token names. Add your own next to your
+  /// project's palette instead.
+  .text-color-inherit {
+    color: inherit;
+  }
 }

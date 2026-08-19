@@ -1,3 +1,5 @@
+@use "styles/tokens/spacing-tokens" as *;
+
 /// @group Utilities
 /// @name Spacing Utilities
 /// @description Utility classes for margin and padding using the fluid spacing system.
@@ -8,123 +10,123 @@
 ///   <div class="mt-8 mb-4">Numeric margin</div>
 /// ===========================================================================
 
-@use "styles/tokens/spacing-tokens" as *;
+@layer utilities {
+  .m-none {
+    margin: 0;
+  }
+  .mx-auto {
+    margin-inline: auto;
+  }
+  .my-auto {
+    margin-block: auto;
+  }
+  .mr-auto {
+    margin-inline-end: auto;
+  }
+  .ml-auto {
+    margin-inline-start: auto;
+  }
+  .p-none {
+    padding: 0;
+  }
 
-.m-none {
-  margin: 0;
-}
-.mx-auto {
-  margin-inline: auto;
-}
-.my-auto {
-  margin-block: auto;
-}
-.mr-auto {
-  margin-inline-end: auto;
-}
-.ml-auto {
-  margin-inline-start: auto;
-}
-.p-none {
-  padding: 0;
-}
+  // ==========================================================================
+  // T-shirt Size Scale
+  // ==========================================================================
 
-// ==========================================================================
-// T-shirt Size Scale
-// ==========================================================================
+  /// Semantic spacing utility classes using t-shirt sizes
+  @each $size, $factor in $space-values {
+    .m-#{$size} {
+      margin: var(--space-#{$size});
+    }
+    .mx-#{$size} {
+      margin-inline: var(--space-#{$size});
+    }
+    .my-#{$size} {
+      margin-block: var(--space-#{$size});
+    }
+    .mt-#{$size} {
+      margin-block-start: var(--space-#{$size});
+    }
+    .ml-#{$size} {
+      margin-inline-start: var(--space-#{$size});
+    }
+    .mb-#{$size} {
+      margin-block-end: var(--space-#{$size});
+    }
+    .mr-#{$size} {
+      margin-inline-end: var(--space-#{$size});
+    }
+    .p-#{$size} {
+      padding: var(--space-#{$size});
+    }
+    .px-#{$size} {
+      padding-inline: var(--space-#{$size});
+    }
+    .py-#{$size} {
+      padding-block: var(--space-#{$size});
+    }
+    .pt-#{$size} {
+      padding-block-start: var(--space-#{$size});
+    }
+    .pl-#{$size} {
+      padding-inline-start: var(--space-#{$size});
+    }
+    .pb-#{$size} {
+      padding-block-end: var(--space-#{$size});
+    }
+    .pr-#{$size} {
+      padding-inline-end: var(--space-#{$size});
+    }
+  }
 
-/// Semantic spacing utility classes using t-shirt sizes
-@each $size, $factor in $space-values {
-  .m-#{$size} {
-    margin: var(--space-#{$size});
-  }
-  .mx-#{$size} {
-    margin-inline: var(--space-#{$size});
-  }
-  .my-#{$size} {
-    margin-block: var(--space-#{$size});
-  }
-  .mt-#{$size} {
-    margin-block-start: var(--space-#{$size});
-  }
-  .ml-#{$size} {
-    margin-inline-start: var(--space-#{$size});
-  }
-  .mb-#{$size} {
-    margin-block-end: var(--space-#{$size});
-  }
-  .mr-#{$size} {
-    margin-inline-end: var(--space-#{$size});
-  }
-  .p-#{$size} {
-    padding: var(--space-#{$size});
-  }
-  .px-#{$size} {
-    padding-inline: var(--space-#{$size});
-  }
-  .py-#{$size} {
-    padding-block: var(--space-#{$size});
-  }
-  .pt-#{$size} {
-    padding-block-start: var(--space-#{$size});
-  }
-  .pl-#{$size} {
-    padding-inline-start: var(--space-#{$size});
-  }
-  .pb-#{$size} {
-    padding-block-end: var(--space-#{$size});
-  }
-  .pr-#{$size} {
-    padding-inline-end: var(--space-#{$size});
-  }
-}
+  // ==========================================================================
+  // Numeric Scale (1-48)
+  // ==========================================================================
 
-// ==========================================================================
-// Numeric Scale (1-48)
-// ==========================================================================
-
-/// Numeric spacing utility classes for fine-grained control
-@for $i from 1 through 48 {
-  .m-#{$i} {
-    margin: var(--space-#{$i});
-  }
-  .mx-#{$i} {
-    margin-inline: var(--space-#{$i});
-  }
-  .my-#{$i} {
-    margin-block: var(--space-#{$i});
-  }
-  .mt-#{$i} {
-    margin-block-start: var(--space-#{$i});
-  }
-  .ml-#{$i} {
-    margin-inline-start: var(--space-#{$i});
-  }
-  .mb-#{$i} {
-    margin-block-end: var(--space-#{$i});
-  }
-  .mr-#{$i} {
-    margin-inline-end: var(--space-#{$i});
-  }
-  .p-#{$i} {
-    padding: var(--space-#{$i});
-  }
-  .px-#{$i} {
-    padding-inline: var(--space-#{$i});
-  }
-  .py-#{$i} {
-    padding-block: var(--space-#{$i});
-  }
-  .pt-#{$i} {
-    padding-block-start: var(--space-#{$i});
-  }
-  .pl-#{$i} {
-    padding-inline-start: var(--space-#{$i});
-  }
-  .pb-#{$i} {
-    padding-block-end: var(--space-#{$i});
-  }
-  .pr-#{$i} {
-    padding-inline-end: var(--space-#{$i});
+  /// Numeric spacing utility classes for fine-grained control
+  @for $i from 1 through 48 {
+    .m-#{$i} {
+      margin: var(--space-#{$i});
+    }
+    .mx-#{$i} {
+      margin-inline: var(--space-#{$i});
+    }
+    .my-#{$i} {
+      margin-block: var(--space-#{$i});
+    }
+    .mt-#{$i} {
+      margin-block-start: var(--space-#{$i});
+    }
+    .ml-#{$i} {
+      margin-inline-start: var(--space-#{$i});
+    }
+    .mb-#{$i} {
+      margin-block-end: var(--space-#{$i});
+    }
+    .mr-#{$i} {
+      margin-inline-end: var(--space-#{$i});
+    }
+    .p-#{$i} {
+      padding: var(--space-#{$i});
+    }
+    .px-#{$i} {
+      padding-inline: var(--space-#{$i});
+    }
+    .py-#{$i} {
+      padding-block: var(--space-#{$i});
+    }
+    .pt-#{$i} {
+      padding-block-start: var(--space-#{$i});
+    }
+    .pl-#{$i} {
+      padding-inline-start: var(--space-#{$i});
+    }
+    .pb-#{$i} {
+      padding-block-end: var(--space-#{$i});
+    }
+    .pr-#{$i} {
+      padding-inline-end: var(--space-#{$i});
+    }
   }
 }

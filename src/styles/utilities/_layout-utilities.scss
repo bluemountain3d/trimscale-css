@@ -4,13 +4,14 @@
 /// @example html
 ///   <div class="width-fit-content">Shrinks to content width</div>
 /// ===========================================================================
-
-.width-fit-content {
-  width: fit-content;
-}
-.width-max-content {
-  width: max-content;
-}
-.width-min-content {
-  width: min-content;
+@layer utilities {
+  .width-fit-content {
+    width: fit-content;
+  }
+  .width-max-content {
+    width: max-content;
+  }
+  .width-min-content {
+    width: min-content;
+  }
 }
