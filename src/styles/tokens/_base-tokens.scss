@@ -36,44 +36,46 @@
   initial-value: 8rem;
 }
 
-:root {
-  // ============================================================================
-  // Viewport Unit System
-  // ============================================================================
+@layer tokens {
+  :root {
+    // ============================================================================
+    // Viewport Unit System
+    // ============================================================================
 
-  /// Custom viewport unit that adapts to ultrawide displays
-  /// Standard: 1vw (viewport width)
-  /// Ultrawide (≥21:9 & ≥ $ultrawide-threshold-px): 2vh to prevent excessive scaling
-  --vwx: 1vw;
+    /// Custom viewport unit that adapts to ultrawide displays
+    /// Standard: 1vw (viewport width)
+    /// Ultrawide (≥21:9 & ≥ $ultrawide-threshold-px): 2vh to prevent excessive scaling
+    --vwx: 1vw;
 
-  /// Switch to height-based scaling on ultrawide displays
-  /// Prevents text from becoming too large on very wide screens
-  @media (min-aspect-ratio: 21/9) and (min-height: #{fn.pxToRem(var.$ultrawide-threshold-px)}) {
-    --vwx: 2vh;
+    /// Switch to height-based scaling on ultrawide displays
+    /// Prevents text from becoming too large on very wide screens
+    @media (min-aspect-ratio: 21/9) and (min-height: #{fn.pxToRem(var.$ultrawide-threshold-px)}) {
+      --vwx: 2vh;
+    }
+
+    // ==========================================================================
+    // Fluid Base Values
+    // ==========================================================================
+
+    /// Fluid base font size
+    /// Scales from 16px @ 384px viewport to 20px @ 1536px viewport
+    /// Formula: clamp(1rem, 0.9167rem + 0.3472 * var(--vwx), 1.25rem)
+    --fluid-base: #{fn.fluidFontSize(0, "vwx")};
+
+    /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid
+    /// The old fluid-base/4 formula only ever rounded to 4px or 5px, so the
+    /// continuous interpolation bought nothing once snapped to a pixel grid.
+    /// container-spacing-provider mirrors this same static value.
+    --unit-micro: #{fn.pxToRem(var.$base-grid-size)};
+
+    /// Base spacing unit for large steps, an independent 4px → 8px fluid clamp
+    --unit-macro: round(#{fn.getFluidClamp(4, 8, "vwx")}, 1px);
+
+
+    // ==========================================================================
+    // Global sizing
+    // ==========================================================================
+
+    --header-height: calc(2.75rem + var(--space-3xl));
   }
-
-  // ==========================================================================
-  // Fluid Base Values
-  // ==========================================================================
-
-  /// Fluid base font size
-  /// Scales from 16px @ 384px viewport to 20px @ 1536px viewport
-  /// Formula: clamp(1rem, 0.9167rem + 0.3472 * var(--vwx), 1.25rem)
-  --fluid-base: #{fn.fluidFontSize(0, "vwx")};
-
-  /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid
-  /// The old fluid-base/4 formula only ever rounded to 4px or 5px, so the
-  /// continuous interpolation bought nothing once snapped to a pixel grid.
-  /// container-spacing-provider mirrors this same static value.
-  --unit-micro: #{fn.pxToRem(var.$base-grid-size)};
-
-  /// Base spacing unit for large steps, an independent 4px → 8px fluid clamp
-  --unit-macro: round(#{fn.getFluidClamp(4, 8, "vwx")}, 1px);
-
-
-  // ==========================================================================
-  // Global sizing
-  // ==========================================================================
-
-  --header-height: calc(2.75rem + var(--space-3xl));
 }

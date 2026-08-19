@@ -56,33 +56,35 @@ $space-values: map.merge($space-micro, $space-macro) !default;
   }
 }
 
-:root {
-  // ==========================================================================
-  // T-shirt Size Scale
-  // ==========================================================================
+@layer tokens {
+  :root {
+    // ==========================================================================
+    // T-shirt Size Scale
+    // ==========================================================================
 
-  /// Semantic spacing tokens using t-shirt sizes
-  /// Usage: padding: var(--space-sm); gap: var(--space-lg);
-  @each $size, $factor in $space-micro {
-    --space-#{$size}: calc(var(--unit-micro) * #{$factor}
-    );
-  }
+    /// Semantic spacing tokens using t-shirt sizes
+    /// Usage: padding: var(--space-sm); gap: var(--space-lg);
+    @each $size, $factor in $space-micro {
+      --space-#{$size}: calc(var(--unit-micro) * #{$factor}
+      );
+    }
 
-  @each $size, $factor in $space-macro {
-    --space-#{$size}: calc(var(--unit-macro) * #{$factor});
-  }
+    @each $size, $factor in $space-macro {
+      --space-#{$size}: calc(var(--unit-macro) * #{$factor});
+    }
 
-  // ==========================================================================
-  // Numeric Scale (1-48)
-  // ==========================================================================
+    // ==========================================================================
+    // Numeric Scale (1-48)
+    // ==========================================================================
 
-  /// Numeric spacing tokens for fine-grained control
-  /// Usage: margin-block: var(--space-5); padding-inline: var(--space-12);
-  @for $i from 1 through 6 {
-    --space-#{$i}: calc(var(--unit-micro) * #{$i});
-  }
+    /// Numeric spacing tokens for fine-grained control
+    /// Usage: margin-block: var(--space-5); padding-inline: var(--space-12);
+    @for $i from 1 through 6 {
+      --space-#{$i}: calc(var(--unit-micro) * #{$i});
+    }
 
-  @for $i from 7 through 48 {
-    --space-#{$i}: calc(var(--unit-macro) * #{$i});
+    @for $i from 7 through 48 {
+      --space-#{$i}: calc(var(--unit-macro) * #{$i});
+    }
   }
 }
