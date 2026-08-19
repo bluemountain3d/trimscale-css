@@ -1,0 +1,32 @@
+/// @group Tokens
+/// @name Z-Index Tokens
+/// @description 
+/// ===========================================================================
+
+$z-index: (
+  "dropdown": 100,
+  "sticky": 200,
+  "header": 300,
+  "fixed": 400,
+  "overlay": 500,
+  "drawer": 600,
+  "modal": 700,
+  "popover": 800,
+  "tooltip": 900,
+  "toast": 1000,
+  "skip-link": 1100,
+) !default;
+
+@each $key, $value in $z-index {
+  @property --z-#{$key} {
+    syntax: "<integer>";
+    inherits: true;
+    initial-value: #{$value};
+  }
+}
+
+@layer tokens {
+  @each $key, $value in $z-index {
+    --z-#{$key}: #{$value};
+  }
+}
