@@ -1,0 +1,97 @@
+/// @group Utilities
+/// @name Accessibility Utilities
+/// @description Screen reader and accessibility utilities
+/// ===========================================================================
+
+@layer utilities {
+  // ===========================================================================
+  // Screen Reader Only
+  // ===========================================================================
+
+  /// Visually hide element but keep it accessible to screen readers
+  /// @example
+  ///   <span class="sr-only">Skip to main content</span>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /// Screen reader only content that becomes visible on focus
+  /// Useful for skip links
+  /// @example
+  ///   <a href="#main" class="sr-only-focusable">Skip to content</a>
+  .sr-only-focusable {
+    @extend .sr-only;
+
+    &:focus,
+    &:active {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+    }
+  }
+
+  // ============================================================================
+  // Focus Styles
+  // ============================================================================
+
+  /// Remove focus outline (use with caution - provide alternative!)
+  .focus-none {
+    outline: none;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+  /// Enhanced focus styles for better visibility
+  .focus-visible {
+    &:focus-visible {
+      outline: 2px solid currentColor;
+      outline-offset: 2px;
+    }
+  }
+
+  // ============================================================================
+  // Skip Links
+  // ============================================================================
+
+  /// Common skip link styling
+  .skip-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: var(--z-skip-link);
+    padding: 1rem 2rem;
+    background: var(--color-surface-base, #fff);
+    color: var(--color-text-primary, #000);
+    text-decoration: none;
+    transform: translateY(-100%);
+    transition: transform 0.2s;
+
+    &:focus {
+      transform: translateY(0);
+    }
+  }
+
+  // ============================================================================
+  // Live Region Utilities
+  // ============================================================================
+
+  /// Polite announcements (don't interrupt)
+  /// Assertive announcements (interrupt immediately)
+  .aria-live-polite,
+  .aria-live-assertive {
+    @extend .sr-only;
+  }
+}
