@@ -2,11 +2,15 @@
 /// @name Global Styles
 /// @description Main entry point for all global styles.
 /// Import order is significant:
-/// 1. Tokens — CSS custom properties must be available before base styles
-/// 2. Utilities — utility classes available globally
-/// 3. Base — HTML element defaults, reset, and typography
-/// 4. Components — global component styles (uncomment when folder exists)
+/// 1. Layer — Define CSS Layers specificity order
+/// 2. Tokens — CSS custom properties must be available before base styles
+/// 3. Utilities — utility classes available globally
+/// 4. Base — HTML element defaults, reset, and typography
+/// 5. Components — global component styles (uncomment when folder exists)
 /// ===========================================================================
+
+// Layer — Define CSS Layers specificity order
+@forward './layer';
 
 // Tokens - CSS custom properties
 @forward 'styles/tokens/';

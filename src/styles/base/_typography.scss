@@ -1,3 +1,7 @@
+@use "styles/abstracts/variables" as var;
+@use "styles/abstracts/mixins/" as mx;
+@use "styles/tokens/leading-trim" as *;
+
 /// @group Base
 /// @name Typography
 /// @description Typographic styles for HTML elements using the font setup system
@@ -15,40 +19,37 @@
 /// @see abstracts/variables/font-metrics For raw font data
 /// @see abstracts/mixins/mx_font-setup For mixin documentation
 /// ===========================================================================
+@layer base {
+  // ============================================================================
+  // Document & Body Typography
+  // ============================================================================
 
-@use "styles/abstracts/variables" as var;
-@use "styles/abstracts/mixins/" as mx;
-@use "styles/tokens/leading-trim" as *;
+  body {
+    font-family: var(--font-family-body);
+    line-height: var(--line-height-dynamic);
+    font-size: var(--text-base, 1rem);
+    color: var(--color-text-primary, #000);
+  }
 
-// ============================================================================
-// Document & Body Typography
-// ============================================================================
+  // ============================================================================
+  // Prose Elements
+  // ============================================================================
 
-body {
-  font-family: var(--font-family-body);
-  line-height: 1.5;
-  font-size: var(--text-base, 1rem);
-  color: var(--color-text-primary, #000);
-}
+  strong,
+  b {
+    font-weight: 700;
+  }
 
-// ============================================================================
-// Prose Elements
-// ============================================================================
+  em,
+  i {
+    font-style: italic;
+  }
 
-strong,
-b {
-  font-weight: 700;
-}
+  small {
+    font-size: var(--text-sm);
+  }
 
-em,
-i {
-  font-style: italic;
-}
-
-small {
-  font-size: var(--text-sm);
-}
-
-sup {
-  font-feature-settings: "sups";
+  sup {
+    font-feature-settings: "sups";
+  }
 }

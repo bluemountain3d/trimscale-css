@@ -66,118 +66,119 @@
   initial-value: 1;
 }
 
+@layer tokens {
+  :root {
+    // ==========================================================================
+    // Modular Typographic Scale (100-900)
+    // ==========================================================================
 
-:root {
-  // ==========================================================================
-  // Modular Typographic Scale (100-900)
-  // ==========================================================================
+    /// 100 level - Smallest text (legal, captions)
+    --fs-100: #{fn.fluidFontSize(-2, "vwx")};
 
-  /// 100 level - Smallest text (legal, captions)
-  --fs-100: #{fn.fluidFontSize(-2, "vwx")};
+    /// 200 level - Small text (secondary info, metadata)
+    --fs-200: #{fn.fluidFontSize(-1, "vwx")};
 
-  /// 200 level - Small text (secondary info, metadata)
-  --fs-200: #{fn.fluidFontSize(-1, "vwx")};
+    /// 300 level - Base font size
+    --fs-300: #{fn.fluidFontSize(0, "vwx")};
 
-  /// 300 level - Base font size
-  --fs-300: #{fn.fluidFontSize(0, "vwx")};
+    /// 400 level - Emphasized text
+    --fs-400: #{fn.fluidFontSize(1, "vwx")};
 
-  /// 400 level - Emphasized text
-  --fs-400: #{fn.fluidFontSize(1, "vwx")};
+    /// 500 level - Small heading
+    --fs-500: #{fn.fluidFontSize(2, "vwx")};
 
-  /// 500 level - Small heading
-  --fs-500: #{fn.fluidFontSize(2, "vwx")};
+    /// 600 level - Medium heading
+    --fs-600: #{fn.fluidFontSize(3, "vwx")};
 
-  /// 600 level - Medium heading
-  --fs-600: #{fn.fluidFontSize(3, "vwx")};
+    /// 700 level - Large heading
+    --fs-700: #{fn.fluidFontSize(4, "vwx")};
 
-  /// 700 level - Large heading
-  --fs-700: #{fn.fluidFontSize(4, "vwx")};
+    /// 800 level - Extra large heading
+    --fs-800: #{fn.fluidFontSize(5, "vwx")};
 
-  /// 800 level - Extra large heading
-  --fs-800: #{fn.fluidFontSize(5, "vwx")};
+    /// 900 level - Display heading
+    --fs-900: #{fn.fluidFontSize(6, "vwx")};
 
-  /// 900 level - Display heading
-  --fs-900: #{fn.fluidFontSize(6, "vwx")};
+    // ==========================================================================
+    // Semantic Display Sizes
+    // ==========================================================================
 
-  // ==========================================================================
-  // Semantic Display Sizes
-  // ==========================================================================
+    /// Hero/landing page display text
+    --display-1: var(--fs-900);
 
-  /// Hero/landing page display text
-  --display-1: var(--fs-900);
+    /// Secondary display text
+    --display-2: var(--fs-800);
 
-  /// Secondary display text
-  --display-2: var(--fs-800);
+    // ==========================================================================
+    // Semantic Heading Sizes
+    // ==========================================================================
 
-  // ==========================================================================
-  // Semantic Heading Sizes
-  // ==========================================================================
+    /// Main page heading
+    --heading-1: var(--fs-700);
 
-  /// Main page heading
-  --heading-1: var(--fs-700);
+    /// Section heading
+    --heading-2: var(--fs-600);
 
-  /// Section heading
-  --heading-2: var(--fs-600);
+    /// Subsection heading
+    --heading-3: var(--fs-500);
 
-  /// Subsection heading
-  --heading-3: var(--fs-500);
+    /// Minor heading
+    --heading-4: var(--fs-400);
 
-  /// Minor heading
-  --heading-4: var(--fs-400);
+    // ==========================================================================
+    // Body Text Sizes (linear scale from base)
+    // ==========================================================================
 
-  // ==========================================================================
-  // Body Text Sizes (linear scale from base)
-  // ==========================================================================
+    /// Lead paragraph / intro text
+    --text-lg: var(--fs-400);
 
-  /// Lead paragraph / intro text
-  --text-lg: var(--fs-400);
+    /// Slightly emphasized body text
+    --text-md: #{fn.fluidFontSize(0.5, "vwx")};
 
-  /// Slightly emphasized body text
-  --text-md: #{fn.fluidFontSize(0.5, "vwx")};
+    /// Default body text size
+    --text-base: var(--fs-300);
 
-  /// Default body text size
-  --text-base: var(--fs-300);
+    /// Small body text (E.g. sidebar, captions)
+    --text-sm: calc(var(--fs-300) * 0.875);
 
-  /// Small body text (E.g. sidebar, captions)
-  --text-sm: calc(var(--fs-300) * 0.875);
+    /// Extra small text (E.g. footnotes, legal)
+    --text-xs: calc(var(--fs-300) * 0.75);
 
-  /// Extra small text (E.g. footnotes, legal)
-  --text-xs: calc(var(--fs-300) * 0.75);
+    // ==========================================================================
+    // Font Weights
+    // ==========================================================================
 
-  // ==========================================================================
-  // Font Weights
-  // ==========================================================================
+    @each $name, $value in var.$font-weights {
+      --font-weight-#{"" + $name}: #{$value};
+    }
 
-  @each $name, $value in var.$font-weights {
-    --font-weight-#{"" + $name}: #{$value};
+    // ==========================================================================
+    // Line Heights / Leading
+    // ==========================================================================
+
+    @each $name, $value in var.$line-heights {
+      --line-height-#{$name}: #{$value};
+    }
+    --line-height-dynamic: #{fn.dynamic-line-height()};
+
+    // ==========================================================================
+    // Font Families
+    // ==========================================================================
+
+    --font-family-primary: #{var.$ff-primary};
+    --font-family-secondary: #{var.$ff-secondary};
+    --font-family-tertiary: #{var.$ff-tertiary};
+
+    --font-family-sans: #{var.$ff-sans};
+    --font-family-serif: #{var.$ff-serif};
+    --font-family-mono: #{var.$ff-mono};
+
+    --font-family-display: #{var.$ff-display};
+    --font-family-body: #{var.$ff-body};
+    --font-family-heading: #{var.$ff-heading};
+    --font-family-subheading: #{var.$ff-subheading};
+    --font-family-quote: #{var.$ff-quote};
+    --font-family-code: #{var.$ff-code};
+    --font-family-ui: #{var.$ff-ui};
   }
-
-  // ==========================================================================
-  // Line Heights / Leading
-  // ==========================================================================
-
-  @each $name, $value in var.$line-heights {
-    --line-height-#{$name}: #{$value};
-  }
-  --line-height-dynamic: #{fn.dynamic-line-height()};
-
-  // ==========================================================================
-  // Font Families
-  // ==========================================================================
-
-  --font-family-primary: #{var.$ff-primary};
-  --font-family-secondary: #{var.$ff-secondary};
-  --font-family-tertiary: #{var.$ff-tertiary};
-
-  --font-family-sans: #{var.$ff-sans};
-  --font-family-serif: #{var.$ff-serif};
-  --font-family-mono: #{var.$ff-mono};
-
-  --font-family-display: #{var.$ff-display};
-  --font-family-body: #{var.$ff-body};
-  --font-family-heading: #{var.$ff-heading};
-  --font-family-subheading: #{var.$ff-subheading};
-  --font-family-quote: #{var.$ff-quote};
-  --font-family-code: #{var.$ff-code};
-  --font-family-ui: #{var.$ff-ui};
 }
