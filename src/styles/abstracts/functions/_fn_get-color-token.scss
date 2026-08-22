@@ -2,6 +2,7 @@
 @use "sass:map";
 @use "sass:color";
 @use "sass:meta";
+@use "sass:math";
 
 /// @group Abstracts/Functions
 /// @name Get Color Token
@@ -16,6 +17,8 @@
 /// @param {Map} $tokens - Source map to look up $token in
 /// @param {Number | null} $alpha [null] - Optional alpha (0-1) applied to all
 ///   oklch/hex variants. Token is returned unchanged if null.
+/// @param {number | null} $chroma [null] - Multiplier
+/// @param {number | null} $lightness [null] - Multiplier
 /// @return {Map} Shape: (light: (oklch:, hex:), dark: (oklch:, hex:))
 /// @throws Error if $token doesn't exist in $tokens
 ///
@@ -26,7 +29,7 @@
 ///   );
 /// ===========================================================================
 ///
-@function get-color-token($token, $tokens, $alpha: null) {
+@function get-color-token($token, $tokens, $alpha: null, $lightness: null, $chroma: null) {
 
   @if meta.type-of($tokens) !=map {
     @error "$tokens must be a map, got #{meta.type-of($tokens)}.";
@@ -38,18 +41,51 @@
 
   $value: map.get($tokens, $token);
 
-  @if $alpha ==null {
+  @if $chroma == null and $lightness == null and $alpha ==null {
     @return $value;
   }
 
-  $light: map.get($value, light);
-  $dark: map.get($value, dark);
+  $light-map: map.get($value, light);
+  $light-oklch: map.get($light-map, oklch);
 
-  @return (light: (oklch: color.change(map.get($light, oklch), $alpha: $alpha),
-      hex: color.change(map.get($light, hex), $alpha: $alpha),
+  $dark-map: map.get($value, dark);
+  $dark-oklch: map.get($dark-map, oklch);
+
+  $light-h: color.channel($light-oklch, "hue");
+  $light-c: if(sass($chroma): color.channel($light-oklch, "chroma") * $chroma;
+            else: color.channel($light-oklch, "chroma"));
+  $light-l: if(sass($lightness): color.channel($light-oklch, "lightness") * $lightness;
+            else: color.channel($light-oklch, "lightness"));
+
+  $dark-h: color.channel($dark-oklch, "hue");
+  $dark-c: if(sass($chroma): color.channel($dark-oklch, "chroma") * $chroma;
+           else: color.channel($dark-oklch, "chroma"));
+  $dark-l: if(sass($lightness): color.channel($dark-oklch, "lightness") * $lightness;
+           else: color.channel($dark-oklch, "lightness"));
+
+  $safe-alpha: if(sass($alpha !=null and $alpha > 1): math.div($alpha, 100); else: $alpha);
+
+  $new-light-oklch: color.change(
+    $light-oklch,
+    $lightness: $light-l,
+    $chroma: $light-c,
+    $alpha: if(sass($safe-alpha != null): $safe-alpha; else: color.channel($light-oklch, "alpha"))
+  );
+  $new-dark-oklch: color.change(
+    $dark-oklch,
+    $lightness: $dark-l,
+    $chroma: $dark-c,
+    $alpha: if(sass($safe-alpha != null): $safe-alpha; else: color.channel($dark-oklch, "alpha"))
+  );
+
+  @return (
+    light: (
+      oklch: $new-light-oklch,
+      hex: color.to-space($new-light-oklch, srgb)
     ),
-    dark: (oklch: color.change(map.get($dark, oklch), $alpha: $alpha),
-      hex: color.change(map.get($dark, hex), $alpha: $alpha),
-    ),
+    dark: (
+      oklch: $new-dark-oklch,
+      hex: color.to-space($new-dark-oklch, srgb)
+    )
   );
 }
