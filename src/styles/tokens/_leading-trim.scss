@@ -147,7 +147,7 @@
   ///   whatever line-height is actually computed on the element — set by
   ///   fontSetup, a utility class, or this placeholder's own default — no
   ///   --_line-height custom property needed
-  /// - Formula: (1lh - 1em) * 0.5 subtracts half the leading space
+  /// - Formula: (1lh - 1em) * -0.5 subtracts half the leading space
   /// - trim values are already in em units from leading-trim mixin
   /// - Firefox requires explicit units; Chrome is more forgiving
   ///
@@ -182,12 +182,11 @@
       ///
       /// Formula breakdown:
       /// 1. (1lh - 1em) = total leading space
-      /// 2. * 0.5 = half-leading
-      /// 3. * -1 = negative (to remove space)
-      /// 4. - var(--_top-trim) = subtract font's cap-to-ascender space (already in em)
+      /// 2. * -0.5 = negative half-leading (to remove space)
+      /// 3. - var(--_top-trim) = subtract font's cap-to-ascender space (already in em)
       ///
       /// Example: line-height: 1.5 (1lh = 1.5em), top-trim: 0.196em
-      /// = -1 * ((1.5em - 1em) * 0.5) - 0.196em
+      /// = ((1.5em - 1em) * -0.5) - 0.196em
       /// = -0.25em - 0.196em
       /// = -0.446em (removes this space above cap-height)
       ///
@@ -199,13 +198,13 @@
       &::before {
         content: "";
         display: table; /// Prevents margin collapse
-        margin-bottom: calc(-1 * ((1lh - 1em) * 0.5) - var(--_top-trim));
+        margin-bottom: calc((1lh - 1em) * -0.5 - var(--_top-trim));
       }
 
       &::after {
         content: "";
         display: table; /// Prevents margin collapse
-        margin-bottom: calc(-1 * ((1lh - 1em) * 0.5) - var(--_bottom-trim));
+        margin-bottom: calc((1lh - 1em) * -0.5 - var(--_bottom-trim));
       }
     }
 
