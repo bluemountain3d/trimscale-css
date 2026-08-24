@@ -9,6 +9,7 @@ A framework-agnostic SCSS design system with fluid typography, leading-trim prec
 - [Overview](#overview)
 - [Features](#features)
 - [Project Structure](#project-structure)
+- [Cascade Layers](#cascade-layers)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
   - [Global Import](#global-import)
@@ -60,6 +61,7 @@ The system is pure SCSS. It generates CSS custom properties, utility classes, an
 trimscale-css/
 ├── src/styles/
 │   ├── trimscale.scss              # Main entry point
+│   ├── _layer.scss                 # @layer order — see Cascade Layers
 │   ├── abstracts/
 │   │   ├── variables/              # Breakpoints, colors, font metrics, scale config
 │   │   ├── functions/              # Fluid size calc, OKLCH helpers, unit utils
@@ -75,6 +77,33 @@ trimscale-css/
 │   └── components/                 # Global component styles (e.g. text-box)
 └── styleguide/                     # Vite dev app for visual testing
 ```
+
+---
+
+## Cascade Layers
+
+The layer order is declared once, in `_layer.scss`:
+
+```scss
+@layer reset, tokens, functions, trim, base, layouts, components, utilities;
+```
+
+Layers are listed lowest-to-highest priority — a later layer always beats an earlier one, regardless of selector specificity (short of `!important`). This is what lets utility classes and `fontSetup`-authored component styles override the framework's own defaults with zero specificity management:
+
+| Layer         | Contains                                                                                        |
+| ------------- | ------------------------------------------------------------------------------------------------ |
+| `reset`       | Browser-default reset (lowest priority)                                                          |
+| `tokens`      | CSS custom property declarations on `:root`                                                      |
+| `functions`   | Reserved, currently unused                                                                       |
+| `trim`        | `%text-properties` and the font-role placeholders — leading-trim geometry plus a bare font-size/line-height baseline |
+| `base`        | HTML element defaults (`body`, headings, etc.)                                                   |
+| `layouts`     | Global layout styles (reserved, currently unused)                                                |
+| `components`  | Global component styles — and typically wherever your own `fontSetup`-based component classes live |
+| `utilities`   | All utility classes: spacing, gap, text, layout (highest priority)                               |
+
+Because `trim` sits below `base`, `components`, and `utilities`, everything the trim placeholders set is a *default*: any component class, base element rule, or utility class overrides it automatically. This is also why `.trim-text-*` and a plain `.font-size-*` can be combined freely on the same element — the winner is decided by layer, not by class order or specificity.
+
+**Using [component-scoped import](#component-scoped-import)?** The layer order above only exists once `@forward './layer'` (or the global `@use 'styles/trimscale'`) has been loaded somewhere in your build. If your app never pulls in the global entry point, add `@use 'styles/layer';` once at your app's own entry point too — otherwise layers fall back to first-seen-in-source order, which may not match the stack above.
 
 ---
 
@@ -167,23 +196,23 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 
 **T-shirt sizes:**
 
-| Token         | Multiplier | Base value (at 16 px) |
-| ------------- | ---------- | --------------------- |
-| `--space-3xs` | × 1        | 4 px                  |
-| `--space-2xs` | × 2        | 8 px                  |
-| `--space-xs`  | × 3        | 12 px                 |
-| `--space-sm`  | × 4        | 16 px                 |
-| `--space-md`  | × 5        | 20 px                 |
-| `--space-lg`  | × 6        | 24 px (fixed)         |
-| `--space-xl`  | × 6        | 24 px                 |
-| `--space-2xl` | × 8        | 32 px                 |
-| `--space-3xl` | × 10       | 40 px                 |
-| `--space-4xl` | × 12       | 48 px                 |
-| `--space-5xl` | × 16       | 64 px                 |
-| `--space-6xl` | × 20       | 80 px                 |
-| `--space-7xl` | × 24       | 96 px                 |
-| `--space-8xl` | × 28       | 112 px                |
-| `--space-9xl` | × 32       | 128 px                |
+| Token         | Multiplier | Base value (360 px viewport) | Base value (1440 px viewport) |
+| ------------- | ---------- | ----------------------------- | ------------------------------- |
+| `--space-3xs` | × 1        | 4 px                           | 4 px                            |
+| `--space-2xs` | × 2        | 8 px                           | 8 px                            |
+| `--space-xs`  | × 3        | 12 px                          | 12 px                           |
+| `--space-sm`  | × 4        | 16 px                          | 16 px                           |
+| `--space-md`  | × 5        | 20 px                          | 20 px                           |
+| `--space-lg`  | × 6        | 24 px (fixed)                  | 24 px (fixed)                   |
+| `--space-xl`  | × 6        | 24 px                          | 48 px                           |
+| `--space-2xl` | × 8        | 32 px                          | 64 px                           |
+| `--space-3xl` | × 10       | 40 px                          | 80 px                           |
+| `--space-4xl` | × 12       | 48 px                          | 96 px                           |
+| `--space-5xl` | × 16       | 64 px                          | 128 px                          |
+| `--space-6xl` | × 20       | 80 px                          | 160 px                          |
+| `--space-7xl` | × 24       | 96 px                          | 192 px                          |
+| `--space-8xl` | × 28       | 112 px                         | 224 px                          |
+| `--space-9xl` | × 32       | 128 px                         | 256 px                          |
 
 **Numeric scale:** `--space-1` through `--space-48`. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`.
 
@@ -338,9 +367,9 @@ Returns a self-scaling, unitless `clamp()` line-height ratio — it re-resolves 
 
 ```scss
 // Default curve — prefer the token instead:
-%text-properties { --_line-height: var(--line-height-dynamic); }
+.my-element { line-height: var(--line-height-dynamic); }
 // Custom bounds for a display heading — call the function directly:
-.display-1 { --_line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
+.display-1 { line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
 ```
 
 Prefer the static `--line-height-*` tokens (or `fontSetup`'s `$line-height` param) for most component work; reach for `dynamic-line-height` directly only when you need to change the *default* curve itself.
@@ -376,7 +405,7 @@ Parameters:
 | `$letter-spacing` | value  | `null`       | Letter spacing                                                  |
 | `$text-transform` | string | `null`       | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
 
-Every parameter except `$font` defaults to `null` and is only emitted if you pass it explicitly — omitted parameters simply inherit their value from the font role's placeholder (which includes the dynamic line-height described under [Typography Tokens](#typography-tokens)) rather than being reset to a hardcoded fallback. `$line-height` accepts a unitless number (`1.1`), stored as-is in `--_line-height`, which is always a `<number>`.
+Every parameter except `$font` defaults to `null` and is only emitted as a real CSS property (`font-size`, `line-height`, etc. — set directly, not via custom properties) if you pass it explicitly. Omitted `$font-size`/`$line-height` fall through to the font role's placeholder, which carries a bare baseline of its own (`font-size: var(--text-base)`, `line-height: var(--line-height-dynamic)` — see [Typography Tokens](#typography-tokens)); the other four parameters have no such placeholder default and fall through further, to whatever's inherited (or the CSS initial value). `$line-height` accepts a unitless number (`1.1`).
 
 Valid `$font` roles:
 
@@ -520,9 +549,7 @@ Flex, grid, display, and visibility utilities from `_layout-utilities.scss`.
 
 Text utility classes from `_text-utilities.scss`. They form the **HTML-level API** for the typography system — compose them in markup to apply font roles, sizes, weights, and alignment without writing any SCSS.
 
-Every property below font-family comes in two families: **`.trim-{property}-*`** sets the `--_{property}` custom property consumed by `%text-properties`, so it only has an effect combined with a Trim Text class. Plain **`.{property}-*`** sets the real CSS property directly and works anywhere, trim system or not.
-
-**Trim text** — applies the full typography preset for a font role: font-family, dynamic line-height, and leading-trim metrics together. Font-size is *not* role-specific — every role shares the `--text-base` default, so pair with a Trim Font Size class for role-appropriate sizing:
+**Trim text** — applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset — pair it with the plain `.{property}-*` classes below (or use `fontSetup` when authoring components) for role-specific sizing or anything beyond the baseline:
 
 | Class                  | Role                   |
 | ---------------------- | ---------------------- |
@@ -541,26 +568,26 @@ Every property below font-family comes in two families: **`.trim-{property}-*`**
 | `.trim-text-ui`        | UI elements context    |
 
 ```html
-<h1 class="trim-text-heading trim-font-size-heading-1">Sized heading</h1>
+<h1 class="trim-text-heading font-size-heading-1">Sized heading</h1>
 ```
 
 **Font family** — sets only `font-family`, nothing else; use this to swap typeface without touching size/line-height/trim:
 `.font-family-primary`, `.font-family-secondary`, `.font-family-tertiary`, `.font-family-sans`, `.font-family-serif`, `.font-family-mono`, `.font-family-display`, `.font-family-heading`, `.font-family-subheading`, `.font-family-body`, `.font-family-quote`, `.font-family-code`, `.font-family-ui`
 
 **Font size:**
-`.trim-font-size-*` (sets `--_font-size`, pair with a Trim Text class) and plain `.font-size-*` (sets `font-size` directly) — both come in: `display-1`, `display-2`, `heading-1` → `heading-4`, `text-lg`, `text-md`, `text-base`, `text-sm`, `text-xs`
+`.font-size-*` — `display-1`, `display-2`, `heading-1` → `heading-4`, `text-lg`, `text-md`, `text-base`, `text-sm`, `text-xs`
 
 **Font weight:**
-`.trim-font-weight-*` and plain `.font-weight-*` — `thin` → `black` (thin, extralight, light, normal, medium, semibold, bold, extrabold, black)
+`.font-weight-*` — `thin` → `black` (thin, extralight, light, normal, medium, semibold, bold, extrabold, black)
 
 **Line height:**
-`.trim-line-height-*` and plain `.line-height-*` — `100` → `200` (steps of 5, e.g. `150` = 1.5), plus `dynamic` (the self-scaling default, e.g. `.trim-line-height-dynamic` resets a component's line-height back to it)
+`.line-height-*` — `100` → `200` (steps of 5, e.g. `150` = 1.5), plus `.line-height-dynamic` (the self-scaling default)
 
 **Font style:**
-`.trim-font-style-*` and plain `.font-style-*` — `normal`, `italic`, `oblique`
+`.font-style-*` — `normal`, `italic`, `oblique`
 
 **Text transform:**
-`.trim-text-transform-*` and plain `.text-transform-*` — `capitalize`, `uppercase`, `lowercase`
+`.text-transform-*` — `capitalize`, `uppercase`, `lowercase`
 
 **Text alignment:** `.text-align-left`, `.text-align-center`, `.text-align-right`
 
@@ -568,10 +595,10 @@ Every property below font-family comes in two families: **`.trim-{property}-*`**
 
 ```html
 <h1
-  class="trim-text-heading trim-font-size-heading-1 trim-font-weight-bold">
+  class="trim-text-heading font-size-heading-1 font-weight-bold">
   Page heading
 </h1>
-<p class="trim-text-body trim-font-size-text-base" style="color: var(--color-text-muted);">
+<p class="trim-text-body font-size-text-base" style="color: var(--color-text-muted);">
   Body copy in muted tone.
 </p>
 ```

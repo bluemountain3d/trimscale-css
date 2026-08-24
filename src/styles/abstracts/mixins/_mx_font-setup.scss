@@ -94,33 +94,33 @@ $_valid-font-roles: (
   $letter-spacing: null,
   $text-transform: null
 ) {
-  // Set CSS custom properties for font configuration
-  @if $font-size != null {
-    --_font-size: #{$font-size};
-  }
-  @if $line-height != null {
-    --_line-height: #{$line-height};
-  }
-  @if $font-weight != null {
-    --_font-weight: #{$font-weight};
-  }
-  @if $font-style != null {
-    --_font-style: #{$font-style};
-  }
-  @if $letter-spacing != null {
-    --_letter-spacing: #{$letter-spacing};
-  }
-  @if $text-transform != null {
-    --_text-transform: #{$text-transform};
-  }
-
   // Validate and extend font-specific placeholder
   @if list.index($_valid-font-roles, $font) {
     @extend %#{$font}-text;
   } @else {
     @error 'Invalid font role: "#{$font}". Valid roles are: #{$_valid-font-roles}';
   }
-
+  
+  // Apply typography properties directly (no --_* indirection — these
+  // have no calc() dependents, unlike the trim metrics on %text-properties)
+  @if $font-size != null {
+    font-size: #{$font-size};
+  }
+  @if $line-height != null {
+    line-height: #{$line-height};
+  }
+  @if $font-weight != null {
+    font-weight: #{$font-weight};
+  }
+  @if $font-style != null {
+    font-style: #{$font-style};
+  }
+  @if $letter-spacing != null {
+    letter-spacing: #{$letter-spacing};
+  }
+  @if $text-transform != null {
+    text-transform: #{$text-transform};
+  }
   // Allow additional custom styles via content block
   @content;
 }

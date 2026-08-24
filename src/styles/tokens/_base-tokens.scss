@@ -58,7 +58,7 @@
     // ==========================================================================
 
     /// Fluid base font size
-    /// Scales from 16px @ 384px viewport to 20px @ 1536px viewport
+    /// Scales from 16px @ 360px viewport to 20px @ 1440px viewport
     /// Formula: clamp(1rem, 0.9167rem + 0.3472 * var(--vwx), 1.25rem)
     --fluid-base: #{fn.fluidFontSize(0, "vwx")};
 

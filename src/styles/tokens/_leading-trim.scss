@@ -27,7 +27,9 @@
 /// - Contextual: %display-text, %heading-text, %body-text, %quote-text, %code-text, %ui-text
 ///
 /// Base placeholder:
-/// - %text-properties: Core typography properties without font-specific metrics
+/// - %text-properties: Shared trim geometry (margins + pseudo-element formulas)
+///   plus a bare font-size/line-height baseline — pair with fontSetup or plain
+///   utility classes for role-specific sizing and everything else
 ///
 /// Usage: Extend placeholders OR use fontSetup mixin (recommended)
 ///
@@ -38,15 +40,15 @@
 /// @see abstracts/variables/font-metrics For source data
 ///
 /// @example scss - Direct usage (not recommended)
-///   .heading {
+///   .heading-1 {
 ///     @extend %heading-text;
-///     --_font-size: var(--heading-1);
-///     --_line-height: 1.1em;
-///     --_font-weight: 700;
+///     font-size: var(--heading-1);
+///     line-height: 1.1;
+///     font-weight: 700;
 ///   }
 ///
 /// @example scss - Via mixin (recommended)
-///   .heading {
+///   .heading-1 {
 ///     @include mx.fontSetup($font: 'heading', $font-size: var(--heading-1));
 ///   }
 /// ===========================================================================
@@ -104,42 +106,6 @@
   --_rsb-adjust: #{_getFontMetric($font, "rsb-adjust")}em;
 }
 
-@property --_font-size {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 1rem;
-}
-
-@property --_line-height {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1.5;
-}
-
-@property --_font-weight {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 400;
-}
-
-@property --_font-style {
-  syntax: "normal | italic | oblique";
-  inherits: true;
-  initial-value: normal;
-}
-
-@property --_letter-spacing {
-  syntax: "<length>| normal";
-  inherits: true;
-  initial-value: normal;
-}
-
-@property --_text-transform {
-  syntax: "none | capitalize | uppercase | lowercase";
-  inherits: true;
-  initial-value: none;
-}
-
 @property --_top-trim {
   syntax: "<length>";
   inherits: true;
@@ -163,36 +129,33 @@
   inherits: true;
   initial-value: 0em;
 }
+
 @layer trim {
   /// Base text properties placeholder
-  /// Provides core typography system without font-specific metrics
-  /// All properties controllable via CSS custom properties
+  /// Provides trim geometry plus a bare typographic baseline: font-size and
+  /// line-height default to --text-base / --line-height-dynamic, so any
+  /// placeholder is usable standalone rather than depending on inheritance
+  /// (e.g. body's own defaults) staying intact. Font-weight, font-style,
+  /// letter-spacing, and text-transform are left unset — the CSS initial
+  /// values already match what we'd set anyway. Override any of these via
+  /// fontSetup or the plain utility classes in utilities/text-utilities;
+  /// the four --_* metrics stay custom properties since they only exist to
+  /// feed the calc() formulas below.
   ///
   /// IMPLEMENTATION NOTES:
-  /// - Pseudo-elements (::before, ::after) use simplified calc() formulas
-  /// - Formula: (line-height - 1) * -0.5em subtracts half the leading space
+  /// - Pseudo-elements (::before, ::after) use the 'lh' unit, which reads
+  ///   whatever line-height is actually computed on the element — set by
+  ///   fontSetup, a utility class, or this placeholder's own default — no
+  ///   --_line-height custom property needed
+  /// - Formula: (1lh - 1em) * -0.5 subtracts half the leading space
   /// - trim values are already in em units from leading-trim mixin
   /// - Firefox requires explicit units; Chrome is more forgiving
   ///
-  /// @property {String} --_font-size [var(--text-base)] - Font size
-  /// @property {Number} --_line-height [1.5] - Line height multiplier (unitless)
-  /// @property {Number} --_font-weight [400] - Font weight
-  /// @property {String} --_font-style [normal] - Font style
-  /// @property {String} --_letter-spacing [0] - Letter spacing
-  /// @property {String} --_text-transform [none] - Text transform
   /// @property {Length} --_top-trim [0] - Top trim value in em (set by font placeholders)
   /// @property {Length} --_bottom-trim [0] - Bottom trim value in em (set by font placeholders)
   /// @property {Length} --_lsb-adjust [0] - Left side bearing adjustment in em
   /// @property {Length} --_rsb-adjust [0] - Right side bearing adjustment in em
   %text-properties {
-    /// Default typography values, overridable via CSS custom properties
-    --_font-size: var(--text-base); // Clamps
-    --_line-height: var(--line-height-dynamic); // Clamps
-    --_font-weight: var(--font-weight-normal);
-    --_font-style: normal;
-    --_letter-spacing: 0;
-    --_text-transform: none;
-
     /// Default metrics
     --_top-trim: 0;
     --_bottom-trim: 0;
@@ -202,14 +165,10 @@
     /// Creates block formatting context to prevent margin collapse
     display: flow-root;
 
-    /// Apply typography values
-    font-size: var(--_font-size);
-    line-height: var(--_line-height);
-    font-weight: var(--_font-weight);
-    font-style: var(--_font-style);
-    letter-spacing: var(--_letter-spacing);
-    text-transform: var(--_text-transform);
+    /// Apply default typography values
     text-rendering: geometricPrecision;
+    font-size: var(--text-base);
+    line-height: var(--line-height-dynamic);
     margin-left: var(--_lsb-adjust);
     margin-right: var(--_rsb-adjust);
 
@@ -218,68 +177,34 @@
     /// browser versions drops below our threshold — check analytics, not
     /// Baseline's "Widely available" date (documentation delay, not usage).
     @supports not (text-box-trim: trim-both) {
-
-      /// Trim excess space above cap-height
+      /// Trim excess space above cap-height, using the 'lh' unit
+      /// The 'lh' unit equals the computed line-height of the element
       ///
       /// Formula breakdown:
-      /// 1. (var(--_line-height) - 1) = excess leading space (unitless)
-      /// 2. * -0.5em = convert to negative half-leading in em
+      /// 1. (1lh - 1em) = total leading space
+      /// 2. * -0.5 = negative half-leading (to remove space)
       /// 3. - var(--_top-trim) = subtract font's cap-to-ascender space (already in em)
       ///
-      /// Example: line-height: 1.5, top-trim: 0.196em
-      /// = (1.5 - 1) * -0.5em - 0.196em
-      /// = 0.5 * -0.5em - 0.196em
+      /// Example: line-height: 1.5 (1lh = 1.5em), top-trim: 0.196em
+      /// = ((1.5em - 1em) * -0.5) - 0.196em
       /// = -0.25em - 0.196em
       /// = -0.446em (removes this space above cap-height)
+      ///
+      /// 'lh' unit dropped the em-based (line-height - 1) fallback previously
+      /// kept here for pre-2023 browsers: 'lh' now sits at the same Baseline
+      /// support tier as other unfallbacked features already shipped in this
+      /// system (e.g. dynamic-line-height's atan2()), and unsupported traffic
+      /// degrades softly (no trim applied, not broken layout).
       &::before {
         content: "";
         display: table; /// Prevents margin collapse
-        margin-bottom: calc((var(--_line-height) - 1) * -0.5em - var(--_top-trim));
+        margin-bottom: calc((1lh - 1em) * -0.5 - var(--_top-trim));
       }
 
-      /// Trim excess space below baseline
-      ///
-      /// Formula breakdown:
-      /// 1. (var(--_line-height) - 1) = excess leading space (unitless)
-      /// 2. * -0.5em = convert to negative half-leading in em
-      /// 3. - var(--_bottom-trim) = subtract font's descender-to-baseline space (already in em)
-      ///
-      /// Example: line-height: 1.5, bottom-trim: 0.144em
-      /// = (1.5 - 1) * -0.5em - 0.144em
-      /// = -0.25em - 0.144em
-      /// = -0.394em (removes this space below baseline)
       &::after {
         content: "";
         display: table; /// Prevents margin collapse
-        margin-bottom: calc((var(--_line-height) - 1) * -0.5em - var(--_bottom-trim));
-      }
-
-      /// Enhanced version using 'lh' unit for simpler calculations
-      /// The 'lh' unit equals the computed line-height of the element
-      ///
-      /// Browser support for 'lh' unit:
-      /// - Chrome 113+ (May 2023)
-      /// - Firefox 120+ (November 2023)
-      /// - Safari 16.4+ (March 2023)
-      ///
-      /// Formula using 'lh':
-      /// - (1lh - 1em) = total leading space
-      /// - * 0.5 = half-leading
-      /// - * -1 = negative (to remove space)
-      /// - - var(--_top-trim/bottom-trim) = subtract font metrics
-      ///
-      /// Benefits over em-based calc:
-      /// - More accurate for complex line-height values
-      /// - Simpler formula (no manual line-height - 1 calculation)
-      /// - Automatically respects computed line-height
-      @supports (margin: 1lh) {
-        &::before {
-          margin-bottom: calc(-1 * ((1lh - 1em) * 0.5) - var(--_top-trim));
-        }
-
-        &::after {
-          margin-bottom: calc(-1 * ((1lh - 1em) * 0.5) - var(--_bottom-trim));
-        }
+        margin-bottom: calc((1lh - 1em) * -0.5 - var(--_bottom-trim));
       }
     }
 

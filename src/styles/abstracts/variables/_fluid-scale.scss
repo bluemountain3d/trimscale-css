@@ -12,8 +12,8 @@
 
 /// Fluid typography scale configuration
 /// @type Map
-/// @prop {Number} min-width - Minimum viewport width in pixels (384px)
-/// @prop {Number} max-width - Maximum viewport width in pixels (1536px)
+/// @prop {Number} min-width - Minimum viewport width in pixels (360px)
+/// @prop {Number} max-width - Maximum viewport width in pixels (1440px)
 /// @prop {Number} min-font-size - Base font size at min viewport (16px)
 /// @prop {Number} max-font-size - Base font size at max viewport (20px)
 /// @prop {Number} min-type-scale - Modular scale ratio at min viewport (1.2 - Minor Third)
@@ -21,11 +21,11 @@
 /// @prop {Number} precision - Decimal precision for calculations (4)
 /// @link https://type-scale.com/ Type scale calculator
 /// @example
-///   // At 384px viewport: base = 16px, scale = 1.2
+///   // At 360px viewport: base = 16px, scale = 1.2
 ///   // Level 1: 16 * 1.2 = 19.2px
 ///   // Level 2: 16 * 1.2^2 = 23.04px
 ///
-///   // At 1536px viewport: base = 20px, scale = 1.333
+///   // At 1440px viewport: base = 20px, scale = 1.333
 ///   // Level 1: 20 * 1.333 = 26.66px
 ///   // Level 2: 20 * 1.333^2 = 35.54px
 $fluid-scale: (

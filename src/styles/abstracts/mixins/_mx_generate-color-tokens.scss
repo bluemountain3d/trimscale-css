@@ -1,6 +1,13 @@
+@use "styles/abstracts/variables" as var;
+@use "styles/abstracts/functions" as fn;
+
+@use 'sass:map';
+@use 'sass:math';
+@use 'sass:color';
+
 /// @group Abstracts/Mixins
 /// @name Generate Color Tokens
-/// Emits CSS custom properties for every token in $color-tokens with a
+/// Emits CSS custom properties for every token in $base-color-tokens with a
 /// progressive-enhancement fallback chain:
 ///
 ///   1. Plain hex          — works everywhere, no color-scheme awareness
@@ -12,26 +19,22 @@
 /// rather than branched — no duplicated logic per browser tier.
 /// ===========================================================================
 
-@use "styles/abstracts/variables" as var;
-@use "styles/abstracts/functions" as fn;
-
-@use 'sass:map';
-
 /// @access public
-/// @param {Map} $tokens [var.$color-tokens] - Map shaped `(name: (light: (oklch:, hex:), dark: (oklch:, hex:)))`
+/// @param {Map} $tokens [var.$base-color-tokens] - Map shaped `(name: (light: (oklch:, hex:), dark: (oklch:, hex:)))`
 /// @param {String} $defaultScheme [light] - Which scheme (`light` or `dark`) backs the plain-hex fallback tier
 /// @param {String} $prefix ["color"] - Custom-property prefix, i.e. `--#{$prefix}-#{name}`
 /// @example scss - Extend the palette with a project-specific token
-///   $brand-tokens: (
+///   $brand-color-tokens: (
 ///     "brand-primary": (
 ///       light: (oklch: oklch(0.55 0.15 250), hex: #4a5fc1),
 ///       dark: (oklch: oklch(0.7 0.12 250), hex: #8fa0e8),
+///       alpha: 0.75,
 ///     ),
 ///   );
-///   @include generate-color-tokens($tokens: $brand-tokens, $defaultScheme: dark);
-///   // → --color-brand-primary, with the full hex/oklch/light-dark fallback chain
+///   @include generate-color-tokens($tokens: $brand-color-tokens, $defaultScheme: dark);
+///   // → --color-brand-primary, with the full hex|rgba/oklch/light-dark fallback chain
 ///
-@mixin generate-color-tokens($tokens: var.$color-tokens, $defaultScheme: light, $prefix: "color") {
+@mixin generate-color-tokens($tokens: var.$base-color-tokens, $defaultScheme: light, $prefix: "color") {
 
   @each $name, $modes in $tokens {
     @property --#{$prefix}-#{$name} {
@@ -49,10 +52,13 @@
     @each $name, $modes in $tokens {
       $light-hex: map.get(map.get($modes, light), hex);
       $dark-hex: map.get(map.get($modes, dark), hex);
+      $alpha: map.get($modes, alpha);
 
       // Sets the default theme as a fallback for older browsers
-      $fallback-hex: if(sass($defaultScheme ==dark): $dark-hex; else: $light-hex);
-      --#{$prefix}-#{$name}: #{$fallback-hex};
+      $fallback-hex: if(sass($defaultScheme == dark): $dark-hex; else: $light-hex);
+      $safe-alpha: if(sass($alpha != null and $alpha > 1): math.div($alpha, 100); else: $alpha);
+      $fallback-color: if(sass($alpha != null): rgba($fallback-hex, $safe-alpha); else: $fallback-hex);
+      --#{$prefix}-#{$name}: #{$fallback-color};
     }
   }
 
@@ -67,8 +73,11 @@
       @each $name, $modes in $tokens {
         $light-oklch: map.get(map.get($modes, light), oklch);
         $dark-oklch: map.get(map.get($modes, dark), oklch);
+        $alpha: map.get($modes, alpha);
 
-        $fallback-oklch: if(sass($defaultScheme ==dark): $dark-oklch; else: $light-oklch);
+        $safe-alpha: if(sass($alpha != null and $alpha > 1): math.div($alpha, 100); else: $alpha);
+        $fallback-oklch: if(sass($defaultScheme == dark): $dark-oklch; else: $light-oklch);
+        $fallback-oklch: if(sass($alpha != null): color.change($fallback-oklch, $alpha: $safe-alpha); else: $fallback-oklch);
         --#{$prefix}-#{$name}: #{$fallback-oklch};
       }
     }
@@ -84,8 +93,13 @@
       @each $name, $modes in $tokens {
         $light-oklch: map.get(map.get($modes, light), oklch);
         $dark-oklch: map.get(map.get($modes, dark), oklch);
+        $alpha: map.get($modes, alpha);
 
-        --#{$prefix}-#{$name}: light-dark(#{$light-oklch}, #{$dark-oklch});
+        $safe-alpha: if(sass($alpha != null and $alpha > 1): math.div($alpha, 100); else: $alpha);
+        $light-val: if(sass($alpha != null): color.change($light-oklch, $alpha: $safe-alpha); else: $light-oklch);
+        $dark-val: if(sass($alpha != null): color.change($dark-oklch, $alpha: $safe-alpha); else: $dark-oklch);
+
+        --#{$prefix}-#{$name}: light-dark(#{$light-val}, #{$dark-val});
       }
     }
   }

@@ -4,10 +4,11 @@
 /// @name Dynamic line-height
 /// 
 /// Fluid, self-scaling line-height using a unitless clamp() ratio.
-/// Set once on %text-properties — automatically pairs with ANY font-size,
-/// including sizes outside the modular scale, since the underlying
-/// tan(atan2()) division resolves against each element's own computed
-/// font-size at render time.
+/// Exposed as the --line-height-dynamic token and set once as the base
+/// line-height (see base/_typography.scss) — automatically pairs with ANY
+/// font-size, including sizes outside the modular scale, since the
+/// underlying tan(atan2()) division resolves against each element's own
+/// computed font-size at render time.
 ///
 /// @access public
 /// @param {Number} $fs-base [16] - Pin point (px, unitless): the font-size where $ratio-base applies exactly
@@ -18,9 +19,9 @@
 /// @return {String} Unitless CSS clamp() expression, self-scaling per element
 ///
 /// @example scss
-///   %text-properties { --_line-height: #{dynamic-line-height()}; }
+///   body { line-height: #{dynamic-line-height()}; }
 /// @example scss - Custom bounds
-///   .display-1 { --_line-height: #{dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
+///   .display-1 { line-height: #{dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
 ///
 @function dynamic-line-height(
   $fs-base: 16,
