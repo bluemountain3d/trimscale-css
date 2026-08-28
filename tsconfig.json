@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    // 1. Filstruktur
+    // "rootDir": "./src",
+    // "outDir": "./dist",
+
+    // 2. Miljö & Moduler
+    "module": "nodenext",
+    "target": "es2024", // Låst till ett modernt, stabilt år (eller esnext)
+    "moduleResolution": "nodenext", // Följer automatiskt med 'module', men bra att vara tydlig
+    "lib": ["es2024"],
+    "types": ["node"],
+
+    // 3. Typ-generering och Maps
+    // "sourceMap": true,
+    // "declaration": true,
+    // "declarationMap": true,
+
+    // 4. Strikthet (Dina val här var exemplariska)
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedSideEffectImports": true, // TS 5.6+
+
+    // 5. Modern syntax och kompilering
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+
+    // (Frivilligt) Lås import-casing för att undvika Linux/Mac-strul
+    "forceConsistentCasingInFileNames": true,
+
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["scripts/**/*", "models/**/*", "*.ts"],
+  "exclude": ["styleguide/**/*"]
+}
