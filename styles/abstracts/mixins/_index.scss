@@ -4,7 +4,6 @@
 /// Forwards spacing system, font setup, and responsive breakpoint mixins.
 /// ===========================================================================
 
-@forward "./mx_spacing-system";
 @forward "./mx_font-setup";
 @forward "./mx_breakpoints";
 @forward "./mx_generate-color-tokens";

@@ -1,3 +1,4 @@
+
 @use "sass:map";
 
 /// @group Tokens
@@ -21,8 +22,8 @@ $space-micro: (
   "xs": 3,
   "sm": 4,
   "md": 5,
-  "lg": 6) !default;
-
+  "lg": 6,
+) !default;
 $space-macro: (
   "xl": 6,
   "2xl": 8,
@@ -32,7 +33,8 @@ $space-macro: (
   "6xl": 20,
   "7xl": 24,
   "8xl": 28,
-  "9xl": 32) !default;
+  "9xl": 32,
+) !default;
 
 $space-values: map.merge($space-micro, $space-macro) !default;
 
@@ -44,7 +46,7 @@ $space-values: map.merge($space-micro, $space-macro) !default;
   @property --space-#{$size} {
     syntax: "<length>";
     inherits: true;
-    initial-value: 1rem;
+    initial-value: 0.25rem;
   }
 }
 
@@ -52,7 +54,7 @@ $space-values: map.merge($space-micro, $space-macro) !default;
   @property --space-#{$i} {
     syntax: "<length>";
     inherits: true;
-    initial-value: 1rem;
+    initial-value: 0.25rem;
   }
 }
 
