@@ -37,7 +37,7 @@
 
   strong,
   b {
-    font-weight: 700;
+    font-weight: var(--font-weight-bold, 700);
   }
 
   em,
@@ -46,10 +46,14 @@
   }
 
   small {
-    font-size: var(--text-sm);
+    font-size: 0.875em;
   }
 
   sup {
     font-feature-settings: "sups";
+  }
+
+  sub {
+    font-feature-settings: "subs";
   }
 }

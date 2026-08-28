@@ -26,6 +26,7 @@
   /// text-transform are left unset — pair with a plain utility class below,
   /// or use fontSetup, for those.
   /// =========================================================================
+  
   .trim-text-primary {
     @extend %primary-text;
   }
@@ -77,8 +78,6 @@
   .trim-text-ui {
     @extend %ui-text;
   }
-
-  
 
   /// =========================================================================
   /// Non "trim" specific utility classes
