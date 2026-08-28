@@ -93,7 +93,7 @@
     ///
     @each $chars in (45, 50, 55, 60, 65, 70, 75) {
       &-#{$chars} {
-        max-width: calc(var(--text-base) * #{var.$avgCharWidth-body * $chars});
+        max-width: calc(var(--text-base) * var(--avg-char-width-body, 1ch) * $chars);
       }
     }
 

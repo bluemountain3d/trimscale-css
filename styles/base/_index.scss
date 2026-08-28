@@ -1,7 +1,8 @@
+
 /// @group Base
 /// @name Base Styles
 /// @description Entry point for all base styles.
-/// Forwards fonts, reset, base defaults, typography, and accessibility utilities.
+/// Forwards fonts, reset, base defaults, and typography.
 /// Import order matters — reset must come before base and typography.
 /// ===========================================================================
 
@@ -9,4 +10,3 @@
 @forward './reset';
 @forward './base';
 @forward './typography';
-@forward './a11y';

@@ -3,10 +3,6 @@
 /// @description Utility functions for working with CSS units
 /// ===========================================================================
 
-@use "styles/abstracts/variables" as var;
-// Only import functions from function files to avoid dependency cycle
-// @use '../functions/fn-other-function' as *;
-
 // Sass built-in modules - Only import what you actually use
 @use "sass:math";
 
@@ -29,12 +25,12 @@
 
 /// Convert pixels to rem
 /// @param {Number} $px - Pixel value to convert
-/// @param {Number} $base [$var.base-font-size] - Base font size in pixels
+/// @param {Number} $base [16px] - Base font size in pixels (assumes 1rem == 16px)
 /// @return {Number} Value in rem
 /// @example
 ///   font-size: pxToRem(24px); // Returns: 1.5rem
 ///   font-size: pxToRem(24); // Returns: 1.5rem
-@function pxToRem($px, $base: var.$base-font-size) {
+@function pxToRem($px, $base: 16px) {
   // Validate input
   @if math.is-unitless($px) {
     $px: $px * 1px;
@@ -49,11 +45,11 @@
 
 /// Convert rem to pixels
 /// @param {Number} $rem - Rem value to convert
-/// @param {Number} $base [$var.base-font-size] - Base font size in pixels
+/// @param {Number} $base [16px] - Base font size in pixels (assumes 1rem == 16px)
 /// @return {Number} Value in pixels
 /// @example
 ///   max-width: remToPx(48rem); // Returns: 768px
-@function remToPx($rem, $base: var.$base-font-size) {
+@function remToPx($rem, $base: 16px) {
   @if math.is-unitless($rem) {
     $rem: $rem * 1rem;
   }
