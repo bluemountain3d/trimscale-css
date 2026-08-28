@@ -1,3 +1,4 @@
+
 // Direct partial import (not the functions index) — the index also forwards
 // fn_fluid-typography-and-spacing, which @uses this very variables module,
 // and going through it here would create a circular dependency.
@@ -5,10 +6,7 @@
 
 /// @group Abstracts/Variables
 /// @name Colors
-/// @description Raw Sass color variables (hex) for the design system palette.
-/// Light mode: cool slate-blue tone with warm off-white surfaces.
-/// Dark mode: retains original deep navy/gold palette.
-/// These are converted to OKLCH CSS custom properties in tokens/_color-tokens.scss.
+/// @description Generated from trimscale.config.ts — see there for the source palette.
 /// ===========================================================================
 
 // ============================================================================
@@ -16,94 +14,118 @@
 // ============================================================================
 
 /// @group Abstracts/Variables
-/// @name Color Tokens
-/// @type Map
-/// @example scss
-///   $color-tokens: (
-///     "surface-base": (
-///       light: (oklch: oklch(0.973 0.003 264), hex: #f5f6f8),
-///       dark: (oklch: oklch(0.214 0.008 274), hex: #18191d),
-///     ),
-///     // ...
-///   );
-///
-$color-tokens: (
-  // Surface
-  "surface-base": (
-    light: (oklch: oklch(0.973 0.003 264), hex: #f5f6f8),
-    dark: (oklch: oklch(0.214 0.008 274), hex: #18191d),
-  ),
-  "surface-elevated": (
-    light: (oklch: oklch(1 0 0), hex: #ffffff),
-    dark: (oklch: oklch(0.29 0.021 270), hex: #272B36),
-  ),
-  "surface-mid": (
-    light: (oklch: oklch(0.949 0.008 271), hex: #eceef4),
-    dark: (oklch: oklch(0.253 0.015 274), hex: #20222a),
-  ),
-
-  // Golden
-  "gold-light": (
-    light: (oklch: oklch(0.921 0.07 100), hex: #efe7b1),
-    dark: (oklch: oklch(0.921 0.07 100), hex: #efe7b1),
-  ),
-  "gold-dark": (
-    light: (oklch: oklch(0.551 0.099 81), hex: #8F6B22),
-    dark: (oklch: oklch(0.351 0.037 48), hex: #4b352a),
-  ),
-
-  // Accent
-  "accent": (
-    light: (oklch: oklch(0.543 0.102 272), hex: #5B6BAB),
-    dark: (oklch: oklch(0.733 0.045 74), hex: #baa58a),
-  ),
-
-  // Action
-  "action": (
-    light: (oklch: oklch(0.485 0.105 271), hex: #495a9a),
-    dark: (oklch: oklch(0.66 0.057 270), hex: #8491b6),
-  ),
-  "action-hover": (
-    light: (oklch: oklch(0.651 0.085 270), hex: #7b8dc4),
-    dark: (oklch: oklch(0.78 0.067 270), hex: #a6b6e3),
-  ),
-  "action-muted": (
-    light: (oklch: oklch(0.734 0.0543 269), hex: #9ba8cc),
-    dark: (oklch: oklch(0.559 0.048 270), hex: #697391),
-  ),
-
-  // Text
-  "text-primary": (
-    light: (oklch: oklch(0.228 0.014 273), hex: #1a1c23),
-    dark: (oklch: oklch(0.943 0 0), hex: #ececec),
-  ),
-  "text-muted": (
-    light: (oklch: oklch(0.39 0 0), hex: #454545),
-    dark: (oklch: oklch(0.783 0 0), hex: #b8b8b8),
-  ),
-  "text-contrast": (
-    light: (oklch: oklch(0 0 0), hex: #000000),
-    dark: (oklch: oklch(1 0 0), hex: #ffffff),
-  ),
-
-  // A11y Focus
-  "a11y-focus": (
-    light: (oklch: oklch(0.526 0.135 251), hex: #1f6db5),
-    dark: (oklch: oklch(0.68 0.106 246), hex: #5e9ed6),
-  ),
-);
+/// @name Default Scheme
+/// @type String
+$default-scheme: light;
 
 /// @group Abstracts/Variables
-/// @name Alias Tokens
+/// @name Base Color Tokens
 /// @type Map
-/// @example scss
-///   "scroll-thumb": get-color-token("action", $color-tokens),
-///   // → reuses the "action" entry's full light/dark oklch+hex shape
-///
-$color-semantic-aliases: (
-  // "alias name": "token-name";
-  "scroll-thumb": fn.get-color-token("action", $color-tokens),
-  "scroll-thumb-hover": fn.get-color-token("action-hover", $color-tokens),
-  "scroll-thumb-active": fn.get-color-token("action-muted", $color-tokens),
-  "scroll-background": fn.get-color-token("surface-base", $color-tokens),
-);
+$base-color-tokens: (
+  "prefix": "color",
+  "tokens": (
+    "surface-base": (
+      "light": (
+        "oklch": oklch(0.973 0.003 264),
+        "hex": #f5f6f8,
+      ),
+      "dark": (
+        "oklch": oklch(0.214 0.008 274),
+        "hex": #18191d,
+      ),
+    ),
+    "surface-elevated": (
+      "light": (
+        "oklch": oklch(1 0 0),
+        "hex": #ffffff,
+      ),
+      "dark": (
+        "oklch": oklch(0.29 0.021 270),
+        "hex": #272B36,
+      ),
+    ),
+    "surface-mid": (
+      "light": (
+        "oklch": oklch(0.949 0.008 271),
+        "hex": #eceef4,
+      ),
+      "dark": (
+        "oklch": oklch(0.253 0.015 274),
+        "hex": #20222a,
+      ),
+    ),
+    "action": (
+      "light": (
+        "oklch": oklch(0.485 0.105 271),
+        "hex": #495a9a,
+      ),
+      "dark": (
+        "oklch": oklch(0.66 0.057 270),
+        "hex": #8491b6,
+      ),
+    ),
+    "action-hover": (
+      "light": (
+        "oklch": oklch(0.651 0.085 270),
+        "hex": #7b8dc4,
+      ),
+      "dark": (
+        "oklch": oklch(0.78 0.067 270),
+        "hex": #a6b6e3,
+      ),
+    ),
+    "action-muted": (
+      "light": (
+        "oklch": oklch(0.734 0.0543 269),
+        "hex": #9ba8cc,
+      ),
+      "dark": (
+        "oklch": oklch(0.559 0.048 270),
+        "hex": #697391,
+      ),
+    ),
+  ),
+) !default;
+
+
+/// @group Abstracts/Variables
+/// @name Campaign Color Tokens
+/// @type Map
+  $campaign-color-tokens: (
+  "prefix": "campaign",
+  "tokens": (
+    "gold-light": (
+      "light": (
+        "oklch": oklch(0.921 0.07 100),
+        "hex": #efe7b1,
+      ),
+      "dark": (
+        "oklch": oklch(0.921 0.07 100),
+        "hex": #efe7b1,
+      ),
+    ),
+    "gold-dark": (
+      "light": (
+        "oklch": oklch(0.551 0.099 81),
+        "hex": #8F6B22,
+      ),
+      "dark": (
+        "oklch": oklch(0.351 0.037 48),
+        "hex": #4b352a,
+      ),
+    ),
+  ),
+) !default;
+
+
+/// @group Abstracts/Variables
+/// @name Semantic Alias Tokens
+/// @type Map
+/// @see fn_get-color-token For the function used to build each entry
+$semantic-color-aliases: (
+  "prefix": "color",
+  "tokens": (
+    "scroll-thumb": fn.get-color-token("action", $base-color-tokens, $opacity: 1, $lightness: (light: 0.75, dark: 1.333), $chroma: (light: 0.8, dark: 1.2)),
+  ),
+) !default;
+

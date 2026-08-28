@@ -1,3 +1,4 @@
+
 @use "styles/abstracts/variables" as var;
 @use "styles/abstracts/mixins" as mx;
 @use "styles/abstracts/functions" as fn;
@@ -35,7 +36,13 @@
   // ============================================================================
   // CSS CUSTOM PROPERTIES (:root)
   // ============================================================================
+  
+  // Base Color Tokens
+  @include mx.generate-color-tokens();
 
-  @include mx.generate-color-tokens($tokens: var.$color-tokens, $defaultScheme: dark);
-  @include mx.generate-color-tokens($tokens: var.$color-semantic-aliases, $defaultScheme: dark);
+  // Campaign Color Tokens
+  @include mx.generate-color-tokens($tokens: var.$campaign-color-tokens);
+
+  // Semantic Color Aliases
+  @include mx.generate-color-tokens($tokens: var.$semantic-color-aliases);
 }
