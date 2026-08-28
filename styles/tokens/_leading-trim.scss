@@ -1,3 +1,8 @@
+ 
+@use 'styles/abstracts/variables' as var;
+@use 'sass:map';
+@use 'sass:math';
+
 /// @group Tokens
 /// @name Leading Trim - Text Box Trim Polyfill
 /// @description Emulates CSS text-box-trim by removing excess vertical space
@@ -52,20 +57,14 @@
 ///     @include mx.fontSetup($font: 'heading', $font-size: var(--heading-1));
 ///   }
 /// ===========================================================================
-
-@use "styles/abstracts/variables" as var;
-@use "sass:map";
-@use "sass:math";
-
-
-
+ 
 /// Get font metric value for a given font role and property
 /// @access private
 /// @param {String} $font-key - Font role key (e.g., 'primary', 'body', 'heading')
 /// @param {String} $property - Metric property name (e.g., 'top-trim', 'bottom-trim')
 /// @return {Number} Normalized metric value from font data
 @function _getFontMetric($font-key, $property) {
-  $font-name: map.get(var.$fonts, $font-key);
+  $font-name: map.get(var.$font-roles, $font-key);
   @return map.get(map.get(var.$font-metrics, $font-name), $property);
 }
 
@@ -76,7 +75,7 @@
 /// Chrome is more forgiving but Firefox will not compute unitless values
 ///
 /// @access private
-/// @param {String} $font ['primary'] - Font role key from $fonts map
+/// @param {String} $font ['primary'] - Font role key from $font-roles map
 /// @output CSS custom properties with em units for trim values and side bearings
 ///
 /// @example scss - Output
@@ -86,14 +85,14 @@
 ///   --_rsb-adjust: -0.0789em;
 ///
 @mixin leading-trim($font: "primary") {
-  $_fontName: map.get(var.$fonts, $font);
+  $_fontName: map.get(var.$font-roles, $font);
 
   /// Font-specific vertical metrics (normalized to em units)
-  /// Calculate from font file: (hhea ascender - cap-height) / UPM
+  /// Calculate from font file: (OS/2 ascender - cap-height) / UPM
   /// Units (em) appended here for Firefox calc() compatibility
   --_top-trim: #{math.abs(_getFontMetric($font, "top-trim"))}em;
 
-  /// Calculate from font file: abs(hhea descender) / UPM
+  /// Calculate from font file: abs(OS/2 descender) / UPM
   /// Units (em) appended here for Firefox calc() compatibility
   --_bottom-trim: #{math.abs(_getFontMetric($font, "bottom-trim"))}em;
 
@@ -105,31 +104,31 @@
   /// Units (em) appended here for Firefox calc() compatibility
   --_rsb-adjust: #{_getFontMetric($font, "rsb-adjust")}em;
 }
-
+ 
 @property --_top-trim {
-  syntax: "<length>";
+  syntax: '<length>';
   inherits: true;
   initial-value: 0em;
 }
 
 @property --_bottom-trim {
-  syntax: "<length>";
+  syntax: '<length>';
   inherits: true;
   initial-value: 0em;
 }
 
 @property --_lsb-adjust {
-  syntax: "<length>";
+  syntax: '<length>';
   inherits: true;
   initial-value: 0em;
 }
 
 @property --_rsb-adjust {
-  syntax: "<length>";
+  syntax: '<length>';
   inherits: true;
   initial-value: 0em;
 }
-
+ 
 @layer trim {
   /// Base text properties placeholder
   /// Provides trim geometry plus a bare typographic baseline: font-size and
@@ -196,13 +195,13 @@
       /// system (e.g. dynamic-line-height's atan2()), and unsupported traffic
       /// degrades softly (no trim applied, not broken layout).
       &::before {
-        content: "";
+        content: '';
         display: table; /// Prevents margin collapse
         margin-bottom: calc((1lh - 1em) * -0.5 - var(--_top-trim));
       }
 
       &::after {
-        content: "";
+        content: '';
         display: table; /// Prevents margin collapse
         margin-bottom: calc((1lh - 1em) * -0.5 - var(--_bottom-trim));
       }
@@ -215,110 +214,84 @@
       text-box-edge: cap alphabetic;
     }
   }
+}
 
-  // ============================================================================
-  // Font-Specific Placeholders
-  // ============================================================================
-  // Each placeholder extends %text-properties and applies font-specific metrics
-  //
-  // IMPORTANT: All placeholders must @extend %text-properties BEFORE the mixin
-  // This ensures ::before and ::after pseudo-elements are inherited
-  // Sass does not allow @extend inside mixins across files
-  //
-  // Use these directly OR via fontSetup mixin (recommended)
-
-  // Hierarchical font roles
-  /// Primary font with leading trim applied
-  /// Extends base text properties and applies primary font metrics
-  %primary-text {
+ @layer trim {
+  /// ============================================================================
+  /// Font-Specific Placeholders
+  /// ============================================================================
+  /// Each placeholder extends %text-properties and applies font-specific metrics
+  ///
+  /// IMPORTANT: All placeholders must @extend %text-properties BEFORE the mixin
+  /// This ensures ::before and ::after pseudo-elements are inherited
+  /// Sass does not allow @extend inside mixins across files
+  ///
+  /// Use these directly OR via fontSetup mixin (recommended)
+  
+    %primary-text {
     @extend %text-properties;
-    @include leading-trim("primary");
+    @include leading-trim('primary');
     font-family: var(--font-family-primary);
   }
-
-  /// Secondary font with leading trim applied
   %secondary-text {
     @extend %text-properties;
-    @include leading-trim("secondary");
+    @include leading-trim('secondary');
     font-family: var(--font-family-secondary);
   }
-
-  /// Tertiary font with leading trim applied
   %tertiary-text {
     @extend %text-properties;
-    @include leading-trim("tertiary");
+    @include leading-trim('tertiary');
     font-family: var(--font-family-tertiary);
   }
-
-  // Category font roles
-  /// Sans-serif font with leading trim applied
   %sans-text {
     @extend %text-properties;
-    @include leading-trim("sans");
+    @include leading-trim('sans');
     font-family: var(--font-family-sans);
   }
-
-  /// Serif font with leading trim applied
   %serif-text {
     @extend %text-properties;
-    @include leading-trim("serif");
+    @include leading-trim('serif');
     font-family: var(--font-family-serif);
   }
-
-  /// Monospace font with leading trim applied
   %mono-text {
     @extend %text-properties;
-    @include leading-trim("mono");
+    @include leading-trim('mono');
     font-family: var(--font-family-mono);
   }
-
-  // Contextual font roles
-  /// Display text font with leading trim applied
   %display-text {
     @extend %text-properties;
-    @include leading-trim("display");
+    @include leading-trim('display');
     font-family: var(--font-family-display);
   }
-
-  /// Heading text font with leading trim applied
   %heading-text {
     @extend %text-properties;
-    @include leading-trim("heading");
+    @include leading-trim('heading');
     font-family: var(--font-family-heading);
   }
-
-  /// Heading text font with leading trim applied
   %subheading-text {
     @extend %text-properties;
-    @include leading-trim("subheading");
+    @include leading-trim('subheading');
     font-family: var(--font-family-subheading);
   }
-
-  /// Body text font with leading trim applied
   %body-text {
     @extend %text-properties;
-    @include leading-trim("body");
+    @include leading-trim('body');
     font-family: var(--font-family-body);
   }
-
-  /// Quote text font with leading trim applied
   %quote-text {
     @extend %text-properties;
-    @include leading-trim("quote");
+    @include leading-trim('quote');
     font-family: var(--font-family-quote);
   }
-
-  /// Code text font with leading trim applied
   %code-text {
     @extend %text-properties;
-    @include leading-trim("code");
+    @include leading-trim('code');
     font-family: var(--font-family-code);
   }
-
-  /// UI text font with leading trim applied
   %ui-text {
     @extend %text-properties;
-    @include leading-trim("ui");
+    @include leading-trim('ui');
     font-family: var(--font-family-ui);
   }
+
 }
