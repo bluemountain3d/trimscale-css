@@ -1,7 +1,22 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit"
+  },
   "cSpell.words": [
+    "bbox",
+    "extralight",
+    "fontkit",
     "nums",
+    "oklch",
     "Oldstyle",
-    "unfallbacked"
+    "trimscale",
+    "ultrawide",
+    "unfallbacked",
+    "wght",
+    "unitless",
+    "phablet",
+    "Unlayered",
+    "styleguide",
+    "viewports"
   ]
 }
