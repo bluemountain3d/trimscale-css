@@ -75,7 +75,7 @@ Import via:
 
 ### `mx.fontSetup`
 
-`fontSetup` is the **SCSS component API** for the typography system. Use it when writing component SCSS and you want to apply a font role together with size, weight, and line-height in a single declaration. For HTML-level styling, use `.trim-text-*` and the other [text utility](utility-classes.md) classes instead, `.trim-text-*` is the class-based equivalent of `fontSetup`'s font-role preset.
+`fontSetup` is the **SCSS component API** for the typography system. Use it when writing component SCSS and you want to apply a font role together with size, weight, and line-height in a single declaration. For HTML-level styling, use `.trim-text-*` and the other [typography utility](utility-classes.md) classes instead, `.trim-text-*` is the class-based equivalent of `fontSetup`'s font-role preset.
 
 ```scss
 @include mx.fontSetup(

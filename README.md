@@ -62,7 +62,7 @@ trimscale-css/
 │   │   └── mixins/                   # fontSetup, breakpoints, color token generation
 │   ├── tokens/                       # CSS custom properties (generated)
 │   ├── base/                         # HTML defaults: reset, fonts, typography (generated fonts + typography)
-│   ├── utilities/                    # Spacing, gap, and text utility classes
+│   ├── utilities/                    # Spacing, gap, and typography utility classes
 │   └── components/                   # Empty by default, see examples.md
 └── styleguide/                       # Vite dev app for visual testing
 ```
@@ -77,7 +77,7 @@ trimscale-css/
 | [cascade-layers.md](docs/cascade-layers.md)                   | The `@layer` stack and why it matters          |
 | [design-tokens.md](docs/design-tokens.md)                     | Every generated CSS custom property            |
 | [abstracts.md](docs/abstracts.md)                             | Functions, mixins, and the breakpoint API      |
-| [utility-classes.md](docs/utility-classes.md)                 | Spacing, gap, and text utility classes         |
+| [utility-classes.md](docs/utility-classes.md)                 | Spacing, gap, and typography utility classes   |
 | [examples.md](docs/examples.md)                               | Copy-paste component recipes (text-box)        |
 | [customizing-spacing.md](docs/customizing-spacing.md)         | Coupled vs. independent spacing, tuning tiers  |
 | [customizing-breakpoints.md](docs/customizing-breakpoints.md) | Changing breakpoint values                     |

@@ -35,7 +35,7 @@ npx trimscale-css generate
 # or, once init has added the script: npm run trimscale:generate / pnpm trimscale:generate / yarn trimscale:generate
 ```
 
-Reads your `trimscale.config.ts` and writes every generated file: font metrics, `@font-face` rules (unless `appFonts.nextFont` is true), the fluid type scale, breakpoints, typography tokens, leading trim placeholders, text utilities, spacing tokens, and color tokens.
+Reads your `trimscale.config.ts` and writes every generated file: font metrics, `@font-face` rules (unless `appFonts.nextFont` is true), the fluid type scale, breakpoints, typography tokens, leading trim placeholders, typography utilities, spacing tokens, and color tokens.
 
 Re-run this any time you change the config. Wire it into your own build pipeline (a `prebuild` or `predev` script) rather than treating it as a one time step, since the generated files live inside `node_modules/trimscale-css` and get reset by a fresh install.
 
@@ -74,7 +74,7 @@ This single import includes:
 
 - All CSS custom property tokens
 - HTML element defaults and reset
-- Utility classes (spacing, gap, text, layout)
+- Utility classes (spacing, gap, typography)
 
 ### Component-Scoped Import
 

@@ -137,7 +137,7 @@
   /// (e.g. body's own defaults) staying intact. Font-weight, font-style,
   /// letter-spacing, and text-transform are left unset — the CSS initial
   /// values already match what we'd set anyway. Override any of these via
-  /// fontSetup or the plain utility classes in utilities/text-utilities;
+  /// fontSetup or the plain utility classes in utilities/typography-utilities;
   /// the four --_* metrics stay custom properties since they only exist to
   /// feed the calc() formulas below.
   ///

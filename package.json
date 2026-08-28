@@ -27,7 +27,7 @@
     "generate-fluid-scale": "node ./scripts/generateFluidScale.ts",
     "generate-typography": "node ./scripts/generateTypography.ts",
     "generate-leading-trim": "node ./scripts/generateLeadingTrim.ts",
-    "generate-text-utilities": "node ./scripts/generateTextUtilities.ts"
+    "generate-typography-utilities": "node ./scripts/generateTypographyUtilities.ts"
   },
   "keywords": [],
   "author": "",
