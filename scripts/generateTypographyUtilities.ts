@@ -1,0 +1,154 @@
+import * as fs from 'node:fs'
+import path from 'node:path'
+import { loadConfig } from './loadConfig.ts'
+
+const cfg = await loadConfig()
+
+// Font Role Placeholders =====================================================================
+/** Builds a `.trim-text-{role}` utility class per `cfg.fontRoles` key, each extending the matching `%{role}-text` placeholder from `_leading-trim.scss`. */
+const trimTextUtilities = (): string => {
+  const arr: string[] = Object.entries(cfg.fontRoles).map(([key]) => {
+    return `
+  .trim-text-${key} {
+    @extend %${key}-text;
+  }
+`
+  })
+
+  return `${arr.join('')}`
+}
+
+// Output =====================================================================
+const output = `
+@use 'styles/abstracts/variables' as var;
+@use 'styles/tokens/leading-trim' as *;
+
+/// @group Utilities
+/// @name Text Utilities
+/// @description Utility classes for font family, size, weight, style, and alignment.
+/// \`.trim-text-{role}\` applies a font-family, leading-trim metrics (margins +
+/// pseudo-element formulas), and a bare font-size/line-height baseline
+/// (--text-base / --line-height-dynamic) for the given role. Font-weight,
+/// font-style, letter-spacing, and text-transform are left unset — pair it
+/// with the plain \`.{property}-*\` utility classes below (or with fontSetup,
+/// for component authoring) for role-specific sizing or anything beyond the
+/// baseline. Plain \`.{property}-*\` classes set the real CSS property
+/// directly and work anywhere, trim system or not. Roles are defined in
+/// abstracts/variables/typography.
+/// @example html
+///   <h1 class="trim-text-heading font-size-heading-1">Sized heading</h1>
+///   <span class="font-family-mono">inline code-style snippet</span>
+///   <span class="font-size-text-sm">plain, no trim system involved</span>
+/// ===========================================================================
+@layer utilities {
+  /// =========================================================================
+  /// Trim Text — font-family, leading-trim metrics, and a bare font-size/
+  /// line-height baseline per font role. Weight, style, letter-spacing, and
+  /// text-transform are left unset — pair with a plain utility class below,
+  /// or use fontSetup, for those.
+  /// =========================================================================
+  ${trimTextUtilities()}
+  /// =========================================================================
+  /// Non "trim" specific utility classes
+  /// =========================================================================
+
+  /// Font Family — sets only font-family, nothing else
+  @each $key, $value in var.$font-roles {
+    .font-family-#{$key} {
+      font-family: var(--font-family-#{$key});
+    }
+  }
+
+  /// Font Size — sets font-size directly, no trim system dependency
+  @each $key, $value in var.$semantic-font-sizes {
+    .font-size-#{$key} {
+      font-size: var(--#{$key});
+    }
+  }
+
+  /// Line Height — sets line-height directly, no trim system dependency
+  @each $key, $value in var.$line-heights {
+    .line-height-#{$key} {
+      line-height: var(--line-height-#{$key});
+    }
+  }
+  .line-height-dynamic {
+    line-height: var(--line-height-dynamic);
+  }
+
+  /// Font Weight — sets font-weight directly, no trim system dependency
+  @each $key, $value in var.$font-weights {
+    .font-weight-#{$key} {
+      font-weight: var(--font-weight-#{$key});
+    }
+  }
+
+  /// Font Style — sets font-style directly, no trim system dependency
+  @each $item in (normal, italic, oblique) {
+    .font-style-#{$item} {
+      font-style: #{$item};
+    }
+  }
+
+  /// Text Transform — sets text-transform directly, no trim system dependency
+  @each $item in (capitalize, uppercase, lowercase) {
+    .text-transform-#{$item} {
+      text-transform: #{$item};
+    }
+  }
+
+  /// Text Align
+  .text-align-left {
+    text-align: left;
+  }
+  .text-align-center {
+    text-align: center;
+  }
+  .text-align-right {
+    text-align: right;
+  }
+
+  /// Lining figures (default) — baseline-aligned, for UI/values
+  .num-lining-tabular {
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  .num-lining-proportional {
+    font-variant-numeric: lining-nums proportional-nums;
+  }
+
+  /// Oldstyle figures — varying baseline, for running text/editorial contexts
+  .num-oldstyle-tabular {
+    font-variant-numeric: oldstyle-nums tabular-nums;
+  }
+
+  .num-oldstyle-proportional {
+    font-variant-numeric: oldstyle-nums proportional-nums;
+  }
+
+  /// Ordinal
+  .num-ordinal-tabular {
+    font-variant-numeric: ordinal-nums tabular-nums;
+  }
+
+  .num-ordinal-proportional {
+    font-variant-numeric: ordinal-nums proportional-nums;
+  }
+
+  /// Text color
+  /// Only \`.text-color-inherit\` ships by default. Unlike font roles, color
+  /// token names aren't a contract enforced anywhere else in the system (see
+  /// fontSetup's required $font-roles roles for contrast) — a project is free to
+  /// name its $color-tokens however it likes, so a fixed set of
+  /// \`.text-color-*\` classes here would risk going silently dead the moment
+  /// a project doesn't use these exact token names. Add your own next to your
+  /// project's palette instead.
+  .text-color-inherit {
+    color: inherit;
+  }
+}
+`
+
+const outFile = path.join(import.meta.dirname, '../styles/utilities/_typography-utilities.scss')
+fs.writeFileSync(outFile, output)
+console.log('- Typography utility classes is written to file')
