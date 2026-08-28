@@ -1,223 +1,192 @@
 /// @group Abstracts/Mixins
 /// @name Responsive Breakpoints
-/// @description Auto-generated responsive breakpoint mixins
+/// @description Generic responsive breakpoint mixins, driven by the $breakpoints map
 /// Provides consistent media query patterns across the design system
 /// @example
-///   @use '@styles/abstracts/mixins/mx_breakpoints' as bp;
+///   @use 'styles/abstracts/mixins/mx_breakpoints' as bp;
 ///
 ///   .component {
 ///     padding: var(--space-sm);
 ///
-///     @include bp.tablet-and-up {
+///     @include bp.and-up('tablet') {
 ///       padding: var(--space-md);
 ///     }
 ///
-///     @include bp.desktop-and-up {
+///     @include bp.and-up('desktop') {
 ///       padding: var(--space-lg);
 ///     }
 ///   }
 /// ===========================================================================
 
-@use "styles/abstracts/variables/breakpoints" as bp;
+@use 'styles/abstracts/functions' as fn;
+@use "styles/abstracts/variables" as var;
 @use "sass:map";
+@use "sass:meta";
+@use "sass:math";
+@use "sass:list";
 
-// ============================================================================
-// And Up Mixins (includes breakpoint and larger)
-// ============================================================================
+/// Get Breakpoint value 
+/// @access private
+/// @param {string | number} $breakpoint - string matching key in $breakpoints map or number
+///   (unitless number is treated as px)
+/// @param {boolean} $next [false] - If set and $breakpoint is a string to true the value 
+///   will be the breakpoint that comes after $breakpoint.
+/// @return {number} - As CSS Rem unit
+@function _get-bp-value($breakpoint, $next: false) {
+  @if meta.type-of($breakpoint)==string {
+      $keys: map.keys(var.$breakpoints);
+      $index: list.index($keys, $breakpoint);
+  
+      @if $index {
+        @if $next {
+          // Get the NEXT value (if not at the last position)
+          @if $index < list.length($keys) {
+            $next-key: list.nth($keys, $index + 1);
+            @return map.get(var.$breakpoints, $next-key);
+          }
+          @else {
+            @error "There is no breakpoint after '#{$breakpoint}' in the your config. You cannot use 'and-down' on the largest size, use 'up-to' instead.";
+          }
+        }
+        @else {
+          // Get CURRENT value
+          @return map.get(var.$breakpoints, $breakpoint);
+        }
+      }
+      @else {
+        @error "Breakpoint '#{$breakpoint}' does not exist in your config. Valid values ​​are: #{$keys}";
+      }
+    }
 
-/// Media query: `(width >= 22.5rem)` / 360px and up
-/// @content Styles to apply at this breakpoint and wider
-/// @example
-///   @include tablet-and-up {
-///     font-size: var(--text-lg);
-///   }
-///   // Output: @media (min-width: 48rem) { ... }
+  @else if meta.type-of($breakpoint)==number {
+    @if $next {
+      @error "You cannot use 'and-down' (which looks for the next value) when passing an exact number like #{$breakpoint}. Use 'up-to' instead.";
+    }
+    @return if(sass(math.is-unitless($breakpoint)): fn.pxToRem($breakpoint, var$base-font-size) ; else: $breakpoint);
+  }
+
+  @error "$breakpoint must be a number or a valid string. You passed in a #{meta.type-of($breakpoint)}.";
+}
+
+/// @group Abstracts/Mixins
+/// @name Up To Breakpoint
 ///
-@mixin mobile-and-up {
-  @media (min-width: map.get(bp.$breakpoints, "mobile")) {
-    @content;
-  }
-}
-
-/// Media query: `(width >= 30rem)` / 480px and up
-/// @content Styles to apply at this breakpoint and wider
-@mixin phablet-and-up {
-  @media (min-width: map.get(bp.$breakpoints, "phablet")) {
-    @content;
-  }
-}
-
-/// Media query: `(width >= 45rem)` / 720px and up
-/// @content Styles to apply at this breakpoint and wider
-@mixin tablet-and-up {
-  @media (min-width: map.get(bp.$breakpoints, "tablet")) {
-    @content;
-  }
-}
-
-/// Media query: `(width >= 60rem)` / 960px and up
-/// @content Styles to apply at this breakpoint and wider
-@mixin tablet-lg-and-up {
-  @media (min-width: map.get(bp.$breakpoints, "tablet-lg")) {
-    @content;
-  }
-}
-
-/// Media query: `(width >= 75rem)` / 1200px and up
-/// @content Styles to apply at this breakpoint and wider
-@mixin laptop-and-up {
-  @media (min-width: map.get(bp.$breakpoints, "laptop")) {
-    @content;
-  }
-}
-
-/// Media query: `(width >= 90rem)` / 1440px and up
-/// @content Styles to apply at this breakpoint and wider
-@mixin desktop-and-up {
-  @media (min-width: map.get(bp.$breakpoints, "desktop")) {
-    @content;
-  }
-}
-
-// ============================================================================
-// Up To Mixins (excludes the breakpoint itself)
-// ============================================================================
-
-/// Media query: `(width < 30rem)` — below phablet
-/// @content Styles to apply below this breakpoint
-/// @example
-///   @include up-to-tablet {
-///     display: none;
-///   }
-///   // Output: @media (max-width: 47.99rem) { ... }
+/// Applies styles below the given breakpoint (exclusive).
 ///
-@mixin up-to-phablet {
-  @media #{bp.$bp-up-to-phablet} {
-    @content;
-  }
-}
-
-/// Media query: `(width < 45rem)` — below tablet
-/// @content Styles to apply below this breakpoint
-@mixin up-to-tablet {
-  @media #{bp.$bp-up-to-tablet} {
-    @content;
-  }
-}
-
-/// Media query: `(width < 60rem)` — below tablet-lg
-/// @content Styles to apply below this breakpoint
-@mixin up-to-tablet-lg {
-  @media #{bp.$bp-up-to-tablet-lg} {
-    @content;
-  }
-}
-
-/// Media query: `(width < 75rem)` — below laptop
-/// @content Styles to apply below this breakpoint
-@mixin up-to-laptop {
-  @media #{bp.$bp-up-to-laptop} {
-    @content;
-  }
-}
-
-/// Media query: `(width < 90rem)` — below desktop
-/// @content Styles to apply below this breakpoint
-@mixin up-to-desktop {
-  @media #{bp.$bp-up-to-desktop} {
-    @content;
-  }
-}
-
-// ============================================================================
-// And Down Mixins (includes the breakpoint and smaller)
-// ============================================================================
-
-/// Media query: `(width < 45rem)` — mobile and phablet only
-/// (there is no desktop-and-down — desktop is the largest breakpoint, use up-to-desktop instead)
-/// @content Styles to apply at this breakpoint and smaller
+/// @type mixin
+/// @param {string | number} $breakpoint - Key in $breakpoints, or a custom px/rem number
 /// @example
-///   @include tablet-and-down {
-///     grid-template-columns: 1fr;
-///   }
-///   // Output: @media (max-width: 48rem) { ... }
+///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+/// 
+///   @include bp.up-to('tablet') {...}
+///   Render: @media (width < 45rem) {...}
+/// 
+///   @include bp.up-to(684px) {...}
+///   Render: @media (width < 42.75rem) {...}
+/// 
+@mixin up-to($breakpoint) {
+  $value: _get-bp-value($breakpoint);
+  @media (width < #{$value}) {
+    @content;
+  }
+}
+
+/// @group Abstracts/Mixins
+/// @name Breakpoint And Up
 ///
-@mixin phablet-and-down {
-  @media #{bp.$bp-phablet-and-down} {
-    @content;
-  }
-}
-
-/// Media query: `(width < 60rem)` — tablet and smaller
-/// @content Styles to apply at this breakpoint and smaller
-@mixin tablet-and-down {
-  @media #{bp.$bp-tablet-and-down} {
-    @content;
-  }
-}
-
-/// Media query: `(width < 75rem)` — tablet-lg and smaller
-/// @content Styles to apply at this breakpoint and smaller
-@mixin tablet-lg-and-down {
-  @media #{bp.$bp-tablet-lg-and-down} {
-    @content;
-  }
-}
-
-/// Media query: `(width < 90rem)` — laptop and smaller
-/// @content Styles to apply at this breakpoint and smaller
-@mixin laptop-and-down {
-  @media #{bp.$bp-laptop-and-down} {
-    @content;
-  }
-}
-
-// ============================================================================
-// Only Mixins (specific breakpoint range)
-// ============================================================================
-
-/// Media query: `(22.5rem <= width < 30rem)` — mobile range only
-/// @content Styles to apply only within this breakpoint's range
+/// Applies styles at the given breakpoint and wider (inclusive).
+///
+/// @type mixin
+/// @param {string | number} $breakpoint - Key in $breakpoints, or a custom px/rem number
 /// @example
-///   @include tablet-only {
-///     columns: 2;
-///   }
-///   // Output: @media (min-width: 48rem) and (max-width: 71.99rem) { ... }
+///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+/// 
+///   @include bp.and-up('tablet') {...}
+///   Render: @media (width >= 45rem) {...} // 720px -->
+/// 
+///   @include bp.and-up(684) {...}
+///   Render: @media (width >= 42.75rem) {...} // 684px -->
 ///
-@mixin mobile-only {
-  @media #{bp.$bp-mobile-only} {
+@mixin and-up($breakpoint) {
+  $value: _get-bp-value($breakpoint);
+  @media (width >= #{$value}) {
     @content;
   }
 }
 
-/// Media query: `(30rem <= width < 45rem)` — phablet range only
-/// @content Styles to apply only within this breakpoint's range
-@mixin phablet-only {
-  @media #{bp.$bp-phablet-only} {
+/// @group Abstracts/Mixins
+/// @name Breakpoint And Down
+///
+/// Applies styles below the *next* breakpoint after the given one —
+/// i.e. at the given breakpoint and everything smaller.
+///
+/// @type mixin
+/// @param {string} $breakpoint - Key in $breakpoints (numbers not supported — use `up-to` instead)
+/// @example
+///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+/// 
+///   @include bp.and-down("tablet") {...}
+///   Render: @media (width < 60rem) {...} // <-- 959.98px if next breakpoint after "tablet" is 60rem.
+/// 
+///   // Number input is not possible, use `up-to` instead if a custom number is needed.
+///
+@mixin and-down($breakpoint) {
+  $value: _get-bp-value($breakpoint, $next: true);
+  @media (width < #{$value}) {
     @content;
   }
 }
 
-/// Media query: `(45rem <= width < 60rem)` — tablet range only
-/// @content Styles to apply only within this breakpoint's range
-@mixin tablet-only {
-  @media #{bp.$bp-tablet-only} {
+/// @group Abstracts/Mixins
+/// @name Between Min and Max Breakpoint
+///
+/// Applies styles between two breakpoints — from $min (inclusive)
+/// up to $max (exclusive).
+///
+/// @type mixin
+/// @param {string | number} $min - Key in $breakpoints, or a custom px/rem number
+/// @param {string | number} $max - Key in $breakpoints, or a custom px/rem number
+/// @example
+///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+/// 
+///   @include bp.between('tablet', 'laptop') {...}
+///   Render: @media (45rem <= width < 60rem) {...} // 720px <--> 1199.98px
+/// 
+///   @include bp.between(512px, 636px) {...}
+///   Render: @media (32rem <= width < 39.75rem) {...} // 512px <--> 635.98px
+/// 
+@mixin between($min, $max) {
+  $min-value: _get-bp-value($min);
+  $max-value: _get-bp-value($max);
+  @media (#{$min-value} <=width < #{$max-value}) {
     @content;
   }
 }
 
-/// Media query: `(60rem <= width < 75rem)` — tablet-lg range only
-/// @content Styles to apply only within this breakpoint's range
-@mixin tablet-lg-only {
-  @media #{bp.$bp-tablet-lg-only} {
-    @content;
+/// @group Abstracts/Mixins
+/// @name Only Breakpoint
+///
+/// Applies styles only within the given breakpoint's own range —
+/// from itself up to (but not including) the next breakpoint.
+///
+/// @type mixin
+/// @param {string} $breakpoint - Key in $breakpoints (numbers not supported — use `between` instead)
+/// @example
+///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+/// 
+///   @include bp.only("tablet") {...}
+///   Render: @media (width < 60rem) {...} // <-- 959.98px if next breakpoint after "tablet" is 60rem.
+/// 
+///   // Number input is not possible, use `between` instead if a span between two custom numbers is needed.
+///
+@mixin only($breakpoint) {
+  @if meta.type-of($breakpoint)==number {
+    @error "You cannot use 'only' with just a single number (#{$breakpoint}). Use @include between(#{$breakpoint}, YOUR_MAX_VALUE) instead";
   }
-}
 
-/// Media query: `(75rem <= width < 90rem)` — laptop range only
-/// @content Styles to apply only within this breakpoint's range
-@mixin laptop-only {
-  @media #{bp.$bp-laptop-only} {
+  $min-value: _get-bp-value($breakpoint);
+  $max-value: _get-bp-value($breakpoint, $next: true);
+  @media (#{$min-value} <=width < #{$max-value}) {
     @content;
   }
 }
@@ -233,13 +202,13 @@
 ///     grid-template-columns: 1fr;
 ///
 ///     // Tablet and up
-///     @include tablet-and-up {
+///     @include bp.and-up('tablet') {
 ///       padding: var(--space-md);
 ///       grid-template-columns: repeat(2, 1fr);
 ///     }
 ///
 ///     // Desktop and up
-///     @include desktop-and-up {
+///     @include bp.and-up('desktop') {
 ///       padding: var(--space-lg);
 ///       grid-template-columns: repeat(3, 1fr);
 ///     }
@@ -251,12 +220,12 @@
 ///     width: 300px;
 ///
 ///     // Tablet and down
-///     @include tablet-and-down {
+///     @include bp.and-down('tablet') {
 ///       width: 200px;
 ///     }
 ///
 ///     // Up to tablet (mobile + phablet)
-///     @include up-to-tablet {
+///     @include bp.up-to('tablet') {
 ///       width: 100%;
 ///     }
 ///   }
@@ -264,7 +233,7 @@
 /// @example scss - Specific breakpoint only
 ///   .feature {
 ///     // Only visible on tablet
-///     @include tablet-only {
+///     @include bp.only('tablet') {
 ///       display: block;
 ///     }
 ///   }
@@ -274,19 +243,19 @@
 ///     font-size: var(--fs-500);
 ///
 ///     // Show different content on mobile
-///     @include mobile-only {
+///     @include bp.only('mobile') {
 ///       .hero__subtitle {
 ///         display: none;
 ///       }
 ///     }
 ///
 ///     // Medium screens get medium size
-///     @include tablet-and-up {
+///     @include bp.and-up('tablet') {
 ///       font-size: var(--fs-600);
 ///     }
 ///
 ///     // Large screens get large size
-///     @include laptop-and-up {
+///     @include bp.and-up('laptop') {
 ///       font-size: var(--fs-700);
 ///     }
 ///   }
