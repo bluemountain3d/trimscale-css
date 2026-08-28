@@ -1,162 +1,93 @@
 # Adding a Font
 
-This guide covers every step needed to integrate a new typeface into trimscale-css, from extracting font metrics to assigning the font to roles in the system.
+Font metrics, `@font-face` declarations, and role assignment are all generated automatically from your actual font files, there's no metrics database to hand-edit. This guide covers the three things you still do yourself: place the font file, configure it, and assign it to roles.
 
 ## Overview
 
-Four files are always involved. A fifth is optional if you want to swap an existing role:
+| Step | File | What you do there |
+|------|------|-------------------|
+| 1 | Your fonts directory (`appFonts.fontPath`) | Add the font file |
+| 2 | [`trimscale.config.ts`](../trimscale.config.ts) | Add a fallback (optional) and map it to one or more `fontRoles` |
+| 3 | Run `npx trimscale-css generate` | Extracts metrics via fontkit, writes `_font-metrics.scss` and `_fonts.scss` |
 
-| File                                                                                                    | What you do there                                 |
-| ------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| [`src/styles/abstracts/variables/_font-metrics.scss`](../styles/abstracts/variables/_font-metrics.scss) | Add the raw metrics entry                         |
-| [`src/styles/base/_fonts.scss`](../styles/base/_fonts.scss)                                             | Add `@font-face` declarations                     |
-| [`src/styles/abstracts/variables/_typography.scss`](../styles/abstracts/variables/_typography.scss)     | Assign the font to one or more roles |
+## Step 1: Add the font file
 
----
+Drop the font file (TTF, OTF, WOFF, or WOFF2) into the directory configured as `appFonts.fontPath`:
 
-## Step 1: Extract the font metrics
-
-The metrics database requires nine values per font. Use [precisionspec.dev](https://precisionspec.dev) to extract them:
-
-1. Drag and drop your font file (TTF, OTF, WOFF, or WOFF2) onto the interface drop-zone.
-   > Note! It is often best to get metrics from the regular font.
-2. Inspect the metric tables and SVG diagrams to verify the values look correct.
-3. Export as **SCSS Map** and copy the values directly into `$font-metrics`.
-
-The SCSS Map export includes all nine required normalized values: cap-height, x-height, ascender, descender, avg-char-width, top-trim, bottom-trim, lsb-adjust, and rsb-adjust.
-
-### Side bearing adjustments
-
-`lsb-adjust` and `rsb-adjust` remove the optical whitespace that font designers build into a typeface's side bearings. They let text sit flush against its container without manual negative margins at every use site.
-
-precisionspec.dev calculates these from the font's glyph data directly as an average of the most commonly used small letters. If you need to adjust them by eye after import, they are typically small negative values (`−0.04em` to `−0.09em`) and matter most at large display sizes.
-
-Existing fonts in the system for reference:
-
-| Font         | `lsb-adjust` | `rsb-adjust` |
-| ------------ | ------------ | ------------ |
-| Roboto       | −0.061       | −0.0547      |
-| Roboto Serif | −0.046       | −0.032       |
-| Roboto Mono  | −0.0859      | −0.0669      |
-| Inter        | −0.0645      | −0.0615      |
-
----
-
-## Step 2: Add the metrics entry
-
-Open [`_font-metrics.scss`](../styles/abstracts/variables/_font-metrics.scss) and add a new entry to the `$font-metrics` map. The key must exactly match the font family name you'll use in `@font-face`.
-
-```scss
-$font-metrics: (
-  // ... existing fonts ...
-  'Source Sans 3': (
-      'family': '"Source Sans 3", "Source Sans 3 Variable", sans-serif',
-      'category': 'sans-serif',
-      'cap-height': 0.66,
-      'x-height': 0.486,
-      'ascender': 0.984,
-      'descender': 0.273,
-      'avg-char-width': 0.558,
-      'top-trim': 0.324,
-      'bottom-trim': 0.273,
-      'lsb-adjust': -0.052,
-      'rsb-adjust': -0.041,
-    )
-) !default;
+```ts
+appFonts: {
+  fontPath: '../assets/fonts/', // relative to trimscale config file, e.g. ./fonts/ or ../assets/fonts/
+  // ...
+},
 ```
 
-**Rules:**
+For a family with multiple weights or an italic variant, add all the files, the generator scans the whole directory. If several files resolve to the same family name (e.g. separate Regular/Italic, or a variable font's upright + italic pair), it automatically picks one to extract metrics from: non-italic always wins over italic, and among files with the same italic-ness, whichever weight is closest to 400/Regular wins. A family with only an Italic file still gets metrics from it.
 
-- The map key (`"Source Sans 3"`) is the canonical name used internally. It must match exactly what `_typography.scss` will reference.
-- The `"family"` value is the CSS `font-family` stack. Quote the font name and add a generic fallback.
-- All metric values are unitless ratios (em fractions). Do not add units here; the leading-trim system appends `em` where needed.
+## Step 2: Configure the family
 
----
+Add a fallback stack entry if the font's generic category isn't covered by `defaultFallback`:
 
-## Step 3: Add `@font-face` declarations
-
-Open [`_fonts.scss`](../styles/base/_fonts.scss) and add one declaration per style variant you're loading. For a variable font (covers all weights in one file):
-
-```scss
-// Source Sans 3
-@font-face {
-  font-family: 'Source Sans 3';
-  src: url('/fonts/SourceSans3-VariableFont_wght.woff2') format('woff2');
-  font-weight: 100 900;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Source Sans 3';
-  src: url('/fonts/SourceSans3-Italic-VariableFont_wght.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: italic;
-  font-display: swap;
-}
+```ts
+appFonts: {
+  fontPath: '../assets/fonts/',
+  fallbacks: {
+    'Roboto': 'sans-serif',
+    'Roboto Serif': 'serif',
+    'Roboto Mono': 'monospace',
+  },
+  defaultFallback: 'sans-serif',
+},
 ```
 
-For a static font with separate weight files, add one block per weight:
+The key must match the font's family name exactly as embedded in the file (what a browser or font inspector would show you). Valid fallback values: `'sans-serif'`, `'serif'`, `'monospace'`, `'system-ui'`, `'cursive'`.
 
-```scss
-@font-face {
-  font-family: 'Source Sans 3';
-  src: url('/fonts/SourceSans3-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
+Then map the family to one or more roles in `fontRoles`:
+
+```ts
+fontRoles: {
+  primary: 'Source Sans 3',
+  secondary: 'Roboto Serif',
+  tertiary: 'Roboto Mono',
+  sans: 'Source Sans 3',
+  serif: 'Roboto Serif',
+  mono: 'Roboto Mono',
+  display: 'Roboto Serif',
+  heading: 'Source Sans 3',
+  subheading: 'Source Sans 3',
+  body: 'Source Sans 3',
+  quote: 'Roboto Serif',
+  code: 'Roboto Mono',
+  ui: 'Source Sans 3',
+  // Custom roles work too:
+  // ink: 'Some Font Name',
+},
 ```
 
-The `font-family` string must be identical to the map key in `_font-metrics.scss`.
+`primary` and `body` are required, everything else, including custom roles via the index signature, is optional. This step is what makes a font usable, a font that's in your fonts directory but not mapped to any role generates metrics but never gets a `--font-family-*` token or shows up in `fontSetup`/`.trim-text-*`.
 
-Place font files in your project's public fonts directory. The path in `src:` should match wherever your build tool serves static assets from.
+## Step 3: Generate
 
----
-
-## Step 4: Assign the font to a role
-
-Open [`_typography.scss`](../styles/abstracts/variables/_typography.scss) and update the `$fonts` map. This step is required: `tokens/_leading-trim.scss` looks up font metrics by role name, so a font that isn't mapped to at least one role will have no trim values applied.
-
-```scss
-$fonts: (
-  // Hierarchical
-  'primary': 'Roboto',
-  'secondary': 'Source Sans 3',
-  // changed from Roboto Serif
-  'tertiary': 'Roboto Mono',
-
-  // Contextual
-  'body': 'Source Sans 3',
-  // changed
-  'heading': 'Source Sans 3',
-  // changed
-   // ... rest unchanged
-) !default;
+```bash
+npx trimscale-css generate
 ```
 
-The map value must match the key in `$font-metrics` exactly. After this change, any call to `fontSetup($font: 'secondary')` or `fontSetup($font: 'body')` will automatically use the new font with its correct metrics.
+This extracts five metric values (avg-char-width, top-trim, bottom-trim, lsb-adjust, and rsb-adjust) directly from the font file via fontkit and writes them, normalized to em units, into `styles/abstracts/variables/_font-metrics.scss`, alongside the `family` value. Cap-height, ascender, and descender are read from the font too, but only as intermediate values used to compute `top-trim`/`bottom-trim`, they aren't stored in the output themselves. It also writes `@font-face` rules into `styles/base/_fonts.scss` (unless `appFonts.nextFont` is true, see [using-with-nextjs.md](using-with-nextjs.md)) and regenerates `styles/abstracts/variables/_typography.scss` from `fontRoles`.
 
-You do not need to touch `_leading-trim.scss` or `_mx_font-setup.scss`; the system reads the metrics from the map at compile time.
-
----
+`lsb-adjust`/`rsb-adjust` (side bearing adjustments) remove the optical whitespace font designers build into a typeface's side bearings, so text sits flush against its container without manual negative margins at every use site. These are computed automatically as an average of commonly used lowercase letters, no manual tuning needed.
 
 ## Verification
 
-After all changes, check three things:
+After generating, check three things:
 
-1. **Compile without errors.** Run the dev server (`cd styleguide && npm run dev`) and confirm no SCSS errors.
-2. **Leading trim is working.** Open a heading in the browser and inspect the element. The `::before` and `::after` pseudo-elements should have negative `margin-bottom` values. If they both show `0`, the font key in `$fonts` doesn't match the key in `$font-metrics`.
-3. **Side bearings look right.** View a large display heading. The first letter's left edge should sit flush with the container. If there's a visible gap, decrease `lsb-adjust` (make it more negative) by increments of `0.005`.
-
----
+1. **Compile without errors.** Run your project's dev server and confirm no SCSS errors. (Working inside this repo itself instead, see [devDocs/styleguide.md](../devDocs/styleguide.md).)
+2. **Leading trim is working.** Open a heading in the browser and inspect the element. The `::before`/`::after` pseudo-elements should have negative `margin-bottom` values. If they both show `0`, the role in `fontRoles` doesn't resolve to a family that has metrics, double check the family name matches exactly what's in the font file.
+3. **Side bearings look right.** View a large display heading. The first letter's left edge should sit flush with the container.
 
 ## Quick checklist
 
-- [ ] Metrics entry added to `$font-metrics` with the correct map key
-- [ ] `"family"` string includes a generic fallback (`sans-serif`, `serif`, or `monospace`)
-- [ ] `top-trim` = `ascender − cap-height`
-- [ ] `bottom-trim` = `descender`
-- [ ] `@font-face` added in `_fonts.scss` with a matching `font-family` string
-- [ ] Font files are present in the public fonts directory
-- [ ] Role mapped in `$fonts` (required: leading-trim depends on it)
+- [ ] Font file placed in the directory set by `appFonts.fontPath`
+- [ ] Fallback added to `appFonts.fallbacks` if the family's category isn't covered by `defaultFallback`
+- [ ] Family mapped to at least one role in `fontRoles` (required if it should actually be usable)
+- [ ] Ran `npx trimscale-css generate`
 - [ ] Dev server compiles without errors
 - [ ] `::before`/`::after` pseudo-elements have non-zero margins at runtime
