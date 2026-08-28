@@ -6,7 +6,7 @@ Functions, mixins, and breakpoints: the SCSS-level API for building components o
 
 Import via:
 ```scss
-@use 'styles/abstracts/functions' as fn
+@use 'abstracts/functions' as fn
 ```
 
 ### `fn.getFluidClamp($min-size, $max-size, $value-key)`
@@ -70,7 +70,7 @@ Prefer the static `--line-height-*` tokens (or `fontSetup`'s `$line-height` para
 
 Import via:
 ```scss
-@use 'styles/abstracts/mixins' as mx
+@use 'abstracts/mixins' as mx
 ```
 
 ### `mx.fontSetup`
@@ -137,12 +137,12 @@ Each token also gets a typed `@property --#{prefix}-#{name} { syntax: "<color>";
 
 Import the mixins via:
 ```scss
-@use 'styles/abstracts/mixins' as mx
+@use 'abstracts/mixins' as mx
 ```
 
 Breakpoints are a plain map, not individual variables, reachable via:
 ```scss
-@use 'styles/abstracts/variables' as var
+@use 'abstracts/variables' as var
 // var.$breakpoints: (mobile, phablet, tablet, tablet-lg, laptop, desktop) → rem
 ```
 

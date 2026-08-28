@@ -38,7 +38,7 @@ npx trimscale-css init
 npx trimscale-css generate
 ```
 
-`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes every generated token file. Then point your SCSS compiler's `loadPaths` at the package and `@use 'styles/trimscale'`.
+`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes every generated token file. Then point your SCSS compiler's `loadPaths` at the package's `styles/` folder and `@use 'trimscale'`.
 
 See [getting-started.md](docs/getting-started.md) for the full walkthrough, requirements (Node version, editor config), and both import styles (global vs. component-scoped).
 

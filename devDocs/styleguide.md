@@ -10,8 +10,8 @@ npm run build    # production build
 npm run preview  # preview production build
 ```
 
-The styleguide sets `loadPaths` to `..`, so SCSS imports work the same way as in any consuming project:
+The styleguide sets `loadPaths` to `../styles`, so SCSS imports work the same way as in any consuming project:
 
 ```scss
-@use 'styles/trimscale';
+@use 'trimscale';
 ```

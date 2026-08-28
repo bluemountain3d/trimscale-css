@@ -12,8 +12,8 @@
 ///   }
 /// ===========================================================================
 
-@use "styles/abstracts/variables" as var;
-@use "styles/abstracts/functions" as fn;
+@use "abstracts/variables" as var;
+@use "abstracts/functions" as fn;
 // Only import mixins from mixin files to avoid dependency cycle
 // @use '../mixins/mx_other-mixin' as *;
 

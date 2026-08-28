@@ -3,7 +3,7 @@
 /// @description Generic responsive breakpoint mixins, driven by the $breakpoints map
 /// Provides consistent media query patterns across the design system
 /// @example
-///   @use 'styles/abstracts/mixins/mx_breakpoints' as bp;
+///   @use 'abstracts/mixins/mx_breakpoints' as bp;
 ///
 ///   .component {
 ///     padding: var(--space-sm);
@@ -18,8 +18,8 @@
 ///   }
 /// ===========================================================================
 
-@use 'styles/abstracts/functions' as fn;
-@use "styles/abstracts/variables" as var;
+@use 'abstracts/functions' as fn;
+@use "abstracts/variables" as var;
 @use "sass:map";
 @use "sass:meta";
 @use "sass:math";
@@ -76,7 +76,7 @@
 /// @type mixin
 /// @param {string | number} $breakpoint - Key in $breakpoints, or a custom px/rem number
 /// @example
-///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+///   @use "abstracts/mixins/mx_breakpoints" as bp;
 /// 
 ///   @include bp.up-to('tablet') {...}
 ///   Render: @media (width < 45rem) {...}
@@ -99,7 +99,7 @@
 /// @type mixin
 /// @param {string | number} $breakpoint - Key in $breakpoints, or a custom px/rem number
 /// @example
-///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+///   @use "abstracts/mixins/mx_breakpoints" as bp;
 /// 
 ///   @include bp.and-up('tablet') {...}
 ///   Render: @media (width >= 45rem) {...} // 720px -->
@@ -123,7 +123,7 @@
 /// @type mixin
 /// @param {string} $breakpoint - Key in $breakpoints (numbers not supported — use `up-to` instead)
 /// @example
-///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+///   @use "abstracts/mixins/mx_breakpoints" as bp;
 /// 
 ///   @include bp.and-down("tablet") {...}
 ///   Render: @media (width < 60rem) {...} // <-- 959.98px if next breakpoint after "tablet" is 60rem.
@@ -147,7 +147,7 @@
 /// @param {string | number} $min - Key in $breakpoints, or a custom px/rem number
 /// @param {string | number} $max - Key in $breakpoints, or a custom px/rem number
 /// @example
-///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+///   @use "abstracts/mixins/mx_breakpoints" as bp;
 /// 
 ///   @include bp.between('tablet', 'laptop') {...}
 ///   Render: @media (45rem <= width < 60rem) {...} // 720px <--> 1199.98px
@@ -172,7 +172,7 @@
 /// @type mixin
 /// @param {string} $breakpoint - Key in $breakpoints (numbers not supported — use `between` instead)
 /// @example
-///   @use "styles/abstracts/mixins/mx_breakpoints" as bp;
+///   @use "abstracts/mixins/mx_breakpoints" as bp;
 /// 
 ///   @include bp.only("tablet") {...}
 ///   Render: @media (width < 60rem) {...} // <-- 959.98px if next breakpoint after "tablet" is 60rem.

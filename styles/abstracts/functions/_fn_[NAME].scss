@@ -10,7 +10,7 @@
 ///   }
 /// ===========================================================================
 
-@use "styles/abstracts/variables" as var;
+@use "abstracts/variables" as var;
 // Only import functions from function files to avoid dependency cycle
 // @use '../functions/fn-other-function' as *;
 

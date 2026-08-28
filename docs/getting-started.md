@@ -5,7 +5,7 @@ trimscale-css is consumed as SCSS source plus a small CLI that generates your to
 ## Requirements
 
 - Node >=23.6.0. The CLI's `generate` command dynamically imports your `trimscale.config.ts` and relies on Node's built in TypeScript type stripping to run it directly, no build step, no `ts-node`. That support only became flagless default at 23.6.0, so it's a hard floor, not a suggestion.
-- Your own SCSS compiler (`sass-embedded` or `sass`) configured with a `loadPaths` entry pointing at the package. Vite and Next.js setups are shown below.
+- Your own SCSS compiler (`sass-embedded` or `sass`) configured with a `loadPaths` entry pointing at the package's `styles/` folder. Vite and Next.js setups are shown below.
 - If your project has a `tsconfig.json` and you want editor type checking on `trimscale.config.ts`, set `moduleResolution` to `"nodenext"` or `"bundler"` so the config's `import type ... from 'trimscale-css/models/Config.ts'` subpath import resolves. This is purely for editor DX, the config runs fine at runtime either way.
 
 ## Install
@@ -49,12 +49,14 @@ export default {
   css: {
     preprocessorOptions: {
       scss: {
-        loadPaths: ['path/to/trimscale-css'],
+        loadPaths: ['path/to/trimscale-css/styles'],
       },
     },
   },
 };
 ```
+
+`loadPaths` accepts multiple entries, add your own project's SCSS root alongside it (e.g. `loadPaths: ['path/to/trimscale-css/styles', './src']`) so your own `@use 'styles/whatever'`-style imports keep working too. Pointing trimscale-css's own entry directly at its `styles/` folder means it never claims the bare `styles/` name for itself, so it can't collide with a `styles/` folder of your own on another loadPath.
 
 **Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration.
 
@@ -65,7 +67,7 @@ export default {
 Import once at your app's entry point to load all tokens, base styles, and utility classes:
 
 ```scss
-@use 'styles/trimscale';
+@use 'trimscale';
 ```
 
 This single import includes:
@@ -79,10 +81,10 @@ This single import includes:
 For component styles that need mixins, functions, or token variables without re-emitting global CSS:
 
 ```scss
-@use 'styles/abstracts/variables' as var;
-@use 'styles/abstracts/functions' as fn;
-@use 'styles/abstracts/mixins' as mx;
-@use 'styles/tokens/leading-trim' as *;
+@use 'abstracts/variables' as var;
+@use 'abstracts/functions' as fn;
+@use 'abstracts/mixins' as mx;
+@use 'tokens/leading-trim' as *;
 
 .card {
   @include mx.fontSetup($font: 'body', $font-size: var(--text-md));
@@ -95,4 +97,4 @@ For component styles that need mixins, functions, or token variables without re-
 }
 ```
 
-This assumes the [global import](#global-import) is loaded somewhere in your build too, which guarantees the layer order (see [cascade-layers.md](cascade-layers.md)). If you only ever use component-scoped import and never load the global entry point, add `@use 'styles/layer';` once at your app's own entry point instead.
+This assumes the [global import](#global-import) is loaded somewhere in your build too, which guarantees the layer order (see [cascade-layers.md](cascade-layers.md)). If you only ever use component-scoped import and never load the global entry point, add `@use 'layer';` once at your app's own entry point instead.

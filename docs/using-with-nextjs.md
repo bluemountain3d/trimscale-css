@@ -32,7 +32,7 @@ appFonts: {
 
 ## Step 2: Configure `next.config.ts`
 
-Point `loadPaths` to the installed package, it contains the `styles/` folder:
+Point `loadPaths` at the installed package's `styles/` folder:
 
 ```ts
 import path from 'path';
@@ -41,14 +41,14 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   sassOptions: {
     implementation: 'sass-embedded',
-    loadPaths: [path.join(process.cwd(), 'node_modules/trimscale-css')],
+    loadPaths: [path.join(process.cwd(), 'node_modules/trimscale-css/styles')],
   },
 };
 
 export default nextConfig;
 ```
 
-After this, `@use 'styles/trimscale'` resolves from anywhere in your SCSS files.
+After this, `@use 'trimscale'` resolves from anywhere in your SCSS files. Add your own project's SCSS root as a second `loadPaths` entry if you need it, trimscale-css never claims the bare `styles/` name for itself, so it won't collide with one of your own.
 
 ## Step 3: Load fonts in `layout.tsx`
 

@@ -23,7 +23,7 @@ const sassDocs = `
 ///   $capHeight-body: _get-metric("body", "cap-height"); // Returns: 0.66
 ///
 /// @example scss - Direct map access (internal use only)
-///   @use 'styles/abstracts/variables/font-metrics' as metrics;
+///   @use 'abstracts/variables/font-metrics' as metrics;
 ///   @use 'sass:map';
 ///   $cap: map.get(map.get(metrics.$font-metrics, "Source Sans 3"), "cap-height");
 /// ===========================================================================

@@ -1,6 +1,6 @@
 # Examples
 
-Recipes you can copy into your own `components/` layer (see [cascade-layers.md](cascade-layers.md)). None of these ship as part of the package, components are inherently more opinionated than tokens and utilities, so they're kept out of the default `@use 'styles/trimscale'` import.
+Recipes you can copy into your own `components/` layer (see [cascade-layers.md](cascade-layers.md)). None of these ship as part of the package, components are inherently more opinionated than tokens and utilities, so they're kept out of the default `@use 'trimscale'` import.
 
 ## Text Box
 
@@ -92,7 +92,7 @@ A typographic prose container: it handles flow spacing between block elements, c
 | `.text-box-45` … `-75`      | Caps line length by character count (steps of 5: `45, 50, 55, 60, 65, 70, 75`), computed as `max-width: calc(var(--text-base) * avg-char-width * N)`                          |
 | `.text-box--center-content` | `margin-inline: auto`, typically paired with a character-count modifier                                                                                                        |
 
-To add this (or any other component) to your own project, create a `components/` folder alongside your SCSS entry point, paste this in, and load it in the `components` layer somewhere after `@use 'styles/trimscale'`:
+To add this (or any other component) to your own project, create a `components/` folder alongside your SCSS entry point, paste this in, and load it in the `components` layer somewhere after `@use 'trimscale'`:
 
 ```scss
 @layer components {

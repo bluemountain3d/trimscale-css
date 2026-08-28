@@ -13,16 +13,16 @@
 @forward './layer';
 
 // Tokens - CSS custom properties
-@forward 'styles/tokens/';
+@forward 'tokens/';
 
 // Utilities - Utility classes
-@forward 'styles/utilities/';
+@forward 'utilities/';
 
 // Base - Global HTML element styling
-@forward 'styles/base/';
+@forward 'base/';
 
 // Layouts - Global layouts styling (add when ready)
-// @forward 'styles/layouts/';
+// @forward 'layouts/';
 
 // Components - Global components styling (add when ready)
-// @forward 'styles/components/';
+// @forward 'components/';

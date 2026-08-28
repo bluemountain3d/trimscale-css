@@ -1,6 +1,6 @@
-@use "styles/abstracts/variables" as var;
-@use "styles/abstracts/mixins/" as mx;
-@use "styles/tokens/leading-trim" as *;
+@use "abstracts/variables" as var;
+@use "abstracts/mixins/" as mx;
+@use "tokens/leading-trim" as *;
 
 /// @group Base
 /// @name Typography

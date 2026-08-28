@@ -39,8 +39,8 @@
 ///   }
 /// ===========================================================================
 
-@use "styles/abstracts/variables" as var;
-@use "styles/tokens/leading-trim" as *;
+@use "abstracts/variables" as var;
+@use "tokens/leading-trim" as *;
 // Only import mixins from mixin files to avoid dependency cycle
 // @use '../mixins/mx_other-mixin' as *;
 

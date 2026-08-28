@@ -44,7 +44,7 @@ Order matters for `mx.and-down()` and `mx.only()`: both look up the *next* key a
 Breakpoints are never read as raw values in component SCSS, always go through the mixins:
 
 ```scss
-@use "styles/abstracts/mixins" as mx;
+@use "abstracts/mixins" as mx;
 
 .sidebar {
   width: 100%;

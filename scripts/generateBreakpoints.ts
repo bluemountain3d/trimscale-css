@@ -20,7 +20,7 @@ const output = `
 /// @description Responsive breakpoints and typography scale configuration
 /// ===========================================================================
 
-@use 'styles/abstracts/functions/fn_unit-utils' as fn;
+@use 'abstracts/functions/fn_unit-utils' as fn;
 
 // ============================================================================
 // Grid System

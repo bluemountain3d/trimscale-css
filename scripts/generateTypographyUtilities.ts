@@ -20,11 +20,11 @@ const trimTextUtilities = (): string => {
 
 // Output =====================================================================
 const output = `
-@use 'styles/abstracts/variables' as var;
-@use 'styles/tokens/leading-trim' as *;
+@use 'abstracts/variables' as var;
+@use 'tokens/leading-trim' as *;
 
 /// @group Utilities
-/// @name Text Utilities
+/// @name Typography Utilities
 /// @description Utility classes for font family, size, weight, style, and alignment.
 /// \`.trim-text-{role}\` applies a font-family, leading-trim metrics (margins +
 /// pseudo-element formulas), and a bare font-size/line-height baseline

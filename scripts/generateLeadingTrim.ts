@@ -21,7 +21,7 @@ const fontRolePlaceholders = (): string => {
 
 // Output =====================================================================
 const output = ` 
-@use 'styles/abstracts/variables' as var;
+@use 'abstracts/variables' as var;
 @use 'sass:map';
 @use 'sass:math';
 

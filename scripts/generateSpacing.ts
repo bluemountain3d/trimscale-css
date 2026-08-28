@@ -21,8 +21,8 @@ const spacingSetupToScssMap = (): string | undefined => {
 }
 
 const baseTokensOutput = `
-@use "styles/abstracts/functions/" as fn;
-@use "styles/abstracts/variables" as var;
+@use "abstracts/functions/" as fn;
+@use "abstracts/variables" as var;
 
 /// @group Tokens
 /// @name Base Tokens

@@ -23,6 +23,6 @@ Because `trim` sits below `base`, `components`, and `utilities`, everything the 
 
 **Adding your own reset rules?** Wrap them in `@layer reset { ... }` too, matching the layer name declared above. Unlayered CSS always wins over every layer regardless of specificity, so a reset rule you add outside `@layer reset` would outrank everything in the system, not just the browser defaults it's meant to normalize. Declaring `@layer reset { ... }` again in your own file doesn't create a second layer, it appends to the same one; normal cascade order still applies within it, so load your additions after `styles/base/_reset.scss` if you need them to win over a specific rule there.
 
-With the [global import](getting-started.md#global-import) (`@use 'styles/trimscale'`), the layer order above is always guaranteed, `_layer.scss` is the first thing that entry point forwards.
+With the [global import](getting-started.md#global-import) (`@use 'trimscale'`), the layer order above is always guaranteed, `_layer.scss` is the first thing that entry point forwards.
 
-If you only ever use [component-scoped import](getting-started.md#component-scoped-import) and never load the global entry point anywhere in your build, the layer order doesn't exist on its own, add `@use 'styles/layer';` once at your app's own entry point too. Otherwise layers fall back to first-seen-in-source order, which may not match the stack above.
+If you only ever use [component-scoped import](getting-started.md#component-scoped-import) and never load the global entry point anywhere in your build, the layer order doesn't exist on its own, add `@use 'layer';` once at your app's own entry point too. Otherwise layers fall back to first-seen-in-source order, which may not match the stack above.

@@ -141,7 +141,7 @@ const abstractsOutput = `
 // Direct partial import (not the functions index) — the index also forwards
 // fn_fluid-typography-and-spacing, which @uses this very variables module,
 // and going through it here would create a circular dependency.
-@use "styles/abstracts/functions/fn_get-color-token" as fn;
+@use "abstracts/functions/fn_get-color-token" as fn;
 
 /// @group Abstracts/Variables
 /// @name Colors
@@ -212,9 +212,9 @@ const customColorScssMixinDefs = (): string | undefined => {
 }
 
 const tokensOutput = `
-@use "styles/abstracts/variables" as var;
-@use "styles/abstracts/mixins" as mx;
-@use "styles/abstracts/functions" as fn;
+@use "abstracts/variables" as var;
+@use "abstracts/mixins" as mx;
+@use "abstracts/functions" as fn;
 
 /// @group Tokens
 /// @name Colors
