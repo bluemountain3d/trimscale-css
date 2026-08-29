@@ -4,11 +4,11 @@ Font metrics, `@font-face` declarations, and role assignment are all generated a
 
 ## Overview
 
-| Step | File | What you do there |
-|------|------|-------------------|
-| 1 | Your fonts directory (`appFonts.fontPath`) | Add the font file |
-| 2 | [`trimscale.config.ts`](../trimscale.config.ts) | Add a fallback (optional) and map it to one or more `fontRoles` |
-| 3 | Run `npx trimscale-css generate` | Extracts metrics via fontkit, writes `_font-metrics.scss` and `_fonts.scss` |
+| Step | File                                                                                          | What you do there                                                           |
+| ---- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 1    | Your fonts directory (`appFonts.fontPath` in [`trimscale.config.ts`](../trimscale.config.ts)) | Add the font file                                                           |
+| 2    | Set fallback (`appFonts.fallbacks` in [`trimscale.config.ts`](../trimscale.config.ts))        | Add a fallback (optional) and map it to one or more `fontRoles`             |
+| 3    | Run `npx trimscale-css generate`                                                              | Extracts metrics via fontkit, writes `_font-metrics.scss` and `_fonts.scss` |
 
 ## Step 1: Add the font file
 
@@ -16,7 +16,7 @@ Drop the font file (TTF, OTF, WOFF, or WOFF2) into the directory configured as `
 
 ```ts
 appFonts: {
-  fontPath: '../assets/fonts/', // relative to trimscale config file, e.g. ./fonts/ or ../assets/fonts/
+  fontPath: 'path/to/fonts/', // relative to trimscale config file, e.g. ./fonts/ or ../assets/fonts/
   // ...
 },
 ```
@@ -29,7 +29,7 @@ Add a fallback stack entry if the font's generic category isn't covered by `defa
 
 ```ts
 appFonts: {
-  fontPath: '../assets/fonts/',
+  fontPath: 'path/to/fonts/',
   fallbacks: {
     'Roboto': 'sans-serif',
     'Roboto Serif': 'serif',
@@ -45,21 +45,21 @@ Then map the family to one or more roles in `fontRoles`:
 
 ```ts
 fontRoles: {
-  primary: 'Source Sans 3',
+  primary: 'Roboto',
   secondary: 'Roboto Serif',
   tertiary: 'Roboto Mono',
-  sans: 'Source Sans 3',
+  sans: 'Roboto',
   serif: 'Roboto Serif',
   mono: 'Roboto Mono',
   display: 'Roboto Serif',
-  heading: 'Source Sans 3',
-  subheading: 'Source Sans 3',
-  body: 'Source Sans 3',
+  heading: 'Roboto',
+  subheading: 'Roboto',
+  body: 'Roboto',
   quote: 'Roboto Serif',
   code: 'Roboto Mono',
-  ui: 'Source Sans 3',
+  ui: 'Roboto',
   // Custom roles work too:
-  // ink: 'Some Font Name',
+  // ink: 'Some Font Family Name',
 },
 ```
 

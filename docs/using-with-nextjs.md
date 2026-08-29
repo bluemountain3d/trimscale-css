@@ -17,7 +17,7 @@ This guide covers the extra steps for integrating trimscale-css with a Next.js p
 
 ```ts
 appFonts: {
-  fontPath: '../fixtures/fonts/',
+  fontPath: 'path/to/fonts/', // relative to trimscale config file, e.g. ./fonts/ or ../assets/fonts/
   nextFont: true,
   nextFontPrefix: 'next-font', // defaults to 'next-font' if omitted
   fallbacks: {
@@ -121,3 +121,4 @@ Next.js does not expose fonts by family name, it exposes them via the CSS custom
 - [ ] Fonts mapped to roles in `fontRoles` (see [adding-a-font.md](adding-a-font.md))
 - [ ] Dev server compiles without errors
 - [ ] Inspect a heading in the browser, the computed `font-family` should show the correct typeface
+ 

@@ -12,7 +12,7 @@ Layers are listed lowest to highest priority, a later layer always beats an earl
 | ------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `reset`      | Browser-default reset (lowest priority)                                                                             |
 | `tokens`     | CSS custom property declarations on `:root`                                                                         |
-| `functions`  | Reserved, currently unused                                                                                          |
+| `functions`  | Reserved for Vanilla CSS @function, currently unused |
 | `trim`       | `%text-properties` and the font-role placeholders, leading-trim geometry plus a bare font-size/line-height baseline |
 | `base`       | HTML element defaults (`body`, headings, etc.)                                                                      |
 | `layouts`    | Reserved for your own layout styles (grids, page structure, containers), the system ships none of its own           |

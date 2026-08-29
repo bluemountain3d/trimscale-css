@@ -5,7 +5,7 @@ trimscale-css is consumed as SCSS source plus a small CLI that generates your to
 ## Requirements
 
 - Node >=23.6.0. The CLI's `generate` command dynamically imports your `trimscale.config.ts` and relies on Node's built in TypeScript type stripping to run it directly, no build step, no `ts-node`. That support only became flagless default at 23.6.0, so it's a hard floor, not a suggestion.
-- Your own SCSS compiler (`sass-embedded` or `sass`) configured with a `loadPaths` entry pointing at the package's `styles/` folder. Vite and Next.js setups are shown below.
+- Your own SCSS compiler (`sass-embedded` or `sass`) at **1.95.0 or later**, configured with a `loadPaths` entry pointing at the package's `styles/` folder. Vite and Next.js setups are shown below.
 - If your project has a `tsconfig.json` and you want editor type checking on `trimscale.config.ts`, set `moduleResolution` to `"nodenext"` or `"bundler"` so the config's `import type ... from 'trimscale-css/models/Config.ts'` subpath import resolves. This is purely for editor DX, the config runs fine at runtime either way.
 
 ## Install
@@ -49,7 +49,7 @@ export default {
   css: {
     preprocessorOptions: {
       scss: {
-        loadPaths: ['path/to/trimscale-css/styles'],
+        loadPaths: ['node_modules/trimscale-css/styles'],
       },
     },
   },
@@ -75,6 +75,15 @@ This single import includes:
 - All CSS custom property tokens
 - HTML element defaults and reset
 - Utility classes (spacing, gap, typography)
+
+Alternatively, if you're not routing your styles through your own SCSS entry file, import it as a side effect directly from your app's JS/TS entry point (works with Vite, webpack, and similar bundlers):
+
+```ts
+// main.ts
+import 'trimscale-css/styles/trimscale.scss';
+```
+
+This resolves to a fully-qualified path, so it works without a `loadPaths` entry. You'll still need `loadPaths` configured if you also use [Component-Scoped Import](#component-scoped-import) from your own SCSS files.
 
 ### Component-Scoped Import
 

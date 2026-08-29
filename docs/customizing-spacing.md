@@ -9,7 +9,7 @@ Spacing is config-driven, not hand-edited SCSS:
 | File | What you do there |
 |------|-------------------|
 | [`trimscale.config.ts`](../trimscale.config.ts) | Edit the `spacingSetup` field |
-| `scripts/generateSpacing.ts` | Regenerated automatically — never edit the output by hand |
+| `scripts/generateSpacing.ts` | Regenerated automatically: never edit the output by hand |
 
 After changing `spacingSetup`, run:
 
@@ -23,16 +23,16 @@ This rewrites `styles/tokens/_base-tokens.scss` (the `--unit*` custom properties
 
 ## The two approaches
 
-`spacingSetup.approach` picks which growth model generates the `--space-*` scale. They aren't combinable — the shape of the rest of `spacingSetup` changes depending on which one you pick.
+`spacingSetup.approach` picks which growth model generates the `--space-*` scale. They aren't combinable: the shape of the rest of `spacingSetup` changes depending on which one you pick.
 
 ### `'independent'` (default)
 
 Spacing has its own two-unit system, decoupled from the type scale:
 
-- `--unit-micro` — a static grid unit (`$base-grid-size`, `4px` by default). Never scales with the viewport.
-- `--unit-macro` — its own fluid clamp, `4px → 8px` across the viewport width range set in `fluidScale` (`minWidth`/`maxWidth`). The `4px`/`8px` endpoints themselves are fixed in `generateSpacing.ts`, not a `fluidScale` field, only the viewport range they interpolate across is shared with the type scale.
+- `--unit-micro`: a static grid unit (`$base-grid-size`, `4px` by default). Never scales with the viewport.
+- `--unit-macro`: its own fluid clamp from `$base-grid-size` (`4px` by default) up to `spacingSetup.macroRangeMax` (optional, defaults to `8px`), across the viewport width range set in `fluidScale` (`minWidth`/`maxWidth`), only the viewport range is shared with the type scale. `macroRangeMax` must be at least `4`, the generator throws if it's lower. If you narrow `fluidScale`'s viewport range significantly (e.g. `minWidth`/`maxWidth` of `360`/`800` instead of the default `360`/`1440`), reconsider `macroRangeMax` too: it's a fixed target value, not derived from the range, so a much narrower range reaches it over a much shorter distance and can make the large tiers (which multiply `--unit-macro`) feel disproportionately large relative to the viewport at `maxWidth`.
 
-Small tiers (`3xs`–`lg`) multiply `--unit-micro`; large tiers (`xl`–`9xl`) multiply `--unit-macro`. This is why `--space-lg` stays fixed while `--space-xl` and up grow with the viewport — the split is deliberate, not an artifact.
+Small tiers (`3xs`–`lg`) multiply `--unit-micro`; large tiers (`xl`–`9xl`) multiply `--unit-macro`. This is why `--space-lg` stays fixed while `--space-xl` and up grow with the viewport: the split is deliberate, not an artifact.
 
 ```ts
 spacingSetup: {
@@ -46,14 +46,15 @@ spacingSetup: {
   },
   numericScaleMicroEnd: 6,   // --space-1 .. --space-6 use --unit-micro
   numericScaleMacroEnd: 48,  // --space-7 .. --space-48 use --unit-macro
+  // macroRangeMax: 8,       // optional, defaults to 8, must be >= 4
 }
 ```
 
-**Use this when** you want to tune how aggressively text grows (`fluidScale`'s type-scale ratio) without spacing following along at the same rate — the two systems can be adjusted independently.
+**Use this when** you want to tune how aggressively text grows (`fluidScale`'s type-scale ratio) without spacing following along at the same rate, the two systems can be adjusted independently.
 
 ### `'coupled'`
 
-Spacing and text scale in lockstep. A single `--unit` (`fluidScale`'s base font-size ÷ `$base-grid-size`) drives every tier — the Utopia.fyi-style model.
+Spacing and text scale in lockstep. A single `--unit` (`fluidScale`'s base font-size ÷ `$base-grid-size`) drives every tier: the Utopia.fyi-style model.
 
 ```ts
 spacingSetup: {
@@ -67,9 +68,9 @@ spacingSetup: {
 }
 ```
 
-Note the multipliers are different from the independent example above — `--unit` is a much narrower range (`4px` at 360px viewport → `5px` at 1440px, since it's `fluidScale.minFontSize / 4` to `fluidScale.maxFontSize / 4`) than `--unit-macro`'s `4px → 8px`, so a tier needs a larger multiplier to land on a similar target pixel value.
+Note the multipliers are different from the independent example above: `--unit` is a much narrower range (`4px` at 360px viewport → `5px` at 1440px, since it's `fluidScale.minFontSize / 4` to `fluidScale.maxFontSize / 4`) than `--unit-macro`'s `4px → 8px` (its default `macroRangeMax`), so a tier needs a larger multiplier to land on a similar target pixel value.
 
-**Use this when** you want spacing to visually "breathe" with text at the same rate everywhere — a simpler mental model, at the cost of not being able to tune one without the other.
+**Use this when** you want spacing to visually "breathe" with text at the same rate everywhere: a simpler mental model, at the cost of not being able to tune one without the other.
 
 ---
 
@@ -77,8 +78,8 @@ Note the multipliers are different from the independent example above — `--uni
 
 Both approaches share the same shape for their scale maps:
 
-- **T-shirt tiers**: a map from tier name to a multiplier of the relevant unit. Tier names are `'xs' | 'sm' | 'md' | 'lg' | 'xl'` or `` `${number}xs` ``/`` `${number}xl` `` for extra tiers beyond those (e.g. `'2xs'`, `'10xl'`) — add or remove keys freely, there's no fixed list you must match.
-- **Numeric range**: `numericScaleEnd` (coupled) or `numericScaleMicroEnd`/`numericScaleMacroEnd` (independent) set how far the numbered `--space-1`..`--space-N` scale goes. Lower it if you don't need the full range — it directly controls how many `--space-*` custom properties get generated.
+- **T-shirt tiers**: a map from tier name to a multiplier of the relevant unit. Tier names are `'xs' | 'sm' | 'md' | 'lg' | 'xl'` or `` `${number}xs` ``/`` `${number}xl` `` for extra tiers beyond those (e.g. `'2xs'`, `'10xl'`): add or remove keys freely, there's no fixed list you must match.
+- **Numeric range**: `numericScaleEnd` (coupled) or `numericScaleMicroEnd`/`numericScaleMacroEnd` (independent) set how far the numbered `--space-1`..`--space-N` scale goes. Lower it if you don't need the full range: it directly controls how many `--space-*` custom properties get generated.
 
 ---
 

@@ -26,7 +26,7 @@ The system is pure SCSS. It generates CSS custom properties, utility classes, an
 - Light/dark mode via `prefers-color-scheme`, no JavaScript required
 - Modern responsive breakpoints using CSS range syntax (`width <`, `width >=`)
 - Semantic (t-shirt sizes) and numeric (1–48) spacing scales
-- Framework-agnostic, works with any JS framework or plain HTML
+- Framework-agnostic, works with any JS framework or plain HTML for the web
 
 ---
 
@@ -58,13 +58,13 @@ trimscale-css/
 │   ├── _layer.scss                  # @layer order, see cascade-layers.md
 │   ├── abstracts/
 │   │   ├── variables/               # Generated: breakpoints, fluid scale, font metrics, typography
-│   │   ├── functions/                # Fluid size calc, OKLCH helpers, unit utils
-│   │   └── mixins/                   # fontSetup, breakpoints, color token generation
-│   ├── tokens/                       # CSS custom properties (generated)
-│   ├── base/                         # HTML defaults: reset, fonts, typography (generated fonts + typography)
-│   ├── utilities/                    # Spacing, gap, and typography utility classes
-│   └── components/                   # Empty by default, see examples.md
-└── styleguide/                       # Vite dev app for visual testing
+│   │   ├── functions/               # Fluid size calc, OKLCH helpers, unit utils
+│   │   └── mixins/                  # fontSetup, breakpoints, color token generation
+│   ├── tokens/                      # CSS custom properties (generated)
+│   ├── base/                        # HTML defaults: reset, fonts, typography (generated fonts + typography)
+│   ├── utilities/                   # Spacing, gap, and typography utility classes
+│   └── components/                  # Empty by default, see examples.md
+└── styleguide/                      # Vite dev app for visual testing
 ```
 
 ---

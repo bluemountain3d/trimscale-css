@@ -29,9 +29,9 @@ breakpoints: {
   tabletLg: 1024,
   laptop: 1280,
   desktop: 1440,
-  // Custom:
-  // xSmall: 360,
-  // mobileLarge: 480,
+  // Custom: E.g.
+  //   xSmall: 360,
+  //   mobileLarge: 480,
 },
 ```
 

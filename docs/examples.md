@@ -10,7 +10,9 @@ A typographic prose container: it handles flow spacing between block elements, c
 <div class="text-box text-box--flow text-box-65 text-box--center-content">
   <h2>Heading</h2>
   <p>Paragraph…</p>
-  <ul>…</ul>
+  <ul>
+    …
+  </ul>
 </div>
 ```
 
@@ -18,6 +20,11 @@ A typographic prose container: it handles flow spacing between block elements, c
 @layer components {
   .text-box {
     width: 100%;
+    height: auto; /* fallback */
+
+    @supports (height: calc-size(auto, size)) {
+      height: calc-size(auto, round(up, size, 1px));
+    }
 
     // Structured flow spacing for mixed content with headings.
     // Applies contextual margin-block values based on sibling relationships.
@@ -68,11 +75,16 @@ A typographic prose container: it handles flow spacing between block elements, c
     }
 
     // Constrains line length by character count.
-    // Computed from --text-base and the average body character width.
+    // --avg-char-width-body is an em value, so it resolves to an absolute
+    // width using .text-box's own computed font-size, assumed to be
+    // --text-base (inherited from body unless overridden by a parent).
     // Available steps: 45, 50, 55, 60, 65, 70, 75.
     @each $chars in (45, 50, 55, 60, 65, 70, 75) {
       &-#{$chars} {
-        max-width: calc(var(--text-base) * var(--avg-char-width-body, 1ch) * $chars);
+        max-width: round(
+          calc(var(--avg-char-width-body, 1ch) * $chars),
+          2px
+        );
       }
     }
 
@@ -84,13 +96,13 @@ A typographic prose container: it handles flow spacing between block elements, c
 }
 ```
 
-| Class                       | Effect                                                                                                                                                                          |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.text-box`                 | Base container (`width: 100%`)                                                                                                                                                 |
+| Class                       | Effect                                                                                                                                                                                                                       |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.text-box`                 | Base container (`width: 100%`)                                                                                                                                                                                               |
 | `.text-box--flow`           | Structured `margin-block` rhythm for **mixed content** (headings + paragraphs/lists/figures), using `:has()` to vary spacing by context (e.g. `2em` before a heading, `0.8em` after one). Mutually exclusive with `--prose`. |
-| `.text-box--prose`          | Uniform `margin-block-start` between every direct child, for **continuous prose**. Override the spacing via the `--prose-flow` custom property (default `1.5em`). Mutually exclusive with `--flow`. |
-| `.text-box-45` … `-75`      | Caps line length by character count (steps of 5: `45, 50, 55, 60, 65, 70, 75`), computed as `max-width: calc(var(--text-base) * avg-char-width * N)`                          |
-| `.text-box--center-content` | `margin-inline: auto`, typically paired with a character-count modifier                                                                                                        |
+| `.text-box--prose`          | Uniform `margin-block-start` between every direct child, for **continuous prose**. Override the spacing via the `--prose-flow` custom property (default `1.5em`). Mutually exclusive with `--flow`.                          |
+| `.text-box-45` … `-75`      | Caps line length by character count (steps of 5: `45, 50, 55, 60, 65, 70, 75`), computed as `max-width: calc(avg-char-width * N)`                                                                                            |
+| `.text-box--center-content` | `margin-inline: auto`, typically paired with a character-count modifier                                                                                                                                                      |
 
 To add this (or any other component) to your own project, create a `components/` folder alongside your SCSS entry point, paste this in, and load it in the `components` layer somewhere after `@use 'trimscale'`:
 
