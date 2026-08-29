@@ -3,10 +3,27 @@ import type { TrimscaleConfig } from './models/Config.ts'
 /**
  * Trimscale design-system configuration. Edit values here to customize the
  * generated tokens — see node_modules/trimscale-css/docs/ for the full reference.
+ *
+ * Where to find the docs for each section below:
+ * - appFonts, fontRoles                                  
+ *   → docs/adding-a-font.md
+ * - breakpoints                                          
+ *   → docs/customizing-breakpoints.md
+ * - fluidScale, modularTypographicScale, semanticFontSizes                                               
+ *   → docs/customizing-type-scale.md
+ * 
+ * - fontWeights, lineHeights                             
+ *   → docs/design-tokens.md#typography-tokens
+ * - spacingSetup                                         
+ *   → docs/customizing-spacing.md
+ * - defaultScheme, baseColorTokens, campaignColorTokens, semanticColorAliases
+ *   → docs/design-tokens.md#color-tokens
+ *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
 const config: TrimscaleConfig = {
   /**
    * Local font files and their fallback stacks.
+   * @property 
    */
   appFonts: {
     fontPath: '../fixtures/fonts/', // relative to trimscale config file, e.g. ./fonts/ or ../assets/fonts/
@@ -182,9 +199,11 @@ const config: TrimscaleConfig = {
    *   (fluidScale's base font-size / 4) drives every step, so
    *   spacing and text always scale in lockstep.
    * - `'independent'` keeps spacing on its own two-unit system: --unit-micro
-   *   (static grid unit) for small steps, --unit-macro (its own 4px → 8px
-   *   fluid clamp, unrelated to fluidScale) for large steps.
-   *
+   *   (static grid unit) for small steps, --unit-macro (its own $base-grid-size
+   *   → macroRangeMax fluid clamp, endpoints unrelated to fluidScale but its
+   *   viewport range still comes from fluidScale) for large steps.
+   * 
+   * macroRangeMax sets the ceiling for --unit-macro clamp(), defaults to 8 (0.5rem) if not set.
    * tShirtScale(Micro/Macro) maps named tiers to a multiplier of the unit
    * they use — keys are 'xs' | 'sm' | 'md' | 'lg' | 'xl' or `${number}xs` /
    * `${number}xl` for extra tiers (e.g. '2xs', '4xl').
@@ -196,6 +215,7 @@ const config: TrimscaleConfig = {
    */
   spacingSetup: {
     approach: 'independent',
+    macroRangeMax: 8,
     tShirtScaleMicro: {
       '3xs': 1,
       '2xs': 2,

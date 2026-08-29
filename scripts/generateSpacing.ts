@@ -5,7 +5,15 @@ import { loadConfig } from './loadConfig.ts';
 
 const cfg = await loadConfig()
 const spacingSetup = cfg.spacingSetup
-const coupledSpacing = spacingSetup.approach === 'coupled'; 
+const coupledSpacing = spacingSetup.approach === 'coupled';
+
+// Floor/ceiling backstop for non-TS consumers bypassing the macroRangeMax
+// literal union. 4 keeps --unit-macro's clamp from a negative slope (it must
+// stay >= the fixed $base-grid-size, see generateBreakpoints.ts); 16 mirrors
+// the type's own upper bound.
+if (!coupledSpacing && spacingSetup.macroRangeMax !== undefined && (spacingSetup.macroRangeMax < 4 || spacingSetup.macroRangeMax > 16)) {
+  throw new Error(`spacingSetup.macroRangeMax must be between 4 and 16, got ${spacingSetup.macroRangeMax}.`)
+}
 
 const spacingSetupToScssMap = (): string | undefined => {
   if (coupledSpacing) {
@@ -98,14 +106,18 @@ ${coupledSpacing
     /// At 16px base = 4px unit, at 20px base = 5px unit
     --unit: calc(var(--fluid-base) / #{var.$base-grid-size});`
       : `
-    /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid
-    /// The old fluid-base/4 formula only ever rounded to 4px or 5px, so the
-    /// continuous interpolation bought nothing once snapped to a pixel grid.
-    /// container-spacing-provider mirrors this same static value.
+    /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid.
+    /// A fluid clamp here would only round to a pixel or two apart across the
+    /// viewport range (e.g. 4px vs 5px under the default fluidScale), so it's
+    /// kept as a plain static value instead of a needless clamp().
     --unit-micro: #{fn.pxToRem(var.$base-grid-size)};
 
-    /// Base spacing unit for large steps, an independent 4px → 8px fluid clamp
-    --unit-macro: round(#{fn.getFluidClamp(4, 8, "vwx")}, 1px);`
+    /// Base spacing unit for large steps, an independent $base-grid-size → macroRangeMax fluid clamp
+    --unit-macro: round(
+                    nearest,
+                    #{fn.getFluidClamp(var.$base-grid-size, ${spacingSetup.macroRangeMax ?? 8}, "vwx")},
+                    1px
+                  );`
     }
   }
 }
@@ -193,7 +205,7 @@ ${spacingSetupToScssMap()}
 /// Spacing scale multipliers
 /// @type Map
 /// $space-micro values are multipliers of --unit-micro (1/4 of --fluid-base);
-/// $space-macro values are multipliers of --unit-macro (an independent 4px → 8px fluid clamp)
+/// $space-macro values are multipliers of --unit-macro (an independent $base-grid-size → macroRangeMax fluid clamp)
 /// Example: --space-sm = calc(var(--unit-micro) * 4) = 1rem at base font size
 ${spacingSetupToScssMap()}
 

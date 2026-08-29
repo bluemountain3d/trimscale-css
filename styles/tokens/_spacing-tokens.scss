@@ -14,7 +14,7 @@
 /// Spacing scale multipliers
 /// @type Map
 /// $space-micro values are multipliers of --unit-micro (1/4 of --fluid-base);
-/// $space-macro values are multipliers of --unit-macro (an independent 4px → 8px fluid clamp)
+/// $space-macro values are multipliers of --unit-macro (an independent $base-grid-size → macroRangeMax fluid clamp)
 /// Example: --space-sm = calc(var(--unit-micro) * 4) = 1rem at base font size
 $space-micro: (
   "3xs": 1,

@@ -151,8 +151,10 @@ type TShirtScale =
  *   (fluidScale's base font-size / $base-grid-size) drives every step, so
  *   one `tShirtScale` map covers every named tier.
  * - `'independent'` keeps spacing on its own two-unit system instead:
- *   `--unit-micro` (static) for small steps, `--unit-macro` (its own 4px→8px
- *   fluid clamp, unrelated to fluidScale) for large steps — hence two
+ *   `--unit-micro` (static, fixed at `$base-grid-size`) for small steps,
+ *   `--unit-macro` (its own fluid clamp from `$base-grid-size` up to
+ *   `macroRangeMax`, endpoints unrelated to fluidScale but its viewport
+ *   range still comes from fluidScale) for large steps — hence two
  *   separate tier maps (`tShirtScaleMicro`/`tShirtScaleMacro`) and two
  *   numeric-scale bounds (`numericScaleMicroEnd`/`numericScaleMacroEnd`).
  */
@@ -164,6 +166,8 @@ export type SpacingSetup =
   }
   | {
     approach: 'independent'
+    /** Upper end (px) of `--unit-macro`'s fluid clamp at `fluidScale.maxWidth`. The lower end is always `$base-grid-size`, so the two units meet at `fluidScale.minWidth`. @default 8 */
+    macroRangeMax?: 4 | 5 | 6 | 7 | 8 | 10 | 12 | 14 | 16
     tShirtScaleMicro: Partial<Record<TShirtScale, number>>
     tShirtScaleMacro: Partial<Record<TShirtScale, number>>
     numericScaleMicroEnd: number
