@@ -52,12 +52,15 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 | `--fs-100` | −2         | Smallest (legal, captions)       |
 | `--fs-200` | −1         | Small (secondary info, metadata) |
 | `--fs-300` | 0          | Base font size                   |
+| `--fs-350` | +0.5       | Slightly emphasized text         |
 | `--fs-400` | +1         | Emphasized text                  |
 | `--fs-500` | +2         | Small heading                    |
 | `--fs-600` | +3         | Medium heading                   |
 | `--fs-700` | +4         | Large heading                    |
 | `--fs-800` | +5         | Extra large heading              |
 | `--fs-900` | +6         | Display heading                  |
+
+`--fs-900` and `--fs-800` also ship an uncapped sibling by default, `--fs-900-uncapped` and `--fs-800-uncapped`, built with `max()` instead of `clamp()` so they keep growing past `fluidScale.maxWidth` rather than settling at a fixed size. Useful for hero/display text on very large viewports; the plain `--fs-900`/`--fs-800` stay capped for everywhere else. Controlled per step via `uncapped: true` in `modularTypographicScale`, see [customizing-type-scale.md](customizing-type-scale.md#uncapped-steps-uncapped).
 
 **Semantic size aliases:**
 

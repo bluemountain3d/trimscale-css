@@ -21,18 +21,19 @@ Returns a `clamp()` value that interpolates linearly between two raw pixel sizes
 
 This is also what the `--unit-macro` spacing token is built from, see [design-tokens.md](design-tokens.md).
 
-### `fn.fluidFontSize($level, $unit-key)`
+### `fn.fluidFontSize($level, $unit-key, $type)`
 
-Returns a `clamp()` value for a type step on the modular scale.
+Returns a `clamp()` value for a type step on the modular scale. Pass `$type: 'max'` to drop the upper bound instead, so the value keeps growing linearly past `fluidScale.maxWidth` rather than capping there (used for the `uncapped` option in `modularTypographicScale`, see [customizing-type-scale.md](customizing-type-scale.md)).
 
 ```scss
 font-size: fn.fluidFontSize(2); // 2 steps up from base, uses vwx unit
 font-size: fn.fluidFontSize(2, 'vw'); // same, using plain vw
+font-size: fn.fluidFontSize(2, 'vwx', 'max'); // max() instead of clamp(), no upper bound
 ```
 
-### `fn.fluidSpacing($level, $unit-key)`
+### `fn.fluidSpacing($level, $unit-key, $type)`
 
-Returns a `clamp()` value for a spacing multiplier on the base grid (independent of the `--unit-micro`/`--unit-macro` split, it computes its own clamp directly from `min-font-size`/`max-font-size`, not from the CSS custom properties).
+Returns a `clamp()` value for a spacing multiplier on the base grid (independent of the `--unit-micro`/`--unit-macro` split, it computes its own clamp directly from `min-font-size`/`max-font-size`, not from the CSS custom properties). Same `$type: 'max'` option as `fluidFontSize` above.
 
 ```scss
 padding: fn.fluidSpacing(6); // grid level × 6

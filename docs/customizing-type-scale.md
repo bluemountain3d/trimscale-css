@@ -41,8 +41,8 @@ Each entry becomes one `--fs-*` custom property:
 
 ```ts
 modularTypographicScale: {
-  fs900: { step: 6, unit: 'vwx' },
-  fs800: { step: 5, unit: 'vwx' },
+  fs900: { step: 6, unit: 'vwx', uncapped: true },
+  fs800: { step: 5, unit: 'vwx', uncapped: true },
   fs700: { step: 4, unit: 'vwx' },
   fs600: { step: 3, unit: 'vwx' },
   fs500: { step: 2, unit: 'vwx' },
@@ -55,6 +55,12 @@ modularTypographicScale: {
 ```
 
 `step` is the exponent in the modular-scale formula (fractional steps like `0.5` are valid, that's how `fs350` sits halfway between `fs300` and `fs400`). `unit` picks which viewport unit drives the interpolation, `'vwx'` (the adaptive custom viewport unit, see [design-tokens.md](design-tokens.md#base-tokens)) is the default; `'vw'`, `'cqw'`, and `'cqi'` are also valid for container-relative or plain-viewport variants. Add or remove keys freely, `fs900`..`fs100` is just the default naming.
+
+### Uncapped steps: `uncapped`
+
+Every scale step normally resolves to a `clamp()`, so growth stops at `fluidScale.maxWidth`. Setting `uncapped: true` on a step additionally generates a second token, `--fs-*-uncapped`, built with `max()` instead: it keeps growing past `maxWidth` rather than being capped there. Use it for display/hero text that should keep scaling up on very large viewports; leave it off (the default) for anything where you want the size to settle at a fixed maximum, which is most of the scale.
+
+The default config sets `uncapped: true` on `fs900` and `fs800` only, giving you `--fs-900`/`--fs-900-uncapped` and `--fs-800`/`--fs-800-uncapped` side by side, so you pick whichever fits a given use of that step.
 
 ## Semantic aliases: `semanticFontSizes`
 

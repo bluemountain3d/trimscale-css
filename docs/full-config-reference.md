@@ -59,7 +59,7 @@ The base scale (`fs100`..`fs900`), each entry a `--fs-*` fluid clamp() built fro
 
 | Property                            | Type        | Required | Description                                        |
 | -------------------------------------- | ----------- | :------: | ----------------------------------------------------- |
-| `fs100`..`fs900` (and `fs350`)       | `ScaleStep` |    No    | `{ step: number, unit: 'vwx' \| 'cqw' \| 'cqi' \| 'vw' }`. `step` is the modular-scale exponent (`0` = `fluidScale`'s base font-size). |
+| `fs100`..`fs900` (and `fs350`)       | `ScaleStep` |    No    | `{ step: number, unit: 'vwx' \| 'cqw' \| 'cqi' \| 'vw', uncapped?: boolean }`. `step` is the modular-scale exponent (`0` = `fluidScale`'s base font-size). `uncapped: true` additionally generates a `--fs-*-uncapped` token using `max()` instead of `clamp()`, so it keeps growing past `fluidScale.maxWidth` instead of capping there. |
 | `[customRole: string]`               | `ScaleStep` |    No    | Any other scale step name.                          |
 
 → Full guide: [customizing-type-scale.md](customizing-type-scale.md)
