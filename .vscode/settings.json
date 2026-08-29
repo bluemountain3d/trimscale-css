@@ -9,14 +9,15 @@
     "nums",
     "oklch",
     "Oldstyle",
+    "phablet",
+    "precisionspec",
+    "styleguide",
     "trimscale",
     "ultrawide",
     "unfallbacked",
-    "wght",
     "unitless",
-    "phablet",
     "Unlayered",
-    "styleguide",
-    "viewports"
+    "viewports",
+    "wght"
   ]
 }

@@ -74,6 +74,7 @@ trimscale-css/
 | Guide                                                         | Covers                                         |
 | ------------------------------------------------------------- | ---------------------------------------------- |
 | [getting-started.md](docs/getting-started.md)                 | Install, CLI, requirements, both import styles |
+| [full-config-reference.md](docs/full-config-reference.md)     | Every `trimscale.config.ts` property, one page |
 | [cascade-layers.md](docs/cascade-layers.md)                   | The `@layer` stack and why it matters          |
 | [design-tokens.md](docs/design-tokens.md)                     | Every generated CSS custom property            |
 | [abstracts.md](docs/abstracts.md)                             | Functions, mixins, and the breakpoint API      |
@@ -90,6 +91,8 @@ trimscale-css/
 ## Customization
 
 Everything lives in one file: [`trimscale.config.ts`](trimscale.config.ts). Edit a field, run `npx trimscale-css generate`, the system derives everything else at compile time. Nothing under `styles/tokens/` or the generated files in `styles/abstracts/variables/`/`styles/base/` should be hand-edited, they get overwritten on the next generate.
+
+The table below groups fields by topic; for every individual property, its type, and whether it's required, see [full-config-reference.md](docs/full-config-reference.md).
 
 | Config field                                                                           | Controls                                                                                                                                             | Guide                                                                                            |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
