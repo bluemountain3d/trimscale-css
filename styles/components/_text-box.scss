@@ -86,14 +86,16 @@
     }
 
     /// Constrains line length by character count.
-    /// Computed from `--text-base` and the average body character width.
+    /// `--avg-char-width-body` is an em value, so it resolves to an absolute
+    /// width using .text-box's own computed font-size, assumed to be
+    /// `--text-base` (inherited from body unless overridden by a parent).
     /// Available steps: 45, 50, 55, 60, 65, 70, 75.
     /// @example html
     ///   <div class="text-box text-box-65">…</div>
     ///
     @each $chars in (45, 50, 55, 60, 65, 70, 75) {
       &-#{$chars} {
-        max-width: calc(var(--text-base) * var(--avg-char-width-body, 1ch) * $chars);
+        max-width: round(calc(var(--avg-char-width-body, 1ch) * $chars), 1px);
       }
     }
 
