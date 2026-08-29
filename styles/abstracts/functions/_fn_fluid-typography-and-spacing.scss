@@ -93,7 +93,7 @@
 ///   h1 { font-size: fluidFontSize(3); }    // 3 steps up from base
 ///   small { font-size: fluidFontSize(-1); } // 1 step down from base
 ///   p { font-size: fluidFontSize(0); }      // Base size
-@function fluidFontSize($level: 0, $unit-key: "vwx") {
+@function fluidFontSize($level: 0, $unit-key: "vwx", $type: 'clamp') {
   $min-base: map.get(var.$fluid-scale, "min-font-size");
   $max-base: map.get(var.$fluid-scale, "max-font-size");
   $min-ratio: map.get(var.$fluid-scale, "min-type-scale");
@@ -116,9 +116,21 @@
 
   $unit: _getUnitSyntax($unit-key);
 
-  @return clamp(#{round(pxToRem($min-size))},
-    #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit},
-    #{round(pxToRem($max-size))});
+  @if $type == 'clamp' {
+    @return clamp(
+      #{round(pxToRem($min-size))},
+      #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit},
+      #{round(pxToRem($max-size))}
+    );
+  }
+  @else if $type == 'max' {
+    @return max(
+      #{round(pxToRem($min-size))},
+      #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit}
+    );
+  }
+
+  
 }
 
 /// Generate fluid spacing based on grid system
@@ -129,7 +141,7 @@
 /// @example
 ///   .card { padding: fluidSpacing(4); }  // 16px-20px (1 × base grid)
 ///   .section { gap: fluidSpacing(8); }   // 32px-40px (2 × base grid)
-@function fluidSpacing($level: 4, $unit-key: "vwx") {
+@function fluidSpacing($level: 4, $unit-key: "vwx", $type: 'clamp') {
   $min-base: map.get(var.$fluid-scale, "min-font-size");
   $max-base: map.get(var.$fluid-scale, "max-font-size");
   $min-w: map.get(var.$fluid-scale, "min-width");
@@ -150,9 +162,16 @@
 
   $unit: _getUnitSyntax($unit-key);
 
-  @return clamp(#{round(pxToRem($min-size))},
-    #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit},
-    #{round(pxToRem($max-size))});
+  @if $type =='clamp' {
+    @return clamp(#{round(pxToRem($min-size))},
+      #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit},
+      #{round(pxToRem($max-size))});
+  }
+
+  @else if $type =='max' {
+    @return max(#{round(pxToRem($min-size))},
+      #{round(pxToRem($intercept))} + #{round($slope * 100)} * #{$unit});
+  }
 }
 
 /// Generate fluid spacing between two different grid levels

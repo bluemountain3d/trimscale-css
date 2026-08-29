@@ -145,8 +145,8 @@ const config: TrimscaleConfig = {
    */
   modularTypographicScale: {
     // System Default (optional)
-    fs900: { step: 6, unit: 'vwx' },
-    fs800: { step: 5, unit: 'vwx' },
+    fs900: { step: 6, unit: 'vwx', uncapped: true},
+    fs800: { step: 5, unit: 'vwx', uncapped: true},
     fs700: { step: 4, unit: 'vwx' },
     fs600: { step: 3, unit: 'vwx' },
     fs500: { step: 2, unit: 'vwx' },
@@ -357,7 +357,7 @@ const config: TrimscaleConfig = {
       token: 'action',
       tokenMap: 'baseColorTokens',
       opacity: 1,
-      chroma: { light: 0.8, dark: 1.2 },
+      chroma: { light: 0.8, dark: 1.25 },
       lightness: { light: 0.75, dark: 1.333 },
     },
   },

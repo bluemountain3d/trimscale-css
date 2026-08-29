@@ -126,6 +126,7 @@ export type FontRoles = {
 export type ScaleStep = {
   step: number
   unit: 'vwx' | 'cqw' | 'cqi' | 'vw'
+  uncapped?: boolean
 }
 
 /** The base modular scale (`fs100`..`fs900`). Each entry generates a `--fs-*` custom property as a fluid clamp(). Referenced by `SemanticFontSizes`' `from` field for `type: 'scale'` entries. */

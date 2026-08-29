@@ -16,11 +16,11 @@ const runInit = () => {
   const configDest = path.join(projectRoot, configFileName)
 
   if (fs.existsSync(configDest)) {
-    console.log(`⚠️  ${configFileName} already exists — leaving it untouched.`)
+    console.log(`⚠️  ${configFileName} already exists, leaving it untouched.`)
   } else {
     const configTemplate = path.join(import.meta.dirname, '..', configFileName)
     // The template's own `import type { TrimscaleConfig } from './models/Config.ts'`
-    // is relative to this repo — correct for dogfooding, but once copied to the
+    // is relative to this repo, correct for dogfooding, but once copied to the
     // consumer's project root, that relative path no longer resolves (models/
     // lives inside node_modules/trimscale-css/, not the consumer's own root).
     // Repoint it at the package specifier before writing the copy.
@@ -59,8 +59,8 @@ const runInit = () => {
 
 /**
  * Runs the package's token generators against the consumer's own
- * `trimscale.config.ts` (read from `process.cwd()` by `scripts/loadConfig.ts`
- * — not this package's own template).
+ * `trimscale.config.ts` (read from `process.cwd()` by `scripts/loadConfig.ts`,
+ * not this package's own template).
  */
 const runGenerate = async () => {
   await import('../scripts/generateAll.ts')

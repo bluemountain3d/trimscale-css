@@ -26,6 +26,14 @@
     inherits: true;
     initial-value: 1rem;
   }
+
+  @if map.get($value, "uncapped") {
+    @property --#{$key}-uncapped {
+      syntax: "<length>";
+      inherits: true;
+      initial-value: 1rem;
+    }
+  }
 }
 
 @each $key, $value in var.$semantic-font-sizes {
@@ -78,6 +86,10 @@
       $unit: map.get($values, "unit");
   
       --#{$scaleStep}: #{fn.fluidFontSize($step, $unit)};
+
+      @if map.get($values, "uncapped") {
+        --#{$scaleStep}-uncapped: #{fn.fluidFontSize($step, $unit, 'max')};
+      }
     }
 
     // ==========================================================================
