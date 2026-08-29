@@ -1,4 +1,4 @@
-import type { FamilyFontMetrics } from './generateFontMetrics.parser.ts'
+import type { FamilyFontMetrics } from './generateFontMetrics.ts'
 
 /** Ordered font metric keys used when generating per-role font-metric SCSS variables (e.g. `$ff-primary`, `$top-trim-primary`). */
 export const metricsList: (keyof FamilyFontMetrics)[] = [

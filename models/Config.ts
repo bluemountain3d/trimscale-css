@@ -40,16 +40,65 @@ export type Breakpoints = {
 }
 
 // AppFonts ===================================================================
-/** Generic CSS font-family fallback keywords usable in `AppFonts.fallbacks`/`defaultFallback`. */
+/** Generic CSS font-family fallback keywords usable in a `FontSource.fallback`/`AppFonts.fallbackDefault`. */
 export type FontFallbacks = 'sans-serif' | 'serif' | 'monospace' | 'system-ui' | 'cursive'
 
-/** Local font files and their fallback stacks. See `nextFont`/`nextFontPrefix` for Next.js `next/font/local` integration. */
+/** The five trim/spacing metrics a font contributes, normalized to em. Same shape the generator extracts from a real font file — a `manual` `FontSource` supplies these by hand instead (see precisionspec.dev). */
+export type RawFontMetrics = {
+  /** Average character width, normalized to em */
+  avgCharWidth: number
+  /** Space between cap-height and ascender, normalized to em */
+  topTrim: number
+  /** Space between baseline and descender, normalized to em */
+  bottomTrim: number
+  /** Left side bearing adjustment, normalized to em (negative) */
+  lsbAdjust: number
+  /** Right side bearing adjustment, normalized to em (negative) */
+  rsbAdjust: number
+}
+
+/**
+ * Where one font family's metrics (and, for `local`/`cdn`, its `@font-face`
+ * rules) come from. `path`/`url` accept multiple files so a family's full
+ * weight/style range (or a single variable-font file) can be declared —
+ * metrics are always read from whichever entry is closest to non-italic
+ * weight 400, the rest still each get their own `@font-face`.
+ */
+export type FontSource =
+  | {
+    source: 'local'
+    /** Path(s) to the font file(s) including file extension, relative to `trimscale.config.ts` */
+    path: string[]
+    fallback?: FontFallbacks
+    /** Overrides `AppFonts.nextFontDefault` for this family only. Set `false` here if most of your fonts go through `next/font` but this particular one doesn't. */
+    nextFont?: boolean
+  }
+  | {
+    source: 'cdn'
+    /** Direct URL(s) to the actual font file(s) — not a CSS-generating endpoint (e.g. not Google Fonts' `css2?family=...`, which resolves differently per `User-Agent` and isn't a font file itself). Fetched once and cached under `.trimscale-cache/fonts/` (gitignored), not re-fetched while cached. */
+    url: string[]
+    fallback?: FontFallbacks
+    /** Write `@font-face` rules pointing at `url` (self-hosting via the CDN's file URLs directly). Default `false`: assumes the font is already loaded some other way (a `<link>` tag, a JS loader, `next/font/google`), and only metrics are needed. */
+    generateFontFace?: boolean
+    /** Overrides `AppFonts.nextFontDefault` for this family only. Set `true` here for a `next/font/google` font when most of your other fonts *aren't* going through `next/font`, or `false` if this one isn't even though most are. */
+    nextFont?: boolean
+  }
+  | {
+    source: 'manual'
+    fallback?: FontFallbacks
+    /** Hand-entered metrics for a font whose file trimscale can't read (e.g. a CDN that doesn't expose downloadable files). See precisionspec.dev. No `@font-face` is generated, load the font some other way. */
+    metrics: RawFontMetrics
+    /** Overrides `AppFonts.nextFontDefault` for this family only. */
+    nextFont?: boolean
+  }
+
+/** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
 export type AppFonts = {
-  fontPath: string
-  nextFont?: boolean // only for next/font/local — metrics require a local font file (fontPath); next/font/google has none to read
+  fonts: Record<string, FontSource>
+  /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `fonts` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
+  nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted
-  fallbacks?: Record<string, FontFallbacks>
-  defaultFallback: FontFallbacks
+  fallbackDefault: FontFallbacks
 }
 
 // FontRoles ==================================================================

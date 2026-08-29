@@ -1,5 +1,4 @@
-import type { FamilyFontMetrics } from './generateFontMetrics.parser.ts';
-import type { FontFace, FontMetricsMap } from './generateFontMetrics.ts';
+import type { FamilyFontMetrics, FontFace, FontMetricsMap } from './generateFontMetrics.ts';
 import { raw, setNestedScssMap, setScssMap, setScssMapEntry, toKebabCase } from './helpers.ts';
 
 const sassDocs = `
@@ -64,7 +63,7 @@ export const fontFacesToScss = (fontFaces: FontFace[]): string => {
 
     return `${isNewFamily ? `// ${face.family}\n` : ''}@font-face {
   font-family: "${face.family}";
-  src: url("${face.path}") format("${face.ext}");
+  src: url("${face.src}") format("${face.ext}");
   font-weight: ${typeof face.weight === 'number'
                   ? face.weight
                   : `${face.weight.min} ${face.weight.max}`};
@@ -78,20 +77,21 @@ export const fontFacesToScss = (fontFaces: FontFace[]): string => {
 
 /**
  * Builds `_index.scss`, the entry point for `styles/base/`. Omits the
- * `@forward './fonts'` line when `isNext` is true, since Next.js's
- * `next/font/local` handles font loading itself and no `_fonts.scss` is
- * generated in that case.
- * @param isNext - Mirrors `cfg.appFonts.nextFont`.
+ * `@forward './fonts'` line when no `@font-face` rules were written (nothing
+ * for `_fonts.scss` to forward) — that's the case whenever every font came
+ * from `next/font/local`, `manual` metrics, or `cdn` without
+ * `generateFontFace: true`.
+ * @param hasFontFaces - Whether any `@font-face` rules were generated this run.
  * @returns The complete `_index.scss` contents.
  */
-export const baseIndexToScss = (isNext: boolean) => `
+export const baseIndexToScss = (hasFontFaces: boolean) => `
 /// @group Base
 /// @name Base Styles
 /// @description Entry point for all base styles.
-/// Forwards ${isNext ? '' : 'fonts, '}reset, base defaults, and typography.
+/// Forwards ${hasFontFaces ? 'fonts, ' : ''}reset, base defaults, and typography.
 /// Import order matters — reset must come before base and typography.
 /// ===========================================================================
-${isNext ? '' : `\n@forward './fonts';`}
+${hasFontFaces ? `\n@forward './fonts';` : ''}
 @forward './reset';
 @forward './base';
 @forward './typography';

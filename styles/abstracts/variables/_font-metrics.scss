@@ -32,27 +32,27 @@
 /// @type Map
 $font-metrics: (
   "Roboto": (
-    "family": '"Roboto", sans-serif',
     "avg-char-width": 0.564,
     "top-trim": 0.039,
     "bottom-trim": 0.25,
     "lsb-adjust": -0.061,
     "rsb-adjust": -0.0547,
-  ),
-  "Roboto Mono": (
-    "family": '"Roboto Mono", monospace',
-    "avg-char-width": 0.6,
-    "top-trim": 0.178,
-    "bottom-trim": 0.112,
-    "lsb-adjust": -0.0859,
-    "rsb-adjust": -0.0669,
+    "family": '"Roboto", sans-serif',
   ),
   "Roboto Serif": (
-    "family": '"Roboto Serif", serif',
     "avg-char-width": 0.617,
     "top-trim": 0.132,
     "bottom-trim": 0.159,
     "lsb-adjust": -0.04,
     "rsb-adjust": -0.026,
+    "family": '"Roboto Serif", serif',
+  ),
+  "Roboto Mono": (
+    "avg-char-width": 0.6,
+    "top-trim": 0.178,
+    "bottom-trim": 0.112,
+    "lsb-adjust": -0.0859,
+    "rsb-adjust": -0.0669,
+    "family": '"Roboto Mono", monospace',
   ),
 ) !default;

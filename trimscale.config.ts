@@ -2,7 +2,8 @@ import type { TrimscaleConfig } from './models/Config.ts'
 
 /**
  * Trimscale design-system configuration. Edit values here to customize the
- * generated tokens — see node_modules/trimscale-css/docs/ for the full reference.
+ * generated tokens — see node_modules/trimscale-css/docs/ for the full reference,
+ * or docs/full-config-reference.md for a single-page property-by-property index.
  *
  * Where to find the docs for each section below:
  * - appFonts, fontRoles                                  
@@ -22,25 +23,65 @@ import type { TrimscaleConfig } from './models/Config.ts'
  */
 const config: TrimscaleConfig = {
   /**
-   * Local font files and their fallback stacks.
-   * @property 
+   * Font sources (local file, CDN URL, or hand-entered metrics), keyed by
+   * family name, and their fallback stacks.
+   * → docs/adding-a-font.md · docs/full-config-reference.md#appfonts
    */
   appFonts: {
-    fontPath: '../fixtures/fonts/', // relative to trimscale config file, e.g. ./fonts/ or ../assets/fonts/
-    nextFont: false,                // if using Next.js `localFont`
+    nextFontDefault: false,         // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
-    fallbacks: {                    // fallback fonts for each font in project fonts folder
-      'Roboto': 'sans-serif',
-      'Roboto Serif': 'serif',
-      'Roboto Mono': 'monospace',
+    fallbackDefault: 'sans-serif',  // used when a font entry below has no `fallback` of its own
+    fonts: {
+      'Roboto': {
+        source: 'local',
+        path: [
+          '../fixtures/fonts/Roboto-VariableFont_wght-100-900_subset.woff2',
+          '../fixtures/fonts/Roboto-VariableFont_wght-100-900-Italic_subset.woff2',
+        ],
+        fallback: 'sans-serif',
+      },
+      'Roboto Serif': {
+        source: 'local',
+        path: [
+          '../fixtures/fonts/RobotoSerif-VariableFont_wght-100-900_subset.woff2',
+          '../fixtures/fonts/RobotoSerif-VariableFont_wght-100-900-Italic_subset.woff2',
+        ],
+        fallback: 'serif',
+      },
+      'Roboto Mono': {
+        source: 'local',
+        path: [
+          '../fixtures/fonts/RobotoMono-VariableFont_wght-100-700_subset.woff2',
+          '../fixtures/fonts/RobotoMono-VariableFont_wght-100-700-Italic_subset.woff2',
+        ],
+        fallback: 'monospace',
+      },
+      // CDN example (metrics auto-extracted, no @font-face written by default):
+      // 'Open Sans': {
+      //   source: 'cdn',
+      //   url: ['https://fonts.gstatic.com/s/opensans/v40/....woff2'],
+      //   fallback: 'sans-serif',
+      // },
+      // Manual example, for CDNs that don't expose a downloadable file — get
+      // the metrics from precisionspec.dev:
+      // 'Proxima Nova': {
+      //   source: 'manual',
+      //   fallback: 'sans-serif',
+      //   metrics: {
+      //     avgCharWidth: 0.545,
+      //     topTrim: 0.107,
+      //     bottomTrim: 0.02,
+      //     lsbAdjust: -0.012,
+      //     rsbAdjust: -0.012,
+      //   },
+      // },
     },
-    defaultFallback: 'sans-serif', // If no fallback fonts is set in ``fallbacks`, this is the fallback
   },
 
   /**
    * Maps semantic font roles (primary, heading, body, etc.) to font family
-   * names defined in appFonts/font-metrics.
-   * primary and body is required, all other are optional.
+   * names defined in appFonts.fonts. primary and body are required, the rest optional.
+   * → docs/full-config-reference.md#fontroles
    */
   fontRoles: {
     // System Default
@@ -65,10 +106,10 @@ const config: TrimscaleConfig = {
   },
 
   /**
-   * Named viewport breakpoints (in px), converted to rem and generates the
-   * `$breakpoints` SCSS map consumed by the breakpoint mixins for `@media`
-   * queries. Keys become kebab-case (e.g. `tabletLg` → `tablet-lg`).
-   * Must be added smallest to largest.
+   * Named viewport breakpoints (px), converted to rem for the $breakpoints
+   * SCSS map. Keys become kebab-case (e.g. tabletLg → tablet-lg). Must be
+   * added smallest to largest.
+   * → docs/customizing-breakpoints.md · docs/full-config-reference.md#breakpoints
    */
   breakpoints: {
     // System Default (optional)
@@ -84,6 +125,7 @@ const config: TrimscaleConfig = {
 
   /**
    * Fluid clamp() boundaries: base font-size and modular-scale ratio at the min/max viewport widths.
+   * → docs/customizing-type-scale.md · docs/full-config-reference.md#fluidscale
    */
   fluidScale: {
     minWidth: 360,
@@ -96,12 +138,10 @@ const config: TrimscaleConfig = {
   },
 
   /**
-   * The base modular scale. Each entry generates a CSS custom property
-   * (--fs-900, --fs-800, etc.) as a fluid clamp() built from `step` (the
-   * exponent in the modular-scale formula, 0 = fluidScale's base font-size)
-   * and `unit` (the viewport unit used for the fluid interpolation).
-   * Referenced by semanticFontSizes' `from` field for `type: 'scale'` entries.
-   * The `vwx` unit is a custom unit used in the system.
+   * The base modular scale (fs100..fs900). Each entry generates a --fs-*
+   * fluid clamp() custom property from step/unit, referenced by
+   * semanticFontSizes' `from` field for `type: 'scale'` entries.
+   * → docs/customizing-type-scale.md · docs/full-config-reference.md#modulartypographicscale
    */
   modularTypographicScale: {
     // System Default (optional)
@@ -121,13 +161,10 @@ const config: TrimscaleConfig = {
 
   /**
    * Named roles (display1, heading1, textBase, etc.), generates CSS custom
-   * properties like --display-1, --text-base. Each role's `from` points at
-   * another token by name:
-   * - `type: 'scale'` aliases directly to a modularTypographicScale key
-   *   (e.g. `from: 'fs900'`) — the semantic token becomes `var(--fs-900)`.
-   * - `type: 'linear'` multiplies another semanticFontSizes role
-   *   (e.g. `from: 'textBase'`) via calc(), for sizes that should track a
-   *   role proportionally instead of getting their own fluid clamp.
+   * properties like --display-1, --text-base. Each role's `from` either
+   * aliases a modularTypographicScale key (`type: 'scale'`) or multiplies
+   * another semanticFontSizes role via calc() (`type: 'linear'`).
+   * → docs/customizing-type-scale.md · docs/full-config-reference.md#semanticfontsizes
    */
   semanticFontSizes: {
     // System Default (optional)
@@ -148,6 +185,7 @@ const config: TrimscaleConfig = {
 
   /**
    * Named font-weight scale. Generates --font-weight-* custom properties.
+   * → docs/full-config-reference.md#fontweights
    */
   fontWeights: {
     // System Default (optional)
@@ -167,6 +205,7 @@ const config: TrimscaleConfig = {
   /**
    * Named line-height scale (percent-based keys, e.g. "125" = 1.25).
    * Generates --line-height-* custom properties, e.g. "--line-height-125".
+   * → docs/full-config-reference.md#lineheights
    */
   lineHeights: {
     // System Default (optional)
@@ -194,24 +233,10 @@ const config: TrimscaleConfig = {
   },
 
   /**
-   * How --space-* tokens grow across viewport widths.
-   * - `'coupled'` ties spacing to the fluid type scale: a single --unit
-   *   (fluidScale's base font-size / 4) drives every step, so
-   *   spacing and text always scale in lockstep.
-   * - `'independent'` keeps spacing on its own two-unit system: --unit-micro
-   *   (static grid unit) for small steps, --unit-macro (its own $base-grid-size
-   *   → macroRangeMax fluid clamp, endpoints unrelated to fluidScale but its
-   *   viewport range still comes from fluidScale) for large steps.
-   * 
-   * macroRangeMax sets the ceiling for --unit-macro clamp(), defaults to 8 (0.5rem) if not set.
-   * tShirtScale(Micro/Macro) maps named tiers to a multiplier of the unit
-   * they use — keys are 'xs' | 'sm' | 'md' | 'lg' | 'xl' or `${number}xs` /
-   * `${number}xl` for extra tiers (e.g. '2xs', '4xl').
-   * numericScale(Micro/Macro)End sets the upper bound of the generated
-   * numbered --space-1..N scale (micro covers 1..numericScaleMicroEnd,
-   * macro continues from there through numericScaleMacroEnd).
-   * See docs/customizing-spacing.md for the 'coupled' approach and a full
-   * side-by-side comparison of both.
+   * How --space-* tokens grow across viewport widths: 'coupled' (spacing
+   * tracks the fluid type scale) or 'independent' (its own two-unit
+   * system, --unit-micro/--unit-macro). The two shapes aren't combinable.
+   * → docs/customizing-spacing.md · docs/full-config-reference.md#spacingsetup
    */
   spacingSetup: {
     approach: 'independent',
@@ -237,11 +262,22 @@ const config: TrimscaleConfig = {
     },
     numericScaleMicroEnd: 6,
     numericScaleMacroEnd: 48,
+    // Coupled example — remove/comment the independent-only fields above
+    // (macroRangeMax, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
+    // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
+    // approach: 'coupled',
+    // tShirtScale: {
+    //   '3xs': 1, '2xs': 2, 'xs': 3, 'sm': 4, 'md': 5, 'lg': 6,
+    //   'xl': 8, '2xl': 12, '3xl': 16, '4xl': 20,
+    //   '5xl': 24, '6xl': 28, '7xl': 32, '8xl': 40, '9xl': 48,
+    // },
+    // numericScaleEnd: 48,
   },
 
   /**
    * Which scheme (light/dark) backs the static fallback tier for browsers
    * without oklch()/light-dark() support.
+   * → docs/full-config-reference.md#defaultscheme
    */
   defaultScheme: 'light',
 
@@ -249,6 +285,7 @@ const config: TrimscaleConfig = {
    * Base color palette. Each token generates a CSS custom property
    * (--{prefix}-{name}) with light/dark oklch/hex values and an optional
    * shared opacity. Referenced by name in semanticColorAliases.
+   * → docs/full-config-reference.md#basecolortokens
    */
   baseColorTokens: {
     // Examples
@@ -291,6 +328,7 @@ const config: TrimscaleConfig = {
    * Optional. Extra color maps alongside baseColorTokens, keyed as
    * `{name}ColorTokens` (e.g. campaignColorTokens). Referenced from
    * semanticColorAliases via `tokenMap`.
+   * → docs/full-config-reference.md#custom-color-token-maps-namecolortokens
    */
   campaignColorTokens: {
     prefix: 'campaign',
@@ -312,7 +350,7 @@ const config: TrimscaleConfig = {
    * Optional. Semantic names (e.g. "text-muted") that alias a token from
    * baseColorTokens or a tokenMap, with optional opacity/lightness/chroma
    * overrides (single value, or per light/dark).
-   * prefix is got from tokenMap
+   * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#semanticcoloraliases
    */
   semanticColorAliases: {
     scrollThumb: {

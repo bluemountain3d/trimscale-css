@@ -1,46 +1,21 @@
-import * as fs from 'node:fs'
 import type { Font } from 'fontkit'
 import * as fontkit from 'fontkit'
+import type { RawFontMetrics } from '../models/Config.ts'
 import {
   calculateTrimValues,
   getAverageSideBearings,
   getBBoxHeight,
   getCorrectedAscenderDescender,
 } from './generateFontMetrics.helpers.ts'
-import { toKebabCase } from './helpers.ts'
-import { loadConfig } from './loadConfig.ts'
-
-const cfg = await loadConfig()
-
-/**
- * Per-family font metrics used to generate leading-trim and font-family SCSS
- * variables. All numeric values are normalized to font units-per-em, except
- * `family` which is a ready-to-use SCSS font-family string.
- */
-export interface FamilyFontMetrics {
-  /** SCSS-ready font-family value, e.g. '"Roboto", sans-serif' */
-  family: string
-  /** Average character width, normalized to em */
-  avgCharWidth: number
-  /** Space between cap-height and ascender, normalized to em */
-  topTrim: number
-  /** Space between baseline and descender, normalized to em */
-  bottomTrim: number
-  /** Left side bearing adjustment, normalized to em (negative) */
-  lsbAdjust: number
-  /** Right side bearing adjustment, normalized to em (negative) */
-  rsbAdjust: number
-}
 
 export type ParsedFont = {
-  name: string
-  data: FamilyFontMetrics
+  metrics: RawFontMetrics
   /** Whether the file's OS/2 table declares it italic (`fsSelection` bit 0) */
   isItalic: boolean
   /** The file's declared weight class (OS/2 `usWeightClass`), e.g. 400 = Regular, 700 = Bold */
   weightClass: number
   /** `wght` axis min/max from the `fvar` table for a variable font, or `null` for a static font */
-  weightRange: {min: number, max: number} | null
+  weightRange: { min: number; max: number } | null
 }
 
 // Weight metrics are extracted at. fontkit@2.0.4's getVariation() is
@@ -51,12 +26,14 @@ export type ParsedFont = {
 const TARGET_WEIGHT = 400
 
 /**
- * Extracts leading-trim and font-family metrics from a single font file.
- * @param filePath - Absolute path to a .ttf/.otf/.woff/.woff2 font file
- * @returns The font's resolved family name and its normalized metrics
+ * Extracts leading-trim and side-bearing metrics from a single font file's
+ * raw bytes. The caller (local read or remote fetch) is responsible for
+ * getting the buffer, this only touches fontkit.
+ * @param buffer - The font file's raw bytes (.ttf/.otf/.woff/.woff2)
+ * @param label - Human-readable source description used in error messages only (e.g. `'Roboto (./fonts/roboto.woff2)'`)
+ * @returns The font's normalized metrics plus its italic/weight classification
  */
-export const parseFontFile = async (filePath: string): Promise<ParsedFont> => {
-  const buffer = await fs.promises.readFile(filePath)
+export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<ParsedFont> => {
   const fontOrCollection = fontkit.create(buffer)
 
   let font: Font
@@ -65,7 +42,7 @@ export const parseFontFile = async (filePath: string): Promise<ParsedFont> => {
     const firstFont = fontOrCollection.fonts[0]
 
     if (!firstFont) {
-      throw new Error(`Font collection in the file is empty: ${filePath}`)
+      throw new Error(`Font collection in the file is empty: ${label}`)
     }
 
     font = firstFont
@@ -78,20 +55,14 @@ export const parseFontFile = async (filePath: string): Promise<ParsedFont> => {
   const os2 = f['OS/2']
 
   if (!os2) {
-    throw new Error(`Could not find the OS/2 table in font ${font.familyName}`)
+    throw new Error(`Could not find the OS/2 table in font: ${label}`)
   }
-
-  // Prefer nameID 16 (Typographic Family) over nameID 1 (legacy family):
-  // variable fonts with multiple width masters (e.g. Condensed) often encode
-  // the "real" family name there instead
-  const fontName = f.name.records.preferredFamily?.en || font.familyName || 'Unknown'
 
   const isVariable = !!f.variationAxes?.wght
   let activeFont = font
 
   if (isVariable) {
     const defaultWeight = f.variationAxes.wght.default
-    // console.log(`Variable font detected: ${fontName} (default weight ${defaultWeight}).`)
 
     if (defaultWeight !== TARGET_WEIGHT) {
       try {
@@ -104,7 +75,7 @@ export const parseFontFile = async (filePath: string): Promise<ParsedFont> => {
         activeFont = instance
       } catch (e) {
         console.warn(
-          `Could not instance wght ${TARGET_WEIGHT} (fontkit's getVariation() is unreliable for WOFF2). Metrics may be inaccurate — falling back to default weight (${defaultWeight}).`,
+          `Could not instance wght ${TARGET_WEIGHT} for ${label} (fontkit's getVariation() is unreliable for WOFF2). Metrics may be inaccurate — falling back to default weight (${defaultWeight}).`,
         )
         activeFont = font
       }
@@ -130,20 +101,6 @@ export const parseFontFile = async (filePath: string): Promise<ParsedFont> => {
   // Side bearings MUST come from activeFont — glyph widths actually change with weight
   const { lsb, rsb } = getAverageSideBearings(activeFont)
 
-  // Fall back safely if the file's name diffs from the config
-  // const fallback = cfg.appFonts.fallbacks[fontName] || cfg.appFonts.defaultFallback || 'sans-serif';
-  const fallback = cfg.appFonts.fallbacks
-    ? cfg.appFonts.fallbacks[fontName]
-    : cfg.appFonts.defaultFallback
-      ? cfg.appFonts.defaultFallback
-      : 'sans-serif'
-
-  const isNext = cfg.appFonts.nextFont;
-  const nextPrefix = cfg.appFonts.nextFontPrefix ?? 'next-font';
-  const scssFamilyString = isNext
-    ? `var(--${nextPrefix}-${toKebabCase(fontName)}), ${fallback}`
-    : `'"${fontName}", ${fallback}'`
-
   // Read from the original font's OS/2 table, not activeFont: fsSelection and
   // usWeightClass are style-classification fields the file declares about
   // itself (not glyph measurements), so they don't change between the
@@ -156,9 +113,7 @@ export const parseFontFile = async (filePath: string): Promise<ParsedFont> => {
     : null
 
   return {
-    name: fontName,
-    data: {
-      family: scssFamilyString,
+    metrics: {
       avgCharWidth: +(avgCharWidth / upm).toFixed(3),
       topTrim: +(topTrim / upm).toFixed(3),
       bottomTrim: +(bottomTrim / upm).toFixed(3),
@@ -167,6 +122,6 @@ export const parseFontFile = async (filePath: string): Promise<ParsedFont> => {
     },
     isItalic: isItalic,
     weightClass: weightClass,
-    weightRange: weightRange
+    weightRange: weightRange,
   }
 }
