@@ -6,13 +6,13 @@ The layer order is declared once, in `_layer.scss`:
 @layer reset, tokens, functions, trim, base, layouts, components, utilities;
 ```
 
-Layers are listed lowest to highest priority, a later layer always beats an earlier one, regardless of selector specificity (short of `!important`). This is what lets utility classes and `fontSetup`-authored component styles override the framework's own defaults with zero specificity management:
+Layers are listed lowest to highest priority, a later layer always beats an earlier one, regardless of selector specificity (short of `!important`). This is what lets utility classes and `font-setup`-authored component styles override the framework's own defaults with zero specificity management:
 
 | Layer        | Contains                                                                                                            |
 | ------------ | ------------------------------------------------------------------------------------------------------------------- |
 | `reset`      | Browser-default reset (lowest priority)                                                                             |
 | `tokens`     | CSS custom property declarations on `:root`                                                                         |
-| `functions`  | Reserved for Vanilla CSS @function, currently unused |
+| `functions`  | Reserved, currently unused |
 | `trim`       | `%text-properties` and the font-role placeholders, leading-trim geometry plus a bare font-size/line-height baseline |
 | `base`       | HTML element defaults (`body`, headings, etc.)                                                                      |
 | `layouts`    | Reserved for your own layout styles (grids, page structure, containers), the system ships none of its own           |

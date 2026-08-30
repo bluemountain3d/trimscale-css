@@ -111,3 +111,97 @@ To add this (or any other component) to your own project, create a `components/`
   @use 'components/text-box';
 }
 ```
+
+## Container
+
+A fluid-width layout wrapper with `max-width` and padding variants. The base class only handles positioning and centering, layout mode (flex, grid, block…) is left to modifiers so it doesn't force an opinion on its children.
+
+```html
+<div class="container container--boxed container--stack">
+  <p>Content…</p>
+</div>
+```
+
+```scss
+@layer components {
+  .container {
+    $_max-width: #{math.div(map.get(var.$fluid-scale, "max-width"), 16)}rem;
+    position: relative;
+    width: 100%;
+    margin-inline: auto;
+
+    // Stretches to fill the viewport height (100dvh, with a 100vh fallback).
+    &--full-height {
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    // Lays child elements out as a vertical flex stack.
+    &--stack {
+      display: flex;
+      flex-direction: column;
+    }
+
+    // Wide max-width with tight padding, content nearly spans the viewport.
+    // Multipliers are empirically tuned against the default fluid-scale
+    // (min-width 360, max-width 1440) — they scale proportionally with a
+    // different fluidScale config, but the 12/20 floors below are absolute
+    // pixel minimums picked for a 360px screen. They differ (12 < 20) on
+    // purpose, so --overshoot's padding stays narrower than --boxed's,
+    // keeping --overshoot the wider of the two at any viewport width.
+    // Mutually exclusive with --boxed/--narrow (all three set max-width).
+    &--overshoot {
+      padding-inline: round(#{fn.get-fluid-clamp(
+        #{math.round(math.max(map.get(var.$fluid-scale, "min-width") * 0.03125, 12))},
+        #{math.round(map.get(var.$fluid-scale, "max-width") * 0.03125)}
+      )}, 1px);
+      max-width: $_max-width;
+    }
+
+    // Narrower max-width with more generous padding than --overshoot.
+    // Mutually exclusive with --overshoot/--narrow.
+    &--boxed {
+      padding-inline: round(#{fn.get-fluid-clamp(
+        #{math.round(math.max(map.get(var.$fluid-scale, "min-width") * 0.05555, 20))},
+        #{math.round(map.get(var.$fluid-scale, "max-width") * 0.08333)}
+      )}, 1px);
+      max-width: $_max-width;
+    }
+
+    // Caps max-width well below the viewport, no padding of its own.
+    // Mutually exclusive with --overshoot/--boxed.
+    &--narrow {
+      max-width: round(#{fn.get-fluid-clamp(
+        #{math.round(map.get(var.$fluid-scale, "min-width") * 0.77778)},
+        #{math.round(map.get(var.$fluid-scale, "max-width") * 0.66667)}
+      )}, 1px);
+    }
+  }
+}
+```
+
+| Class                     | Effect                                                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `.container`               | Base wrapper: `position: relative`, `width: 100%`, `margin-inline: auto`                                        |
+| `.container--full-height`  | `min-height: 100dvh` (with a `100vh` fallback)                                                                   |
+| `.container--stack`        | Lays children out as a vertical flex stack (`display: flex; flex-direction: column`)                            |
+| `.container--overshoot`    | Wide `max-width` with tight fluid padding, content nearly spans the viewport. Mutually exclusive with `--boxed`/`--narrow`. |
+| `.container--boxed`        | Narrower `max-width`, more generous fluid padding than `--overshoot`. Mutually exclusive with `--overshoot`/`--narrow`.     |
+| `.container--narrow`       | Caps `max-width` well below the viewport, no padding of its own. Mutually exclusive with `--overshoot`/`--boxed`.           |
+
+Depends on the package's own `abstracts/functions`/`abstracts/variables` (already resolvable via the `loadPaths` entry from [getting-started.md](getting-started.md)):
+
+```scss
+@use 'abstracts/variables' as var;
+@use 'abstracts/functions' as fn;
+@use 'sass:math';
+@use 'sass:map';
+```
+
+To add this to your own project, paste the snippet above plus the `.container` block into `components/container.scss`, and load it in the `components` layer somewhere after `@use 'trimscale'`:
+
+```scss
+@layer components {
+  @use 'components/container';
+}
+```

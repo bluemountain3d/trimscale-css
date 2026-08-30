@@ -7,6 +7,10 @@
 /// @description Foundation CSS custom properties for fluid typography and spacing system
 /// ===========================================================================
 
+@if var.$spacing-approach != "coupled" and var.$macro-range-max <= var.$base-grid-size {
+  @error "$macro-range-max (#{var.$macro-range-max}) must be greater than $base-grid-size (#{var.$base-grid-size}).";
+}
+
 @property --vwx {
   syntax: "<length>";
   inherits: true;
@@ -19,16 +23,24 @@
   initial-value: 1rem;
 }
 
-@property --unit-micro {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 0.25rem;
-}
+@if var.$spacing-approach == "coupled" {
+  @property --unit {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0.25rem;
+  }
+} @else {
+  @property --unit-micro {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0.25rem;
+  }
 
-@property --unit-macro {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 0.25rem;
+  @property --unit-macro {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0.25rem;
+  }
 }
 
 @property --header-height {
@@ -50,7 +62,7 @@
 
     /// Switch to height-based scaling on ultrawide displays
     /// Prevents text from becoming too large on very wide screens
-    @media (aspect-ratio >= 21/9) and (height >= #{fn.pxToRem(var.$ultrawide-height-threshold-px)}) {
+    @media (aspect-ratio >= 21/9) and (height >= #{fn.px-to-rem(var.$ultrawide-height-threshold-px)}) {
       --vwx: 2vh;
     }
 
@@ -59,21 +71,26 @@
     // ==========================================================================
 
     /// Fluid base font size
-    /// Scales from 16px @ 360px viewport to 20px @ 1440px viewport
-    /// Formula: clamp(1rem, 0.9167rem + 0.3472 * var(--vwx), 1.25rem)
-    --fluid-base: #{fn.fluidFontSize(0, "vwx")};
-    
-    /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid.
-    /// A fluid clamp here would only round to a pixel or two apart across the
-    /// viewport range (e.g. 4px vs 5px under the default fluidScale), so it's
-    /// kept as a plain static value instead of a needless clamp().
-    --unit-micro: #{fn.pxToRem(var.$base-grid-size)};
+    /// Scales from min-font-size @ min-width viewport to max-font-size @ max-width viewport
+    --fluid-base: #{fn.fluid-font-size(0, "vwx")};
 
-    /// Base spacing unit for large steps, an independent $base-grid-size → macroRangeMax fluid clamp
-    --unit-macro: round(
-                    nearest,
-                    #{fn.getFluidClamp(var.$base-grid-size, 8, "vwx")},
-                    1px
-                  );
+    @if var.$spacing-approach == "coupled" {
+      /// Base spacing unit (1/4 of fluid base)
+      /// Used as foundation for all spacing tokens
+      --unit: calc(var(--fluid-base) / #{var.$base-grid-size});
+    } @else {
+      /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid.
+      /// A fluid clamp here would only round to a pixel or two apart across the
+      /// viewport range (e.g. 4px vs 5px under the default fluidScale), so it's
+      /// kept as a plain static value instead of a needless clamp().
+      --unit-micro: #{fn.px-to-rem(var.$base-grid-size)};
+
+      /// Base spacing unit for large steps, an independent $base-grid-size → $macro-range-max fluid clamp
+      --unit-macro: round(
+                      nearest,
+                      #{fn.get-fluid-clamp(var.$base-grid-size, var.$macro-range-max, "vwx")},
+                      1px
+                    );
+    }
   }
 }

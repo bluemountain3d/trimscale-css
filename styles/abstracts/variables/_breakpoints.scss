@@ -15,9 +15,9 @@
 /// @type Number
 $base-font-size: 16px !default;
 
-/// Base grid unit
+/// Base grid unit (px). 4 or 8.
 /// @type Number
-$base-grid-size: 4 !default; // 4px grid
+$base-grid-size: 4 !default;
 
 // ============================================================================
 // Breakpoints
@@ -26,15 +26,15 @@ $base-grid-size: 4 !default; // 4px grid
 /// Responsive breakpoints map (in rem)
 /// @type Map
 $breakpoints: (
-  "mobile": fn.pxToRem(320),
-  "phablet": fn.pxToRem(540),
-  "tablet": fn.pxToRem(720),
-  "tablet-lg": fn.pxToRem(1024),
-  "laptop": fn.pxToRem(1280),
-  "desktop": fn.pxToRem(1440),
+  "mobile": fn.px-to-rem(320),
+  "phablet": fn.px-to-rem(540),
+  "tablet": fn.px-to-rem(720),
+  "tablet-lg": fn.px-to-rem(1024),
+  "laptop": fn.px-to-rem(1280),
+  "desktop": fn.px-to-rem(1440),
 ) !default;
 
 /// Viewport height threshold for the ultrawide aspect-ratio check
 /// @type Number
 /// @see styles/tokens/_base-tokens.scss
-$ultrawide-height-threshold-px: 944px;
+$ultrawide-height-threshold-px: 944px !default;

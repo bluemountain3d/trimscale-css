@@ -10,54 +10,54 @@ Import via:
 @use 'abstracts/functions' as fn;
 ```
 
-### `fn.getFluidClamp($min-size, $max-size, $value-key)`
+### `fn.get-fluid-clamp($min-size, $max-size, $value-key)`
 
-Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range, the general-purpose building block the other fluid functions below are built on. Unlike `fluidSpacing`/`fluidSpaceStep`, it isn't pinned to the spacing grid, so it's useful for one-off fluid values (e.g. a component's own min/max size). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`.
+Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range, the general-purpose building block the other fluid functions below are built on. Unlike `fluid-spacing`/`fluid-space-step`, it isn't pinned to the spacing grid, so it's useful for one-off fluid values (e.g. a component's own min/max size). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`.
 
 ```scss
---custom-size: #{fn.getFluidClamp(4, 8)}; // clamp() between 4px and 8px
---icon-size: #{fn.getFluidClamp(24, 32, 'vw')}; // same, using plain vw
+--custom-size: #{fn.get-fluid-clamp(4, 8)}; // clamp() between 4px and 8px
+--icon-size: #{fn.get-fluid-clamp(24, 32, 'vw')}; // same, using plain vw
 ```
 
 This is also what the `--unit-macro` spacing token is built from, see [design-tokens.md](design-tokens.md).
 
-### `fn.fluidFontSize($level, $unit-key, $type)`
+### `fn.fluid-font-size($level, $unit-key, $type)`
 
 Returns a `clamp()` value for a type step on the modular scale. Pass `$type: 'max'` to drop the upper bound instead, so the value keeps growing linearly past `fluidScale.maxWidth` rather than capping there (used for the `uncapped` option in `modularTypographicScale`, see [customizing-type-scale.md](customizing-type-scale.md)).
 
 ```scss
-font-size: fn.fluidFontSize(2); // 2 steps up from base, uses vwx unit
-font-size: fn.fluidFontSize(2, 'vw'); // same, using plain vw
-font-size: fn.fluidFontSize(2, 'vwx', 'max'); // max() instead of clamp(), no upper bound
+font-size: fn.fluid-font-size(2); // 2 steps up from base, uses vwx unit
+font-size: fn.fluid-font-size(2, 'vw'); // same, using plain vw
+font-size: fn.fluid-font-size(2, 'vwx', 'max'); // max() instead of clamp(), no upper bound
 ```
 
-### `fn.fluidSpacing($level, $unit-key, $type)`
+### `fn.fluid-spacing($level, $unit-key, $type)`
 
-Returns a `clamp()` value for a spacing multiplier on the base grid (independent of the `--unit-micro`/`--unit-macro` split, it computes its own clamp directly from `min-font-size`/`max-font-size`, not from the CSS custom properties). Same `$type: 'max'` option as `fluidFontSize` above.
+Returns a `clamp()` value for a spacing multiplier on the base grid (independent of the `--unit-micro`/`--unit-macro` split, it computes its own clamp directly from `min-font-size`/`max-font-size`, not from the CSS custom properties). Same `$type: 'max'` option as `fluid-font-size` above.
 
 ```scss
-padding: fn.fluidSpacing(6); // grid level × 6
+padding: fn.fluid-spacing(6); // grid level × 6
 ```
 
-### `fn.fluidSpaceStep($min-level, $max-level, $unit-key)`
+### `fn.fluid-space-step($min-level, $max-level, $unit-key)`
 
 Returns a `clamp()` value that spans between two grid levels.
 
 ```scss
-gap: fn.fluidSpaceStep(4, 8); // between grid level 4 and grid level 8
+gap: fn.fluid-space-step(4, 8); // between grid level 4 and grid level 8
 ```
 
-### `fn.pxToRem($px)`
+### `fn.px-to-rem($px)`
 
 Converts a pixel value to rem (assumes 16 px root).
 
 ```scss
-margin: fn.pxToRem(24); // → 1.5rem
+margin: fn.px-to-rem(24); // → 1.5rem
 ```
 
 ### `fn.dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap)`
 
-Returns a self-scaling, unitless `clamp()` line-height ratio, it re-resolves against _any_ element's own computed font-size at render time via `tan(atan2())` (dividing the curve's px intercept by the element's own `1em`), instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [design-tokens.md](design-tokens.md)); call the function directly only when you need a custom curve.
+Returns a self-scaling, unitless `clamp()` line-height ratio that re-resolves against _any_ element's own computed font-size, instead of being tied to the modular type scale, so a component with its own font-size override still gets a correctly-scaled line-height without recomputing anything itself. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. Called with no arguments, this is computed once (from `dynamicLineHeight` in the config, see [full-config-reference.md#dynamiclineheight](full-config-reference.md#dynamiclineheight)) and exposed as the `--line-height-dynamic` token (see [design-tokens.md](design-tokens.md)); call the function directly with explicit arguments only when one specific component needs its own curve instead of the site-wide default.
 
 ```scss
 // Default curve, prefer the token instead:
@@ -70,15 +70,15 @@ Returns a self-scaling, unitless `clamp()` line-height ratio, it re-resolves aga
 }
 ```
 
-Prefer the static `--line-height-*` tokens (or `fontSetup`'s `$line-height` param) for most component work; reach for `dynamic-line-height` directly only when you need to change the _default_ curve itself.
+Prefer the static `--line-height-*` tokens (or `font-setup`'s `$line-height` param) for most component work; reach for `dynamic-line-height` directly only when one component needs a curve of its own. To change the site-wide default curve, set `dynamicLineHeight` in `trimscale.config.ts` instead, no SCSS required.
 
-### `fn.get-color-token($token, $tokens, $opacity, $lightness, $chroma)`
+### `fn.get-color-token($token, $tokens, $opacity, $lightness-multiplier, $chroma-multiplier)`
 
 Looks up a color token by name and returns its `(light: (oklch:, hex:), dark: (oklch:, hex:))` structure, optionally adjusted via `color.change()` without mutating the original entry in `$tokens`. This is what `semanticColorAliases` in `trimscale.config.ts` uses under the hood: deriving a near-duplicate color (e.g. a muted text variant) from an existing token instead of hand-picking a whole new OKLCH value (see [Color Tokens](design-tokens.md#color-tokens)).
 
 ```scss
 fn.get-color-token('bg-canvas', $tokens: var.$base-color-tokens, $opacity: 0.5);
-fn.get-color-token('ink', $tokens: var.$base-color-tokens, $chroma: (light: 0.8, dark: 1.2));
+fn.get-color-token('ink', $tokens: var.$base-color-tokens, $chroma-multiplier: (light: 0.8, dark: 1.2));
 ```
 
 Parameters:
@@ -87,11 +87,11 @@ Parameters:
 | ------------ | --------------------- | ---------- | ------------------------------------------------------------------------------ |
 | `$token`     | string                | (required) | Token name to look up, e.g. `'bg-canvas'`                                      |
 | `$tokens`    | map                   | (required) | Source map to look up `$token` in, same shape `mx.generate-color-tokens` takes |
-| `$opacity`   | number \| null        | `null`     | Opacity (0–1) applied to all oklch/hex variants                                |
-| `$lightness` | number \| map \| null | `null`     | Multiplier: a single number for both modes, or `(light:, dark:)` for per-mode  |
-| `$chroma`    | number \| map \| null | `null`     | Multiplier: a single number for both modes, or `(light:, dark:)` for per-mode  |
+| `$opacity`   | number or null        | `null`     | Absolute opacity (0–1) applied to all oklch/hex variants                       |
+| `$lightness-multiplier` | number, map, or null | `null`     | Multiplier applied to the token's current lightness (NOT an absolute value): a single number for both modes, or `(light:, dark:)` for per-mode  |
+| `$chroma-multiplier`    | number, map, or null | `null`     | Multiplier applied to the token's current chroma (NOT an absolute value): a single number for both modes, or `(light:, dark:)` for per-mode  |
 
-`$lightness`/`$chroma` are multipliers, not absolute values, and accept a `(light:, dark:)` map because the light/dark base values aren't perceptual mirrors of each other, a flat multiplier can land differently in each mode. The return value is shaped like a single `$tokens` entry, so it feeds straight into `semanticColorAliases` or your own `mx.generate-color-tokens` call.
+`$lightness-multiplier`/`$chroma-multiplier` multiply the token's *existing* channel value, they don't set an absolute target (unlike `$opacity`), and accept a `(light:, dark:)` map because the light/dark base values aren't perceptual mirrors of each other, a flat multiplier can land differently in each mode. The return value is shaped like a single `$tokens` entry, so it feeds straight into `semanticColorAliases` or your own `mx.generate-color-tokens` call.
 
 ## Mixins
 
@@ -101,12 +101,12 @@ Import via:
 @use 'abstracts/mixins' as mx;
 ```
 
-### `mx.fontSetup`
+### `mx.font-setup`
 
-`fontSetup` is the **SCSS component API** for the typography system. Use it when writing component SCSS and you want to apply a font role together with size, weight, and line-height in a single declaration. For HTML-level styling, use `.trim-text-*` and the other [typography utility](utility-classes.md) classes instead, `.trim-text-*` is the class-based equivalent of `fontSetup`'s font-role preset.
+`font-setup` is the **SCSS component API** for the typography system. Use it when writing component SCSS and you want to apply a font role together with size, weight, and line-height in a single declaration. For HTML-level styling, use `.trim-text-*` and the other [typography utility](utility-classes.md) classes instead, `.trim-text-*` is the class-based equivalent of `font-setup`'s font-role preset.
 
 ```scss
-@include mx.fontSetup(
+@include mx.font-setup(
   $font: 'primary',
   // font role, see fontRoles in trimscale.config.ts
   $font-size: var(--heading-1),
@@ -130,11 +130,11 @@ Parameters:
 
 Every parameter except `$font` defaults to `null` and is only emitted as a real CSS property (`font-size`, `line-height`, etc., set directly, not via custom properties) if you pass it explicitly. Omitted `$font-size`/`$line-height` fall through to the font role's placeholder, which carries a bare baseline of its own (`font-size: var(--text-base)`, `line-height: var(--line-height-dynamic)`, see [design-tokens.md](design-tokens.md)); the other four parameters have no such placeholder default and fall through further, to whatever's inherited (or the CSS initial value).
 
-The mixin sets font metrics as CSS custom properties (`--_top-trim`, `--_bottom-trim`, `--_lsb-adjust`, `--_rsb-adjust`) and applies leading-trim via `::before`/`::after` pseudo-elements. When the browser supports `text-box-trim`, native trimming is used instead.
+The mixin sets font metrics internally and applies leading-trim via `::before`/`::after` pseudo-elements. When the browser supports `text-box-trim`, native trimming is used instead.
 
 ### `mx.generate-color-tokens($tokens, $default-scheme)`
 
-Emits CSS custom properties for every entry in a color-token map, with a progressive-enhancement fallback chain layered on `:root`/`.app-theme-container`: plain hex first (works everywhere), then static `oklch()` behind an `@supports` check for browsers without `light-dark()`, then full `light-dark(oklch(), oklch())` where supported. Later blocks win the cascade, so support is layered rather than branched.
+Emits CSS custom properties for every entry in a color-token map, with a progressive-enhancement fallback chain layered on `:root`/`.app-theme-container`: plain hex first (works everywhere), then static `oklch()` behind an `@supports` check for browsers without `light-dark()`, then full `light-dark(oklch(), oklch())` where supported. Because later blocks always win the cascade, an older browser simply never reaches the blocks it doesn't support and keeps resolving the plain hex (or static `oklch()`) tier instead, so colors degrade gracefully on older browsers rather than breaking outright.
 
 This is the actual mechanism behind [Color Tokens](design-tokens.md#color-tokens). Call it again with your own map to add project-specific tokens alongside the config-driven defaults:
 

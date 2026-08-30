@@ -7,7 +7,7 @@ Breakpoints are config-driven, not hand-edited SCSS:
 | File | What you do there |
 |------|-------------------|
 | [`trimscale.config.ts`](../trimscale.config.ts) | Edit the `breakpoints` field |
-| `scripts/generateBreakpoints.ts` | Regenerated automatically, never edit the output by hand |
+| `styles/abstracts/variables/_breakpoints.scss` | Static — never edit by hand, reads `var.$breakpoints` |
 
 After changing `breakpoints`, run:
 
@@ -15,7 +15,7 @@ After changing `breakpoints`, run:
 npx trimscale-css generate
 ```
 
-This rewrites `styles/abstracts/variables/_breakpoints.scss`, the `$breakpoints` map consumed by the breakpoint mixins (see [abstracts.md](abstracts.md#breakpoints)).
+This writes your project's generated bridge file, configuring `$breakpoints` via `@use ... with (...)` (see [getting-started.md](getting-started.md#generate)). `_breakpoints.scss`'s `$breakpoints` map (consumed by the breakpoint mixins, see [abstracts.md](abstracts.md#breakpoints)) picks that up at your own compile time.
 
 ## Changing the values
 
@@ -35,7 +35,7 @@ breakpoints: {
 },
 ```
 
-Keys become kebab-case in the generated map (`tabletLg` → `tablet-lg`), then get converted to `rem` via `fn.pxToRem`. Add, remove, or rename keys freely, there's no fixed list you must match, the six defaults above are just a starting point.
+Keys become kebab-case in the generated map (`tabletLg` → `tablet-lg`), then get converted to `rem` via `fn.px-to-rem`. Add, remove, or rename keys freely, there's no fixed list you must match, the six defaults above are just a starting point.
 
 Order matters for `mx.and-down()` and `mx.only()`: both look up the *next* key after the one you pass, based on the map's insertion order. Keep `breakpoints` sorted smallest to largest, or those two mixins will resolve against the wrong neighbor.
 

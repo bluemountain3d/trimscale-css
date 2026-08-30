@@ -1,54 +1,17 @@
-import * as fs from 'node:fs'
-import path from 'node:path'
-import { raw, setScssMap, setScssMapEntries, toKebabCase } from './helpers.ts'
-import { loadConfig } from './loadConfig.ts'
+import type { Breakpoints } from '../models/Config.ts'
+import { raw, setScssMapEntries, setScssMapValue, toKebabCase } from './helpers.ts'
 
-const cfg = await loadConfig()
-
-/** Builds the `$breakpoints` SCSS map from `cfg.breakpoints`, converting each px value to rem via `fn.pxToRem`. */
-const breakpointsToScssMap = (): string => {
+/**
+ * Builds the `$breakpoints` map VALUE (no `$name:`/`!default`, see
+ * {@link setScssMapValue}) from `cfg.breakpoints`, converting each px value
+ * to rem via `fn.px-to-rem`, for use as a `@use 'trimscale-css' with
+ * ($breakpoints: ...)` argument in the generated bridge file (which must
+ * have `fn` in scope for the `px-to-rem` calls to resolve).
+ */
+export const breakpointsToScssMapValue = (data: Breakpoints): string => {
   const rawData = Object.fromEntries(
-    Object.entries(cfg.breakpoints).map(([key, value]) => [toKebabCase(key), raw(`fn.pxToRem(${value})`)]),
+    Object.entries(data).map(([key, value]) => [toKebabCase(key), raw(`fn.px-to-rem(${value})`)]),
   )
-  const entries = setScssMapEntries(rawData)
-  return setScssMap('', 'breakpoints', entries)
+  const entries = setScssMapEntries(rawData, 2)
+  return setScssMapValue(entries)
 }
-
-const output = `
-/// @group Abstracts/Variables
-/// @name Breakpoints
-/// @description Responsive breakpoints and typography scale configuration
-/// ===========================================================================
-
-@use 'abstracts/functions/fn_unit-utils' as fn;
-
-// ============================================================================
-// Grid System
-// ============================================================================
-
-/// Base font size — matches min-font-size in $fluid-scale
-/// Used as the rem base for unit conversion functions
-/// @type Number
-$base-font-size: 16px !default;
-
-/// Base grid unit
-/// @type Number
-$base-grid-size: 4 !default; // 4px grid
-
-// ============================================================================
-// Breakpoints
-// ============================================================================
-
-/// Responsive breakpoints map (in rem)
-/// @type Map
-${breakpointsToScssMap()}
-
-/// Viewport height threshold for the ultrawide aspect-ratio check
-/// @type Number
-/// @see styles/tokens/_base-tokens.scss
-$ultrawide-height-threshold-px: 944px;
-`
-
-const outputFile = path.join(import.meta.dirname, '../styles/abstracts/variables/_breakpoints.scss')
-fs.writeFileSync(outputFile, output)
-console.log('- Breakpoint abstracts is written to file')

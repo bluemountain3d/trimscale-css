@@ -1,25 +1,20 @@
-import * as fs from 'node:fs'
 import path from 'node:path'
-import type { RawFontMetrics } from '../models/Config.ts'
+import type { RawFontMetrics, TrimscaleConfig } from '../models/Config.ts'
 import { fetchRemoteFont, getFontExtension, readLocalFont } from './generateFontMetrics.io.ts'
 import { parseFontBuffer } from './generateFontMetrics.parser.ts'
-import { baseIndexToScss, fontFacesToScss, metricsToScss } from './generateFontMetrics.scss.ts'
 import { toKebabCase } from './helpers.ts'
-import { loadConfig } from './loadConfig.ts'
-
-const cfg = await loadConfig()
-const nextFontDefault = cfg.appFonts.nextFontDefault ?? false
-const nextPrefix = cfg.appFonts.nextFontPrefix ?? 'next-font'
+import { resolveOutDir } from './loadConfig.ts'
 
 /**
- * A single `@font-face` rule to emit into `_fonts.scss`. Written for `local`
- * sources (unless that family resolves to `nextFont: true`) and for `cdn`
- * sources with `generateFontFace: true`; never for `manual`.
+ * A single `@font-face` rule to emit (as one `$font-faces` list entry via
+ * `fontFacesToScssListValue`). Written for `local` sources (unless that
+ * family resolves to `nextFont: true`) and for `cdn` sources with
+ * `generateFontFace: true`; never for `manual`.
  */
 export type FontFace = {
   /** Font family name (`font-family` value) — always the family's config key, never a name read from the file */
   family: string
-  /** `src: url(...)` value: a relative path for `local`, the CDN URL as-is for `cdn` */
+  /** `src: url(...)` value: a relative path for `local` (relative to `outDir`), the CDN URL as-is for `cdn` */
   src: string
   /** File extension, used as the `format(...)` hint (e.g. `woff2`) */
   ext: string
@@ -44,14 +39,15 @@ export type FamilyFontMetrics = RawFontMetrics & { family: string }
 /** Map of resolved font family name to its extracted metrics */
 export type FontMetricsMap = Record<string, FamilyFontMetrics>
 
-const fontsOutputFile = path.join(import.meta.dirname, '../styles/base/_fonts.scss')
-const fontsOutputDir = path.dirname(fontsOutputFile)
-const metricsOutputFile = path.join(import.meta.dirname, '../styles/abstracts/variables/_font-metrics.scss')
-const baseIndexOutputFile = path.join(import.meta.dirname, '../styles/base/_index.scss')
-
 /** Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a quoted family name, both with the resolved fallback appended. */
-const buildFamilyString = (familyName: string, fallback: string | undefined, usesNextFont: boolean): string => {
+const buildFamilyString = (
+  cfg: TrimscaleConfig,
+  familyName: string,
+  fallback: string | undefined,
+  usesNextFont: boolean,
+): string => {
   const resolvedFallback = fallback ?? cfg.appFonts.fallbackDefault
+  const nextPrefix = cfg.appFonts.nextFontPrefix ?? 'next-font'
 
   return usesNextFont
     ? `var(--${nextPrefix}-${toKebabCase(familyName)}), ${resolvedFallback}`
@@ -60,21 +56,27 @@ const buildFamilyString = (familyName: string, fallback: string | undefined, use
 
 /**
  * Scans every family in `appFonts.fonts`, extracts metrics from its
- * `local`/`cdn` file(s) (or takes `manual` metrics as-is), picks the
+ * `local`/`cdn` file(s) (or takes `manual` metrics as-is), and picks the
  * single best-matching file per family for metrics (preferring non-italic,
- * then whichever weight is closest to 400/Regular), and writes the
- * resulting metrics map to `_font-metrics.scss`. Also builds one `FontFace`
- * per file that should get a `@font-face` rule and writes them to
- * `_fonts.scss`; `_index.scss` is regenerated either way to forward (or
- * skip) it.
+ * then whichever weight is closest to 400/Regular). Also builds one
+ * `FontFace` per file that should get a `@font-face` rule. Local font paths
+ * are resolved relative to `process.cwd()` (the directory containing
+ * `trimscale.config.ts`); each `FontFace.src` is resolved relative to
+ * `outDir`, where the generated bridge file (and the `@font-face` rules
+ * built from these `FontFace`s) live.
  */
-const generateMetrics = async () => {
+export const computeFontData = async (
+  cfg: TrimscaleConfig,
+): Promise<{ metrics: FontMetricsMap; fontFaces: FontFace[] }> => {
+  const nextFontDefault = cfg.appFonts.nextFontDefault ?? false
+  const outDir = resolveOutDir(cfg)
+
   const metrics: FontMetricsMap = {}
   const fontFaces: FontFace[] = []
 
   for (const [familyName, fontSource] of Object.entries(cfg.appFonts.fonts)) {
     const usesNextFont = fontSource.nextFont ?? nextFontDefault
-    const family = buildFamilyString(familyName, fontSource.fallback, usesNextFont)
+    const family = buildFamilyString(cfg, familyName, fontSource.fallback, usesNextFont)
 
     if (fontSource.source === 'manual') {
       metrics[familyName] = { ...fontSource.metrics, family }
@@ -88,18 +90,20 @@ const generateMetrics = async () => {
       try {
         const buffer =
           fontSource.source === 'local'
-            ? await readLocalFont(path.join(import.meta.dirname, entry))
+            ? await readLocalFont(path.join(process.cwd(), entry))
             : await fetchRemoteFont(entry)
 
         const src =
           fontSource.source === 'local'
-            ? path.relative(fontsOutputDir, path.join(import.meta.dirname, entry)).split(path.sep).join('/')
+            ? path.relative(outDir, path.join(process.cwd(), entry)).split(path.sep).join('/')
             : entry
 
-        const { metrics: raw, isItalic, weightClass, weightRange } = await parseFontBuffer(
-          buffer,
-          `${familyName} (${entry})`,
-        )
+        const {
+          metrics: raw,
+          isItalic,
+          weightClass,
+          weightRange,
+        } = await parseFontBuffer(buffer, `${familyName} (${entry})`)
 
         parsedEntries.push({ src, ext: getFontExtension(entry), isItalic, weightClass, weightRange, raw })
       } catch (err: unknown) {
@@ -140,15 +144,5 @@ const generateMetrics = async () => {
     }
   }
 
-  fs.writeFileSync(metricsOutputFile, metricsToScss(metrics))
-  console.log('- Font-metrics Abstracts is written to file')
-
-  if (fontFaces.length > 0) {
-    fs.writeFileSync(fontsOutputFile, fontFacesToScss(fontFaces))
-    console.log('- Font Faces is written to file')
-  }
-
-  fs.writeFileSync(baseIndexOutputFile, baseIndexToScss(fontFaces.length > 0))
+  return { metrics, fontFaces }
 }
-
-generateMetrics()

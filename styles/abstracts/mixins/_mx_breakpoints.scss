@@ -62,7 +62,7 @@
     @if $next {
       @error "You cannot use 'and-down' (which looks for the next value) when passing an exact number like #{$breakpoint}. Use 'up-to' instead.";
     }
-    @return if(sass(math.is-unitless($breakpoint)): fn.pxToRem($breakpoint, var$base-font-size) ; else: $breakpoint);
+    @return if(sass(math.is-unitless($breakpoint)): fn.px-to-rem($breakpoint, var.$base-font-size) ; else: $breakpoint);
   }
 
   @error "$breakpoint must be a number or a valid string. You passed in a #{meta.type-of($breakpoint)}.";

@@ -12,19 +12,23 @@
 /// chroma, and lightness channels via color.change(), without mutating the
 /// original entry in $tokens.
 ///
-/// $chroma and $lightness each accept either a single multiplier (applied to
-/// both light and dark) or a `(light:, dark:)` map for per-mode multipliers —
-/// useful since the light/dark base values aren't perceptual mirrors of each
-/// other, so a flat multiplier can land differently in each mode.
+/// $chroma-multiplier and $lightness-multiplier each accept either a single
+/// multiplier (applied to both light and dark) or a `(light:, dark:)` map for
+/// per-mode multipliers — useful since the light/dark base values aren't
+/// perceptual mirrors of each other, so a flat multiplier can land
+/// differently in each mode. They multiply the token's EXISTING channel
+/// value, they are not absolute lightness/chroma targets (unlike $opacity,
+/// which is absolute) — a stray "0.75" reads like it could be either, name
+/// them accordingly at call sites.
 ///
 /// @access public
 /// @param {String} $token - Token name to look up (e.g. "panel-scroll-thumb")
 /// @param {Map} $tokens - Source map to look up $token in
 /// @param {Number | null} $opacity [null] - Optional opacity (0-1) applied to all
 ///   oklch/hex variants. Token is returned unchanged if null.
-/// @param {Number | Map | null} $lightness [null] - Multiplier, either a single
+/// @param {Number | Map | null} $lightness-multiplier [null] - Multiplier, either a single
 ///   number applied to both modes or `(light: Number, dark: Number)`.
-/// @param {Number | Map | null} $chroma [null] - Multiplier, either a single
+/// @param {Number | Map | null} $chroma-multiplier [null] - Multiplier, either a single
 ///   number applied to both modes or `(light: Number, dark: Number)`.
 /// @return {Map} Shape: (light: (oklch:, hex:), dark: (oklch:, hex:))
 /// @throws Error if $token doesn't exist in $tokens
@@ -32,12 +36,12 @@
 /// @example scss
 ///   $color-semantic-aliases: (
 ///     "scroll-thumb": get-color-token("panel-scroll-thumb"),
-///     "scrim": get-color-token("bg-canvas", $opacity: 0.5, $chroma: 1.05),
-///     "muted-text": get-color-token("ink", $chroma: (light: 0.8, dark: 1.2)),
+///     "scrim": get-color-token("bg-canvas", $opacity: 0.5, $chroma-multiplier: 1.05),
+///     "muted-text": get-color-token("ink", $chroma-multiplier: (light: 0.8, dark: 1.2)),
 ///   );
 /// ===========================================================================
 ///
-@function get-color-token($token, $tokens, $opacity: null, $lightness: null, $chroma: null) {
+@function get-color-token($token, $tokens, $opacity: null, $lightness-multiplier: null, $chroma-multiplier: null) {
 
   @if meta.type-of($tokens) !=map {
     @error "$tokens must be a map, got #{meta.type-of($tokens)}.";
@@ -55,7 +59,7 @@
 
   $value: map.get($tokens-map, $token);
 
-  @if $chroma == null and $lightness == null and $opacity ==null {
+  @if $chroma-multiplier == null and $lightness-multiplier == null and $opacity ==null {
     @return $value;
   }
 
@@ -67,23 +71,23 @@
   $dark-oklch: map.get($dark-map, oklch);
 
   // Extract correct values
-  $light-chroma: if(sass(meta.type-of($chroma) == map): map.get($chroma, light); else: $chroma );
-  $dark-chroma: if(sass(meta.type-of($chroma) == map): map.get($chroma, dark); else: $chroma );
+  $light-chroma: if(sass(meta.type-of($chroma-multiplier) == map): map.get($chroma-multiplier, light); else: $chroma-multiplier );
+  $dark-chroma: if(sass(meta.type-of($chroma-multiplier) == map): map.get($chroma-multiplier, dark); else: $chroma-multiplier );
 
-  $light-lightness: if(sass(meta.type-of($lightness) == map): map.get($lightness, light); else: $lightness );
-  $dark-lightness: if(sass(meta.type-of($lightness) == map): map.get($lightness, dark); else: $lightness );
+  $light-lightness: if(sass(meta.type-of($lightness-multiplier) == map): map.get($lightness-multiplier, light); else: $lightness-multiplier );
+  $dark-lightness: if(sass(meta.type-of($lightness-multiplier) == map): map.get($lightness-multiplier, dark); else: $lightness-multiplier );
 
   // Adjust Channels
   $light-h: color.channel($light-oklch, "hue");
-  $light-c: if(sass($chroma): color.channel($light-oklch, "chroma") * $light-chroma;
+  $light-c: if(sass($chroma-multiplier): color.channel($light-oklch, "chroma") * $light-chroma;
             else: color.channel($light-oklch, "chroma"));
-  $light-l: if(sass($lightness): color.channel($light-oklch, "lightness") * $light-lightness;
+  $light-l: if(sass($lightness-multiplier): color.channel($light-oklch, "lightness") * $light-lightness;
             else: color.channel($light-oklch, "lightness"));
 
   $dark-h: color.channel($dark-oklch, "hue");
-  $dark-c: if(sass($chroma): color.channel($dark-oklch, "chroma") * $dark-chroma;
+  $dark-c: if(sass($chroma-multiplier): color.channel($dark-oklch, "chroma") * $dark-chroma;
            else: color.channel($dark-oklch, "chroma"));
-  $dark-l: if(sass($lightness): color.channel($dark-oklch, "lightness") * $dark-lightness;
+  $dark-l: if(sass($lightness-multiplier): color.channel($dark-oklch, "lightness") * $dark-lightness;
            else: color.channel($dark-oklch, "lightness"));
 
   // Normalize Opacity

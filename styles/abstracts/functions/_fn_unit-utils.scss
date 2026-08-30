@@ -10,9 +10,9 @@
 /// @param {Number} $value - Value with or without unit
 /// @return {Number} Unitless number
 /// @example
-///   $unitless: stripUnit(16px); // Returns: 16
-///   $already-unitless: stripUnit(16); // Returns: 16
-@function stripUnit($value) {
+///   $unitless: strip-unit(16px); // Returns: 16
+///   $already-unitless: strip-unit(16); // Returns: 16
+@function strip-unit($value) {
   // Return early if already unitless
   @if math.is-unitless($value) {
     @return $value;
@@ -28,9 +28,9 @@
 /// @param {Number} $base [16px] - Base font size in pixels (assumes 1rem == 16px)
 /// @return {Number} Value in rem
 /// @example
-///   font-size: pxToRem(24px); // Returns: 1.5rem
-///   font-size: pxToRem(24); // Returns: 1.5rem
-@function pxToRem($px, $base: 16px) {
+///   font-size: px-to-rem(24px); // Returns: 1.5rem
+///   font-size: px-to-rem(24); // Returns: 1.5rem
+@function px-to-rem($px, $base: 16px) {
   // Validate input
   @if math.is-unitless($px) {
     $px: $px * 1px;
@@ -40,7 +40,7 @@
     $base: $base * 1px;
   }
 
-  @return math.div(stripUnit($px), stripUnit($base)) * 1rem;
+  @return math.div(strip-unit($px), strip-unit($base)) * 1rem;
 }
 
 /// Convert rem to pixels
@@ -48,8 +48,8 @@
 /// @param {Number} $base [16px] - Base font size in pixels (assumes 1rem == 16px)
 /// @return {Number} Value in pixels
 /// @example
-///   max-width: remToPx(48rem); // Returns: 768px
-@function remToPx($rem, $base: 16px) {
+///   max-width: rem-to-px(48rem); // Returns: 768px
+@function rem-to-px($rem, $base: 16px) {
   @if math.is-unitless($rem) {
     $rem: $rem * 1rem;
   }
@@ -58,5 +58,5 @@
     $base: $base * 1px;
   }
 
-  @return stripUnit($rem) * stripUnit($base) * 1px;
+  @return strip-unit($rem) * strip-unit($base) * 1px;
 }

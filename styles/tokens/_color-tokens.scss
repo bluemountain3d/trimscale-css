@@ -2,12 +2,37 @@
 @use "abstracts/variables" as var;
 @use "abstracts/mixins" as mx;
 @use "abstracts/functions" as fn;
+@use "sass:map";
 
 /// @group Tokens
 /// @name Colors
 /// @description Maps abstract Sass variables to OKLCH CSS Custom Properties
 /// using light-dark() for automatic light/dark mode switching.
 ///
+
+// Resolve $semantic-color-alias-defs (plain data — see
+// abstracts/variables/_colors.scss) into a real (prefix:, tokens:) map by
+// calling fn.get-color-token() against $base-color-tokens or the named
+// $custom-color-tokens entry, one alias at a time.
+$_semantic-alias-tokens: ();
+@each $name, $def in var.$semantic-color-alias-defs {
+  $token-map-key: map.get($def, "token-map");
+  $tokens: if(
+    $token-map-key == null,
+    var.$base-color-tokens,
+    map.get(var.$custom-color-tokens, $token-map-key)
+  );
+  $_semantic-alias-tokens: map.merge($_semantic-alias-tokens, (
+    $name: fn.get-color-token(
+      map.get($def, "token"),
+      $tokens,
+      $opacity: map.get($def, "opacity"),
+      $lightness-multiplier: map.get($def, "lightness-multiplier"),
+      $chroma-multiplier: map.get($def, "chroma-multiplier"),
+    ),
+  ));
+}
+
 @layer tokens {
   :root,
   .app-theme-container {
@@ -36,13 +61,20 @@
   // ============================================================================
   // CSS CUSTOM PROPERTIES (:root)
   // ============================================================================
-  
+
   // Base Color Tokens
   @include mx.generate-color-tokens();
 
-  // Campaign Color Tokens
-  @include mx.generate-color-tokens($tokens: var.$campaign-color-tokens);
+  // Custom Color Tokens
+  @each $name, $tokens in var.$custom-color-tokens {
+    @include mx.generate-color-tokens($tokens: $tokens);
+  }
 
   // Semantic Color Aliases
-  @include mx.generate-color-tokens($tokens: var.$semantic-color-aliases);
+  @if map.keys(var.$semantic-color-alias-defs) != () {
+    @include mx.generate-color-tokens($tokens: (
+      "prefix": map.get(var.$base-color-tokens, "prefix"),
+      "tokens": $_semantic-alias-tokens,
+    ));
+  }
 }

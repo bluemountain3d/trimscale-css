@@ -10,9 +10,7 @@
 /// 3. Custom typography values (via parameters)
 ///
 /// Font Role Options:
-/// - Hierarchical: 'primary', 'secondary', 'tertiary' (recommended for most use)
-/// - Category: 'sans', 'serif', 'mono' (when type classification matters)
-/// - Contextual: 'display', 'body', 'heading', 'quote', 'code', 'ui' (convenience aliases)
+/// - All keys in $font-roles that is set in _typography.scss are valid.
 ///
 /// @requires abstracts/variables
 /// @requires abstracts/functions
@@ -21,12 +19,12 @@
 ///
 /// @example scss - Basic usage
 ///   .heading {
-///     @include fontSetup($font: 'primary', $font-size: var(--heading-1));
+///     @include font-setup($font: 'primary', $font-size: var(--heading-1));
 ///   }
 ///
 /// @example scss - With all parameters
 ///   .custom-text {
-///     @include fontSetup(
+///     @include font-setup(
 ///       $font: 'display',
 ///       $font-size: var(--display-1),
 ///       $line-height: null,
@@ -48,6 +46,7 @@
 @use "sass:string";
 @use "sass:list";
 @use "sass:math";
+@use "sass:map";
 
 // ============================================================================
 // Font Setup Mixin
@@ -55,24 +54,7 @@
 
 /// Valid font roles that map to placeholder selectors
 /// @type List
-$_valid-font-roles: (
-  // Hierarchical
-  "primary",
-  "secondary",
-  "tertiary",
-  // Category
-  "sans",
-  "serif",
-  "mono",
-  // Contextual
-  "display",
-  "heading",
-  "subheading",
-  "body",
-  "quote",
-  "code",
-  "ui"
-);
+$_valid-font-roles: map.keys(var.$font-roles);
 
 /// Apply complete font setup with metrics and typography properties
 /// @param {String} $font ['primary'] - Font role key (primary/secondary/tertiary or any defined role)
@@ -85,7 +67,7 @@ $_valid-font-roles: (
 /// @param {ArgList} $content - Optional additional styles passed as a content block
 /// @content Optional additional styles
 /// @output Complete typography setup including font family, metrics, and trim values
-@mixin fontSetup(
+@mixin font-setup(
   $font: "primary",
   $font-size: null,
   $line-height: null,

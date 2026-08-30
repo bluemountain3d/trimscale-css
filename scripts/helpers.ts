@@ -1,15 +1,3 @@
-import type { FamilyFontMetrics } from './generateFontMetrics.ts'
-
-/** Ordered font metric keys used when generating per-role font-metric SCSS variables (e.g. `$ff-primary`, `$top-trim-primary`). */
-export const metricsList: (keyof FamilyFontMetrics)[] = [
-  'family',
-  'avgCharWidth',
-  'topTrim',
-  'bottomTrim',
-  'lsbAdjust',
-  'rsbAdjust',
-]
-
 /**
  * Converts a camelCase or alphanumeric identifier to kebab-case.
  * @param text - The string to convert (e.g. `fontSize`, `fs900`).
@@ -250,3 +238,25 @@ export const setScssMap = (sassDocs: string, name: string, entries: string[]): s
 
 /** Alias of {@link setScssMap} for building a top-level SCSS list instead of a map. */
 export const setScssList = setScssMap
+
+/**
+ * Builds a bare, unnamed SCSS map literal `( ...entries )` — no `$name:`
+ * prefix, no `!default;` suffix. Used for values destined to become a
+ * `@use ... with ($name: <value>)` argument instead of a top-level variable
+ * declaration (see `scripts/generateBridge.ts`).
+ *
+ * @param entries - Pre-formatted entry lines (e.g. from {@link setScssMapEntries}), each ending in `\n`.
+ * @returns The bare map literal string.
+ */
+export const setScssMapValue = (entries: string[]): string => `(\n${entries.join('')}  )`
+
+/**
+ * Builds one `  $name: <value>,\n` line for a `@use 'pkg' with (...)`
+ * argument list (unquoted `$`-prefixed key, unlike a map entry's quoted
+ * string key).
+ *
+ * @param name - The configured variable's name, without the leading `$`.
+ * @param value - The already-formatted SCSS value (e.g. from {@link setScssMapValue} or {@link raw}).
+ * @returns A single `  $name: value,\n` line.
+ */
+export const setWithArg = (name: string, value: string): string => `  $${name}: ${value},\n`

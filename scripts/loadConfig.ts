@@ -26,3 +26,16 @@ export const loadConfig = async (): Promise<TrimscaleConfig> => {
     )
   }
 }
+
+/** Default `outDir`, relative to the directory containing `trimscale.config.ts`, when the config doesn't set its own. */
+export const DEFAULT_OUT_DIR = 'trimscale-generated'
+
+/**
+ * Resolves `cfg.outDir` to an absolute path, relative to `process.cwd()`
+ * (the directory containing `trimscale.config.ts`, same base `loadConfig`
+ * itself resolves against). This is the ONLY place generated per-consumer
+ * output (the bridge file, `_fonts.scss`) gets written — never relative to
+ * this package's own install location, so a consumer's `generate` run
+ * never writes into `node_modules`.
+ */
+export const resolveOutDir = (cfg: TrimscaleConfig): string => path.join(process.cwd(), cfg.outDir ?? DEFAULT_OUT_DIR)

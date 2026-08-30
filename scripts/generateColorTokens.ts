@@ -1,25 +1,12 @@
-import * as fs from 'node:fs'
-import path from 'node:path'
-import type { ColorDefinition, ColorToken, ColorTokensMap } from '../models/Config.ts'
-import { raw, setNestedScssMap, setScssMap, setScssMapEntry, toCapitalizedNiceName, toKebabCase } from './helpers.ts'
-import { loadConfig } from './loadConfig.ts'
-
-const cfg = await loadConfig()
-
-// ============================================================================
-// Color Tokens
-// ============================================================================
+import type { ColorDefinition, ColorToken, ColorTokensMap, SemanticColorAliases } from '../models/Config.ts'
+import { raw, setNestedScssMap, setScssMapEntry, setScssMapValue, toKebabCase } from './helpers.ts'
 
 /**
- * Builds the `oklch`/`hex` entry lines for one light-or-dark ColorDefinition.
- * @param def - The color definition to format.
- * @param nestedLevel - Indentation depth (in 2-space units) for these entries.
- * @returns The formatted `oklch`/`hex` entry lines.
+ * Builds each color config map's VALUE (no `$name:`/`!default`, see
+ * {@link setScssMapValue}), for use as `@use 'trimscale-css' with
+ * ($base-color-tokens: ..., $custom-color-tokens: ..., ...)` arguments in
+ * the generated bridge file.
  */
-const colorDefinitionEntries = (def: ColorDefinition, nestedLevel: number): string[] => [
-  setScssMapEntry('oklch', raw(def.oklch), nestedLevel),
-  setScssMapEntry('hex', raw(def.hex), nestedLevel),
-]
 
 /**
  * Builds the `light`/`dark` nested maps (plus optional `opacity`) for one ColorToken.
@@ -28,6 +15,11 @@ const colorDefinitionEntries = (def: ColorDefinition, nestedLevel: number): stri
  * @returns The formatted entry lines for this token.
  */
 const colorTokenEntries = (token: ColorToken, nestedLevel: number): string[] => {
+  const colorDefinitionEntries = (def: ColorDefinition, level: number): string[] => [
+    setScssMapEntry('oklch', raw(def.oklch), level),
+    setScssMapEntry('hex', raw(def.hex), level),
+  ]
+
   const entries = [
     setNestedScssMap('light', colorDefinitionEntries(token.light, nestedLevel + 1), nestedLevel),
     setNestedScssMap('dark', colorDefinitionEntries(token.dark, nestedLevel + 1), nestedLevel),
@@ -38,230 +30,71 @@ const colorTokenEntries = (token: ColorToken, nestedLevel: number): string[] => 
   return entries
 }
 
-/**
- * Builds a complete `$name: (prefix, tokens)` SCSS map declaration from a ColorTokensMap.
- * @param name - The map's name (camelCase or kebab-case; converted to kebab-case for the SCSS variable).
- * @param data - The source ColorTokensMap (e.g. `cfg.baseColorTokens`).
- * @returns The complete SCSS map declaration string.
- */
-const colorTokensToScssMap = (name: string, data: ColorTokensMap): string => {
+/** Builds a `(prefix:, tokens:)` map VALUE from a single `ColorTokensMap`. */
+export const colorTokensMapToScssMapValue = (data: ColorTokensMap): string => {
   const tokenEntries = Object.entries(data.tokens).map(([tokenName, token]) =>
-    setNestedScssMap(toKebabCase(tokenName), colorTokenEntries(token, 3), 2),
+    setNestedScssMap(toKebabCase(tokenName), colorTokenEntries(token, 4), 3),
   )
-
-  const entries = [setScssMapEntry('prefix', data.prefix, 1), setNestedScssMap('tokens', tokenEntries, 1)]
-
-  return setScssMap('', toKebabCase(name), entries)
+  const entries = [setScssMapEntry('prefix', data.prefix, 2), setNestedScssMap('tokens', tokenEntries, 2)]
+  return setScssMapValue(entries)
 }
 
-// Base Color Tokens ==========================================================
-/** Builds the `$base-color-tokens` SCSS map from `cfg.baseColorTokens`. */
-const baseColorVariablesToScss = (): string => {
-  return colorTokensToScssMap('baseColorTokens', cfg.baseColorTokens)
-}
-
-// Custom Color Tokens ========================================================
-/**
- * Builds an SCSS map for every custom `{name}ColorTokens` entry in the config
- * (any key besides `baseColorTokens` ending in `ColorTokens`).
- * @returns The concatenated map declarations, or `undefined` if none exist.
- */
-const customColorVariablesToScss = (): string | undefined => {
-  // Get all keys named {string}ColorTokens except "baseColorTokens"
-  const customMaps = Object.entries(cfg)
-    .filter(([key]) => {
-      return key.endsWith('ColorTokens') && key !== 'baseColorTokens'
-    })
-    .map(([key, value]) => {
-      return {
-        name: key,
-        data: value as ColorTokensMap,
-      }
-    })
-
-  // If no keys exist return undefined
-  if (customMaps.length === 0) return
-
-  // If key(s) named {string}ColorTokens exist loop through each and create a map
-  const scssMaps = customMaps.map((m) => {
-    // SASSDocs for Map
-    const scssDocs = `
-/// @group Abstracts/Variables
-/// @name ${toCapitalizedNiceName(m.name)}
-/// @type Map
-  `
-    return `${scssDocs}${colorTokensToScssMap(m.name, m.data)}`
+/** Builds the `$custom-color-tokens` map-of-maps VALUE from `cfg.customColorTokens`. */
+export const customColorTokensToScssMapValue = (data: Record<string, ColorTokensMap> | undefined): string => {
+  if (!data) return '()'
+  const entries = Object.entries(data).map(([name, tokens]) => {
+    const innerEntries = [
+      setScssMapEntry('prefix', tokens.prefix, 3),
+      setNestedScssMap(
+        'tokens',
+        Object.entries(tokens.tokens).map(([tokenName, token]) =>
+          setNestedScssMap(toKebabCase(tokenName), colorTokenEntries(token, 5), 4),
+        ),
+        3,
+      ),
+    ]
+    return setNestedScssMap(toKebabCase(name), innerEntries, 2)
   })
-
-  return `${scssMaps.join('')}`
+  return setScssMapValue(entries)
 }
 
-// Semantic Aliases ===========================================================
 /**
- * Builds the `$semantic-color-aliases` SCSS map from `cfg.semanticColorAliases`.
- * Each entry resolves to a `fn.get-color-token(...)` call against the alias's
- * `tokenMap` (defaulting to `baseColorTokens`), carrying over any
- * opacity/lightness/chroma overrides.
- * @returns The map declaration, or `undefined` if no aliases are configured.
+ * Builds the `$semantic-color-alias-defs` map VALUE from `cfg.semanticColorAliases` —
+ * plain data (token/token-map/opacity/lightness-multiplier/chroma-multiplier), no function calls
+ * embedded. `tokens/_color-tokens.scss` (static) resolves each entry
+ * against `var.$base-color-tokens`/`var.$custom-color-tokens` at its own
+ * Sass compile time via `fn.get-color-token(...)`, so this stays plain
+ * `with()`-configurable data instead of needing to reference the very
+ * values it would otherwise be configured alongside (a `!default` map's
+ * default expression can reference another `!default` var declared earlier
+ * in the same static file, but a generated `with()` argument in the bridge
+ * file can't reference another `with()` argument from the same call).
+ * @param aliases - `cfg.semanticColorAliases`.
+ * @returns The bare map literal string.
  */
-const semanticAliasesVariablesToScss = (): string | undefined => {
-  if (!cfg.semanticColorAliases) return
+export const semanticColorAliasDefsToScssMapValue = (aliases: SemanticColorAliases | undefined): string => {
+  if (!aliases) return '()'
 
   const formatMultiplier = (v: number | { light: number; dark: number }) =>
     typeof v === 'number' ? `${v}` : `(light: ${v.light}, dark: ${v.dark})`
 
-  const aliasEntries = Object.entries(cfg.semanticColorAliases).map(([key, value]) => {
-    const tokensMap = `$${toKebabCase(value.tokenMap ?? 'baseColorTokens')}`
+  const entries = Object.entries(aliases).map(([key, value]) => {
+    const defEntries = [
+      setScssMapEntry('token', toKebabCase(value.token), 3),
+      value.tokenMap && value.tokenMap !== 'baseColorTokens'
+        ? setScssMapEntry('token-map', toKebabCase(value.tokenMap), 3)
+        : '',
+      value.opacity !== undefined ? setScssMapEntry('opacity', value.opacity, 3) : '',
+      value.lightnessMultiplier !== undefined
+        ? setScssMapEntry('lightness-multiplier', raw(formatMultiplier(value.lightnessMultiplier)), 3)
+        : '',
+      value.chromaMultiplier !== undefined
+        ? setScssMapEntry('chroma-multiplier', raw(formatMultiplier(value.chromaMultiplier)), 3)
+        : '',
+    ].filter(Boolean)
 
-    const args = [
-      `"${toKebabCase(value.token)}"`,
-      tokensMap,
-      value.opacity !== undefined ? `$opacity: ${value.opacity}` : null,
-      value.lightness !== undefined ? `$lightness: ${formatMultiplier(value.lightness)}` : null,
-      value.chroma !== undefined ? `$chroma: ${formatMultiplier(value.chroma)}` : null,
-    ]
-      .filter((a) => a !== null)
-      .join(', ')
-
-    return setScssMapEntry(toKebabCase(key), raw(`fn.get-color-token(${args})`), 2)
+    return setNestedScssMap(toKebabCase(key), defEntries, 2)
   })
 
-  const entries = [
-    setScssMapEntry('prefix', cfg.baseColorTokens.prefix, 1),
-    setNestedScssMap('tokens', aliasEntries, 1),
-  ]
-
-  return setScssMap('', 'semantic-color-aliases', entries)
+  return setScssMapValue(entries)
 }
-
-const customColorTokens = customColorVariablesToScss()
-const semanticColorAliases = semanticAliasesVariablesToScss()
-
-const abstractsOutput = `
-// Direct partial import (not the functions index) — the index also forwards
-// fn_fluid-typography-and-spacing, which @uses this very variables module,
-// and going through it here would create a circular dependency.
-@use "abstracts/functions/fn_get-color-token" as fn;
-
-/// @group Abstracts/Variables
-/// @name Colors
-/// @description Generated from trimscale.config.ts — see there for the source palette.
-/// ===========================================================================
-
-// ============================================================================
-// Configuration
-// ============================================================================
-
-/// @group Abstracts/Variables
-/// @name Default Scheme
-/// @type String
-$default-scheme: ${cfg.defaultScheme};
-
-/// @group Abstracts/Variables
-/// @name Base Color Tokens
-/// @type Map
-${baseColorVariablesToScss()}
-
-${customColorTokens ? customColorTokens : ''}
-
-${
-  semanticColorAliases
-    ? `
-/// @group Abstracts/Variables
-/// @name Semantic Alias Tokens
-/// @type Map
-/// @see fn_get-color-token For the function used to build each entry
-${semanticColorAliases}
-`
-    : ''
-}
-`
-
-const abstractsOutputFile = path.join(import.meta.dirname, '../styles/abstracts/variables/_colors.scss')
-fs.writeFileSync(abstractsOutputFile, abstractsOutput)
-console.log('- Color Abstracts is written to file')
-
-// ============================================================================
-// Color Tokens
-// ============================================================================
-
-/**
- * Builds an `@include mx.generate-color-tokens(...)` call per custom
- * `{name}ColorTokens` map, so each gets its own CSS custom properties
- * alongside the base tokens.
- * @returns The concatenated `@include` lines, or `undefined` if no custom maps exist.
- */
-const customColorScssMixinDefs = (): string | undefined => {
-  // Get all keys named {string}ColorTokens except "baseColorTokens"
-  const customMaps = Object.entries(cfg)
-    .filter(([key]) => {
-      return key.endsWith('ColorTokens') && key !== 'baseColorTokens'
-    })
-    .map(([key]) => {
-      return key
-    })
-
-  // If no keys exist return undefined
-  if (customMaps.length === 0) return
-
-  const mixinDefs = customMaps.map(
-    (m) => `// ${toCapitalizedNiceName(m)}\n  @include mx.generate-color-tokens($tokens: var.$${toKebabCase(m)});\n`,
-  )
-
-  return `${mixinDefs.join('')}`
-}
-
-const tokensOutput = `
-@use "abstracts/variables" as var;
-@use "abstracts/mixins" as mx;
-@use "abstracts/functions" as fn;
-
-/// @group Tokens
-/// @name Colors
-/// @description Maps abstract Sass variables to OKLCH CSS Custom Properties
-/// using light-dark() for automatic light/dark mode switching.
-///
-@layer tokens {
-  :root,
-  .app-theme-container {
-
-    // ==========================================================================
-    // Initiate automatic scheme change
-    // ==========================================================================
-
-    color-scheme: light dark;
-
-    // ==========================================================================
-    // Manual theme overrides
-    // Overrides prefers-color-scheme by forcing color-scheme on :root.
-    // light-dark() resolves automatically — no token duplication needed.
-    // ==========================================================================
-
-    &.theme-light {
-      color-scheme: light;
-    }
-
-    &.theme-dark {
-      color-scheme: dark;
-    }
-  }
-
-  // ============================================================================
-  // CSS CUSTOM PROPERTIES (:root)
-  // ============================================================================
-  
-  // Base Color Tokens
-  @include mx.generate-color-tokens();
-
-  ${customColorTokens ? customColorScssMixinDefs() : ''}
-  ${
-    semanticColorAliases
-      ? `// Semantic Color Aliases\n  @include mx.generate-color-tokens($tokens: var.$semantic-color-aliases);`
-      : ''
-  }
-}
-`
-
-const tokensOutputFile = path.join(import.meta.dirname, '../styles/tokens/_color-tokens.scss')
-fs.writeFileSync(tokensOutputFile, tokensOutput)
-console.log('- Color Tokens is written to file')

@@ -28,7 +28,7 @@ Pattern: `.gap-{size}`, using t-shirt and numeric scales.
 
 Typography utility classes from `_typography-utilities.scss`. They form the **HTML-level API** for the typography system, compose them in markup to apply font roles, sizes, weights, and alignment without writing any SCSS.
 
-**Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `fontSetup` when authoring components) for role-specific sizing or anything beyond the baseline:
+**Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `font-setup` when authoring components) for role-specific sizing or anything beyond the baseline:
 
 | Class                  | Role                   |
 | ---------------------- | ---------------------- |

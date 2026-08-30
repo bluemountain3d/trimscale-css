@@ -33,10 +33,10 @@
 ///
 /// Base placeholder:
 /// - %text-properties: Shared trim geometry (margins + pseudo-element formulas)
-///   plus a bare font-size/line-height baseline — pair with fontSetup or plain
+///   plus a bare font-size/line-height baseline — pair with font-setup or plain
 ///   utility classes for role-specific sizing and everything else
 ///
-/// Usage: Extend placeholders OR use fontSetup mixin (recommended)
+/// Usage: Extend placeholders OR use font-setup mixin (recommended)
 ///
 /// @requires abstracts/functions
 /// @requires abstracts/variables
@@ -54,7 +54,7 @@
 ///
 /// @example scss - Via mixin (recommended)
 ///   .heading-1 {
-///     @include mx.fontSetup($font: 'heading', $font-size: var(--heading-1));
+///     @include mx.font-setup($font: 'heading', $font-size: var(--heading-1));
 ///   }
 /// ===========================================================================
  
@@ -137,14 +137,14 @@
   /// (e.g. body's own defaults) staying intact. Font-weight, font-style,
   /// letter-spacing, and text-transform are left unset — the CSS initial
   /// values already match what we'd set anyway. Override any of these via
-  /// fontSetup or the plain utility classes in utilities/typography-utilities;
+  /// font-setup or the plain utility classes in utilities/typography-utilities;
   /// the four --_* metrics stay custom properties since they only exist to
   /// feed the calc() formulas below.
   ///
   /// IMPLEMENTATION NOTES:
   /// - Pseudo-elements (::before, ::after) use the 'lh' unit, which reads
   ///   whatever line-height is actually computed on the element — set by
-  ///   fontSetup, a utility class, or this placeholder's own default — no
+  ///   font-setup, a utility class, or this placeholder's own default — no
   ///   --_line-height custom property needed
   /// - Formula: (1lh - 1em) * -0.5 subtracts half the leading space
   /// - trim values are already in em units from leading-trim mixin
@@ -220,78 +220,20 @@
   /// ============================================================================
   /// Font-Specific Placeholders
   /// ============================================================================
-  /// Each placeholder extends %text-properties and applies font-specific metrics
+  /// One %{role}-text placeholder per var.$font-roles key, each extending
+  /// %text-properties and applying that role's leading-trim metrics +
+  /// font-family.
   ///
   /// IMPORTANT: All placeholders must @extend %text-properties BEFORE the mixin
   /// This ensures ::before and ::after pseudo-elements are inherited
   /// Sass does not allow @extend inside mixins across files
   ///
-  /// Use these directly OR via fontSetup mixin (recommended)
-  
-    %primary-text {
-    @extend %text-properties;
-    @include leading-trim('primary');
-    font-family: var(--font-family-primary);
+  /// Use these directly OR via font-setup mixin (recommended)
+  @each $key, $family in var.$font-roles {
+    %#{$key}-text {
+      @extend %text-properties;
+      @include leading-trim($key);
+      font-family: var(--font-family-#{$key});
+    }
   }
-  %secondary-text {
-    @extend %text-properties;
-    @include leading-trim('secondary');
-    font-family: var(--font-family-secondary);
-  }
-  %tertiary-text {
-    @extend %text-properties;
-    @include leading-trim('tertiary');
-    font-family: var(--font-family-tertiary);
-  }
-  %sans-text {
-    @extend %text-properties;
-    @include leading-trim('sans');
-    font-family: var(--font-family-sans);
-  }
-  %serif-text {
-    @extend %text-properties;
-    @include leading-trim('serif');
-    font-family: var(--font-family-serif);
-  }
-  %mono-text {
-    @extend %text-properties;
-    @include leading-trim('mono');
-    font-family: var(--font-family-mono);
-  }
-  %display-text {
-    @extend %text-properties;
-    @include leading-trim('display');
-    font-family: var(--font-family-display);
-  }
-  %heading-text {
-    @extend %text-properties;
-    @include leading-trim('heading');
-    font-family: var(--font-family-heading);
-  }
-  %subheading-text {
-    @extend %text-properties;
-    @include leading-trim('subheading');
-    font-family: var(--font-family-subheading);
-  }
-  %body-text {
-    @extend %text-properties;
-    @include leading-trim('body');
-    font-family: var(--font-family-body);
-  }
-  %quote-text {
-    @extend %text-properties;
-    @include leading-trim('quote');
-    font-family: var(--font-family-quote);
-  }
-  %code-text {
-    @extend %text-properties;
-    @include leading-trim('code');
-    font-family: var(--font-family-code);
-  }
-  %ui-text {
-    @extend %text-properties;
-    @include leading-trim('ui');
-    font-family: var(--font-family-ui);
-  }
-
 }

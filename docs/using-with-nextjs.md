@@ -74,6 +74,8 @@ After this, `@use 'trimscale'` resolves from anywhere in your SCSS files. Add yo
 
 The `variable` you assign must be `--{nextFontPrefix}-{kebab-case family name}`. With the default prefix, a font named "Inter" needs `variable: '--next-font-inter'`; "Newsreader Text" needs `--next-font-newsreader-text`.
 
+**Double-check this name by hand**, nothing catches a mismatch for you: Next.js writes `variable` to the DOM as a plain string, and trimscale-css's generated `family` value reads it back by the same naming convention, there's no compile-time link between the two. A typo (`--next-font-inte`, a missing prefix, a family renamed in `trimscale.config.ts` without updating `layout.tsx` to match) doesn't error, it quietly falls through to the fallback font instead, see [Why the CSS variable must come first](#why-the-css-variable-must-come-first). If a font looks wrong after following this guide, a mismatched variable name is the first thing to check: inspect the element and see whether `font-family` resolves to `var(--next-font-...)` or has already fallen through.
+
 ```tsx
 import { Newsreader_Text } from 'next/font/google';
 import { localFont } from 'next/font/local';
@@ -126,7 +128,7 @@ Next.js does not expose fonts by family name, it exposes them via the CSS custom
 - [ ] `appFonts.nextFontDefault: true` set (globally, with per-family `nextFont: false` overrides for anything not loaded via `next/font`)
 - [ ] `sassOptions` with `loadPaths` added to `next.config.ts`
 - [ ] `next/font/local` families use `source: 'local'`; `next/font/google` families use `source: 'cdn'` pointed at the real gstatic URL, `generateFontFace` left at its default
-- [ ] Each font's `next/font` `variable` matches `--{nextFontPrefix}-{kebab-family-name}`
+- [ ] Each font's `next/font` `variable` matches `--{nextFontPrefix}-{kebab-family-name}` exactly, checked by hand: a typo fails silently (falls back to the fallback font, no error)
 - [ ] All `variable` classes added to the `<html>` element in `layout.tsx`
 - [ ] Ran `npx trimscale-css generate`
 - [ ] Fonts mapped to roles in `fontRoles` (see [adding-a-font.md](adding-a-font.md))

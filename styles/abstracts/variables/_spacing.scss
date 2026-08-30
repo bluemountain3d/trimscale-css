@@ -1,0 +1,77 @@
+
+/// @group Abstracts/Variables
+/// @name Spacing Configuration
+/// @description How --space-* tokens grow across viewport widths
+/// @see tokens/_base-tokens.scss
+/// @see tokens/_spacing-tokens.scss
+/// ===========================================================================
+
+/// 'coupled' ties spacing to a single --unit (fluidScale's base font-size /
+/// $base-grid-size); 'independent' uses its own two-unit system instead,
+/// --unit-micro (static) and --unit-macro (its own fluid clamp)
+/// @type String
+$spacing-approach: "independent" !default;
+
+/// Upper end (px) of --unit-macro's fluid clamp at $fluid-scale's max-width.
+/// Independent approach only, must be greater than $base-grid-size.
+/// @type Number
+$macro-range-max: 8 !default;
+
+/// T-shirt scale multipliers of --unit. Coupled approach only.
+/// @type Map
+$t-shirt-scale: (
+  "3xs": 1,
+  "2xs": 2,
+  "xs": 3,
+  "sm": 4,
+  "md": 5,
+  "lg": 6,
+  "xl": 8,
+  "2xl": 12,
+  "3xl": 16,
+  "4xl": 20,
+  "5xl": 24,
+  "6xl": 28,
+  "7xl": 32,
+  "8xl": 40,
+  "9xl": 48,
+) !default;
+
+/// T-shirt scale multipliers of --unit-micro. Independent approach only.
+/// @type Map
+$t-shirt-scale-micro: (
+  "3xs": 1,
+  "2xs": 2,
+  "xs": 3,
+  "sm": 4,
+  "md": 5,
+  "lg": 6,
+) !default;
+
+/// T-shirt scale multipliers of --unit-macro. Independent approach only.
+/// @type Map
+$t-shirt-scale-macro: (
+  "xl": 6,
+  "2xl": 8,
+  "3xl": 10,
+  "4xl": 12,
+  "5xl": 16,
+  "6xl": 20,
+  "7xl": 24,
+  "8xl": 28,
+  "9xl": 32,
+) !default;
+
+/// Numeric spacing scale upper bound (--space-1..N). Coupled approach only.
+/// @type Number
+$numeric-scale-end: 48 !default;
+
+/// Numeric scale upper bound for --unit-micro-based steps (--space-1..N).
+/// Independent approach only.
+/// @type Number
+$numeric-scale-micro-end: 6 !default;
+
+/// Numeric scale upper bound for --unit-macro-based steps (picks up where
+/// $numeric-scale-micro-end leaves off). Independent approach only.
+/// @type Number
+$numeric-scale-macro-end: 48 !default;

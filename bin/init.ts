@@ -54,6 +54,9 @@ const runInit = () => {
     console.error('❌ Something went wrong:', (error as Error).message)
   }
 
+  console.log(
+    '📁 `generate` writes to ./trimscale-generated/ by default (set outDir in trimscale.config.ts to change it). Commit it like any other source file, or gitignore it (along with .trimscale-cache/) and run `generate` in CI, your choice.',
+  )
   console.log('📖 Docs: node_modules/trimscale-css/docs/getting-started.md')
 }
 

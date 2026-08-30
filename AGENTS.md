@@ -12,7 +12,7 @@ Keep `base/` lean. This is a _base_ system, not a utility framework — resist a
 
 ## Config-driven generation
 
-Token/scale files under `styles/tokens/` and `styles/abstracts/variables/` are generated from `trimscale.config.ts` via scripts in `scripts/generate*.ts` (see `pnpm generate-all`). Prefer changing the config or generator over hand-editing generated SCSS output.
+Most token/scale files under `styles/tokens/` and `styles/abstracts/variables/` are static SCSS shipped in the package (never regenerated), reading `!default` variables that a consumer configures via `@use 'trimscale' with (...)` in a generated bridge file. `scripts/generateBridge.ts` (see `pnpm generate-all` / `pnpm generate-bridge`) reads `trimscale.config.ts` and writes that bridge file into `<outDir>` (the consumer's own project, never `node_modules`), reusing per-domain map-builder functions exported from the other `scripts/generate*.ts` files. `scripts/generateFonts.ts` additionally computes font metrics and `@font-face` data (folded into the same bridge `with()` call). Prefer changing the config, a `!default` var, or a builder function in `scripts/` over hand-editing generated output — but "generated output" here is almost always just the bridge file itself, not the static `styles/` files it configures.
 
 ## Design conventions
 

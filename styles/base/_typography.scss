@@ -8,13 +8,13 @@
 ///
 /// IMPLEMENTATION LAYER - Applies typography system to actual HTML elements
 ///
-/// This file uses the fontSetup mixin to apply:
+/// This file uses the font-setup mixin to apply:
 /// - Font families with precise metrics from font-metrics.scss
 /// - Leading trim for optical alignment
 /// - Typography properties (size, weight, line-height, etc.)
 ///
 /// @requires abstracts/variables For CSS custom properties and font configuration
-/// @requires abstracts/mixins For fontSetup mixin (primary API)
+/// @requires abstracts/mixins For font-setup mixin (primary API)
 /// @requires tokens/leading-trim For %text-properties and font-specific placeholders
 /// @see abstracts/variables/font-metrics For raw font data
 /// @see abstracts/mixins/mx_font-setup For mixin documentation
@@ -28,7 +28,6 @@
     font-family: var(--font-family-body);
     line-height: var(--line-height-dynamic);
     font-size: var(--text-base, 1rem);
-    color: var(--color-text-primary, #000);
   }
 
   // ============================================================================
@@ -55,5 +54,16 @@
 
   sub {
     font-feature-settings: "subs";
+  }
+
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-family-code, monospace);
+  }
+
+  abbr {
+    text-decoration: underline dotted;
   }
 }

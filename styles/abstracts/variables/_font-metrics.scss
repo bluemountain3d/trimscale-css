@@ -56,3 +56,18 @@ $font-metrics: (
     "family": '"Roboto Mono", monospace',
   ),
 ) !default;
+
+/// @group Abstracts/Variables
+/// @name Font Faces
+/// @description One entry per @font-face rule to emit in base/_fonts.scss —
+/// written for `local` sources (unless `nextFont: true`) and `cdn` sources
+/// with `generateFontFace: true`; never for `manual`. `src` is a resolved
+/// URL, either the CDN URL as-is or a path relative to this project's
+/// generated output directory (see `outDir` in trimscale.config.ts).
+/// @type List
+/// @prop {String} family - font-family value (the family's config key)
+/// @prop {String} src - src: url(...) value
+/// @prop {String} ext - file extension, used as the format(...) hint (e.g. "woff2")
+/// @prop {String} weight - font-weight value, e.g. "700" or "100 900" (variable fonts)
+/// @prop {String} style - "normal" | "italic"
+$font-faces: () !default;

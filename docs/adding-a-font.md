@@ -96,7 +96,7 @@ fontRoles: {
 },
 ```
 
-`primary` and `body` are required, everything else, including custom roles via the index signature, is optional. A family present in `appFonts.fonts` but not mapped to any role still generates metrics but never gets a `--font-family-*` token or shows up in `fontSetup`/`.trim-text-*`.
+`primary` and `body` are required, everything else, including custom roles via the index signature, is optional. A family present in `appFonts.fonts` but not mapped to any role still generates metrics but never gets a `--font-family-*` token or shows up in `font-setup`/`.trim-text-*`.
 
 ## Generate
 

@@ -85,10 +85,10 @@
       $step: map.get($values, "step");
       $unit: map.get($values, "unit");
   
-      --#{$scaleStep}: #{fn.fluidFontSize($step, $unit)};
+      --#{$scaleStep}: #{fn.fluid-font-size($step, $unit)};
 
       @if map.get($values, "uncapped") {
-        --#{$scaleStep}-uncapped: #{fn.fluidFontSize($step, $unit, 'max')};
+        --#{$scaleStep}-uncapped: #{fn.fluid-font-size($step, $unit, 'max')};
       }
     }
 
@@ -121,7 +121,13 @@
     @each $name, $value in var.$line-heights {
       --line-height-#{$name}: #{$value};
     }
-    --line-height-dynamic: #{fn.dynamic-line-height()};
+    --line-height-dynamic: #{fn.dynamic-line-height(
+      $fs-base: map.get(var.$dynamic-line-height, "fs-base"),
+      $ratio-base: map.get(var.$dynamic-line-height, "ratio-base"),
+      $fs-ceil: map.get(var.$dynamic-line-height, "fs-ceil"),
+      $ratio-ceil: map.get(var.$dynamic-line-height, "ratio-ceil"),
+      $ratio-cap: map.get(var.$dynamic-line-height, "ratio-cap"),
+    )};
 
     // ==========================================================================
     // Font Families

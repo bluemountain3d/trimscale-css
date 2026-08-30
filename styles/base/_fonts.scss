@@ -1,48 +1,17 @@
-// Roboto
-@font-face {
-  font-family: "Roboto";
-  src: url("../../fixtures/fonts/Roboto-VariableFont_wght-100-900_subset.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Roboto";
-  src: url("../../fixtures/fonts/Roboto-VariableFont_wght-100-900-Italic_subset.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: italic;
-  font-display: swap;
-}
+@use "abstracts/variables" as var;
+@use "sass:map";
 
-// Roboto Serif
-@font-face {
-  font-family: "Roboto Serif";
-  src: url("../../fixtures/fonts/RobotoSerif-VariableFont_wght-100-900_subset.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Roboto Serif";
-  src: url("../../fixtures/fonts/RobotoSerif-VariableFont_wght-100-900-Italic_subset.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: italic;
-  font-display: swap;
-}
+/// @group Base
+/// @name Fonts
+/// @description @font-face rules, one per var.$font-faces entry.
+/// ===========================================================================
 
-// Roboto Mono
-@font-face {
-  font-family: "Roboto Mono";
-  src: url("../../fixtures/fonts/RobotoMono-VariableFont_wght-100-700_subset.woff2") format("woff2");
-  font-weight: 100 700;
-  font-style: normal;
-  font-display: swap;
+@each $face in var.$font-faces {
+  @font-face {
+    font-family: "#{map.get($face, "family")}";
+    src: url("#{map.get($face, "src")}") format("#{map.get($face, "ext")}");
+    font-weight: #{map.get($face, "weight")};
+    font-style: #{map.get($face, "style")};
+    font-display: swap;
+  }
 }
-@font-face {
-  font-family: "Roboto Mono";
-  src: url("../../fixtures/fonts/RobotoMono-VariableFont_wght-100-700-Italic_subset.woff2") format("woff2");
-  font-weight: 100 700;
-  font-style: italic;
-  font-display: swap;
-}
-

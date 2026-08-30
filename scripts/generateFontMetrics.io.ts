@@ -2,7 +2,7 @@ import * as crypto from 'node:crypto'
 import * as fs from 'node:fs'
 import path from 'node:path'
 
-const cacheDir = path.join(import.meta.dirname, '../.trimscale-cache/fonts')
+const cacheDir = path.join(process.cwd(), '.trimscale-cache/fonts')
 
 /** Reads a local font file's raw bytes. `filePath` is expected already resolved to an absolute path. */
 export const readLocalFont = (filePath: string): Promise<Buffer> => fs.promises.readFile(filePath)

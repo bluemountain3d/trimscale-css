@@ -23,11 +23,7 @@
     "build": "tsc -p tsconfig.build.json",
     "prepack": "pnpm run build",
     "generate-all": "node ./scripts/generateAll.ts",
-    "generate-font-metrics": "node ./scripts/generateFontMetrics.ts",
-    "generate-fluid-scale": "node ./scripts/generateFluidScale.ts",
-    "generate-typography": "node ./scripts/generateTypography.ts",
-    "generate-leading-trim": "node ./scripts/generateLeadingTrim.ts",
-    "generate-typography-utilities": "node ./scripts/generateTypographyUtilities.ts"
+    "generate-bridge": "node ./scripts/generateBridge.ts"
   },
   "keywords": [],
   "author": "",

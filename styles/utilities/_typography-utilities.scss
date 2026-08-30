@@ -9,7 +9,7 @@
 /// pseudo-element formulas), and a bare font-size/line-height baseline
 /// (--text-base / --line-height-dynamic) for the given role. Font-weight,
 /// font-style, letter-spacing, and text-transform are left unset — pair it
-/// with the plain `.{property}-*` utility classes below (or with fontSetup,
+/// with the plain `.{property}-*` utility classes below (or with font-setup,
 /// for component authoring) for role-specific sizing or anything beyond the
 /// baseline. Plain `.{property}-*` classes set the real CSS property
 /// directly and work anywhere, trim system or not. Roles are defined in
@@ -24,59 +24,12 @@
   /// Trim Text — font-family, leading-trim metrics, and a bare font-size/
   /// line-height baseline per font role. Weight, style, letter-spacing, and
   /// text-transform are left unset — pair with a plain utility class below,
-  /// or use fontSetup, for those.
+  /// or use font-setup, for those.
   /// =========================================================================
-  
-  .trim-text-primary {
-    @extend %primary-text;
-  }
-
-  .trim-text-secondary {
-    @extend %secondary-text;
-  }
-
-  .trim-text-tertiary {
-    @extend %tertiary-text;
-  }
-
-  .trim-text-sans {
-    @extend %sans-text;
-  }
-
-  .trim-text-serif {
-    @extend %serif-text;
-  }
-
-  .trim-text-mono {
-    @extend %mono-text;
-  }
-
-  .trim-text-display {
-    @extend %display-text;
-  }
-
-  .trim-text-heading {
-    @extend %heading-text;
-  }
-
-  .trim-text-subheading {
-    @extend %subheading-text;
-  }
-
-  .trim-text-body {
-    @extend %body-text;
-  }
-
-  .trim-text-quote {
-    @extend %quote-text;
-  }
-
-  .trim-text-code {
-    @extend %code-text;
-  }
-
-  .trim-text-ui {
-    @extend %ui-text;
+  @each $key, $family in var.$font-roles {
+    .trim-text-#{$key} {
+      @extend %#{$key}-text;
+    }
   }
 
   /// =========================================================================
@@ -169,7 +122,7 @@
   /// Text color
   /// Only `.text-color-inherit` ships by default. Unlike font roles, color
   /// token names aren't a contract enforced anywhere else in the system (see
-  /// fontSetup's required $font-roles roles for contrast) — a project is free to
+  /// font-setup's required $font-roles roles for contrast) — a project is free to
   /// name its $color-tokens however it likes, so a fixed set of
   /// `.text-color-*` classes here would risk going silently dead the moment
   /// a project doesn't use these exact token names. Add your own next to your

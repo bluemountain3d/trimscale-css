@@ -8,12 +8,14 @@ import type { TrimscaleConfig } from './models/Config.ts'
  * Where to find the docs for each section below:
  * - appFonts, fontRoles                                  
  *   → docs/adding-a-font.md
- * - breakpoints                                          
+ * - breakpoints
  *   → docs/customizing-breakpoints.md
+ * - ultrawideHeightThresholdPx
+ *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes                                               
  *   → docs/customizing-type-scale.md
  * 
- * - fontWeights, lineHeights                             
+ * - fontWeights, lineHeights, dynamicLineHeight
  *   → docs/design-tokens.md#typography-tokens
  * - spacingSetup                                         
  *   → docs/customizing-spacing.md
@@ -22,6 +24,13 @@ import type { TrimscaleConfig } from './models/Config.ts'
  *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
 const config: TrimscaleConfig = {
+  /**
+   * Where `trimscale-css generate` writes this project's generated output
+   * (the bridge file + any @font-face rules), relative to this file.
+   * → docs/getting-started.md
+   */
+  outDir: './styles/generated',
+
   /**
    * Font sources (local file, CDN URL, or hand-entered metrics), keyed by
    * family name, and their fallback stacks.
@@ -35,24 +44,24 @@ const config: TrimscaleConfig = {
       'Roboto': {
         source: 'local',
         path: [
-          '../fixtures/fonts/Roboto-VariableFont_wght-100-900_subset.woff2',
-          '../fixtures/fonts/Roboto-VariableFont_wght-100-900-Italic_subset.woff2',
+          './fixtures/fonts/Roboto-VariableFont_wght-100-900_subset.woff2',
+          './fixtures/fonts/Roboto-VariableFont_wght-100-900-Italic_subset.woff2',
         ],
         fallback: 'sans-serif',
       },
       'Roboto Serif': {
         source: 'local',
         path: [
-          '../fixtures/fonts/RobotoSerif-VariableFont_wght-100-900_subset.woff2',
-          '../fixtures/fonts/RobotoSerif-VariableFont_wght-100-900-Italic_subset.woff2',
+          './fixtures/fonts/RobotoSerif-VariableFont_wght-100-900_subset.woff2',
+          './fixtures/fonts/RobotoSerif-VariableFont_wght-100-900-Italic_subset.woff2',
         ],
         fallback: 'serif',
       },
       'Roboto Mono': {
         source: 'local',
         path: [
-          '../fixtures/fonts/RobotoMono-VariableFont_wght-100-700_subset.woff2',
-          '../fixtures/fonts/RobotoMono-VariableFont_wght-100-700-Italic_subset.woff2',
+          './fixtures/fonts/RobotoMono-VariableFont_wght-100-700_subset.woff2',
+          './fixtures/fonts/RobotoMono-VariableFont_wght-100-700-Italic_subset.woff2',
         ],
         fallback: 'monospace',
       },
@@ -119,9 +128,16 @@ const config: TrimscaleConfig = {
     tabletLg: 1024,
     laptop: 1280,
     desktop: 1440,
-    // Custom: 
+    // Custom:
     // E.g. xSmall: 360 or mobileLarge: 480
   },
+
+  /**
+   * Viewport height (px) threshold for the --vwx ultrawide switch-over
+   * (paired with a >= 21:9 aspect ratio check). Optional, defaults to 944.
+   * → docs/design-tokens.md#base-tokens
+   */
+  // ultrawideHeightThresholdPx: 944,
 
   /**
    * Fluid clamp() boundaries: base font-size and modular-scale ratio at the min/max viewport widths.
@@ -233,14 +249,28 @@ const config: TrimscaleConfig = {
   },
 
   /**
+   * Curve for the self-scaling --line-height-dynamic token. Optional, every
+   * field falls back to its own default (shown below, commented out).
+   * → docs/design-tokens.md#typography-tokens
+   */
+  // dynamicLineHeight: {
+  //   fsBase: 16,
+  //   ratioBase: 1.5,
+  //   fsCeil: 64,
+  //   ratioCeil: 1.05,
+  //   ratioCap: 1.6,
+  // },
+
+  /**
    * How --space-* tokens grow across viewport widths: 'coupled' (spacing
    * tracks the fluid type scale) or 'independent' (its own two-unit
    * system, --unit-micro/--unit-macro). The two shapes aren't combinable.
    * → docs/customizing-spacing.md · docs/full-config-reference.md#spacingsetup
    */
   spacingSetup: {
+    baseGridSize: 4,
     approach: 'independent',
-    macroRangeMax: 8,
+    macroRangeMultiplier: 2,
     tShirtScaleMicro: {
       '3xs': 1,
       '2xs': 2,
@@ -263,7 +293,7 @@ const config: TrimscaleConfig = {
     numericScaleMicroEnd: 6,
     numericScaleMacroEnd: 48,
     // Coupled example — remove/comment the independent-only fields above
-    // (macroRangeMax, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
+    // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',
     // tShirtScale: {
@@ -306,6 +336,20 @@ const config: TrimscaleConfig = {
         dark: { oklch: 'oklch(0.253 0.015 274)', hex: '#20222a' },
         // opacity: 0.8,
       },
+      goldLight: {
+        light: { oklch: 'oklch(0.921 0.07 100)', hex: '#efe7b1' },
+        dark: { oklch: 'oklch(0.921 0.07 100)', hex: '#efe7b1' },
+        // opacity: 0.8,
+      },
+      goldDark: {
+        light: { oklch: 'oklch(0.551 0.099 81)', hex: '#8F6B22' },
+        dark: { oklch: 'oklch(0.351 0.037 48)', hex: '#4b352a' },
+        // opacity: 0.8,
+      },
+      accent: {
+        light: {oklch: 'oklch(0.543 0.102 272)', hex: '#5B6BAB'},
+        dark: {oklch: 'oklch(0.733 0.045 74)', hex: '#baa58a'},
+      },
       action: {
         light: { oklch: 'oklch(0.485 0.105 271)', hex: '#495a9a' },
         dark: { oklch: 'oklch(0.66 0.057 270)', hex: '#8491b6' },
@@ -321,35 +365,59 @@ const config: TrimscaleConfig = {
         dark: { oklch: 'oklch(0.559 0.048 270)', hex: '#697391' },
         // opacity: 0.8,
       },
+      textPrimary: {
+        light: {oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23'},
+        dark: {oklch: 'oklch(0.943 0 0)', hex: '#ececec'},
+      },
+      textMuted: {
+        light: {oklch: 'oklch(0.39 0 0)', hex: '#454545'},
+        dark: {oklch: 'oklch(0.783 0 0)', hex: '#b8b8b8'},
+      },
+      textContrast: {
+        light: {oklch: 'oklch(0 0 0)', hex: '#000000'},
+        dark: {oklch: 'oklch(1 0 0)', hex: '#ffffff'},
+      },
+      a11yFocus: {
+        light: {oklch: 'oklch(0.526 0.135 251)', hex: '#1f6db5'},
+        dark: {oklch: 'oklch(0.68 0.106 246)', hex: '#5e9ed6'},
+      },
     },
   },
 
   /**
-   * Optional. Extra color maps alongside baseColorTokens, keyed as
-   * `{name}ColorTokens` (e.g. campaignColorTokens). Referenced from
-   * semanticColorAliases via `tokenMap`.
-   * → docs/full-config-reference.md#custom-color-token-maps-namecolortokens
+   * Optional. Extra color maps alongside baseColorTokens, keyed by whatever
+   * name you like (e.g. `campaign`). Referenced from semanticColorAliases
+   * via `tokenMap`.
+   * → docs/full-config-reference.md#customcolortokens
    */
-  campaignColorTokens: {
-    prefix: 'campaign',
-    tokens: {
-      goldLight: {
-        light: { oklch: 'oklch(0.921 0.07 100)', hex: '#efe7b1' },
-        dark: { oklch: 'oklch(0.921 0.07 100)', hex: '#efe7b1' },
-        // opacity: 0.8,
-      },
-      goldDark: {
-        light: { oklch: 'oklch(0.551 0.099 81)', hex: '#8F6B22' },
-        dark: { oklch: 'oklch(0.351 0.037 48)', hex: '#4b352a' },
-        // opacity: 0.8,
+  customColorTokens: {
+    campaign: {
+      prefix: 'campaign',
+      tokens: {
+        goldLight: {
+          light: { oklch: 'oklch(0.949 0.0877 104.44)', hex: '#f7f2ad' },
+          dark: { oklch: 'oklch(0.949 0.0877 104.44)', hex: '#f7f2ad' },
+          // opacity: 0.8,
+        },
+        goldMid: {
+          light: { oklch: 'oklch(0.7598 0.1258 88.23)', hex: '#d2ac47' },
+          dark: { oklch: 'oklch(0.7598 0.1258 88.23)', hex: '#d2ac47' },
+          // opacity: 0.8,
+        },
+        goldDark: {
+          light: { oklch: 'oklch(0.642 0.119 84.75)', hex: '#ae8625' },
+          dark: { oklch: 'oklch(0.642 0.119 84.75)', hex: '#ae8625' },
+          // opacity: 0.8,
+        },
       },
     },
   },
 
   /**
    * Optional. Semantic names (e.g. "text-muted") that alias a token from
-   * baseColorTokens or a tokenMap, with optional opacity/lightness/chroma
-   * overrides (single value, or per light/dark).
+   * baseColorTokens or a tokenMap, with an optional absolute opacity plus
+   * optional lightness/chroma MULTIPLIERS (not absolute values) applied to
+   * the aliased token's existing channels (single value, or per light/dark).
    * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#semanticcoloraliases
    */
   semanticColorAliases: {
@@ -357,8 +425,25 @@ const config: TrimscaleConfig = {
       token: 'action',
       tokenMap: 'baseColorTokens',
       opacity: 1,
-      chroma: { light: 0.8, dark: 1.25 },
-      lightness: { light: 0.75, dark: 1.333 },
+      chromaMultiplier: { light: 0.8, dark: 1.25 },
+    },
+    scrollThumbHover: {
+      token: 'action',
+      tokenMap: 'baseColorTokens',
+      opacity: 1,
+      chromaMultiplier: { light: 0.8, dark: 1.25 },
+      lightnessMultiplier: { light: 0.9, dark: 1.1 },
+    },
+    scrollThumbActive: {
+      token: 'action',
+      tokenMap: 'baseColorTokens',
+      opacity: 1,
+      chromaMultiplier: { light: 0.8, dark: 1.25 },
+      lightnessMultiplier: { light: 1.1, dark: 0.9 },
+    },
+    scrollBackground: {
+      token: 'surfaceBase',
+      tokenMap: 'baseColorTokens',
     },
   },
 }

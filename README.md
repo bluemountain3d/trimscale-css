@@ -38,7 +38,7 @@ npx trimscale-css init
 npx trimscale-css generate
 ```
 
-`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes every generated token file. Then point your SCSS compiler's `loadPaths` at the package's `styles/` folder and `@use 'trimscale'`.
+`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes a single bridge file into your own project (`outDir`, `./trimscale-generated` by default, never `node_modules`). Point your SCSS compiler's `loadPaths` at the package's `styles/` folder for trimscale-css's own static files, and `@use` the generated bridge file for your project's actual config values.
 
 See [getting-started.md](docs/getting-started.md) for the full walkthrough, requirements (Node version, editor config), and both import styles (global vs. component-scoped).
 
@@ -50,18 +50,18 @@ See [getting-started.md](docs/getting-started.md) for the full walkthrough, requ
 trimscale-css/
 ├── bin/                             # CLI entry point (init/generate)
 ├── models/                          # Config.ts, the TrimscaleConfig type
-├── scripts/                         # generate*.ts, read trimscale.config.ts, write styles/
+├── scripts/                         # generateBridge.ts/generateFonts.ts, read trimscale.config.ts, write <outDir>/ (your project, not styles/)
 ├── fixtures/                        # Default font files used by the shipped config
 ├── trimscale.config.ts              # Your project's configuration
 ├── styles/
-│   ├── trimscale.scss               # Main entry point
+│   ├── trimscale.scss               # Main entry point — static, !default-configurable via `@use ... with (...)`
 │   ├── _layer.scss                  # @layer order, see cascade-layers.md
 │   ├── abstracts/
-│   │   ├── variables/               # Generated: breakpoints, fluid scale, font metrics, typography
+│   │   ├── variables/               # Config surface: breakpoints, fluid scale, font metrics, typography, spacing, colors
 │   │   ├── functions/               # Fluid size calc, OKLCH helpers, unit utils
-│   │   └── mixins/                  # fontSetup, breakpoints, color token generation
-│   ├── tokens/                      # CSS custom properties (generated)
-│   ├── base/                        # HTML defaults: reset, fonts, typography (generated fonts + typography)
+│   │   └── mixins/                  # font-setup, breakpoints, color token generation
+│   ├── tokens/                      # CSS custom properties
+│   ├── base/                        # HTML defaults: reset, fonts, typography
 │   ├── utilities/                   # Spacing, gap, and typography utility classes
 │   └── components/                  # Empty by default, see examples.md
 └── styleguide/                      # Vite dev app for visual testing
@@ -100,7 +100,7 @@ The table below groups fields by topic; for every individual property, its type,
 | `fluidScale`, `modularTypographicScale`, `semanticFontSizes`                           | Viewport range, base font sizes, modular scale ratios                                                                                                | [customizing-type-scale.md](docs/customizing-type-scale.md)                                      |
 | `breakpoints`                                                                          | Named viewport breakpoints                                                                                                                           | [customizing-breakpoints.md](docs/customizing-breakpoints.md)                                    |
 | `spacingSetup`                                                                         | `coupled` vs. `independent` spacing growth model, tier multipliers, numeric scale range                                                              | [customizing-spacing.md](docs/customizing-spacing.md)                                            |
-| `defaultScheme`, `baseColorTokens`, `semanticColorAliases`, custom `{name}ColorTokens` | The color palette. Ships with a placeholder palette; replace the values (or add your own token maps) rather than treating them as fixed brand colors | [design-tokens.md](docs/design-tokens.md#color-tokens), [abstracts.md](docs/abstracts.md#mixins) |
+| `defaultScheme`, `baseColorTokens`, `semanticColorAliases`, `customColorTokens` | The color palette. Ships with a placeholder palette; replace the values (or add your own token maps) rather than treating them as fixed brand colors | [design-tokens.md](docs/design-tokens.md#color-tokens), [abstracts.md](docs/abstracts.md#mixins) |
 
 Adding a component of your own? See [examples.md](docs/examples.md), the `components` cascade layer is reserved for exactly that.
 
@@ -108,4 +108,4 @@ Adding a component of your own? See [examples.md](docs/examples.md), the `compon
 
 ## Development
 
-`docs/` covers using the published package; it ships with it. `devDocs/` does not ship, it's for working on trimscale-css itself: [devDocs/styleguide.md](devDocs/styleguide.md) covers running the local Vite dev app used to visually test the system while building it.
+`docs/` covers using the published package; it ships with it. `devDocs/` does not ship, it's for working on trimscale-css itself: [devDocs/styleguide.md](devDocs/styleguide.md) covers running the local Vite dev app used to visually test the system while building it, [devDocs/roadmap.md](devDocs/roadmap.md) tracks planned work not yet reflected in the package, and [devDocs/maintenance.md](devDocs/maintenance.md) tracks files that need a manual update pass when something else changes.

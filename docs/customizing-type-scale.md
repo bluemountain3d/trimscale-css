@@ -7,7 +7,7 @@ The fluid type scale is config-driven, not hand-edited SCSS:
 | File                                                      | What you do there                                                     |
 | --------------------------------------------------------- | --------------------------------------------------------------------- |
 | [`trimscale.config.ts`](../trimscale.config.ts)           | Edit `fluidScale`, `modularTypographicScale`, and `semanticFontSizes` |
-| `scripts/generateFluidScale.ts` / `generateTypography.ts` | Regenerated automatically, never edit the output by hand              |
+| `styles/abstracts/variables/_fluid-scale.scss` / `_typography.scss` | Static — never edit by hand, read `var.$fluid-scale`/`$modular-typographic-scale`/`$semantic-font-sizes` |
 
 After changing any of these fields, run:
 
@@ -15,7 +15,7 @@ After changing any of these fields, run:
 npx trimscale-css generate
 ```
 
-This rewrites `styles/abstracts/variables/_fluid-scale.scss` and `styles/abstracts/variables/_typography.scss`, which together produce every `--fs-*` and semantic size token (see [design-tokens.md](design-tokens.md#typography-tokens)).
+This writes your project's generated bridge file, configuring `$fluid-scale`, `$modular-typographic-scale`, and `$semantic-font-sizes` via `@use ... with (...)` (see [getting-started.md](getting-started.md#generate)). `_fluid-scale.scss`/`_typography.scss` pick those up at your own compile time to produce every `--fs-*` and semantic size token (see [design-tokens.md](design-tokens.md#typography-tokens)).
 
 ## The viewport range: `fluidScale`
 
@@ -33,7 +33,21 @@ fluidScale: {
 },
 ```
 
-`minTypeScale`/`maxTypeScale` accept either a named ratio (`'Minor Second'`, `'Major Second'`, `'Minor Third'`, `'Major Third'`, `'Perfect Fourth'`, `'Augmented Fourth'`, `'Perfect Fifth'`, `'Golden Ratio'`) or the numeric ratio directly. At `minWidth`, text uses `minFontSize` and grows by `minTypeScale` per step; at `maxWidth`, it uses `maxFontSize` and `maxTypeScale`. Between the two, every step interpolates continuously via `clamp()`, not just the endpoints.
+`minTypeScale` and `maxTypeScale` accept either a custom numeric ratio directly, or one of the named presets below:
+
+**Named Scale Ratios**
+| Scale Name | Numeric Ratio |
+| --- | --- |
+| `'Minor Second'` | 1.067 |
+| `'Major Second'` | 1.125 |
+| `'Minor Third'` | 1.2 |
+| `'Major Third'` | 1.25 |
+| `'Perfect Fourth'` | 1.333 |
+| `'Augmented Fourth'` | 1.414 |
+| `'Perfect Fifth'` | 1.5 |
+| `'Golden Ratio'` | 1.618 |
+
+At `minWidth`, text uses `minFontSize` and grows by `minTypeScale` per step; at `maxWidth`, it uses `maxFontSize` and `maxTypeScale`. Between the two, every step interpolates continuously via `clamp()`, not just the endpoints.
 
 ## The scale steps: `modularTypographicScale`
 

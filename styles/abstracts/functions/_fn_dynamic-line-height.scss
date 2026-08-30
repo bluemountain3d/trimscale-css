@@ -19,9 +19,9 @@
 /// @return {String} Unitless CSS clamp() expression, self-scaling per element
 ///
 /// @example scss
-///   body { line-height: #{dynamic-line-height()}; }
+///   body { line-height: #{fn.dynamic-line-height()}; }
 /// @example scss - Custom bounds
-///   .display-1 { line-height: #{dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
+///   .display-1 { line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
 ///
 @function dynamic-line-height(
   $fs-base: 16,
