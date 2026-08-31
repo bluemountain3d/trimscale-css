@@ -1,6 +1,7 @@
 # trimscale-css
 
 A framework-agnostic SCSS design system with fluid typography, leading-trim precision, and OKLCH color tokens.
+>An npm package with a CLI is in the works, current usage is source-only.
 
 ---
 
