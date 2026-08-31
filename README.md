@@ -2,6 +2,8 @@
 
 A framework-agnostic SCSS design system with fluid typography, leading-trim precision, and OKLCH color tokens.
 
+> Note: an npm package with a CLI is on its way, current usage is still source-only.
+
 ---
 
 ## Table of Contents
@@ -90,18 +92,18 @@ The layer order is declared once, in `_layer.scss`:
 
 Layers are listed lowest-to-highest priority — a later layer always beats an earlier one, regardless of selector specificity (short of `!important`). This is what lets utility classes and `fontSetup`-authored component styles override the framework's own defaults with zero specificity management:
 
-| Layer         | Contains                                                                                        |
-| ------------- | ------------------------------------------------------------------------------------------------ |
-| `reset`       | Browser-default reset (lowest priority)                                                          |
-| `tokens`      | CSS custom property declarations on `:root`                                                      |
-| `functions`   | Reserved, currently unused                                                                       |
-| `trim`        | `%text-properties` and the font-role placeholders — leading-trim geometry plus a bare font-size/line-height baseline |
-| `base`        | HTML element defaults (`body`, headings, etc.)                                                   |
-| `layouts`     | Global layout styles (reserved, currently unused)                                                |
-| `components`  | Global component styles — and typically wherever your own `fontSetup`-based component classes live |
-| `utilities`   | All utility classes: spacing, gap, text, layout (highest priority)                               |
+| Layer        | Contains                                                                                                             |
+| ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `reset`      | Browser-default reset (lowest priority)                                                                              |
+| `tokens`     | CSS custom property declarations on `:root`                                                                          |
+| `functions`  | Reserved, currently unused                                                                                           |
+| `trim`       | `%text-properties` and the font-role placeholders — leading-trim geometry plus a bare font-size/line-height baseline |
+| `base`       | HTML element defaults (`body`, headings, etc.)                                                                       |
+| `layouts`    | Global layout styles (reserved, currently unused)                                                                    |
+| `components` | Global component styles — and typically wherever your own `fontSetup`-based component classes live                   |
+| `utilities`  | All utility classes: spacing, gap, text, layout (highest priority)                                                   |
 
-Because `trim` sits below `base`, `components`, and `utilities`, everything the trim placeholders set is a *default*: any component class, base element rule, or utility class overrides it automatically. This is also why `.trim-text-*` and a plain `.font-size-*` can be combined freely on the same element — the winner is decided by layer, not by class order or specificity.
+Because `trim` sits below `base`, `components`, and `utilities`, everything the trim placeholders set is a _default_: any component class, base element rule, or utility class overrides it automatically. This is also why `.trim-text-*` and a plain `.font-size-*` can be combined freely on the same element — the winner is decided by layer, not by class order or specificity.
 
 **Using [component-scoped import](#component-scoped-import)?** The layer order above only exists once `@forward './layer'` (or the global `@use 'styles/trimscale'`) has been loaded somewhere in your build. If your app never pulls in the global entry point, add `@use 'styles/layer';` once at your app's own entry point too — otherwise layers fall back to first-seen-in-source order, which may not match the stack above.
 
@@ -175,13 +177,13 @@ All tokens are CSS custom properties scoped to `:root`.
 
 ### Base Tokens
 
-| Token             | Description                                                                                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Token             | Description                                                                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--vwx`           | Adaptive viewport unit. `1vw` normally; switches to `2vh` on ultrawide screens (≥ 21:9 ratio + ≥ 944 px height, `$ultrawide-threshold-px`) to prevent runaway scaling |
-| `--fluid-base`    | Base font size. Scales from `16px` at 360 px viewport to `20px` at 1440 px using `clamp()`                                                  |
-| `--unit-micro`    | Base spacing unit for small steps — fixed at `$base-grid-size` (default `4`), not fluid. Always a whole pixel                               |
-| `--unit-macro`    | Base spacing unit for large steps, an independent fluid clamp (`getFluidClamp(4, 8)`), rounded to the nearest pixel. Scales 4 px → 8 px      |
-| `--header-height` | Global header height: `2.75rem + var(--space-3xl)`                                                                                          |
+| `--fluid-base`    | Base font size. Scales from `16px` at 360 px viewport to `20px` at 1440 px using `clamp()`                                                                            |
+| `--unit-micro`    | Base spacing unit for small steps — fixed at `$base-grid-size` (default `4`), not fluid. Always a whole pixel                                                         |
+| `--unit-macro`    | Base spacing unit for large steps, an independent fluid clamp (`getFluidClamp(4, 8)`), rounded to the nearest pixel. Scales 4 px → 8 px                               |
+| `--header-height` | Global header height: `2.75rem + var(--space-3xl)`                                                                                                                    |
 
 There is no single `--unit` token anymore; it was split into `--unit-micro` and `--unit-macro`. See [Spacing Tokens](#spacing-tokens) for which sizes use which.
 
@@ -197,22 +199,22 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 **T-shirt sizes:**
 
 | Token         | Multiplier | Base value (360 px viewport) | Base value (1440 px viewport) |
-| ------------- | ---------- | ----------------------------- | ------------------------------- |
-| `--space-3xs` | × 1        | 4 px                           | 4 px                            |
-| `--space-2xs` | × 2        | 8 px                           | 8 px                            |
-| `--space-xs`  | × 3        | 12 px                          | 12 px                           |
-| `--space-sm`  | × 4        | 16 px                          | 16 px                           |
-| `--space-md`  | × 5        | 20 px                          | 20 px                           |
-| `--space-lg`  | × 6        | 24 px (fixed)                  | 24 px (fixed)                   |
-| `--space-xl`  | × 6        | 24 px                          | 48 px                           |
-| `--space-2xl` | × 8        | 32 px                          | 64 px                           |
-| `--space-3xl` | × 10       | 40 px                          | 80 px                           |
-| `--space-4xl` | × 12       | 48 px                          | 96 px                           |
-| `--space-5xl` | × 16       | 64 px                          | 128 px                          |
-| `--space-6xl` | × 20       | 80 px                          | 160 px                          |
-| `--space-7xl` | × 24       | 96 px                          | 192 px                          |
-| `--space-8xl` | × 28       | 112 px                         | 224 px                          |
-| `--space-9xl` | × 32       | 128 px                         | 256 px                          |
+| ------------- | ---------- | ---------------------------- | ----------------------------- |
+| `--space-3xs` | × 1        | 4 px                         | 4 px                          |
+| `--space-2xs` | × 2        | 8 px                         | 8 px                          |
+| `--space-xs`  | × 3        | 12 px                        | 12 px                         |
+| `--space-sm`  | × 4        | 16 px                        | 16 px                         |
+| `--space-md`  | × 5        | 20 px                        | 20 px                         |
+| `--space-lg`  | × 6        | 24 px (fixed)                | 24 px (fixed)                 |
+| `--space-xl`  | × 6        | 24 px                        | 48 px                         |
+| `--space-2xl` | × 8        | 32 px                        | 64 px                         |
+| `--space-3xl` | × 10       | 40 px                        | 80 px                         |
+| `--space-4xl` | × 12       | 48 px                        | 96 px                         |
+| `--space-5xl` | × 16       | 64 px                        | 128 px                        |
+| `--space-6xl` | × 20       | 80 px                        | 160 px                        |
+| `--space-7xl` | × 24       | 96 px                        | 192 px                        |
+| `--space-8xl` | × 28       | 112 px                       | 224 px                        |
+| `--space-9xl` | × 32       | 128 px                       | 256 px                        |
 
 **Numeric scale:** `--space-1` through `--space-48`. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`.
 
@@ -271,11 +273,11 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 
 **Line heights:** `--line-height-100` through `--line-height-200`, named by value × 100, stored as a unitless `<number>` (e.g. `--line-height-150` = `1.5`). All steps of 0.05 are defined.
 
-These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a *dynamic*, self-scaling line-height instead — computed once by the `dynamic-line-height()` Sass function (see [Functions](#functions)) and exposed as the `--line-height-dynamic` token, unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
+These static tokens are opt-in. By default, text styled through `fontSetup` or any `%*-text` placeholder gets a _dynamic_, self-scaling line-height instead — computed once by the `dynamic-line-height()` Sass function (see [Functions](#functions)) and exposed as the `--line-height-dynamic` token, unless you pass an explicit `$line-height` to `fontSetup` or a `--line-height-*` token.
 
 ### Color Tokens
 
-The token *names* below (`surface-base`, `accent`, `text-muted`, etc.) are the stable, semantic part of the system — the actual color values are just a starter palette in `$color-tokens` (`_colors.scss`) and are meant to be replaced per project, not treated as brand colors. See [Mixins](#mixins) for how to swap them.
+The token _names_ below (`surface-base`, `accent`, `text-muted`, etc.) are the stable, semantic part of the system — the actual color values are just a starter palette in `$color-tokens` (`_colors.scss`) and are meant to be replaced per project, not treated as brand colors. See [Mixins](#mixins) for how to swap them.
 
 Colors use `light-dark()` for automatic theme switching driven by `prefers-color-scheme`. You can override the automatic detection by adding a class to `:root`:
 
@@ -288,24 +290,24 @@ Colors use `light-dark()` for automatic theme switching driven by `prefers-color
 </html>
 ```
 
-| Token                                      | Description                            |
-| ------------------------------------------ | -------------------------------------- |
-| `--color-surface-base`                     | Page background                        |
-| `--color-surface-elevated`                 | Card / modal background                |
-| `--color-surface-mid`                      | Subtle container background            |
-| `--color-gold-light` / `--color-gold-dark` | Slate in light mode, gold in dark mode |
-| `--color-accent`                           | Brand accent                           |
-| `--color-action`                           | Interactive / CTA color                |
-| `--color-action-hover`                     | Action hover state                     |
-| `--color-action-muted`                     | Subtle action fill                     |
-| `--color-text-primary`                     | Default body text                      |
-| `--color-text-muted`                       | Secondary / subdued text               |
+| Token                                      | Description                              |
+| ------------------------------------------ | ---------------------------------------- |
+| `--color-surface-base`                     | Page background                          |
+| `--color-surface-elevated`                 | Card / modal background                  |
+| `--color-surface-mid`                      | Subtle container background              |
+| `--color-gold-light` / `--color-gold-dark` | Slate in light mode, gold in dark mode   |
+| `--color-accent`                           | Brand accent                             |
+| `--color-action`                           | Interactive / CTA color                  |
+| `--color-action-hover`                     | Action hover state                       |
+| `--color-action-muted`                     | Subtle action fill                       |
+| `--color-text-primary`                     | Default body text                        |
+| `--color-text-muted`                       | Secondary / subdued text                 |
 | `--color-text-contrast`                    | Maximum-contrast text (pure black/white) |
-| `--color-a11y-focus`                       | Focus ring color                       |
-| `--color-scroll-thumb`                     | Scrollbar thumb                        |
-| `--color-scroll-thumb-hover`               | Scrollbar thumb hover                  |
-| `--color-scroll-thumb-active`              | Scrollbar thumb active                 |
-| `--color-scroll-background`                | Scrollbar track                        |
+| `--color-a11y-focus`                       | Focus ring color                         |
+| `--color-scroll-thumb`                     | Scrollbar thumb                          |
+| `--color-scroll-thumb-hover`               | Scrollbar thumb hover                    |
+| `--color-scroll-thumb-active`              | Scrollbar thumb active                   |
+| `--color-scroll-background`                | Scrollbar track                          |
 
 Every token gets a triple-layered fallback (plain hex → static `oklch()` → `light-dark(oklch(), oklch())`) so the palette degrades gracefully on older browsers. See [Mixins](#mixins) for how these are generated and how to extend the palette with your own tokens.
 
@@ -363,16 +365,20 @@ margin: fn.pxToRem(24); // → 1.5rem
 
 #### `dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap)`
 
-Returns a self-scaling, unitless `clamp()` line-height ratio — it re-resolves against *any* element's own computed font-size at render time via `tan(atan2())` (dividing the curve's px intercept by the element's own `1em`), instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [Typography Tokens](#typography-tokens)); call the function directly only when you need a custom curve.
+Returns a self-scaling, unitless `clamp()` line-height ratio — it re-resolves against _any_ element's own computed font-size at render time via `tan(atan2())` (dividing the curve's px intercept by the element's own `1em`), instead of being tied to the modular type scale. It pins an exact ratio (`$ratio-base`, default `1.5`) at one font-size (`$fs-base`, default `16`px), interpolates down to a minimum ratio (`$ratio-ceil`, default `1.05`) at a ceiling font-size (`$fs-ceil`, default `64`px), and caps the ratio at `$ratio-cap` (default `1.6`) for small font-sizes below the natural crossover point. With default arguments, this is computed once and exposed as the `--line-height-dynamic` token (see [Typography Tokens](#typography-tokens)); call the function directly only when you need a custom curve.
 
 ```scss
 // Default curve — prefer the token instead:
-.my-element { line-height: var(--line-height-dynamic); }
+.my-element {
+  line-height: var(--line-height-dynamic);
+}
 // Custom bounds for a display heading — call the function directly:
-.display-1 { line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
+.display-1 {
+  line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)};
+}
 ```
 
-Prefer the static `--line-height-*` tokens (or `fontSetup`'s `$line-height` param) for most component work; reach for `dynamic-line-height` directly only when you need to change the *default* curve itself.
+Prefer the static `--line-height-*` tokens (or `fontSetup`'s `$line-height` param) for most component work; reach for `dynamic-line-height` directly only when you need to change the _default_ curve itself.
 
 ### Mixins
 
@@ -395,15 +401,15 @@ Import via `@use 'styles/abstracts/mixins' as mx`.
 
 Parameters:
 
-| Parameter         | Type   | Default      | Description                                                     |
-| ----------------- | ------ | ------------ | --------------------------------------------------------------- |
-| `$font`           | string | `'primary'`  | Font role key (see list below)                                  |
-| `$font-size`      | value  | `null`       | CSS font-size value                                              |
-| `$line-height`    | number | `null` | Line height multiplier (unitless) |
-| `$font-weight`    | number | `null`       | Font weight                                                     |
-| `$font-style`     | string | `null`       | Font style (`normal`, `italic`, `oblique`)                      |
-| `$letter-spacing` | value  | `null`       | Letter spacing                                                  |
-| `$text-transform` | string | `null`       | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
+| Parameter         | Type   | Default     | Description                                                     |
+| ----------------- | ------ | ----------- | --------------------------------------------------------------- |
+| `$font`           | string | `'primary'` | Font role key (see list below)                                  |
+| `$font-size`      | value  | `null`      | CSS font-size value                                             |
+| `$line-height`    | number | `null`      | Line height multiplier (unitless)                               |
+| `$font-weight`    | number | `null`      | Font weight                                                     |
+| `$font-style`     | string | `null`      | Font style (`normal`, `italic`, `oblique`)                      |
+| `$letter-spacing` | value  | `null`      | Letter spacing                                                  |
+| `$text-transform` | string | `null`      | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
 
 Every parameter except `$font` defaults to `null` and is only emitted as a real CSS property (`font-size`, `line-height`, etc. — set directly, not via custom properties) if you pass it explicitly. Omitted `$font-size`/`$line-height` fall through to the font role's placeholder, which carries a bare baseline of its own (`font-size: var(--text-base)`, `line-height: var(--line-height-dynamic)` — see [Typography Tokens](#typography-tokens)); the other four parameters have no such placeholder default and fall through further, to whatever's inherited (or the CSS initial value). `$line-height` accepts a unitless number (`1.1`).
 
@@ -425,9 +431,15 @@ This is the actual mechanism behind [Color Tokens](#color-tokens), and it's how 
 
 ```scss
 $brand-tokens: (
-  "brand-primary": (
-    light: (oklch: oklch(0.55 0.15 250), hex: #4a5fc1),
-    dark: (oklch: oklch(0.7 0.12 250), hex: #8fa0e8),
+  'brand-primary': (
+    light: (
+      oklch: oklch(0.55 0.15 250),
+      hex: #4a5fc1,
+    ),
+    dark: (
+      oklch: oklch(0.7 0.12 250),
+      hex: #8fa0e8,
+    ),
   ),
 );
 
@@ -437,11 +449,11 @@ $brand-tokens: (
 
 Parameters:
 
-| Parameter        | Type   | Default              | Description                                                        |
-| ---------------- | ------ | --------------------- | ------------------------------------------------------------------- |
-| `$tokens`        | map    | `var.$color-tokens`   | Map shaped `(name: (light: (oklch:, hex:), dark: (oklch:, hex:)))` |
-| `$defaultScheme` | string | `light`               | Which scheme's value backs the plain-hex fallback tier              |
-| `$prefix`        | string | `"color"`              | Custom-property prefix, i.e. `--#{$prefix}-#{name}`                 |
+| Parameter        | Type   | Default             | Description                                                        |
+| ---------------- | ------ | ------------------- | ------------------------------------------------------------------ |
+| `$tokens`        | map    | `var.$color-tokens` | Map shaped `(name: (light: (oklch:, hex:), dark: (oklch:, hex:)))` |
+| `$defaultScheme` | string | `light`             | Which scheme's value backs the plain-hex fallback tier             |
+| `$prefix`        | string | `"color"`           | Custom-property prefix, i.e. `--#{$prefix}-#{name}`                |
 
 Each token also gets a typed `@property --#{$prefix}-#{name} { syntax: "<color>"; }` registration, so invalid overrides fail safe to the fallback color instead of silently breaking the cascade.
 
@@ -551,21 +563,21 @@ Text utility classes from `_text-utilities.scss`. They form the **HTML-level API
 
 **Trim text** — applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset — pair it with the plain `.{property}-*` classes below (or use `fontSetup` when authoring components) for role-specific sizing or anything beyond the baseline:
 
-| Class                  | Role                   |
-| ---------------------- | ---------------------- |
-| `.trim-text-primary`   | Primary brand typeface |
-| `.trim-text-secondary` | Secondary typeface     |
-| `.trim-text-tertiary`  | Tertiary typeface      |
-| `.trim-text-sans`      | Sans-serif category    |
-| `.trim-text-serif`     | Serif category         |
-| `.trim-text-mono`      | Monospace category     |
-| `.trim-text-display`   | Display / hero context |
-| `.trim-text-heading`   | Heading context        |
-| `.trim-text-subheading`| Subheading context     |
-| `.trim-text-body`      | Body text context      |
-| `.trim-text-quote`     | Blockquote context     |
-| `.trim-text-code`      | Code / pre context     |
-| `.trim-text-ui`        | UI elements context    |
+| Class                   | Role                   |
+| ----------------------- | ---------------------- |
+| `.trim-text-primary`    | Primary brand typeface |
+| `.trim-text-secondary`  | Secondary typeface     |
+| `.trim-text-tertiary`   | Tertiary typeface      |
+| `.trim-text-sans`       | Sans-serif category    |
+| `.trim-text-serif`      | Serif category         |
+| `.trim-text-mono`       | Monospace category     |
+| `.trim-text-display`    | Display / hero context |
+| `.trim-text-heading`    | Heading context        |
+| `.trim-text-subheading` | Subheading context     |
+| `.trim-text-body`       | Body text context      |
+| `.trim-text-quote`      | Blockquote context     |
+| `.trim-text-code`       | Code / pre context     |
+| `.trim-text-ui`         | UI elements context    |
 
 ```html
 <h1 class="trim-text-heading font-size-heading-1">Sized heading</h1>
@@ -594,11 +606,12 @@ Text utility classes from `_text-utilities.scss`. They form the **HTML-level API
 **Text color:** `.text-color-inherit` only — unlike font roles, color token names aren't a contract enforced anywhere else in the system, so fixed `.text-color-*` classes would risk going silently dead the moment a project renames its `$color-tokens` keys. Add your own next to your project's palette.
 
 ```html
-<h1
-  class="trim-text-heading font-size-heading-1 font-weight-bold">
+<h1 class="trim-text-heading font-size-heading-1 font-weight-bold">
   Page heading
 </h1>
-<p class="trim-text-body font-size-text-base" style="color: var(--color-text-muted);">
+<p
+  class="trim-text-body font-size-text-base"
+  style="color: var(--color-text-muted);">
   Body copy in muted tone.
 </p>
 ```
@@ -617,17 +630,19 @@ A typographic prose container: it handles flow spacing between block elements, c
 <div class="text-box text-box--flow text-box-65 text-box--center-content">
   <h2>Heading</h2>
   <p>Paragraph…</p>
-  <ul>…</ul>
+  <ul>
+    …
+  </ul>
 </div>
 ```
 
-| Class                       | Effect                                                                                                                                                                          |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.text-box`                 | Base container (`width: 100%`)                                                                                                                                                 |
+| Class                       | Effect                                                                                                                                                                                                                       |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.text-box`                 | Base container (`width: 100%`)                                                                                                                                                                                               |
 | `.text-box--flow`           | Structured `margin-block` rhythm for **mixed content** (headings + paragraphs/lists/figures), using `:has()` to vary spacing by context (e.g. `2em` before a heading, `0.8em` after one). Mutually exclusive with `--prose`. |
-| `.text-box--prose`          | Uniform `margin-block-start` between every direct child, for **continuous prose**. Override the spacing via the `--prose-flow` custom property (default `1.5em`). Mutually exclusive with `--flow`. |
-| `.text-box-45` … `-75`      | Caps line length by character count (steps of 5: `45, 50, 55, 60, 65, 70, 75`), computed as `max-width: calc(var(--text-base) * avg-char-width * N)`                          |
-| `.text-box--center-content` | `margin-inline: auto`, typically paired with a character-count modifier                                                                                                        |
+| `.text-box--prose`          | Uniform `margin-block-start` between every direct child, for **continuous prose**. Override the spacing via the `--prose-flow` custom property (default `1.5em`). Mutually exclusive with `--flow`.                          |
+| `.text-box-45` … `-75`      | Caps line length by character count (steps of 5: `45, 50, 55, 60, 65, 70, 75`), computed as `max-width: calc(var(--text-base) * avg-char-width * N)`                                                                         |
+| `.text-box--center-content` | `margin-inline: auto`, typically paired with a character-count modifier                                                                                                                                                      |
 
 To add another global component, create a new `_[name].scss` file in `src/styles/components/` and add `@forward './[name]';` to `components/_index.scss`.
 
@@ -659,12 +674,12 @@ All configuration lives in `src/styles/abstracts/variables/`. Edit the relevant 
 
 Key configuration files:
 
-| File                 | Controls                                              | Guide                                                             |
-| -------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- |
-| `_breakpoints.scss`  | Viewport breakpoints and shortcut variables           | [customizing-breakpoints.md](src/docs/customizing-breakpoints.md) |
-| `_fluid-scale.scss`  | Viewport range, base font sizes, modular scale ratios | [customizing-type-scale.md](src/docs/customizing-type-scale.md)   |
-| `_font-metrics.scss` | Per-font cap-height, ascender, descender, trim values | [adding-a-font.md](src/docs/adding-a-font.md)                     |
-| `_typography.scss`   | Font role → family mappings                           | [adding-a-font.md](src/docs/adding-a-font.md)                     |
-| `_colors.scss`       | `$color-tokens` — the project's color palette (light/dark, oklch + hex per token). Ships with a placeholder palette; replace the values (or add your own tokens and pass them to `mx.generate-color-tokens`) rather than treating them as fixed brand colors | [Color Tokens](#color-tokens), [Mixins](#mixins) |
+| File                 | Controls                                                                                                                                                                                                                                                     | Guide                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `_breakpoints.scss`  | Viewport breakpoints and shortcut variables                                                                                                                                                                                                                  | [customizing-breakpoints.md](src/docs/customizing-breakpoints.md) |
+| `_fluid-scale.scss`  | Viewport range, base font sizes, modular scale ratios                                                                                                                                                                                                        | [customizing-type-scale.md](src/docs/customizing-type-scale.md)   |
+| `_font-metrics.scss` | Per-font cap-height, ascender, descender, trim values                                                                                                                                                                                                        | [adding-a-font.md](src/docs/adding-a-font.md)                     |
+| `_typography.scss`   | Font role → family mappings                                                                                                                                                                                                                                  | [adding-a-font.md](src/docs/adding-a-font.md)                     |
+| `_colors.scss`       | `$color-tokens` — the project's color palette (light/dark, oklch + hex per token). Ships with a placeholder palette; replace the values (or add your own tokens and pass them to `mx.generate-color-tokens`) rather than treating them as fixed brand colors | [Color Tokens](#color-tokens), [Mixins](#mixins)                  |
 
 Use the `_[NAME].scss` template files in each `abstracts/` subdirectory as a starting point for adding your own variables, functions, or mixins.
