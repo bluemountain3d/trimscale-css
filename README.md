@@ -40,7 +40,7 @@ npx trimscale-css generate
 
 `init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes two files into your own project (`outDir`, `./trimscale-generated` by default, never `node_modules`): the SCSS bridge file and a `utility-classes.md` reference. Point your SCSS compiler's `loadPaths` at the package's `styles/` folder for trimscale-css's own static files, and `@use` the generated bridge file for your project's actual config values.
 
-See [getting-started.md](docs/getting-started.md) for the full walkthrough, requirements (Node version, editor config), and both import styles (global vs. component-scoped).
+See [getting-started.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md) for the full walkthrough, requirements (Node version, editor config), and both import styles (global vs. component-scoped).
 
 ---
 
@@ -73,39 +73,39 @@ trimscale-css/
 
 | Guide                                                         | Covers                                         |
 | ------------------------------------------------------------- | ---------------------------------------------- |
-| [getting-started.md](docs/getting-started.md)                 | Install, CLI, requirements, both import styles |
-| [full-config-reference.md](docs/full-config-reference.md)     | Every `trimscale.config.ts` property, one page |
-| [cascade-layers.md](docs/cascade-layers.md)                   | The `@layer` stack and why it matters          |
-| [design-tokens.md](docs/design-tokens.md)                     | Every generated CSS custom property            |
-| [abstracts.md](docs/abstracts.md)                             | Functions, mixins, and the breakpoint API      |
-| [utility-classes.md](docs/utility-classes.md)                 | Spacing, gap, and typography utility classes   |
-| [examples.md](docs/examples.md)                               | Copy-paste component recipes (text-box)        |
-| [customizing-spacing.md](docs/customizing-spacing.md)         | Coupled vs. independent spacing, tuning tiers  |
-| [customizing-breakpoints.md](docs/customizing-breakpoints.md) | Changing breakpoint values                     |
-| [customizing-type-scale.md](docs/customizing-type-scale.md)   | Tuning the fluid type scale                    |
-| [adding-a-font.md](docs/adding-a-font.md)                     | Adding a font and assigning roles              |
-| [using-with-nextjs.md](docs/using-with-nextjs.md)             | `next/font` integration                        |
+| [getting-started.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md)                 | Install, CLI, requirements, both import styles |
+| [full-config-reference.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/full-config-reference.md)     | Every `trimscale.config.ts` property, one page |
+| [cascade-layers.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/cascade-layers.md)                   | The `@layer` stack and why it matters          |
+| [design-tokens.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/design-tokens.md)                     | Every generated CSS custom property            |
+| [abstracts.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/abstracts.md)                             | Functions, mixins, and the breakpoint API      |
+| [utility-classes.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/utility-classes.md)                 | Spacing, gap, and typography utility classes   |
+| [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md)                               | Copy-paste component recipes (text-box)        |
+| [customizing-spacing.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-spacing.md)         | Coupled vs. independent spacing, tuning tiers  |
+| [customizing-breakpoints.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-breakpoints.md) | Changing breakpoint values                     |
+| [customizing-type-scale.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-type-scale.md)   | Tuning the fluid type scale                    |
+| [adding-a-font.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/adding-a-font.md)                     | Adding a font and assigning roles              |
+| [using-with-nextjs.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/using-with-nextjs.md)             | `next/font` integration                        |
 
 ---
 
 ## Customization
 
-Everything lives in one file: [`trimscale.config.ts`](trimscale.config.ts). Edit a field, run `npx trimscale-css generate`, the system derives everything else at compile time. Nothing under `styles/tokens/` or the generated files in `styles/abstracts/variables/`/`styles/base/` should be hand-edited, they get overwritten on the next generate.
+Everything lives in one file: [`trimscale.config.ts`](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/templates/trimscale.config.ts). Edit a field, run `npx trimscale-css generate`, the system derives everything else at compile time. Nothing under `styles/tokens/` or the generated files in `styles/abstracts/variables/`/`styles/base/` should be hand-edited, they get overwritten on the next generate.
 
-The table below groups fields by topic; for every individual property, its type, and whether it's required, see [full-config-reference.md](docs/full-config-reference.md).
+The table below groups fields by topic; for every individual property, its type, and whether it's required, see [full-config-reference.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/full-config-reference.md).
 
 | Config field                                                                           | Controls                                                                                                                                             | Guide                                                                                            |
 | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `appFonts`, `fontRoles`                                                                | Font files, fallbacks, and role assignment                                                                                                           | [adding-a-font.md](docs/adding-a-font.md), [using-with-nextjs.md](docs/using-with-nextjs.md)     |
-| `fluidScale`, `modularTypographicScale`, `semanticFontSizes`                           | Viewport range, base font sizes, modular scale ratios                                                                                                | [customizing-type-scale.md](docs/customizing-type-scale.md)                                      |
-| `breakpoints`                                                                          | Named viewport breakpoints                                                                                                                           | [customizing-breakpoints.md](docs/customizing-breakpoints.md)                                    |
-| `spacingSetup`                                                                         | `coupled` vs. `independent` spacing growth model, tier multipliers, numeric scale range                                                              | [customizing-spacing.md](docs/customizing-spacing.md)                                            |
-| `defaultScheme`, `baseColorTokens`, `semanticColorAliases`, `customColorTokens` | The color palette. Ships with a placeholder palette; replace the values (or add your own token maps) rather than treating them as fixed brand colors | [design-tokens.md](docs/design-tokens.md#color-tokens), [abstracts.md](docs/abstracts.md#mixins) |
+| `appFonts`, `fontRoles`                                                                | Font files, fallbacks, and role assignment                                                                                                           | [adding-a-font.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/adding-a-font.md), [using-with-nextjs.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/using-with-nextjs.md)     |
+| `fluidScale`, `modularTypographicScale`, `semanticFontSizes`                           | Viewport range, base font sizes, modular scale ratios                                                                                                | [customizing-type-scale.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-type-scale.md)                                      |
+| `breakpoints`                                                                          | Named viewport breakpoints                                                                                                                           | [customizing-breakpoints.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-breakpoints.md)                                    |
+| `spacingSetup`                                                                         | `coupled` vs. `independent` spacing growth model, tier multipliers, numeric scale range                                                              | [customizing-spacing.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-spacing.md)                                            |
+| `defaultScheme`, `baseColorTokens`, `semanticColorAliases`, `customColorTokens` | The color palette. Ships with a placeholder palette; replace the values (or add your own token maps) rather than treating them as fixed brand colors | [design-tokens.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/design-tokens.md#color-tokens), [abstracts.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/abstracts.md#mixins) |
 
-Adding a component of your own? See [examples.md](docs/examples.md), the `components` cascade layer is reserved for exactly that.
+Adding a component of your own? See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md), the `components` cascade layer is reserved for exactly that.
 
 ---
 
 ## Development
 
-`docs/` covers using the published package; it ships with it. `devDocs/` does not ship, it's for working on trimscale-css itself: [devDocs/styleguide.md](devDocs/styleguide.md) covers running the local Vite dev app used to visually test the system while building it, [devDocs/roadmap.md](devDocs/roadmap.md) tracks planned work not yet reflected in the package, and [devDocs/maintenance.md](devDocs/maintenance.md) tracks files that need a manual update pass when something else changes.
+`docs/` covers using the published package; it ships with it. `devDocs/` does not ship, it's for working on trimscale-css itself: [devDocs/styleguide.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/styleguide.md) covers running the local Vite dev app used to visually test the system while building it, [devDocs/roadmap.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/roadmap.md) tracks planned work not yet reflected in the package, and [devDocs/maintenance.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/maintenance.md) tracks files that need a manual update pass when something else changes.
