@@ -1,9 +1,11 @@
+@use "abstracts/variables" as var;
 @use "tokens/spacing-tokens" as *;
 
 /// @group Utilities
 /// @name Gap Utilities
 /// @description Utility classes for gap, row-gap, and column-gap using the fluid spacing system.
-/// Provides both t-shirt sizes (xs, sm, md...) and numeric scale (1-48).
+/// Provides both t-shirt sizes (xs, sm, md...) and a numeric scale (1 through
+/// this project's configured numericScaleEnd/numericScaleMacroEnd).
 /// @example html
 ///   <div class="gap-md">Grid with medium gap</div>
 ///   <div class="row-gap-4 column-gap-8">Custom row/column gaps</div>
@@ -37,11 +39,19 @@
   }
 
   // ==========================================================================
-  // Numeric Scale (1-48)
+  // Numeric Scale
   // ==========================================================================
 
-  /// Numeric gap utility classes for fine-grained control
-  @for $i from 1 through 48 {
+  /// Numeric gap utility classes for fine-grained control. Upper bound
+  /// matches the numeric --space-* custom properties tokens/_spacing-tokens.scss
+  /// actually generates (numericScaleEnd under 'coupled', numericScaleMacroEnd
+  /// under 'independent'), so a class here never resolves to an unset custom property.
+  $_numeric-scale-end: if(
+    sass(var.$spacing-approach == "coupled"): var.$numeric-scale-end;
+    else: var.$numeric-scale-macro-end
+  );
+
+  @for $i from 1 through $_numeric-scale-end {
     .gap-#{$i} {
       gap: var(--space-#{$i});
     }

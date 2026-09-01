@@ -1,9 +1,11 @@
+@use "abstracts/variables" as var;
 @use "tokens/spacing-tokens" as *;
 
 /// @group Utilities
 /// @name Spacing Utilities
 /// @description Utility classes for margin and padding using the fluid spacing system.
-/// Provides both t-shirt sizes (xs, sm, md...) and numeric scale (1-48).
+/// Provides both t-shirt sizes (xs, sm, md...) and a numeric scale (1 through
+/// this project's configured numericScaleEnd/numericScaleMacroEnd).
 /// All values are multiples of --unit-micro/--unit-macro, which scale fluidly with viewport width.
 /// @example html
 ///   <div class="px-md py-sm">Padded box</div>
@@ -81,11 +83,19 @@
   }
 
   // ==========================================================================
-  // Numeric Scale (1-48)
+  // Numeric Scale
   // ==========================================================================
 
-  /// Numeric spacing utility classes for fine-grained control
-  @for $i from 1 through 48 {
+  /// Numeric spacing utility classes for fine-grained control. Upper bound
+  /// matches the numeric --space-* custom properties tokens/_spacing-tokens.scss
+  /// actually generates (numericScaleEnd under 'coupled', numericScaleMacroEnd
+  /// under 'independent'), so a class here never resolves to an unset custom property.
+  $_numeric-scale-end: if(
+    sass(var.$spacing-approach == "coupled"): var.$numeric-scale-end;
+    else: var.$numeric-scale-macro-end
+  );
+
+  @for $i from 1 through $_numeric-scale-end {
     .m-#{$i} {
       margin: var(--space-#{$i});
     }

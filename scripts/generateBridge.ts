@@ -9,6 +9,7 @@ import {
 import { fluidScaleToScssMapValue } from './generateFluidScale.ts'
 import { fontFacesToScssListValue, metricsToScssMapValue } from './generateFontMetrics.scss.ts'
 import { computeFontData } from './generateFonts.ts'
+import { buildUtilityClassesMarkdown } from './generateUtilityClassesDoc.ts'
 import {
   dynamicLineHeightToScssMapValue,
   fontRolesToScssMapValue,
@@ -83,3 +84,8 @@ ${withArgs});
 fs.mkdirSync(outDir, { recursive: true })
 fs.writeFileSync(path.join(outDir, '_index.scss'), output)
 console.log(`- Bridge file is written to ${path.relative(process.cwd(), path.join(outDir, '_index.scss'))}`)
+
+fs.writeFileSync(path.join(outDir, 'utility-classes.md'), buildUtilityClassesMarkdown(cfg))
+console.log(
+  `- Utility class reference is written to ${path.relative(process.cwd(), path.join(outDir, 'utility-classes.md'))}`,
+)

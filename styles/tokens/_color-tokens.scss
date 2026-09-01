@@ -18,9 +18,8 @@ $_semantic-alias-tokens: ();
 @each $name, $def in var.$semantic-color-alias-defs {
   $token-map-key: map.get($def, "token-map");
   $tokens: if(
-    $token-map-key == null,
-    var.$base-color-tokens,
-    map.get(var.$custom-color-tokens, $token-map-key)
+    sass($token-map-key == null): var.$base-color-tokens;
+    else: map.get(var.$custom-color-tokens, $token-map-key)
   );
   $_semantic-alias-tokens: map.merge($_semantic-alias-tokens, (
     $name: fn.get-color-token(
