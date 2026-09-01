@@ -1,0 +1,79 @@
+
+@use "abstracts/variables" as var;
+@use "abstracts/mixins" as mx;
+@use "abstracts/functions" as fn;
+@use "sass:map";
+
+/// @group Tokens
+/// @name Colors
+/// @description Maps abstract Sass variables to OKLCH CSS Custom Properties
+/// using light-dark() for automatic light/dark mode switching.
+///
+
+// Resolve $semantic-color-alias-defs (plain data — see
+// abstracts/variables/_colors.scss) into a real (prefix:, tokens:) map by
+// calling fn.get-color-token() against $base-color-tokens or the named
+// $custom-color-tokens entry, one alias at a time.
+$_semantic-alias-tokens: ();
+@each $name, $def in var.$semantic-color-alias-defs {
+  $token-map-key: map.get($def, "token-map");
+  $tokens: if(
+    sass($token-map-key == null): var.$base-color-tokens;
+    else: map.get(var.$custom-color-tokens, $token-map-key)
+  );
+  $_semantic-alias-tokens: map.merge($_semantic-alias-tokens, (
+    $name: fn.get-color-token(
+      map.get($def, "token"),
+      $tokens,
+      $opacity: map.get($def, "opacity"),
+      $lightness-multiplier: map.get($def, "lightness-multiplier"),
+      $chroma-multiplier: map.get($def, "chroma-multiplier"),
+    ),
+  ));
+}
+
+@layer tokens {
+  :root,
+  .app-theme-container {
+
+    // ==========================================================================
+    // Initiate automatic scheme change
+    // ==========================================================================
+
+    color-scheme: light dark;
+
+    // ==========================================================================
+    // Manual theme overrides
+    // Overrides prefers-color-scheme by forcing color-scheme on :root.
+    // light-dark() resolves automatically — no token duplication needed.
+    // ==========================================================================
+
+    &.theme-light {
+      color-scheme: light;
+    }
+
+    &.theme-dark {
+      color-scheme: dark;
+    }
+  }
+
+  // ============================================================================
+  // CSS CUSTOM PROPERTIES (:root)
+  // ============================================================================
+
+  // Base Color Tokens
+  @include mx.generate-color-tokens();
+
+  // Custom Color Tokens
+  @each $name, $tokens in var.$custom-color-tokens {
+    @include mx.generate-color-tokens($tokens: $tokens);
+  }
+
+  // Semantic Color Aliases
+  @if map.keys(var.$semantic-color-alias-defs) != () {
+    @include mx.generate-color-tokens($tokens: (
+      "prefix": map.get(var.$base-color-tokens, "prefix"),
+      "tokens": $_semantic-alias-tokens,
+    ));
+  }
+}

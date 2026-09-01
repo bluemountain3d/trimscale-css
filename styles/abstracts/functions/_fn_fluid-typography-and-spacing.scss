@@ -1,0 +1,209 @@
+/// @group Abstracts/Functions
+/// @name Fluid Typography & Spacing
+/// @description Calculate fluid values using clamp() for responsive typography and spacing.
+/// Uses linear interpolation (y = mx + b) between min/max viewport widths.
+/// All public functions support multiple viewport unit types via $unit-key.
+/// @link https://www.smashingmagazine.com/2022/01/modern-fluid-typography-css-clamp/
+/// ===========================================================================
+
+@use "abstracts/variables" as var;
+@use "./fn_unit-utils" as *;
+@use "./fn_number-utils" as *;
+
+// Sass built-in modules - Only import what you actually use
+@use "sass:math";
+@use "sass:map";
+
+// ============================================================================
+// Private Helper Functions
+// ============================================================================
+
+/// Get CSS unit syntax for fluid calculations
+/// @access private
+/// @param {String} $type - Unit type: 'vwx', 'cqw', 'cqi', 'vw', or custom unit
+/// @return {String} CSS unit syntax
+/// @example
+///   $unit: _get-unit-syntax('vwx'); // Returns: var(--vwx)
+///   $unit: _get-unit-syntax('vw');  // Returns: 1vw
+@function _get-unit-syntax($type) {
+  @if $type =="vwx" {
+    @return var(--vwx);
+  }
+
+  @if $type =="cqw" {
+    @return 1cqw;
+  }
+
+  @if $type =="cqi" {
+    @return 1cqi;
+  }
+
+  @if $type =="vw" {
+    @return 1vw;
+  }
+
+  @return $type; // Fallback if passing a custom unit
+}
+
+// ============================================================================
+// Public API Functions
+// ============================================================================
+
+/// Calculate fluid clamp value with linear interpolation
+/// @access public
+/// @param {Number} $min-size - Minimum size in pixels
+/// @param {Number} $max-size - Maximum size in pixels
+/// @param {String} $value-key ['vwx'] - Unit type for viewport calculation
+/// @return {String} CSS clamp() expression
+/// @example
+///   $value: get-fluid-clamp(16, 24);
+///   // Returns: "clamp(1rem, 0.5rem + 1.0417 * var(--vwx), 1.5rem)"
+@function get-fluid-clamp($min-size, $max-size, $value-key: "vwx") {
+  $min-width: map.get(var.$fluid-scale, "min-width");
+  $max-width: map.get(var.$fluid-scale, "max-width");
+
+  // Check if the clamp is unnecessary or if we risk division by zero
+  @if $min-size ==$max-size or $min-width ==$max-width {
+    @return px-to-rem($min-size);
+  }
+
+  // Get correct CSS syntax (e.g. var(--vwx))
+  $unit-syntax: _get-unit-syntax($value-key);
+
+  // Linear interpolation: y = mx + b
+  $slope: math.div($max-size - $min-size, $max-width - $min-width);
+  $y-intercept: $min-size - $slope * $min-width;
+
+  $intercept-rem: px-to-rem($y-intercept);
+  $min-rem: px-to-rem($min-size);
+  $max-rem: px-to-rem($max-size);
+
+  // Multiply slope by 100 because we start from 1 unit (1% of width)
+  @return clamp(#{$min-rem},
+    #{$intercept-rem} + #{round($slope * 100, 4)} * #{$unit-syntax},
+    #{$max-rem});
+}
+
+/// Generate fluid font size using modular scale
+/// @access public
+/// @param {Number} $level [0] - Scale level (negative for smaller, positive for larger)
+/// @param {String} $unit-key ['vwx'] - Unit type: 'vwx', 'cqw', 'cqi', 'vw'
+/// @return {String} CSS clamp() expression
+/// @example
+///   h1 { font-size: fluid-font-size(3); }    // 3 steps up from base
+///   small { font-size: fluid-font-size(-1); } // 1 step down from base
+///   p { font-size: fluid-font-size(0); }      // Base size
+@function fluid-font-size($level: 0, $unit-key: "vwx", $type: 'clamp') {
+  $min-base: map.get(var.$fluid-scale, "min-font-size");
+  $max-base: map.get(var.$fluid-scale, "max-font-size");
+  $min-ratio: map.get(var.$fluid-scale, "min-type-scale");
+  $max-ratio: map.get(var.$fluid-scale, "max-type-scale");
+  $min-w: map.get(var.$fluid-scale, "min-width");
+  $max-w: map.get(var.$fluid-scale, "max-width");
+
+  // Calculate min/max pixel values for the level using modular scale
+  $min-size: $min-base * math.pow($min-ratio, $level);
+  $max-size: $max-base * math.pow($max-ratio, $level);
+
+  // Return static value if clamp is redundant
+  @if $min-size ==$max-size or $min-w ==$max-w {
+    @return #{round(px-to-rem($min-size))};
+  }
+
+  // Linear interpolation: y = mx + b
+  $slope: math.div($max-size - $min-size, $max-w - $min-w);
+  $intercept: $min-size - $slope * $min-w;
+
+  $unit: _get-unit-syntax($unit-key);
+
+  @if $type == 'clamp' {
+    @return clamp(
+      #{round(px-to-rem($min-size))},
+      #{round(px-to-rem($intercept))} + #{round($slope * 100)} * #{$unit},
+      #{round(px-to-rem($max-size))}
+    );
+  }
+  @else if $type == 'max' {
+    @return max(
+      #{round(px-to-rem($min-size))},
+      #{round(px-to-rem($intercept))} + #{round($slope * 100)} * #{$unit}
+    );
+  }
+
+
+}
+
+/// Generate fluid spacing based on grid system
+/// @access public
+/// @param {Number} $level [4] - Grid level (multiples of base grid size)
+/// @param {String} $unit-key ['vwx'] - Unit type: 'vwx', 'cqw', 'cqi', 'vw'
+/// @return {String} CSS clamp() expression
+/// @example
+///   .card { padding: fluid-spacing(4); }  // 16px-20px (1 × base grid)
+///   .section { gap: fluid-spacing(8); }   // 32px-40px (2 × base grid)
+@function fluid-spacing($level: 4, $unit-key: "vwx", $type: 'clamp') {
+  $min-base: map.get(var.$fluid-scale, "min-font-size");
+  $max-base: map.get(var.$fluid-scale, "max-font-size");
+  $min-w: map.get(var.$fluid-scale, "min-width");
+  $max-w: map.get(var.$fluid-scale, "max-width");
+
+  // Multiply base by (level / baseGridSize) to match grid scale
+  $multiplier: math.div($level, var.$base-grid-size);
+  $min-size: $min-base * $multiplier;
+  $max-size: $max-base * $multiplier;
+
+  // Return static value if clamp is redundant
+  @if $min-size ==$max-size or $min-w ==$max-w {
+    @return #{round(px-to-rem($min-size))};
+  }
+
+  $slope: math.div($max-size - $min-size, $max-w - $min-w);
+  $intercept: $min-size - $slope * $min-w;
+
+  $unit: _get-unit-syntax($unit-key);
+
+  @if $type =='clamp' {
+    @return clamp(#{round(px-to-rem($min-size))},
+      #{round(px-to-rem($intercept))} + #{round($slope * 100)} * #{$unit},
+      #{round(px-to-rem($max-size))});
+  }
+
+  @else if $type =='max' {
+    @return max(#{round(px-to-rem($min-size))},
+      #{round(px-to-rem($intercept))} + #{round($slope * 100)} * #{$unit});
+  }
+}
+
+/// Generate fluid spacing between two different grid levels
+/// @access public
+/// @param {Number} $min-level [4] - Minimum grid level
+/// @param {Number} $max-level [12] - Maximum grid level
+/// @param {String} $unit-key ['vwx'] - Unit type: 'vwx', 'cqw', 'cqi', 'vw'
+/// @return {String} CSS clamp() expression
+/// @example
+///   .hero { margin-block: fluid-space-step(4, 12); } // sm to 2xl spacing
+///   .section { padding: fluid-space-step(8, 16); }   // md to 3xl spacing
+@function fluid-space-step($min-level: 4, $max-level: 12, $unit-key: "vwx") {
+  $min-base: map.get(var.$fluid-scale, "min-font-size");
+  $max-base: map.get(var.$fluid-scale, "max-font-size");
+  $min-w: map.get(var.$fluid-scale, "min-width");
+  $max-w: map.get(var.$fluid-scale, "max-width");
+
+  // Calculate actual pixel values for the two different levels
+  $min-size: $min-base * math.div($min-level, var.$base-grid-size);
+  $max-size: $max-base * math.div($max-level, var.$base-grid-size);
+
+  // Return static value if clamp is redundant
+  @if $min-size ==$max-size or $min-w ==$max-w {
+    @return #{round(px-to-rem($min-size))};
+  }
+
+  $slope: math.div($max-size - $min-size, $max-w - $min-w);
+  $intercept: $min-size - $slope * $min-w;
+
+  $unit: _get-unit-syntax($unit-key);
+
+  @return clamp(#{round(px-to-rem($min-size))},
+    #{round(px-to-rem($intercept))} + #{round($slope * 100)} * #{$unit},
+    #{round(px-to-rem($max-size))});
+}

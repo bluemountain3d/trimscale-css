@@ -1,0 +1,19 @@
+/// @group Base
+/// @name Base Styles
+/// Absolute minimum
+/// ===========================================================================
+
+@layer base {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+
+  * {
+    transition-behavior: allow-discrete;
+  }
+
+  html {
+    scrollbar-gutter: stable;
+    color-interpolation-filters: sRGB;
+  }
+}

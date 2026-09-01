@@ -1,0 +1,73 @@
+
+/// @group Abstracts/Variables
+/// @name Font Metrics Database
+/// @description Raw font metrics extracted from font files using fontkit/opentype.js
+///
+/// DATA LAYER - Pure metrics data with no dependencies
+///
+/// Metrics are normalized to em units (divided by units-per-em from font file):
+/// - avg-char-width: Average character width
+/// - top-trim: Space from ascender to cap-height (for leading-trim)
+/// - bottom-trim: Space from baseline to descender (for leading-trim)
+/// - lsb-adjust: Left side bearing adjustment
+/// - rsb-adjust: Right side bearing adjustment
+///
+/// @see tokens/_leading-trim.scss For usage of these metrics
+///
+/// @example scss - Access via typography variables (recommended)
+///   // In _typography.scss — use the _get-metric() helper
+///   $capHeight-body: _get-metric("body", "cap-height"); // Returns: 0.66
+///
+/// @example scss - Direct map access (internal use only)
+///   @use 'abstracts/variables/font-metrics' as metrics;
+///   @use 'sass:map';
+///   $cap: map.get(map.get(metrics.$font-metrics, "Source Sans 3"), "cap-height");
+/// ===========================================================================
+
+// ============================================================================
+// Font Metrics Database
+// ============================================================================
+
+/// Font metrics for precise vertical rhythm and optical alignment
+/// @type Map
+$font-metrics: (
+  "Roboto": (
+    "avg-char-width": 0.564,
+    "top-trim": 0.039,
+    "bottom-trim": 0.25,
+    "lsb-adjust": -0.061,
+    "rsb-adjust": -0.0547,
+    "family": '"Roboto", sans-serif',
+  ),
+  "Roboto Serif": (
+    "avg-char-width": 0.617,
+    "top-trim": 0.132,
+    "bottom-trim": 0.159,
+    "lsb-adjust": -0.04,
+    "rsb-adjust": -0.026,
+    "family": '"Roboto Serif", serif',
+  ),
+  "Roboto Mono": (
+    "avg-char-width": 0.6,
+    "top-trim": 0.178,
+    "bottom-trim": 0.112,
+    "lsb-adjust": -0.0859,
+    "rsb-adjust": -0.0669,
+    "family": '"Roboto Mono", monospace',
+  ),
+) !default;
+
+/// @group Abstracts/Variables
+/// @name Font Faces
+/// @description One entry per @font-face rule to emit in base/_fonts.scss —
+/// written for `local` sources (unless `nextFont: true`) and `cdn` sources
+/// with `generateFontFace: true`; never for `manual`. `src` is a resolved
+/// URL, either the CDN URL as-is or a path relative to this project's
+/// generated output directory (see `outDir` in trimscale.config.ts).
+/// @type List
+/// @prop {String} family - font-family value (the family's config key)
+/// @prop {String} src - src: url(...) value
+/// @prop {String} ext - file extension, used as the format(...) hint (e.g. "woff2")
+/// @prop {String} weight - font-weight value, e.g. "700" or "100 900" (variable fonts)
+/// @prop {String} style - "normal" | "italic"
+$font-faces: () !default;

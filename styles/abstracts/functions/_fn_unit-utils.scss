@@ -1,0 +1,62 @@
+/// @group Abstracts/Functions
+/// @name Unit Utilities
+/// @description Utility functions for working with CSS units
+/// ===========================================================================
+
+// Sass built-in modules - Only import what you actually use
+@use "sass:math";
+
+/// Strip unit from a value
+/// @param {Number} $value - Value with or without unit
+/// @return {Number} Unitless number
+/// @example
+///   $unitless: strip-unit(16px); // Returns: 16
+///   $already-unitless: strip-unit(16); // Returns: 16
+@function strip-unit($value) {
+  // Return early if already unitless
+  @if math.is-unitless($value) {
+    @return $value;
+  }
+
+  // Strip unit by dividing by (value * 0 + 1)
+  // This creates a value of "1" with the same unit as $value
+  @return math.div($value, ($value * 0 + 1));
+}
+
+/// Convert pixels to rem
+/// @param {Number} $px - Pixel value to convert
+/// @param {Number} $base [16px] - Base font size in pixels (assumes 1rem == 16px)
+/// @return {Number} Value in rem
+/// @example
+///   font-size: px-to-rem(24px); // Returns: 1.5rem
+///   font-size: px-to-rem(24); // Returns: 1.5rem
+@function px-to-rem($px, $base: 16px) {
+  // Validate input
+  @if math.is-unitless($px) {
+    $px: $px * 1px;
+  }
+
+  @if math.is-unitless($base) {
+    $base: $base * 1px;
+  }
+
+  @return math.div(strip-unit($px), strip-unit($base)) * 1rem;
+}
+
+/// Convert rem to pixels
+/// @param {Number} $rem - Rem value to convert
+/// @param {Number} $base [16px] - Base font size in pixels (assumes 1rem == 16px)
+/// @return {Number} Value in pixels
+/// @example
+///   max-width: rem-to-px(48rem); // Returns: 768px
+@function rem-to-px($rem, $base: 16px) {
+  @if math.is-unitless($rem) {
+    $rem: $rem * 1rem;
+  }
+
+  @if math.is-unitless($base) {
+    $base: $base * 1px;
+  }
+
+  @return strip-unit($rem) * strip-unit($base) * 1px;
+}
