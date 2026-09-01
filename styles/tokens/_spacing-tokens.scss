@@ -1,0 +1,97 @@
+
+@use "abstracts/variables" as var;
+@use "sass:map";
+
+/// @group Tokens
+/// @name Spacing Tokens
+/// @description Fluid spacing scale based on --unit (coupled) or
+/// --unit-micro/--unit-macro (independent) from base tokens. Provides both
+/// t-shirt sizes (xs, sm, md...) and a numeric scale.
+/// ===========================================================================
+
+/// The t-shirt-size scale actually in effect (var.$t-shirt-scale under the
+/// coupled approach, or the merge of var.$t-shirt-scale-micro/-macro under
+/// independent) — consumed by utilities/_spacing-utilities.scss and
+/// utilities/_gap-utilities.scss.
+/// @type Map
+$space-values: () !default;
+$_space-micro: () !default;
+$_space-macro: () !default;
+
+@if var.$spacing-approach == "coupled" {
+  $space-values: var.$t-shirt-scale;
+} @else {
+  $_space-micro: var.$t-shirt-scale-micro;
+  $_space-macro: var.$t-shirt-scale-macro;
+  $space-values: map.merge($_space-micro, $_space-macro);
+}
+
+@each $size, $factor in $space-values {
+  @property --space-#{$size} {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0.25rem;
+  }
+}
+
+@if var.$spacing-approach == "coupled" {
+  @for $i from 1 through var.$numeric-scale-end {
+    @property --space-#{$i} {
+      syntax: "<length>";
+      inherits: true;
+      initial-value: 0.25rem;
+    }
+  }
+} @else {
+  @for $i from 1 through var.$numeric-scale-macro-end {
+    @property --space-#{$i} {
+      syntax: "<length>";
+      inherits: true;
+      initial-value: 0.25rem;
+    }
+  }
+}
+
+@layer tokens {
+  :root {
+    // ==========================================================================
+    // T-shirt Size Scale
+    // ==========================================================================
+
+    /// Semantic spacing tokens using t-shirt sizes
+    /// Usage: padding: var(--space-sm); gap: var(--space-lg);
+    @if var.$spacing-approach == "coupled" {
+      @each $size, $factor in $space-values {
+        --space-#{$size}: calc(var(--unit) * #{$factor});
+      }
+    } @else {
+      @each $size, $factor in $_space-micro {
+        --space-#{$size}: calc(var(--unit-micro) * #{$factor});
+      }
+
+      @each $size, $factor in $_space-macro {
+        --space-#{$size}: calc(var(--unit-macro) * #{$factor});
+      }
+    }
+
+    // ==========================================================================
+    // Numeric Scale
+    // ==========================================================================
+
+    /// Numeric spacing tokens for fine-grained control
+    /// Usage: margin-block: var(--space-5); padding-inline: var(--space-12);
+    @if var.$spacing-approach == "coupled" {
+      @for $i from 1 through var.$numeric-scale-end {
+        --space-#{$i}: calc(var(--unit) * #{$i});
+      }
+    } @else {
+      @for $i from 1 through var.$numeric-scale-micro-end {
+        --space-#{$i}: calc(var(--unit-micro) * #{$i});
+      }
+
+      @for $i from (var.$numeric-scale-micro-end + 1) through var.$numeric-scale-macro-end {
+        --space-#{$i}: calc(var(--unit-macro) * #{$i});
+      }
+    }
+  }
+}

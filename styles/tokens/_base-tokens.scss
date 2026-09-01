@@ -1,0 +1,96 @@
+
+@use "abstracts/functions/" as fn;
+@use "abstracts/variables" as var;
+
+/// @group Tokens
+/// @name Base Tokens
+/// @description Foundation CSS custom properties for fluid typography and spacing system
+/// ===========================================================================
+
+@if var.$spacing-approach != "coupled" and var.$macro-range-max <= var.$base-grid-size {
+  @error "$macro-range-max (#{var.$macro-range-max}) must be greater than $base-grid-size (#{var.$base-grid-size}).";
+}
+
+@property --vwx {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1vw;
+}
+
+@property --fluid-base {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 1rem;
+}
+
+@if var.$spacing-approach == "coupled" {
+  @property --unit {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0.25rem;
+  }
+} @else {
+  @property --unit-micro {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0.25rem;
+  }
+
+  @property --unit-macro {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 0.25rem;
+  }
+}
+
+@property --header-height {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 8rem;
+}
+
+@layer tokens {
+  :root {
+    // ============================================================================
+    // Viewport Unit System
+    // ============================================================================
+
+    /// Custom viewport unit that adapts to ultrawide displays
+    /// Standard: 1vw (viewport width)
+    /// Ultrawide (≥21:9 & ≥ $ultrawide-threshold-px): 2vh to prevent excessive scaling
+    --vwx: 1vw;
+
+    /// Switch to height-based scaling on ultrawide displays
+    /// Prevents text from becoming too large on very wide screens
+    @media (aspect-ratio >= 21/9) and (height >= #{fn.px-to-rem(var.$ultrawide-height-threshold-px)}) {
+      --vwx: 2vh;
+    }
+
+    // ==========================================================================
+    // Fluid Base Values
+    // ==========================================================================
+
+    /// Fluid base font size
+    /// Scales from min-font-size @ min-width viewport to max-font-size @ max-width viewport
+    --fluid-base: #{fn.fluid-font-size(0, "vwx")};
+
+    @if var.$spacing-approach == "coupled" {
+      /// Base spacing unit (1/4 of fluid base)
+      /// Used as foundation for all spacing tokens
+      --unit: calc(var(--fluid-base) / #{var.$base-grid-size});
+    } @else {
+      /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid.
+      /// A fluid clamp here would only round to a pixel or two apart across the
+      /// viewport range (e.g. 4px vs 5px under the default fluidScale), so it's
+      /// kept as a plain static value instead of a needless clamp().
+      --unit-micro: #{fn.px-to-rem(var.$base-grid-size)};
+
+      /// Base spacing unit for large steps, an independent $base-grid-size → $macro-range-max fluid clamp
+      --unit-macro: round(
+                      nearest,
+                      #{fn.get-fluid-clamp(var.$base-grid-size, var.$macro-range-max, "vwx")},
+                      1px
+                    );
+    }
+  }
+}

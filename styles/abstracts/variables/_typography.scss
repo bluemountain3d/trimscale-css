@@ -1,0 +1,193 @@
+
+@use './font-metrics' as metrics;
+@use 'sass:map';
+
+/// @group Abstracts/Variables
+/// @name Typography Configuration
+/// @description Font role mappings and exported font-family variables
+///
+/// CONFIGURATION LAYER - Maps semantic roles to actual fonts
+///
+/// Font Role Philosophy:
+/// - Hierarchical (primary/secondary/tertiary): Core system - use these by default
+/// - Category (sans/serif/mono): Type classification - use when type matters
+/// - Contextual (display/body/heading/etc): Convenience aliases - use when it improves clarity
+///
+/// All roles map to fonts defined in $font-metrics (font-metrics.scss)
+/// Font family strings are automatically extracted from metrics data
+///
+/// @requires abstracts/variables/font-metrics
+/// @see abstracts/mixins/mx_font-setup For applying these fonts with metrics
+/// ===========================================================================
+
+
+// ============================================================================
+// Typography lists and maps
+// ============================================================================
+
+
+/// Semantic font role assignments
+/// @type Map
+$font-roles: (
+  "primary": "Roboto",
+  "secondary": "Roboto Serif",
+  "tertiary": "Roboto Mono",
+  "sans": "Roboto",
+  "serif": "Roboto Serif",
+  "mono": "Roboto Mono",
+  "display": "Roboto Serif",
+  "heading": "Roboto Serif",
+  "subheading": "Roboto",
+  "body": "Roboto",
+  "quote": "Roboto Serif",
+  "code": "Roboto Mono",
+  "ui": "Roboto",
+) !default;
+/// Modular Typographic Scale Map
+/// @type Map
+$modular-typographic-scale: (
+  "fs-900": (
+    "step": 6,
+    "unit": "vwx",
+    "uncapped": true,
+  ),
+  "fs-800": (
+    "step": 5,
+    "unit": "vwx",
+    "uncapped": true,
+  ),
+  "fs-700": (
+    "step": 4,
+    "unit": "vwx",
+  ),
+  "fs-600": (
+    "step": 3,
+    "unit": "vwx",
+  ),
+  "fs-500": (
+    "step": 2,
+    "unit": "vwx",
+  ),
+  "fs-400": (
+    "step": 1,
+    "unit": "vwx",
+  ),
+  "fs-350": (
+    "step": 0.5,
+    "unit": "vwx",
+  ),
+  "fs-300": (
+    "step": 0,
+    "unit": "vwx",
+  ),
+  "fs-200": (
+    "step": -1,
+    "unit": "vwx",
+  ),
+  "fs-100": (
+    "step": -2,
+    "unit": "vwx",
+  ),
+) !default;
+
+/// Semantic font sizes map
+/// @type Map
+$semantic-font-sizes: (
+  "display-1": (
+    "type": "scale",
+    "from": "fs-900",
+  ),
+  "display-2": (
+    "type": "scale",
+    "from": "fs-800",
+  ),
+  "heading-1": (
+    "type": "scale",
+    "from": "fs-700",
+  ),
+  "heading-2": (
+    "type": "scale",
+    "from": "fs-600",
+  ),
+  "heading-3": (
+    "type": "scale",
+    "from": "fs-500",
+  ),
+  "heading-4": (
+    "type": "scale",
+    "from": "fs-400",
+  ),
+  "text-lg": (
+    "type": "scale",
+    "from": "fs-400",
+  ),
+  "text-md": (
+    "type": "scale",
+    "from": "fs-350",
+  ),
+  "text-base": (
+    "type": "scale",
+    "from": "fs-300",
+  ),
+  "text-sm": (
+    "type": "linear",
+    "from": "text-base",
+    "multiplier": 0.875,
+  ),
+  "text-xs": (
+    "type": "linear",
+    "from": "text-base",
+    "multiplier": 0.75,
+  ),
+) !default;
+
+/// Semantic Font Weights Map
+/// @type Map
+$font-weights: (
+  "thin": 100,
+  "extralight": 200,
+  "light": 300,
+  "normal": 400,
+  "medium": 500,
+  "semibold": 600,
+  "bold": 700,
+  "extrabold": 800,
+  "black": 900,
+) !default;
+
+/// Semantic Line Heights Map
+/// @type Map
+$line-heights: (
+  "100": 1,
+  "105": 1.05,
+  "110": 1.1,
+  "115": 1.15,
+  "120": 1.2,
+  "125": 1.25,
+  "130": 1.3,
+  "135": 1.35,
+  "140": 1.4,
+  "145": 1.45,
+  "150": 1.5,
+  "155": 1.55,
+  "160": 1.6,
+  "165": 1.65,
+  "170": 1.7,
+  "175": 1.75,
+  "180": 1.8,
+  "185": 1.85,
+  "190": 1.9,
+  "195": 1.95,
+  "200": 2,
+) !default;
+
+/// Curve for the self-scaling --line-height-dynamic token, see
+/// abstracts/functions/fn_dynamic-line-height.scss for the formula.
+/// @type Map
+$dynamic-line-height: (
+  "fs-base": 16,
+  "ratio-base": 1.5,
+  "fs-ceil": 64,
+  "ratio-ceil": 1.05,
+  "ratio-cap": 1.6,
+) !default;

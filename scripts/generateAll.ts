@@ -1,0 +1,1 @@
+import './generateBridge.ts'

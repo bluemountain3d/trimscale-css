@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "styleguide",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "styleguide", "run", "dev"],
+      "port": 5173
+    }
+  ]
+}
