@@ -8,6 +8,7 @@
   "files": [
     "bin/*.js",
     "styles",
+    "!styles/generated",
     "scripts/*.js",
     "models",
     "docs",
