@@ -52,7 +52,9 @@ trimscale-css/
 ├── models/                          # Config.ts, the TrimscaleConfig type
 ├── scripts/                         # generateBridge.ts/generateFonts.ts, read trimscale.config.ts, write <outDir>/ (your project, not styles/)
 ├── fixtures/                        # Default font files used by the shipped config
-├── trimscale.config.ts              # Your project's configuration
+├── templates/                       # trimscale.config.ts, the consumer-safe template `init` copies into your project
+├── trimscale.config.ts              # This repo's own dev/testing config, dogfoods against fixtures/, not what `init` copies
+├── docs/                            # Guides, see Documentation below
 ├── styles/
 │   ├── trimscale.scss               # Main entry point — static, !default-configurable via `@use ... with (...)`
 │   ├── _layer.scss                  # @layer order, see cascade-layers.md
