@@ -62,13 +62,14 @@ export type RawFontMetrics = {
  * rules) come from. `path`/`url` accept multiple files so a family's full
  * weight/style range (or a single variable-font file) can be declared —
  * metrics are always read from whichever entry is closest to non-italic
- * weight 400, the rest still each get their own `@font-face`.
+ * weight 400, the rest still each get their own `@font-face`. `local`'s
+ * `path` is optional if `AppFonts.localFontsPath` is set (see there).
  */
 export type FontSource =
   | {
       source: 'local'
-      /** Path(s) to the font file(s) including file extension, relative to `trimscale.config.ts` */
-      path: string[]
+      /** Path(s) to the font file(s) including file extension, relative to `trimscale.config.ts`. If omitted, falls back to every font file found under `AppFonts.localFontsPath`/<this family's config key>. */
+      path?: string[]
       fallback?: FontFallbacks
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `false` here if most of your fonts go through `next/font` but this particular one doesn't. */
       nextFont?: boolean
@@ -95,6 +96,8 @@ export type FontSource =
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
 export type AppFonts = {
   fonts: Record<string, FontSource>
+  /** Base folder, relative to `trimscale.config.ts`, for `local` families that omit `path`: looked up as `localFontsPath/<family's config key>/`, non-recursive, every font file found there is used. */
+  localFontsPath?: string
   /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `fonts` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
   nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted

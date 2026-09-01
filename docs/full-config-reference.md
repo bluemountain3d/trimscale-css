@@ -18,7 +18,8 @@ Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name
 
 | Property          | Type                         | Required | Description                                                                                                                                                 |
 | ----------------- | ---------------------------- | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fonts`           | `Record<string, FontSource>` |   Yes    | Font sources keyed by family name. `FontSource` is a discriminated union on `source`: `'local'`, `'cdn'`, or `'manual'`, shape depends on which.             |
+| `fonts`           | `Record<string, FontSource>` |   Yes    | Font sources keyed by family name; `source` picks the shape (`'local'`, `'cdn'`, or `'manual'`), see [adding-a-font.md](adding-a-font.md).                   |
+| `localFontsPath`  | `string`                     |    No    | Base folder, relative to this config file. A `local` family that omits `path` looks for its files under `localFontsPath/<family key>/` instead.             |
 | `nextFontDefault` | `boolean`                    |    No    | Whether `family` values build around a `next/font` CSS variable by default. A family's own `nextFont` overrides this for just that family. Default `false`. |
 | `nextFontPrefix`  | `string`                     |    No    | Prefix half of the `next/font` CSS variable name (`--{prefix}-{family}`). Default `'next-font'`.                                                            |
 | `fallbackDefault` | `FontFallbacks`              |   Yes    | Fallback stack used when a family has no `fallback` of its own. One of `'sans-serif'`, `'serif'`, `'monospace'`, `'system-ui'`, or `'cursive'`.              |

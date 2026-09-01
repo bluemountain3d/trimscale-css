@@ -37,6 +37,7 @@ const config: TrimscaleConfig = {
    * → docs/adding-a-font.md · docs/full-config-reference.md#appfonts
    */
   appFonts: {
+    localFontsPath: './fixtures/fonts',
     nextFontDefault: false,         // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
     fallbackDefault: 'sans-serif',  // used when a font entry below has no `fallback` of its own

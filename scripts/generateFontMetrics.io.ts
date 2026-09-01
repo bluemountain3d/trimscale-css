@@ -4,8 +4,31 @@ import path from 'node:path'
 
 const cacheDir = path.join(process.cwd(), '.trimscale-cache/fonts')
 
+const FONT_EXTENSIONS = new Set(['ttf', 'otf', 'woff', 'woff2'])
+
 /** Reads a local font file's raw bytes. `filePath` is expected already resolved to an absolute path. */
 export const readLocalFont = (filePath: string): Promise<Buffer> => fs.promises.readFile(filePath)
+
+/**
+ * Lists font files directly inside `dir` (non-recursive, known extensions
+ * only), sorted for deterministic output. Returns paths relative to
+ * `process.cwd()`, same shape as an explicit `path` array. Empty array if
+ * `dir` doesn't exist.
+ */
+export const listLocalFontDir = async (dir: string): Promise<string[]> => {
+  let entries: fs.Dirent[]
+
+  try {
+    entries = await fs.promises.readdir(dir, { withFileTypes: true })
+  } catch {
+    return []
+  }
+
+  return entries
+    .filter((entry) => entry.isFile() && FONT_EXTENSIONS.has(path.extname(entry.name).slice(1).toLowerCase()))
+    .map((entry) => path.relative(process.cwd(), path.join(dir, entry.name)).split(path.sep).join('/'))
+    .sort()
+}
 
 /** File extension (no dot) for a local path or a remote URL, used as the `format(...)` hint in `@font-face`. */
 export const getFontExtension = (source: string): string => {

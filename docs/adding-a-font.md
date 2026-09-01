@@ -33,6 +33,24 @@ appFonts: {
 
 The family name is always the config key (`'Roboto'` above), not whatever the font file's own internal name table says, that's what makes `manual` families able to have a name at all despite having no file to read one from.
 
+### Auto-discovery via `localFontsPath`
+
+`path` is optional. If `appFonts.localFontsPath` is set (a folder relative to `trimscale.config.ts`), any `local` family that omits `path` looks for its files under `localFontsPath/<the config key>/` instead, non-recursive. Every font file found there (`.ttf`/`.otf`/`.woff`/`.woff2`) is picked up, same as if you'd listed them in `path`:
+
+```ts
+appFonts: {
+  localFontsPath: './fonts',
+  fallbackDefault: 'sans-serif',
+  fonts: {
+    'Roboto': { source: 'local', fallback: 'sans-serif' }, // reads every font file in ./fonts/Roboto/
+  },
+},
+```
+
+The subfolder must be named exactly like the config key, not the font file's internal name, same rule as above: `Roboto`'s files live in `./fonts/Roboto/` regardless of what the file's own name table says. A family can still set its own `path` to opt out of the convention (e.g. a font that lives outside `localFontsPath`, or under a differently-named folder), `path`, when set, always wins over the convention.
+
+If neither `path` nor a matching `localFontsPath` subfolder turns up any files, `generate` fails with an error naming the family and the folder it looked in, rather than silently skipping it.
+
 ## `source: 'cdn'`
 
 ```ts
@@ -49,6 +67,8 @@ The family name is always the config key (`'Roboto'` above), not whatever the fo
 The file is fetched once and cached under `.trimscale-cache/fonts/` (gitignored, safe regardless of the font's license since nothing is redistributed, it never leaves your machine and is never committed), subsequent `generate` runs reuse the cached copy instead of re-fetching.
 
 By default no `@font-face` is written, `cdn` only extracts metrics, on the assumption the font is already loaded some other way (a `<link>` tag, `next/font/google`, a CDN's JS loader). Set `generateFontFace: true` if you actually want trimscale to self-host by writing `@font-face` rules pointing at `url` directly.
+
+Same caveat as `manual`: without `generateFontFace: true`, your config key must match that other loader's declared `font-family`, not the font file's own name (see below).
 
 ## `source: 'manual'`
 
@@ -70,7 +90,11 @@ For a font whose file trimscale can't read at all, most commonly a CDN that only
 
 Get these five values from [precisionspec.dev](https://precisionspec.dev): drop the font file in there (even if you can't use that file directly in your project, e.g. a Typekit sync font downloaded just for measurement), open **Export Metrics**, and use the **TrimScale** tab, it outputs exactly this shape, ready to paste into `metrics`.
 
+precisionspec.dev needs an actual font file to read, not just a family name. If you don't have direct download access (e.g. a locked CDN font), check whether the foundry offers a free trial/demo version, that's usually enough for measurement purposes since only the metrics tables matter, not the full character set or license.
+
 No `@font-face` is generated for a `manual` family, load the font however that CDN normally expects, trimscale only needs the numbers to compute leading-trim and side-bearing adjustments.
+
+**The config key must match what's actually loaded, not the font file's own name.** `@font-face`'s `font-family` value is arbitrary, matching is a plain string comparison against whichever `@font-face` rule is actually in effect, never the font file's internal name table. Since `manual` writes no `@font-face` at all, that rule comes entirely from the CDN's own script/stylesheet, trimscale has no say in it. If nothing renders despite metrics looking correct, check DevTools' Computed panel (or the CDN's own injected CSS) for the real `font-family` string in use, and match your config key to that, not to whatever the raw font file calls itself internally.
 
 ## Map to roles
 
@@ -119,7 +143,7 @@ After generating, check three things:
 ## Quick checklist
 
 - [ ] Family added to `appFonts.fonts` with the right `source` (`local`/`cdn`/`manual`)
-- [ ] `local`: font file(s) placed at the configured `path`(s)
+- [ ] `local`: font file(s) placed at the configured `path`(s), or under `localFontsPath/<family key>/` if `path` is omitted
 - [ ] `cdn`: `url`(s) point at real font files, not a CSS-generating endpoint
 - [ ] `manual`: metrics copied from precisionspec.dev's **TrimScale** export
 - [ ] Fallback set (or relying on `fallbackDefault`)

@@ -1,6 +1,6 @@
 import path from 'node:path'
-import type { RawFontMetrics, TrimscaleConfig } from '../models/Config.ts'
-import { fetchRemoteFont, getFontExtension, readLocalFont } from './generateFontMetrics.io.ts'
+import type { FontSource, RawFontMetrics, TrimscaleConfig } from '../models/Config.ts'
+import { fetchRemoteFont, getFontExtension, listLocalFontDir, readLocalFont } from './generateFontMetrics.io.ts'
 import { parseFontBuffer } from './generateFontMetrics.parser.ts'
 import { toKebabCase } from './helpers.ts'
 import { resolveOutDir } from './loadConfig.ts'
@@ -38,6 +38,44 @@ export type FamilyFontMetrics = RawFontMetrics & { family: string }
 
 /** Map of resolved font family name to its extracted metrics */
 export type FontMetricsMap = Record<string, FamilyFontMetrics>
+
+/** Explicit `path` wins outright; otherwise looks under `localFontsPath/<familyName>/`. */
+const resolveLocalFontPaths = async (
+  cfg: TrimscaleConfig,
+  familyName: string,
+  fontSource: Extract<FontSource, { source: 'local' }>,
+): Promise<string[]> => {
+  if (fontSource.path) return fontSource.path
+
+  if (!cfg.appFonts.localFontsPath) {
+    throw new Error(
+      `Font family "${familyName}" has no \`path\` and \`appFonts.localFontsPath\` is not set. Set one or the other.`,
+    )
+  }
+
+  const dir = path.join(process.cwd(), cfg.appFonts.localFontsPath, familyName)
+  const found = await listLocalFontDir(dir)
+
+  if (found.length === 0) {
+    throw new Error(
+      `No font files found for "${familyName}" in ${path.relative(process.cwd(), dir)}. Add files there, or set \`path\` explicitly.`,
+    )
+  }
+
+  return found
+}
+
+/**
+ * Warns that a family's config key is used as-is for `font-family` even
+ * though trimscale writes no `@font-face` for it (`manual`, or `cdn` without
+ * `generateFontFace`), so nothing here confirms it matches whatever
+ * `font-family` the font is actually loaded under elsewhere.
+ */
+const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cdn'): void => {
+  console.warn(
+    `⚠ "${familyName}": no @font-face written (source: ${source}). Confirm "${familyName}" matches the font-family actually loaded elsewhere, or metrics apply to nothing.`,
+  )
+}
 
 /** Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a quoted family name, both with the resolved fallback appended. */
 const buildFamilyString = (
@@ -79,11 +117,13 @@ export const computeFontData = async (
     const family = buildFamilyString(cfg, familyName, fontSource.fallback, usesNextFont)
 
     if (fontSource.source === 'manual') {
+      warnIfFamilyNameUnverifiable(familyName, 'manual')
       metrics[familyName] = { ...fontSource.metrics, family }
       continue
     }
 
-    const entries = fontSource.source === 'local' ? fontSource.path : fontSource.url
+    const entries =
+      fontSource.source === 'local' ? await resolveLocalFontPaths(cfg, familyName, fontSource) : fontSource.url
     const parsedEntries: ParsedEntry[] = []
 
     for (const entry of entries) {
@@ -130,6 +170,10 @@ export const computeFontData = async (
 
     const shouldGenerateFontFace =
       fontSource.source === 'local' ? !usesNextFont : (fontSource.generateFontFace ?? false)
+
+    if (fontSource.source === 'cdn' && !shouldGenerateFontFace) {
+      warnIfFamilyNameUnverifiable(familyName, 'cdn')
+    }
 
     if (shouldGenerateFontFace) {
       for (const entry of parsedEntries) {
