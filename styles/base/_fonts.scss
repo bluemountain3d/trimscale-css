@@ -1,0 +1,17 @@
+@use "abstracts/variables" as var;
+@use "sass:map";
+
+/// @group Base
+/// @name Fonts
+/// @description @font-face rules, one per var.$font-faces entry.
+/// ===========================================================================
+
+@each $face in var.$font-faces {
+  @font-face {
+    font-family: "#{map.get($face, "family")}";
+    src: url("#{map.get($face, "src")}") format("#{map.get($face, "ext")}");
+    font-weight: #{map.get($face, "weight")};
+    font-style: #{map.get($face, "style")};
+    font-display: swap;
+  }
+}

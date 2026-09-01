@@ -1,0 +1,59 @@
+/// @group Globals
+/// @name Global Styles
+/// @description Main entry point for all global styles.
+/// Import order is significant:
+/// 0. Configuration surface — must be the FIRST load of abstracts/variables
+///    anywhere in the compile, so `@use 'trimscale-css' with (...)` can
+///    configure it before anything below loads it unconfigured
+/// 1. Layer — Define CSS Layers specificity order
+/// 2. Tokens — CSS custom properties must be available before base styles
+/// 3. Utilities — utility classes available globally
+/// 4. Base — HTML element defaults, reset, and typography
+/// 5. Components — global component styles (uncomment when folder exists)
+/// ===========================================================================
+
+// Configuration surface — see trimscale.config.ts / docs/getting-started.md.
+// Every var shown here can be overridden via `@use 'trimscale-css' with (...)`.
+@forward './abstracts/variables' show
+  $breakpoints,
+  $fluid-scale,
+  $font-metrics,
+  $font-faces,
+  $font-roles,
+  $modular-typographic-scale,
+  $semantic-font-sizes,
+  $font-weights,
+  $line-heights,
+  $dynamic-line-height,
+  $default-scheme,
+  $base-color-tokens,
+  $custom-color-tokens,
+  $semantic-color-alias-defs,
+  $spacing-approach,
+  $t-shirt-scale,
+  $t-shirt-scale-micro,
+  $t-shirt-scale-macro,
+  $macro-range-max,
+  $numeric-scale-end,
+  $numeric-scale-micro-end,
+  $numeric-scale-macro-end,
+  $base-grid-size,
+  $ultrawide-height-threshold-px;
+
+// Layer — Define CSS Layers specificity order
+@forward './layer';
+
+// Tokens - CSS custom properties
+@forward 'tokens/';
+
+// Utilities - Utility classes
+@forward 'utilities/';
+
+// Base - Global HTML element styling
+@forward 'base/';
+
+// Layouts - Global layouts styling (add when ready)
+// @forward 'layouts/';
+
+// Components - Global components styling (add when ready)
+// @forward 'components/';

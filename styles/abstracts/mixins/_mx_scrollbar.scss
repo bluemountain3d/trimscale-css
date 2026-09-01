@@ -1,0 +1,47 @@
+@use 'sass:meta';
+@use 'sass:list';
+
+/// @group Abstracts/Mixins
+/// @name Scrollbar
+/// @description Sets `scrollbar-width`, `scrollbar-color` and `scrollbar-gutter`
+/// on the current selector. $thumb/$background accept either a literal color
+/// or a CSS custom property reference (e.g. `var(--color-scroll-thumb)`).
+/// @param {Color | String} $thumb [grey] - Scrollbar thumb color
+/// @param {Color | String} $background [black] - Scrollbar track color
+/// @param {String} $width [thin] - `auto` | `thin` | `none`
+/// @param {String} $gutter [auto] - `auto` | `stable` | `stable both-edges`
+/// @example
+///   .sidebar {
+///     @include mx.scrollbar($thumb: var(--color-scroll-thumb), $background: var(--color-surface-base));
+///   }
+/// ===========================================================================
+
+$_valid-widths: ("auto", "thin", "none");
+$_valid-gutters: ("auto", "stable", "stable both-edges");
+
+@mixin scrollbar(
+  $thumb: grey,
+  $background: black,
+  $width: auto,
+  $gutter: auto
+) {
+  @if list.index($_valid-widths, $width) == null {
+    @error '$width must be one of #{$_valid-widths}. Got "#{$width}".';
+  }
+
+  @if list.index($_valid-gutters, quote(#{$gutter})) == null {
+    @error '$gutter must be one of #{$_valid-gutters}. Got "#{$gutter}".';
+  }
+
+  @if meta.type-of($thumb) != 'color' and meta.type-of($thumb) != 'string' {
+    @error '$thumb must be a color or a CSS custom property. Got a #{meta.type-of($thumb)}.';
+  }
+
+  @if meta.type-of($background) != 'color' and meta.type-of($background) != 'string' {
+    @error '$background must be a color or a CSS custom property. Got a #{meta.type-of($background)}.';
+  }
+
+  scrollbar-width: #{$width};
+  scrollbar-color: #{$thumb} #{$background};
+  scrollbar-gutter: #{$gutter};
+}

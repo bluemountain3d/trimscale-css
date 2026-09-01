@@ -1,0 +1,108 @@
+/// @group Abstracts/Mixins
+/// @name Font Setup
+/// @description Convenient API for applying font with metrics and typography properties
+///
+/// API LAYER - Developer-friendly interface to the typography system
+///
+/// This mixin combines:
+/// 1. Base text properties (%text-properties from leading-trim.scss)
+/// 2. Font-specific metrics (via placeholder selectors)
+/// 3. Custom typography values (via parameters)
+///
+/// Font Role Options:
+/// - All keys in $font-roles that is set in _typography.scss are valid.
+///
+/// @requires abstracts/variables
+/// @requires abstracts/functions
+/// @requires tokens/leading-trim For %text-properties and font placeholders
+/// @see tokens/leading-trim For direct placeholder usage (not recommended)
+///
+/// @example scss - Basic usage
+///   .heading {
+///     @include font-setup($font: 'primary', $font-size: var(--heading-1));
+///   }
+///
+/// @example scss - With all parameters
+///   .custom-text {
+///     @include font-setup(
+///       $font: 'display',
+///       $font-size: var(--display-1),
+///       $line-height: null,
+///       $font-weight: 700,
+///       $letter-spacing: -0.02em
+///     ) {
+///       // Additional custom styles
+///       color: var(--color-primary);
+///     }
+///   }
+/// ===========================================================================
+
+@use "abstracts/variables" as var;
+@use "tokens/leading-trim" as *;
+// Only import mixins from mixin files to avoid dependency cycle
+// @use '../mixins/mx_other-mixin' as *;
+
+// Sass built-in modules
+@use "sass:string";
+@use "sass:list";
+@use "sass:math";
+@use "sass:map";
+
+// ============================================================================
+// Font Setup Mixin
+// ============================================================================
+
+/// Valid font roles that map to placeholder selectors
+/// @type List
+$_valid-font-roles: map.keys(var.$font-roles);
+
+/// Apply complete font setup with metrics and typography properties
+/// @param {String} $font ['primary'] - Font role key (primary/secondary/tertiary or any defined role)
+/// @param {Null | String} $font-size [null] - Font size (CSS value or custom property)
+/// @param {Null | Number} $line-height [null] - Line height multiplier (unitless numbers)
+/// @param {Null | Number} $font-weight [null] - Font weight (100-900)
+/// @param {Null | String} $font-style [null] - Font style (normal, italic, oblique)
+/// @param {Null | String} $letter-spacing [null] - Letter spacing (CSS value)
+/// @param {Null | String} $text-transform [null] - Text transform (none, uppercase, lowercase, capitalize)
+/// @param {ArgList} $content - Optional additional styles passed as a content block
+/// @content Optional additional styles
+/// @output Complete typography setup including font family, metrics, and trim values
+@mixin font-setup(
+  $font: "primary",
+  $font-size: null,
+  $line-height: null,
+  $font-weight: null,
+  $font-style: null,
+  $letter-spacing: null,
+  $text-transform: null
+) {
+  // Validate and extend font-specific placeholder
+  @if list.index($_valid-font-roles, $font) {
+    @extend %#{$font}-text;
+  } @else {
+    @error 'Invalid font role: "#{$font}". Valid roles are: #{$_valid-font-roles}';
+  }
+  
+  // Apply typography properties directly (no --_* indirection — these
+  // have no calc() dependents, unlike the trim metrics on %text-properties)
+  @if $font-size != null {
+    font-size: #{$font-size};
+  }
+  @if $line-height != null {
+    line-height: #{$line-height};
+  }
+  @if $font-weight != null {
+    font-weight: #{$font-weight};
+  }
+  @if $font-style != null {
+    font-style: #{$font-style};
+  }
+  @if $letter-spacing != null {
+    letter-spacing: #{$letter-spacing};
+  }
+  @if $text-transform != null {
+    text-transform: #{$text-transform};
+  }
+  // Allow additional custom styles via content block
+  @content;
+}

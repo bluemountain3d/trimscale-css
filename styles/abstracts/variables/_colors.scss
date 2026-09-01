@@ -1,0 +1,199 @@
+
+/// @group Abstracts/Variables
+/// @name Colors
+/// @description Generated from trimscale.config.ts — see there for the source palette.
+/// ===========================================================================
+
+// ============================================================================
+// Configuration
+// ============================================================================
+
+/// @group Abstracts/Variables
+/// @name Default Scheme
+/// @type String
+$default-scheme: light !default;
+
+/// @group Abstracts/Variables
+/// @name Base Color Tokens
+/// @type Map
+$base-color-tokens: (
+  "prefix": "color",
+  "tokens": (
+    "surface-base": (
+      "light": (
+        "oklch": oklch(0.973 0.003 264),
+        "hex": #f5f6f8,
+      ),
+      "dark": (
+        "oklch": oklch(0.214 0.008 274),
+        "hex": #18191d,
+      ),
+    ),
+    "surface-elevated": (
+      "light": (
+        "oklch": oklch(1 0 0),
+        "hex": #ffffff,
+      ),
+      "dark": (
+        "oklch": oklch(0.29 0.021 270),
+        "hex": #272B36,
+      ),
+    ),
+    "surface-mid": (
+      "light": (
+        "oklch": oklch(0.949 0.008 271),
+        "hex": #eceef4,
+      ),
+      "dark": (
+        "oklch": oklch(0.253 0.015 274),
+        "hex": #20222a,
+      ),
+    ),
+    "gold-light": (
+      "light": (
+        "oklch": oklch(0.921 0.07 100), 
+        "hex": #efe7b1),
+      "dark": (
+        "oklch": oklch(0.921 0.07 100), 
+        "hex": #efe7b1),
+    ),
+    "gold-dark": (
+      "light": (
+        "oklch": oklch(0.551 0.099 81), 
+        "hex": #8F6B22),
+      "dark": (
+        "oklch": oklch(0.351 0.037 48), 
+       "hex": #4b352a),
+    ),
+    "accent": (
+      "light": (
+        "oklch": oklch(0.543 0.102 272),
+        "hex": #5B6BAB),
+      "dark": (
+        "oklch": oklch(0.733 0.045 74),
+        "hex": #baa58a),
+    ),
+    "action": (
+      "light": (
+        "oklch": oklch(0.485 0.105 271),
+        "hex": #495a9a,
+      ),
+      "dark": (
+        "oklch": oklch(0.66 0.057 270),
+        "hex": #8491b6,
+      ),
+    ),
+    "action-hover": (
+      "light": (
+        "oklch": oklch(0.651 0.085 270),
+        "hex": #7b8dc4,
+      ),
+      "dark": (
+        "oklch": oklch(0.78 0.067 270),
+        "hex": #a6b6e3,
+      ),
+    ),
+    "action-muted": (
+      "light": (
+        "oklch": oklch(0.734 0.0543 269),
+        "hex": #9ba8cc,
+      ),
+      "dark": (
+        "oklch": oklch(0.559 0.048 270),
+        "hex": #697391,
+      ),
+    ),
+    "text-primary": (
+      "light": (
+        "oklch": oklch(0.228 0.014 273),
+        "hex": #1a1c23
+      ),
+      "dark": (
+        "oklch": oklch(0.943 0 0),
+        "hex": #ececec
+      ),
+    ),
+    "text-muted": (
+      "light": (
+        "oklch": oklch(0.39 0 0),
+        "hex": #454545
+      ),
+      "dark": (
+        "oklch": oklch(0.783 0 0),
+        "hex": #b8b8b8
+      ),
+    ),
+    "text-contrast": ( 
+      "light": (
+        "oklch": oklch(0 0 0),
+        "hex": #000000
+      ),
+      "dark": (
+        "oklch": oklch(1 0 0),
+        "hex": #ffffff
+      ),
+    ),
+  ),
+) !default;
+
+
+/// @group Abstracts/Variables
+/// @name Custom Color Tokens
+/// @type Map
+/// @description Additional named palettes beyond $base-color-tokens, keyed by name (see `customColorTokens` in trimscale.config.ts).
+$custom-color-tokens: (
+  "campaign": (
+    "prefix": "campaign",
+    "tokens": (
+      "gold-light": (
+        "light": (
+          "oklch": oklch(0.949 0.0877 104.44),
+          "hex": #f7f2ad,
+        ),
+        "dark": (
+          "oklch": oklch(0.949 0.0877 104.44),
+          "hex": #f7f2ad,
+        ),
+      ),
+      "gold-mid": (
+        "light": (
+          "oklch": oklch(0.7598 0.1258 88.23),
+          "hex": #d2ac47,
+        ),
+        "dark": (
+          "oklch": oklch(0.7598 0.1258 88.23),
+          "hex": #d2ac47,
+        ),
+      ),
+      "gold-dark": (
+        "light": (
+          "oklch": oklch(0.642 0.119 84.75),
+          "hex": #ae8625,
+        ),
+        "dark": (
+          "oklch": oklch(0.642 0.119 84.75),
+          "hex": #ae8625,
+        ),
+      ),
+    ),
+  ),
+) !default;
+
+
+/// @group Abstracts/Variables
+/// @name Semantic Alias Definitions
+/// @type Map
+/// @description Plain data (no function calls) — `tokens/_color-tokens.scss`
+/// resolves each entry against $base-color-tokens/$custom-color-tokens via
+/// fn.get-color-token() at its own compile time. `token-map` names a
+/// $custom-color-tokens key; omit it (or the whole map, for base tokens.
+/// @see tokens/_color-tokens.scss For the resolution logic
+$semantic-color-alias-defs: (
+  "scroll-thumb": (
+    "token": "action",
+    "opacity": 1,
+    "lightness-multiplier": (light: 0.75, dark: 1.333),
+    "chroma-multiplier": (light: 0.8, dark: 1.25),
+  ),
+) !default;
+
