@@ -1,6 +1,6 @@
 # trimscale-css
 
-A lean, opinionated SCSS design-system base, published as an npm package (see [package.json](package.json), [bin/init.ts](bin/init.ts)). Consumers install it and generate their own tokens from [trimscale.config.ts](trimscale.config.ts).
+A lean, opinionated SCSS toolkit, published as an npm package (see [package.json](package.json), [bin/init.ts](bin/init.ts)). Consumers install it and generate their own tokens from [trimscale.config.ts](trimscale.config.ts).
 
 ## Layer order
 
