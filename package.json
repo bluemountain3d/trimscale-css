@@ -5,6 +5,14 @@
     "trimscale-css": "./bin/init.js"
   },
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bluemountain3d/trimscale-css.git"
+  },
+  "homepage": "https://github.com/bluemountain3d/trimscale-css#readme",
+  "bugs": {
+    "url": "https://github.com/bluemountain3d/trimscale-css/issues"
+  },
   "files": [
     "bin/*.js",
     "styles",
