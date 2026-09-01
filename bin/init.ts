@@ -7,9 +7,12 @@ const projectRoot = process.cwd()
 const command = process.argv[2] ?? 'init'
 
 /**
- * Copies the package's `trimscale.config.ts` template into the consumer's
- * project root (unless one already exists there) and wires up a
- * `trimscale:generate` npm script pointing at the `generate` subcommand below.
+ * Copies the package's consumer-facing `templates/trimscale.config.ts` into
+ * the consumer's project root (unless one already exists there) and wires up
+ * a `trimscale:generate` npm script pointing at the `generate` subcommand
+ * below. This template is distinct from the repo's own `trimscale.config.ts`
+ * (used for dogfooding against `fixtures/`), it has no file-path assumptions
+ * of its own so it works unmodified in a fresh project.
  */
 const runInit = () => {
   const configFileName = 'trimscale.config.ts'
@@ -18,16 +21,8 @@ const runInit = () => {
   if (fs.existsSync(configDest)) {
     console.log(`⚠️  ${configFileName} already exists, leaving it untouched.`)
   } else {
-    const configTemplate = path.join(import.meta.dirname, '..', configFileName)
-    // The template's own `import type { TrimscaleConfig } from './models/Config.ts'`
-    // is relative to this repo, correct for dogfooding, but once copied to the
-    // consumer's project root, that relative path no longer resolves (models/
-    // lives inside node_modules/trimscale-css/, not the consumer's own root).
-    // Repoint it at the package specifier before writing the copy.
-    const templateContent = fs
-      .readFileSync(configTemplate, 'utf8')
-      .replace("from './models/Config.ts'", "from 'trimscale-css/models/Config.ts'")
-    fs.writeFileSync(configDest, templateContent, 'utf8')
+    const configTemplate = path.join(import.meta.dirname, '..', 'templates', configFileName)
+    fs.copyFileSync(configTemplate, configDest)
     console.log(`✅ Created ${configFileName}.`)
   }
 

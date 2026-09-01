@@ -12,6 +12,7 @@
     "models",
     "docs",
     "fixtures",
+    "templates",
     "trimscale.config.ts"
   ],
   "scripts": {
