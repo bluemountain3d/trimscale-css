@@ -92,7 +92,7 @@ These static tokens are opt-in. By default, text styled through `font-setup` or 
 
 ## Color Tokens
 
-The token _names_ below (`surface-base`, `accent`, `text-muted`, etc.) come from `baseColorTokens`, `customColorTokens` (the shipped example config adds a `campaign` palette there), and `semanticColorAliases` in `trimscale.config.ts`. The starter palette shipped in the default config is meant to be replaced with your own values, not treated as fixed brand colors.
+The token _names_ below (`surface-base`, `accent`, `text-muted`, etc.) come from `baseColorTokens`, `customColorTokens` (an optional field, not present in the starter template, for extra palettes such as a `campaign` palette), and `semanticColorAliases` in `trimscale.config.ts`. The starter palette shipped in the default config is meant to be replaced with your own values, not treated as fixed brand colors.
 
 Each `baseColorTokens`/`customColorTokens` entry is a hand-picked `{ oklch, hex }` pair per light/dark mode, there's no build step deriving them from a single source color. [oklch.com](https://oklch.com/) is a convenient picker for choosing the OKLCH values and reading off the matching hex.
 

@@ -45,7 +45,10 @@ npx trimscale-css generate
 # or, once init has added the script: npm run trimscale:generate / pnpm trimscale:generate / yarn trimscale:generate
 ```
 
-Reads your `trimscale.config.ts` and writes a single bridge file, `<outDir>/index.scss` (`outDir` defaults to `./trimscale-generated`, configurable via `outDir` in `trimscale.config.ts`), into **your own project**, never into `node_modules`. The bridge file configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, and (if any of your fonts need `@font-face` rules) sits alongside the generated font faces.
+Reads your `trimscale.config.ts` and writes two files into `<outDir>` (`outDir` defaults to `./trimscale-generated`, configurable via `outDir` in `trimscale.config.ts`), into **your own project**, never into `node_modules`:
+
+- `_index.scss`, the bridge file. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, and (if any of your fonts need `@font-face` rules) sits alongside the generated font faces.
+- `utility-classes.md`, a reference listing the exact utility classes _your_ config produces (font roles, sizes, weights, spacing tiers), not a generic example, see [utility-classes.md](utility-classes.md).
 
 Re-run this any time you change `trimscale.config.ts`. The output lives in your own project, so it survives a fresh install. Commit `<outDir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
 
@@ -59,14 +62,17 @@ export default {
   css: {
     preprocessorOptions: {
       scss: {
-        loadPaths: ['node_modules/trimscale-css/styles'], // or 'path/to/trimscale-css/styles'
+        loadPaths: [
+          'node_modules/trimscale-css/styles', // or wherever it's installed
+          './src', // your own project's SCSS root
+        ],
       },
     },
   },
 };
 ```
 
-`loadPaths` accepts multiple entries, add your own project's SCSS root alongside it (e.g. `loadPaths: ['path/to/trimscale-css/styles', './src']`) so your own `@use 'styles/whatever'`-style imports keep working too. Pointing trimscale-css's own entry directly at its `styles/` folder means it never claims the bare `styles/` name for itself, so it can't collide with a `styles/` folder of your own on another loadPath.
+`loadPaths` accepts multiple entries, add your own project's SCSS root alongside trimscale-css's so your own `@use 'styles/whatever'`-style imports keep working too. Pointing trimscale-css's own entry directly at its `styles/` folder means it never claims the bare `styles/` name for itself, so it can't collide with a `styles/` folder of your own on another loadPath.
 
 This `loadPaths` entry is only for trimscale-css's own static files (functions, mixins, base styles), it's separate from wherever `generate` writes your bridge file (`outDir`, see [Generate](#generate) above) — that one you `@use` by its actual location in your project (relative path, or add its parent directory to `loadPaths` too if you'd rather use a bare specifier).
 
@@ -94,7 +100,7 @@ Alternatively, if you're not routing your styles through your own SCSS entry fil
 
 ```ts
 // main.ts
-import '../trimscale-generated/index.scss'; // relative to your entry file
+import '../trimscale-generated/_index.scss'; // relative to your entry file
 ```
 
 ### Component-Scoped Import

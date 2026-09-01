@@ -1,12 +1,14 @@
 # Utility Classes
 
+This page documents the *shape* of each utility class using the example config's names. For the exact classes **your own** `trimscale.config.ts` produces, generate writes a resolved reference to `<outDir>/utility-classes.md`, see [getting-started.md](getting-started.md#generate).
+
 ## Spacing
 
 Pattern: `.{property}-{side?}-{size}`
 
 - **Properties:** `m` (margin), `p` (padding)
 - **Sides:** `t` (top), `r` (right), `b` (bottom), `l` (left), `x` (horizontal), `y` (vertical)
-- **Sizes:** t-shirt (`3xs` to `9xl`) and numeric (`1` to `48`), see [design-tokens.md](design-tokens.md#spacing-tokens)
+- **Sizes:** t-shirt (`3xs` to `9xl`) and numeric (`1` to `numericScaleEnd`/`numericScaleMacroEnd`, `48` by default), see [design-tokens.md](design-tokens.md#spacing-tokens)
 - **Special:** `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`
 
 All directional sides map to **logical properties**, not physical ones: `t`/`b` use `margin-block-start`/`-end`, and `l`/`r` use `margin-inline-start`/`-end` (same for padding). In a left-to-right document this behaves like top/right/bottom/left, but `l`/`r` flip automatically in `dir="rtl"` content since they follow inline flow direction rather than a fixed side.
