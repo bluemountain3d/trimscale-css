@@ -2,7 +2,7 @@
 
 All tokens are CSS custom properties scoped to `:root` inside the `tokens` cascade layer (see [cascade-layers.md](cascade-layers.md)), generated from [`trimscale.config.ts`](../trimscale.config.ts) by `npx trimscale-css generate` (see [getting-started.md](getting-started.md)).
 
-Every specific number in the tables below (px values, ratios, scale steps, tiers) is the shipped _default_ config's value, not a fixed characteristic of the system. Change any of them in `trimscale.config.ts` and re-generate, see the `customizing-*.md` guides linked throughout for how.
+Every specific number in the tables below (px values, ratios, scale steps, tiers) is the shipped _default_ config's value, not a fixed characteristic of trimscale-css. Change any of them in `trimscale.config.ts` and re-generate, see the `customizing-*.md` guides linked throughout for how.
 
 ## Base Tokens
 
@@ -45,7 +45,7 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 
 ## Typography Tokens
 
-**Modular scale levels,** all computed with `clamp()` from Minor Third at mobile to Perfect Fourth at desktop by default. Both the ratios and the underlying viewport/font-size range are set in `trimscale.config.ts`'s `fluidScale`, not fixed characteristics of the system. See [customizing-type-scale.md](customizing-type-scale.md).
+**Modular scale levels,** all computed with `clamp()` from Minor Third at mobile to Perfect Fourth at desktop by default. Both the ratios and the underlying viewport/font-size range are set in `trimscale.config.ts`'s `fluidScale`, not fixed characteristics of trimscale-css. See [customizing-type-scale.md](customizing-type-scale.md).
 
 | Token      | Scale step | Role                             |
 | ---------- | ---------- | -------------------------------- |
