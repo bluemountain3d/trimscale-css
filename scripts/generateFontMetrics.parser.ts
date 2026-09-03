@@ -4,6 +4,7 @@ import type { RawFontMetrics } from '../models/Config.ts'
 import {
   calculateTrimValues,
   getAverageSideBearings,
+  getAvgAdvanceWidth,
   getBBoxHeight,
   getCorrectedAscenderDescender,
 } from './generateFontMetrics.helpers.ts'
@@ -92,7 +93,7 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
     capHeight = getBBoxHeight(activeFont, ['H', 'I', 'E', 'T'])
   }
 
-  const avgCharWidth: number = os2.xAvgCharWidth // Read directly from the original's OS/2
+  const avgCharWidth: number = getAvgAdvanceWidth(activeFont)
 
   const { upmAscender, upmDescender } = getCorrectedAscenderDescender(os2.typoAscender, os2.typoDescender, upm)
 
