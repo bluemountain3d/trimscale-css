@@ -1,9 +1,134 @@
 import path from 'node:path'
-import type { FontSource, RawFontMetrics, TrimscaleConfig } from '../models/Config.ts'
+import type {
+  FontSource,
+  MatchableFallbackChain,
+  MatchableFallbackFamily,
+  RawFontMetrics,
+  TrimscaleConfig,
+} from '../models/Config.ts'
 import { fetchRemoteFont, getFontExtension, listLocalFontDir, readLocalFont } from './generateFontMetrics.io.ts'
 import { parseFontBuffer } from './generateFontMetrics.parser.ts'
 import { toKebabCase } from './helpers.ts'
 import { resolveOutDir } from './loadConfig.ts'
+
+/**
+ * `unitsPerEm`/`avgCharWidth` (raw font units) for each `MatchableFallbackFamily`,
+ * hardcoded since these system fonts don't change. Only these two fields are
+ * needed — `computeFallbackFontFaces`'s size-adjust/ascent-override formula
+ * uses the WEB font's own ascender/descender/lineGap (scaled by size-adjust),
+ * not the fallback's, see notes/trimscale-css-forbattringar.md.
+ */
+const FALLBACK_FONT_METRICS: Record<MatchableFallbackFamily, { upm: number; avgCharWidth: number }> = {
+  Arial: { upm: 2048, avgCharWidth: 935 },
+  'Courier New': { upm: 2048, avgCharWidth: 1283 },
+  Georgia: { upm: 2048, avgCharWidth: 931 },
+  'Noto Serif': { upm: 1000, avgCharWidth: 495 },
+  Helvetica: { upm: 1000, avgCharWidth: 457 },
+  'Helvetica Neue': { upm: 1000, avgCharWidth: 463 },
+  Consolas: { upm: 2048, avgCharWidth: 1176 },
+  Menlo: { upm: 2048, avgCharWidth: 1287 },
+  Roboto: { upm: 2048, avgCharWidth: 939 },
+  'Segoe UI': { upm: 2048, avgCharWidth: 938 },
+  'Times New Roman': { upm: 2048, avgCharWidth: 848 },
+}
+
+/**
+ * Named cross-platform fallback chains — resolved by `resolveFallbackFamilies`
+ * when a `FontSource.fallbackFamily` is one of these keywords instead of an
+ * explicit `MatchableFallbackFamily`/array. `computeFallbackFontFaces` emits
+ * one `@font-face` per family in the chain, all sharing the same
+ * `font-family` name — the browser tries each in order and uses the first
+ * one actually installed (same technique as a `src: local(...), url(...)`
+ * fallback list, just across separate `@font-face` rules).
+ */
+const FALLBACK_CHAINS: Record<MatchableFallbackChain, MatchableFallbackFamily[]> = {
+  'sans-serif': ['Segoe UI', 'Arial', 'Helvetica', 'Helvetica Neue', 'Roboto'],
+  serif: ['Times New Roman', 'Georgia', 'Noto Serif'],
+  monospace: ['Consolas', 'Menlo', 'Courier New'],
+}
+
+/** Resolves a `FontSource.fallbackFamily` value (single family, explicit array, or named chain) to a flat `MatchableFallbackFamily[]`. */
+const resolveFallbackFamilies = (
+  value: MatchableFallbackFamily | MatchableFallbackFamily[] | MatchableFallbackChain,
+): MatchableFallbackFamily[] => {
+  if (Array.isArray(value)) return value
+  return value in FALLBACK_CHAINS ? FALLBACK_CHAINS[value as MatchableFallbackChain] : [value as MatchableFallbackFamily]
+}
+
+/** A single metric-matched `@font-face` override to emit, so a fallback system font takes on the web font's vertical/horizontal metrics during font-swap (reduces CLS). */
+export type FallbackFontFace = {
+  /** `font-family` value for the override (`"${familyName} Fallback"`), inserted between the web font and the generic fallback in the `font-family` stack */
+  family: string
+  /** The `MatchableFallbackFamily` to load via `src: local(...)` */
+  fallbackFamily: MatchableFallbackFamily
+  /** Percentage value, e.g. `107.06` for `size-adjust: 107.06%` */
+  sizeAdjust: number
+  ascentOverride: number
+  descentOverride: number
+  lineGapOverride: number
+}
+
+/**
+ * Computes one metric-matched `@font-face` override's four descriptors for a
+ * single fallback family. `size-adjust` is the only descriptor that reads
+ * the fallback's own metrics (`avgCharWidth`, for the width ratio) —
+ * `ascent-override`/`descent-override`/`line-gap-override` reuse the WEB
+ * font's own (uncorrected) ascender/descender/lineGap divided by
+ * size-adjust, so the fallback's glyphs occupy the same vertical box the web
+ * font would have. Same approach as fontaine and next/font's
+ * `adjustFontFallback`. Formula: notes/trimscale-css-forbattringar.md.
+ */
+const computeOneFallbackFontFace = (
+  familyName: string,
+  webMetrics: Required<Pick<RawFontMetrics, 'avgCharWidth' | 'ascender' | 'descender' | 'lineGap'>>,
+  fallbackFamily: MatchableFallbackFamily,
+): FallbackFontFace => {
+  const fb = FALLBACK_FONT_METRICS[fallbackFamily]
+  const fallbackAvgCharWidth = fb.avgCharWidth / fb.upm
+
+  const sizeAdjust = webMetrics.avgCharWidth / fallbackAvgCharWidth
+  const ascentOverride = webMetrics.ascender / sizeAdjust
+  const descentOverride = webMetrics.descender / sizeAdjust
+  const lineGapOverride = webMetrics.lineGap / sizeAdjust
+
+  return {
+    family: `${familyName} Fallback`,
+    fallbackFamily,
+    sizeAdjust: +(sizeAdjust * 100).toFixed(2),
+    ascentOverride: +(ascentOverride * 100).toFixed(2),
+    descentOverride: +(descentOverride * 100).toFixed(2),
+    lineGapOverride: +(lineGapOverride * 100).toFixed(2),
+  }
+}
+
+/**
+ * Computes one metric-matched `@font-face` override per family in
+ * `fallbackFamily` (a single family, an explicit array, or a named
+ * `MatchableFallbackChain` — see `resolveFallbackFamilies`). All returned
+ * entries share the same `family` name, so multiple `@font-face` rules with
+ * identical `font-family` end up in the output — the browser tries each in
+ * declaration order and uses the first one whose `src` actually resolves,
+ * covering multiple platforms without averaging their metrics together.
+ * @returns `[]` (with a console warning) if `webMetrics` is missing `ascender`/`descender`/`lineGap` — only guaranteed present for extracted `local`/`cdn` fonts, optional for `manual`.
+ */
+export const computeFallbackFontFaces = (
+  familyName: string,
+  webMetrics: RawFontMetrics,
+  fallbackFamily: MatchableFallbackFamily | MatchableFallbackFamily[] | MatchableFallbackChain,
+): FallbackFontFace[] => {
+  if (webMetrics.ascender === undefined || webMetrics.descender === undefined || webMetrics.lineGap === undefined) {
+    console.warn(
+      `⚠ "${familyName}": \`fallbackFamily\` is set but this family's metrics are missing \`ascender\`/\`descender\`/\`lineGap\` (only extracted automatically for \`local\`/\`cdn\` sources — a \`manual\` entry must supply them explicitly). Skipping its fallback @font-face.`,
+    )
+    return []
+  }
+
+  const resolvedMetrics = { ...webMetrics, ascender: webMetrics.ascender, descender: webMetrics.descender, lineGap: webMetrics.lineGap }
+
+  return resolveFallbackFamilies(fallbackFamily).map((family) =>
+    computeOneFallbackFontFace(familyName, resolvedMetrics, family),
+  )
+}
 
 /**
  * A single `@font-face` rule to emit (as one `$font-faces` list entry via
@@ -77,19 +202,21 @@ const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cd
   )
 }
 
-/** Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a quoted family name, both with the resolved fallback appended. */
+/** Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a quoted family name, both with the resolved fallback appended. When `fallbackFaceGenerated`, the metric-matched `"${familyName} Fallback"` override is inserted between the family and the generic fallback. */
 const buildFamilyString = (
   cfg: TrimscaleConfig,
   familyName: string,
   fallback: string | undefined,
   usesNextFont: boolean,
+  fallbackFaceGenerated: boolean,
 ): string => {
   const resolvedFallback = fallback ?? cfg.appFonts.fallbackDefault
   const nextPrefix = cfg.appFonts.nextFontPrefix ?? 'next-font'
+  const fallbackFaceSegment = fallbackFaceGenerated ? `, "${familyName} Fallback"` : ''
 
   return usesNextFont
-    ? `var(--${nextPrefix}-${toKebabCase(familyName)}), ${resolvedFallback}`
-    : `'"${familyName}", ${resolvedFallback}'`
+    ? `var(--${nextPrefix}-${toKebabCase(familyName)})${fallbackFaceSegment}, ${resolvedFallback}`
+    : `'"${familyName}"${fallbackFaceSegment}, ${resolvedFallback}'`
 }
 
 /**
@@ -105,19 +232,26 @@ const buildFamilyString = (
  */
 export const computeFontData = async (
   cfg: TrimscaleConfig,
-): Promise<{ metrics: FontMetricsMap; fontFaces: FontFace[] }> => {
+): Promise<{ metrics: FontMetricsMap; fontFaces: FontFace[]; fallbackFontFaces: FallbackFontFace[] }> => {
   const nextFontDefault = cfg.appFonts.nextFontDefault ?? false
   const outDir = resolveOutDir(cfg)
 
   const metrics: FontMetricsMap = {}
   const fontFaces: FontFace[] = []
+  const fallbackFontFaces: FallbackFontFace[] = []
 
   for (const [familyName, fontSource] of Object.entries(cfg.appFonts.fonts)) {
     const usesNextFont = fontSource.nextFont ?? nextFontDefault
-    const family = buildFamilyString(cfg, familyName, fontSource.fallback, usesNextFont)
 
     if (fontSource.source === 'manual') {
       warnIfFamilyNameUnverifiable(familyName, 'manual')
+
+      const fallbackFaces = fontSource.fallbackFamily
+        ? computeFallbackFontFaces(familyName, fontSource.metrics, fontSource.fallbackFamily)
+        : []
+      fallbackFontFaces.push(...fallbackFaces)
+
+      const family = buildFamilyString(cfg, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
       metrics[familyName] = { ...fontSource.metrics, family }
       continue
     }
@@ -166,6 +300,12 @@ export const computeFontData = async (
       return score < bestScore ? entry : best
     })
 
+    const fallbackFaces = fontSource.fallbackFamily
+      ? computeFallbackFontFaces(familyName, best.raw, fontSource.fallbackFamily)
+      : []
+    fallbackFontFaces.push(...fallbackFaces)
+
+    const family = buildFamilyString(cfg, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
     metrics[familyName] = { ...best.raw, family }
 
     const shouldGenerateFontFace =
@@ -188,5 +328,5 @@ export const computeFontData = async (
     }
   }
 
-  return { metrics, fontFaces }
+  return { metrics, fontFaces, fallbackFontFaces }
 }

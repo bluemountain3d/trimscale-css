@@ -120,6 +120,13 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
       bottomTrim: +(bottomTrim / upm).toFixed(3),
       lsbAdjust: +((lsb / upm) * -1).toFixed(4),
       rsbAdjust: +((rsb / upm) * -1).toFixed(4),
+      // Raw (uncorrected) OS/2 typo metrics, not upmAscender/upmDescender —
+      // those are clipped to fit unitsPerEm for leading-trim's cap-height
+      // math, but ascent-override/descent-override/line-gap-override need
+      // the font's true declared metrics, overshoot and all.
+      ascender: +(os2.typoAscender / upm).toFixed(3),
+      descender: +(Math.abs(os2.typoDescender) / upm).toFixed(3),
+      lineGap: +(os2.typoLineGap / upm).toFixed(3),
     },
     isItalic: isItalic,
     weightClass: weightClass,

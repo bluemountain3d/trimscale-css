@@ -43,6 +43,23 @@ export type Breakpoints = {
 /** Generic CSS font-family fallback keywords usable in a `FontSource.fallback`/`AppFonts.fallbackDefault`. */
 export type FontFallbacks = 'sans-serif' | 'serif' | 'monospace' | 'system-ui' | 'cursive'
 
+/** Concrete system fonts trimscale has built-in metrics for, usable as a metric-matched `fallbackFamily`. Distinct from `FontFallbacks` (generic keywords), which can't be metric-matched. */
+export type MatchableFallbackFamily =
+  | 'Arial'
+  | 'Helvetica'
+  | 'Helvetica Neue'
+  | 'Times New Roman'
+  | 'Georgia'
+  | 'Noto Serif'
+  | 'Courier New'
+  | 'Consolas'
+  | 'Menlo'
+  | 'Segoe UI'
+  | 'Roboto'
+
+/** Named cross-platform fallback chains, each resolving to an ordered list of `MatchableFallbackFamily` covering Windows/macOS/Android — trimscale emits one `@font-face` per family in the chain (all sharing the same `font-family` name), and the browser uses the first one actually installed. See `FALLBACK_CHAINS` in generateFonts.ts. */
+export type MatchableFallbackChain = 'sans-serif' | 'serif' | 'monospace'
+
 /** The five trim/spacing metrics a font contributes, normalized to em. Same shape the generator extracts from a real font file — a `manual` `FontSource` supplies these by hand instead (see precisionspec.dev). */
 export type RawFontMetrics = {
   /** Average character width, normalized to em */
@@ -55,6 +72,12 @@ export type RawFontMetrics = {
   lsbAdjust: number
   /** Right side bearing adjustment, normalized to em (negative) */
   rsbAdjust: number
+  /** Raw (uncorrected) OS/2 typo ascender, normalized to em. Only needed when `fallbackFamily` is set — without it, no metric-matched @font-face override is generated. */
+  ascender?: number
+  /** Raw (uncorrected) OS/2 typo descender, normalized to em (positive). Only needed when `fallbackFamily` is set. */
+  descender?: number
+  /** Raw OS/2 typo line gap, normalized to em. Only needed when `fallbackFamily` is set. */
+  lineGap?: number
 }
 
 /**
@@ -73,6 +96,8 @@ export type FontSource =
       fallback?: FontFallbacks
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `false` here if most of your fonts go through `next/font` but this particular one doesn't. */
       nextFont?: boolean
+      /** Generates a metric-matched `@font-face` override against one or more system fonts (size-adjust/ascent-override/descent-override/line-gap-override), inserted between the web font and the generic fallback in the `font-family` stack, so font-swap doesn't shift the layout. Prefer a `MatchableFallbackChain` (e.g. `'sans-serif'`) for broad Windows/macOS/Android coverage with no extra effort — trimscale emits one `@font-face` per family in the chain, and the browser uses whichever is actually installed. Reach for a single `MatchableFallbackFamily` or your own array only when you need precise control over exactly which system font(s) to target. Omit for no override. Requires this family's extracted metrics to include `ascender`/`descender`/`lineGap` (always true for `local`/`cdn`; for `manual`, only if those optional `RawFontMetrics` fields are supplied). */
+      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
   | {
       source: 'cdn'
@@ -83,6 +108,8 @@ export type FontSource =
       generateFontFace?: boolean
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `true` here for a `next/font/google` font when most of your other fonts *aren't* going through `next/font`, or `false` if this one isn't even though most are. */
       nextFont?: boolean
+      /** Generates a metric-matched `@font-face` override against one or more system fonts (size-adjust/ascent-override/descent-override/line-gap-override), inserted between the web font and the generic fallback in the `font-family` stack, so font-swap doesn't shift the layout. Prefer a `MatchableFallbackChain` (e.g. `'sans-serif'`) for broad Windows/macOS/Android coverage with no extra effort — trimscale emits one `@font-face` per family in the chain, and the browser uses whichever is actually installed. Reach for a single `MatchableFallbackFamily` or your own array only when you need precise control over exactly which system font(s) to target. Omit for no override. */
+      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
   | {
       source: 'manual'
@@ -91,6 +118,8 @@ export type FontSource =
       metrics: RawFontMetrics
       /** Overrides `AppFonts.nextFontDefault` for this family only. */
       nextFont?: boolean
+      /** Generates a metric-matched `@font-face` override against one or more system fonts. Prefer a `MatchableFallbackChain` (e.g. `'sans-serif'`) for broad platform coverage — see the `local` variant's `fallbackFamily` for the full explanation. Requires `metrics` to include `ascender`/`descender`/`lineGap` — without them this is ignored with a warning. */
+      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
 
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */

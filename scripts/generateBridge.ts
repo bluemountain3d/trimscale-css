@@ -7,7 +7,11 @@ import {
   semanticColorAliasDefsToScssMapValue,
 } from './generateColorTokens.ts'
 import { fluidScaleToScssMapValue } from './generateFluidScale.ts'
-import { fontFacesToScssListValue, metricsToScssMapValue } from './generateFontMetrics.scss.ts'
+import {
+  fallbackFontFacesToScssListValue,
+  fontFacesToScssListValue,
+  metricsToScssMapValue,
+} from './generateFontMetrics.scss.ts'
 import { computeFontData } from './generateFonts.ts'
 import { buildUtilityClassesMarkdown } from './generateUtilityClassesDoc.ts'
 import {
@@ -26,7 +30,7 @@ const outDir = resolveOutDir(cfg)
 const spacing = cfg.spacingSetup
 const baseGridSize = spacing.baseGridSize ?? 4
 
-const { metrics, fontFaces } = await computeFontData(cfg)
+const { metrics, fontFaces, fallbackFontFaces } = await computeFontData(cfg)
 
 // Spacing: two mutually-exclusive shapes (coupled/independent), see
 // models/Config.ts's SpacingSetup and abstracts/variables/_spacing.scss.
@@ -52,6 +56,7 @@ const withArgs = [
   setWithArg('fluid-scale', fluidScaleToScssMapValue(cfg.fluidScale)),
   setWithArg('font-metrics', metricsToScssMapValue(metrics)),
   setWithArg('font-faces', fontFacesToScssListValue(fontFaces)),
+  setWithArg('fallback-font-faces', fallbackFontFacesToScssListValue(fallbackFontFaces)),
   setWithArg('font-roles', fontRolesToScssMapValue(cfg.fontRoles)),
   setWithArg('modular-typographic-scale', modularTypographicScaleToScssMapValue(cfg.modularTypographicScale)),
   setWithArg('semantic-font-sizes', semanticFontSizesToScssMapValue(cfg.semanticFontSizes)),
