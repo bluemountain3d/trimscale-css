@@ -123,3 +123,46 @@ export const getAverageSideBearings = (font: Font): { lsb: number; rsb: number }
     rsb: Math.round(average(rsbValues)),
   }
 }
+
+
+// English letter-frequency weights (space + a-z sum to 1), used to weight
+// advance-width by how often each character actually appears in running
+// text. Space dominates (~18%) because average word length + gap is what
+// determines where text wraps — see notes/trimscale-css-avgcharwidth.md.
+const CHAR_WEIGHTS: Record<string, number> = {
+  ' ': 0.1801,
+  e: 0.1025, t: 0.0761, a: 0.0659, o: 0.0627, i: 0.0621,
+  n: 0.0593, s: 0.0534, r: 0.0515, h: 0.0414, l: 0.0334,
+  d: 0.0313, c: 0.0274, u: 0.0224, m: 0.0206, f: 0.0197,
+  p: 0.0176, g: 0.0153, w: 0.0138, y: 0.0136, b: 0.0121,
+  v: 0.0086, k: 0.0044, x: 0.0019, j: 0.0013, q: 0.0010, z: 0.0007,
+}
+
+/**
+ * Frequency-weighted average advance width over lowercase a-z + space,
+ * used instead of OS/2 xAvgCharWidth (whose definition silently changes
+ * between table versions — see notes/trimscale-css-avgcharwidth.md).
+ * Missing glyphs are dropped and remaining weights renormalized rather
+ * than silently counted as zero width.
+ * @param font - The fontkit Font object
+ * @returns Weighted average advance width, in font units (not normalized to em)
+ */
+export const getAvgAdvanceWidth = (font: Font): number => {
+  const entries = Object.entries(CHAR_WEIGHTS)
+    .map(([char, weight]) => {
+      const glyph = font.glyphForCodePoint(char.codePointAt(0) ?? 0)
+      return glyph && glyph.id !== 0 ? { width: glyph.advanceWidth, weight } : null
+    })
+    .filter((entry): entry is { width: number; weight: number } => entry !== null)
+
+  const totalWeight = entries.reduce((sum, { weight }) => sum + weight, 0)
+  const weightedAverage = entries.reduce((sum, { width, weight }) => sum + width * (weight / totalWeight), 0)
+
+  // Real running text includes occasional capitals/punctuation that the
+  // a-z+space weighting doesn't cover, making the raw weighted average ~4%
+  // narrower than actual text width — measured empirically against rendered
+  // .text-box-N wrap points, see notes/trimscale-css-avgcharwidth.md.
+  const REAL_TEXT_CORRECTION = 1.044
+
+  return weightedAverage * REAL_TEXT_CORRECTION
+}
