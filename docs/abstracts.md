@@ -209,6 +209,8 @@ You never read the map directly for `@media` queries though, use the mixins:
 
 `$breakpoint` accepts either a key from the `$breakpoints` map (`'tablet'`, `'laptop'`, ...) or a raw number (treated as px if unitless). `and-down` and `only` need a string key, since they look up the _next_ entry in the map, there's no "next" for an arbitrary number.
 
+Every mixin also takes an optional trailing `$container`: `true` swaps `@media` for an unnamed `@container` query (nearest ancestor with `container-type` set), a string swaps it for a named one. The ancestor must actually set `container-type` (e.g. `container-type: inline-size`), an `@container` query with no such ancestor simply never matches, unlike `cqi`/`cqw` units elsewhere in this system, which silently resolve against the small viewport instead (see [customizing-type-scale.md](customizing-type-scale.md)).
+
 ```scss
 .card {
   padding: var(--space-sm);
@@ -233,6 +235,18 @@ You never read the map directly for `@media` queries though, use the mixins:
 
   @include mx.up-to('tablet') {
     width: 100%;
+  }
+}
+
+.widget {
+  container-type: inline-size;
+
+  .widget__title {
+    font-size: 1rem;
+
+    @include mx.and-up('tablet', $container: true) {
+      font-size: 1.25rem;
+    }
   }
 }
 ```

@@ -70,6 +70,8 @@ modularTypographicScale: {
 
 `step` is the exponent in the modular-scale formula (fractional steps like `0.5` are valid, that's how `fs350` sits halfway between `fs300` and `fs400`). `unit` picks which viewport unit drives the interpolation, `'vwx'` (the adaptive custom viewport unit, see [design-tokens.md](design-tokens.md#base-tokens)) is the default; `'vw'`, `'cqw'`, and `'cqi'` are also valid for container-relative or plain-viewport variants. Add or remove keys freely, `fs900`..`fs100` is just the default naming.
 
+`cqw`/`cqi` require `container-type` set on an ancestor, or they silently resolve against the small viewport instead, same requirement as the breakpoint mixins' `$container` option, see [abstracts.md](abstracts.md#breakpoints).
+
 ### Uncapped steps: `uncapped`
 
 Every scale step normally resolves to a `clamp()`, so growth stops at `fluidScale.maxWidth`. Setting `uncapped: true` on a step additionally generates a second token, `--fs-*-uncapped`, built with `max()` instead: it keeps growing past `maxWidth` rather than being capped there. Use it for display/hero text that should keep scaling up on very large viewports; leave it off (the default) for anything where you want the size to settle at a fixed maximum, which is most of the scale.
