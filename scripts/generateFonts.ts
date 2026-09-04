@@ -13,7 +13,7 @@ import { toKebabCase } from './helpers.ts'
 /**
  * `unitsPerEm`/`avgCharWidth` (raw font units) for each `MatchableFallbackFamily`,
  * hardcoded since these system fonts don't change. Only these two fields are
- * needed — `computeFallbackFontFaces`'s size-adjust/ascent-override formula
+ * needed, `computeFallbackFontFaces`'s size-adjust/ascent-override formula
  * uses the WEB font's own ascender/descender/lineGap (scaled by size-adjust),
  * not the fallback's, see notes/trimscale-css-forbattringar.md.
  */
@@ -32,11 +32,11 @@ const FALLBACK_FONT_METRICS: Record<MatchableFallbackFamily, { upm: number; avgC
 }
 
 /**
- * Named cross-platform fallback chains — resolved by `resolveFallbackFamilies`
+ * Named cross-platform fallback chains, resolved by `resolveFallbackFamilies`
  * when a `FontSource.fallbackFamily` is one of these keywords instead of an
  * explicit `MatchableFallbackFamily`/array. `computeFallbackFontFaces` emits
  * one `@font-face` per family in the chain, all sharing the same
- * `font-family` name — the browser tries each in order and uses the first
+ * `font-family` name: the browser tries each in order and uses the first
  * one actually installed (same technique as a `src: local(...), url(...)`
  * fallback list, just across separate `@font-face` rules).
  */
@@ -44,6 +44,30 @@ const FALLBACK_CHAINS: Record<MatchableFallbackChain, MatchableFallbackFamily[]>
   'sans-serif': ['Segoe UI', 'Arial', 'Helvetica', 'Helvetica Neue', 'Roboto'],
   serif: ['Times New Roman', 'Georgia', 'Noto Serif'],
   monospace: ['Consolas', 'Menlo', 'Courier New'],
+}
+
+/**
+ * Builds a `local` font file's `@font-face` `src: url(...)` value: a
+ * root-relative path (leading `/`), with the leading `publicDir` segment
+ * stripped when the file lives under it, matching how a bundler serves
+ * that folder's contents at the site root, without the folder name itself
+ * in the URL (Vite's `public/`, SvelteKit's `static/`, etc.). A file
+ * outside `publicDir` still gets a root-relative path (works in dev, not
+ * guaranteed after a production build, see `AppFonts.publicDir`).
+ */
+const buildLocalFontSrc = (entry: string, publicDir: string): string => {
+  const normalizedEntry = entry.replace(/^\.[\\/]/, '').split(path.sep).join('/')
+  const normalizedPublicDir = publicDir
+    .replace(/^\.[\\/]/, '')
+    .replace(/[\\/]+$/, '')
+    .split(path.sep)
+    .join('/')
+
+  const withoutPublicDir = normalizedEntry.startsWith(`${normalizedPublicDir}/`)
+    ? normalizedEntry.slice(normalizedPublicDir.length + 1)
+    : normalizedEntry
+
+  return `/${withoutPublicDir}`
 }
 
 /** Resolves a `FontSource.fallbackFamily` value (single family, explicit array, or named chain) to a flat `MatchableFallbackFamily[]`. */
@@ -70,7 +94,7 @@ export type FallbackFontFace = {
 /**
  * Computes one metric-matched `@font-face` override's four descriptors for a
  * single fallback family. `size-adjust` is the only descriptor that reads
- * the fallback's own metrics (`avgCharWidth`, for the width ratio) —
+ * the fallback's own metrics (`avgCharWidth`, for the width ratio):
  * `ascent-override`/`descent-override`/`line-gap-override` reuse the WEB
  * font's own (uncorrected) ascender/descender/lineGap divided by
  * size-adjust, so the fallback's glyphs occupy the same vertical box the web
@@ -103,12 +127,12 @@ const computeOneFallbackFontFace = (
 /**
  * Computes one metric-matched `@font-face` override per family in
  * `fallbackFamily` (a single family, an explicit array, or a named
- * `MatchableFallbackChain` — see `resolveFallbackFamilies`). All returned
+ * `MatchableFallbackChain`, see `resolveFallbackFamilies`). All returned
  * entries share the same `family` name, so multiple `@font-face` rules with
- * identical `font-family` end up in the output — the browser tries each in
+ * identical `font-family` end up in the output: the browser tries each in
  * declaration order and uses the first one whose `src` actually resolves,
  * covering multiple platforms without averaging their metrics together.
- * @returns `[]` (with a console warning) if `webMetrics` is missing `ascender`/`descender`/`lineGap` — only guaranteed present for extracted `local`/`cdn` fonts, optional for `manual`.
+ * @returns `[]` (with a console warning) if `webMetrics` is missing `ascender`/`descender`/`lineGap` (only guaranteed present for extracted `local`/`cdn` fonts, optional for `manual`).
  */
 export const computeFallbackFontFaces = (
   familyName: string,
@@ -117,7 +141,7 @@ export const computeFallbackFontFaces = (
 ): FallbackFontFace[] => {
   if (webMetrics.ascender === undefined || webMetrics.descender === undefined || webMetrics.lineGap === undefined) {
     console.warn(
-      `⚠ "${familyName}": \`fallbackFamily\` is set but this family's metrics are missing \`ascender\`/\`descender\`/\`lineGap\` (only extracted automatically for \`local\`/\`cdn\` sources — a \`manual\` entry must supply them explicitly). Skipping its fallback @font-face.`,
+      `⚠ "${familyName}": \`fallbackFamily\` is set but this family's metrics are missing \`ascender\`/\`descender\`/\`lineGap\` (only extracted automatically for \`local\`/\`cdn\` sources, a \`manual\` entry must supply them explicitly). Skipping its fallback @font-face.`,
     )
     return []
   }
@@ -226,21 +250,25 @@ const buildFamilyString = (
  * `FontFace` per file that should get a `@font-face` rule. Local font paths
  * are resolved relative to `process.cwd()` (the directory containing
  * `trimscale.config.ts`); each `FontFace.src` is a root-relative URL (leading
- * `/`), also relative to `process.cwd()` — NOT to `outDir`. Sass never
+ * `/`), also relative to `process.cwd()`, NOT to `outDir`. Sass never
  * rebases a `url()` to the partial it came from, so a path relative to
  * `outDir` only survives once the bundler compiles the CSS if the
  * consumer's own entry stylesheet happens to sit at `outDir` too; a
  * root-relative path resolves the same regardless of which stylesheet
  * pulls it in. This assumes `process.cwd()` (where `trimscale.config.ts`
- * lives) is also the bundler's project root — true for Vite/webpack's
- * default setup — and, for a production build to serve the file at that
- * same path, that the font file lives under the project's public/static
- * directory (Vite's `public/`), not an arbitrary source folder.
+ * lives) is also the bundler's project root, true for Vite/webpack's
+ * default setup. `AppFonts.publicDir` (default `'public'`) is stripped as a
+ * leading segment when present, matching how a bundler serves that folder's
+ * contents at the site root, see `buildLocalFontSrc`. A font file outside
+ * `publicDir` still gets a root-relative path, but isn't guaranteed to
+ * resolve correctly after a production build (works in dev, where the
+ * whole project root is servable).
  */
 export const computeFontData = async (
   cfg: TrimscaleConfig,
 ): Promise<{ metrics: FontMetricsMap; fontFaces: FontFace[]; fallbackFontFaces: FallbackFontFace[] }> => {
   const nextFontDefault = cfg.appFonts.nextFontDefault ?? false
+  const publicDir = cfg.appFonts.publicDir ?? 'public'
 
   const metrics: FontMetricsMap = {}
   const fontFaces: FontFace[] = []
@@ -273,10 +301,7 @@ export const computeFontData = async (
             ? await readLocalFont(path.join(process.cwd(), entry))
             : await fetchRemoteFont(entry)
 
-        const src =
-          fontSource.source === 'local'
-            ? `/${entry.replace(/^\.[\\/]/, '').split(path.sep).join('/')}`
-            : entry
+        const src = fontSource.source === 'local' ? buildLocalFontSrc(entry, publicDir) : entry
 
         const {
           metrics: raw,

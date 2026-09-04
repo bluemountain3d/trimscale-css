@@ -16,14 +16,14 @@
   }
 }
 
-// Metric-matched fallback overrides — see var.$fallback-font-faces and
+// Metric-matched fallback overrides, see var.$fallback-font-faces and
 // FontSource.fallbackFamily in models/Config.ts.
 @each $face in var.$fallback-font-faces {
   @font-face {
     font-family: "#{map.get($face, "family")}";
     src: local("#{map.get($face, "fallback-family")}");
     // `* 1%` (not `#{...}%` interpolation) attaches the unit as real Sass
-    // number arithmetic — interpolating a unitless number directly against a
+    // number arithmetic. Interpolating a unitless number directly against a
     // literal `%` re-tokenizes as two separate values, emitting `100 %` with
     // a stray space instead of `100%`.
     size-adjust: #{map.get($face, "size-adjust") * 1%};

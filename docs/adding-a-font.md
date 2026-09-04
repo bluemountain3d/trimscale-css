@@ -33,7 +33,24 @@ appFonts: {
 
 The family name is always the config key (`'Roboto'` above), not whatever the font file's own internal name table says, that's what makes `manual` families able to have a name at all despite having no file to read one from.
 
-**The generated `@font-face` `src: url(...)` is root-relative** (e.g. `/fonts/Roboto-Regular.woff2`, relative to `process.cwd()`, i.e. wherever `trimscale.config.ts` lives), never relative to `outDir` or to whichever stylesheet actually `@use`s the generated bridge file — Sass doesn't rebase `url()` values to the partial they came from, so a root-relative path is the only form that resolves the same regardless of where in your SCSS tree it ends up. For this to work in a **production build**, the font files must live under your bundler's static/public directory (Vite's `public/`, served as-is at the site root); files under `src/` (or similar) only resolve correctly in dev, where Vite serves the whole project root.
+**The generated `@font-face` `src: url(...)` is root-relative** (relative to `process.cwd()`, i.e. wherever `trimscale.config.ts` lives), never relative to `outDir` or to whichever stylesheet actually `@use`s the generated bridge file. Sass doesn't rebase `url()` values to the partial they came from, so a root-relative path is the only form that resolves the same regardless of where in your SCSS tree it ends up.
+
+That's enough for **dev**, where Vite serves the whole project root. For a **production build** to also work, the font file needs to exist at that exact path in the built output, which only happens automatically for files under your bundler's static-passthrough folder (Vite/CRA/Astro: `public/`, SvelteKit: `static/`), copied verbatim to the site root, folder name stripped. trimscale knows this via `appFonts.publicDir` (default `'public'`, only change it if your bundler uses a different name): when a font file's `path` starts with that folder, trimscale strips it from the generated `src` too, matching what your bundler actually does:
+
+```ts
+appFonts: {
+  // publicDir: 'public', // default, only set if your bundler's folder is named differently
+  fonts: {
+    'Roboto': {
+      source: 'local',
+      path: ['./public/fonts/Roboto-Regular.woff2'], // → src: url("/fonts/Roboto-Regular.woff2")
+      fallback: 'sans-serif',
+    },
+  },
+},
+```
+
+`path`/`localFontsPath` are the location trimscale reads the file from (for metrics extraction), relative to `trimscale.config.ts`. `publicDir` only affects the generated `src`, stripping that leading segment when present. A font file that lives outside `publicDir` still gets a root-relative `src`, which resolves correctly in dev but isn't guaranteed to after a production build. Move it under `publicDir` for that.
 
 ### Auto-discovery via `localFontsPath`
 
@@ -119,9 +136,9 @@ This writes a `"Roboto Fallback"` `@font-face` (`src: local("Segoe UI")`, with `
 
 `fallbackFamily` accepts three shapes:
 
-- **A `MatchableFallbackChain`** (`'sans-serif'`, `'serif'`, or `'monospace'`) — **the recommended default.** Expands to an ordered list of system fonts covering Windows/macOS/Android; trimscale writes one `@font-face` per family in the chain, all sharing the same `font-family` name, and the browser tries each in order until it finds one actually installed on the user's system. No manual curation needed.
-- **A single `MatchableFallbackFamily`** (e.g. `'Arial'`) — when you want precise control over exactly one target, or know your audience is on a single platform.
-- **Your own `MatchableFallbackFamily[]`** — when you want the multi-platform technique above but a different family list or order than the built-in chains.
+- **A `MatchableFallbackChain`** (`'sans-serif'`, `'serif'`, or `'monospace'`), **the recommended default.** Expands to an ordered list of system fonts covering Windows/macOS/Android; trimscale writes one `@font-face` per family in the chain, all sharing the same `font-family` name, and the browser tries each in order until it finds one actually installed on the user's system. No manual curation needed.
+- **A single `MatchableFallbackFamily`** (e.g. `'Arial'`), when you want precise control over exactly one target, or know your audience is on a single platform.
+- **Your own `MatchableFallbackFamily[]`**, when you want the multi-platform technique above but a different family list or order than the built-in chains.
 
 The built-in chains:
 
@@ -138,9 +155,9 @@ All 11 concrete families with built-in metrics: Arial, Helvetica, Helvetica Neue
 Don't confuse the two:
 
 - **`fallbackFamily`** targets *concrete* system fonts with real, known metrics, so trimscale can compute a matching override. It's a metric-matching mechanism.
-- **`fallback`** is the plain CSS generic keyword (`sans-serif`, `serif`, etc.) at the very end of the stack. It's just a keyword, the browser resolves it to *whatever* sans-serif font that system has, with **no way to attach a metric override to a generic keyword** — there's no concrete font to point `local()` at.
+- **`fallback`** is the plain CSS generic keyword (`sans-serif`, `serif`, etc.) at the very end of the stack. It's just a keyword, the browser resolves it to *whatever* sans-serif font that system has, with **no way to attach a metric override to a generic keyword**, there's no concrete font to point `local()` at.
 
-`fallback` is always the last resort: if `fallbackFamily` is unset, or if none of its `@font-face` entries resolve (e.g. Linux, where none of the 11 built-in families is typically installed by default), the stack silently falls through to the plain, unmatched `fallback` keyword — same CLS exposure as not using `fallbackFamily` at all. That's an acceptable, expected degradation, not a bug: `fallbackFamily` improves the common case (Windows/macOS/Android) without requiring universal coverage.
+`fallback` is always the last resort: if `fallbackFamily` is unset, or if none of its `@font-face` entries resolve (e.g. Linux, where none of the 11 built-in families is typically installed by default), the stack silently falls through to the plain, unmatched `fallback` keyword, same CLS exposure as not using `fallbackFamily` at all. That's an acceptable, expected degradation, not a bug: `fallbackFamily` improves the common case (Windows/macOS/Android) without requiring universal coverage.
 
 ### Requirements
 
@@ -214,7 +231,7 @@ After generating, check three things:
 ## Quick checklist
 
 - [ ] Family added to `appFonts.fonts` with the right `source` (`local`/`cdn`/`manual`)
-- [ ] `local`: font file(s) placed at the configured `path`(s), or under `localFontsPath/<family key>/` if `path` is omitted — and, for a production build, under your bundler's public/static directory (not just `src/`)
+- [ ] `local`: font file(s) placed at the configured `path`(s), or under `localFontsPath/<family key>/` if `path` is omitted, and, for a production build, under `appFonts.publicDir` (default `'public'`), not just `src/`
 - [ ] `cdn`: `url`(s) point at real font files, not a CSS-generating endpoint
 - [ ] `manual`: metrics copied from precisionspec.dev's **TrimScale** export
 - [ ] Fallback set (or relying on `fallbackDefault`)
