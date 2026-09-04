@@ -33,6 +33,8 @@ appFonts: {
 
 The family name is always the config key (`'Roboto'` above), not whatever the font file's own internal name table says, that's what makes `manual` families able to have a name at all despite having no file to read one from.
 
+**The generated `@font-face` `src: url(...)` is root-relative** (e.g. `/fonts/Roboto-Regular.woff2`, relative to `process.cwd()`, i.e. wherever `trimscale.config.ts` lives), never relative to `outDir` or to whichever stylesheet actually `@use`s the generated bridge file — Sass doesn't rebase `url()` values to the partial they came from, so a root-relative path is the only form that resolves the same regardless of where in your SCSS tree it ends up. For this to work in a **production build**, the font files must live under your bundler's static/public directory (Vite's `public/`, served as-is at the site root); files under `src/` (or similar) only resolve correctly in dev, where Vite serves the whole project root.
+
 ### Auto-discovery via `localFontsPath`
 
 `path` is optional. If `appFonts.localFontsPath` is set (a folder relative to `trimscale.config.ts`), any `local` family that omits `path` looks for its files under `localFontsPath/<the config key>/` instead, non-recursive. Every font file found there (`.ttf`/`.otf`/`.woff`/`.woff2`) is picked up, same as if you'd listed them in `path`:
@@ -212,7 +214,7 @@ After generating, check three things:
 ## Quick checklist
 
 - [ ] Family added to `appFonts.fonts` with the right `source` (`local`/`cdn`/`manual`)
-- [ ] `local`: font file(s) placed at the configured `path`(s), or under `localFontsPath/<family key>/` if `path` is omitted
+- [ ] `local`: font file(s) placed at the configured `path`(s), or under `localFontsPath/<family key>/` if `path` is omitted — and, for a production build, under your bundler's public/static directory (not just `src/`)
 - [ ] `cdn`: `url`(s) point at real font files, not a CSS-generating endpoint
 - [ ] `manual`: metrics copied from precisionspec.dev's **TrimScale** export
 - [ ] Fallback set (or relying on `fallbackDefault`)

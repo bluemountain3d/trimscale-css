@@ -9,7 +9,6 @@ import type {
 import { fetchRemoteFont, getFontExtension, listLocalFontDir, readLocalFont } from './generateFontMetrics.io.ts'
 import { parseFontBuffer } from './generateFontMetrics.parser.ts'
 import { toKebabCase } from './helpers.ts'
-import { resolveOutDir } from './loadConfig.ts'
 
 /**
  * `unitsPerEm`/`avgCharWidth` (raw font units) for each `MatchableFallbackFamily`,
@@ -139,7 +138,7 @@ export const computeFallbackFontFaces = (
 export type FontFace = {
   /** Font family name (`font-family` value) — always the family's config key, never a name read from the file */
   family: string
-  /** `src: url(...)` value: a relative path for `local` (relative to `outDir`), the CDN URL as-is for `cdn` */
+  /** `src: url(...)` value: a root-relative path (leading `/`, relative to `process.cwd()`) for `local`, the CDN URL as-is for `cdn` */
   src: string
   /** File extension, used as the `format(...)` hint (e.g. `woff2`) */
   ext: string
@@ -226,15 +225,22 @@ const buildFamilyString = (
  * then whichever weight is closest to 400/Regular). Also builds one
  * `FontFace` per file that should get a `@font-face` rule. Local font paths
  * are resolved relative to `process.cwd()` (the directory containing
- * `trimscale.config.ts`); each `FontFace.src` is resolved relative to
- * `outDir`, where the generated bridge file (and the `@font-face` rules
- * built from these `FontFace`s) live.
+ * `trimscale.config.ts`); each `FontFace.src` is a root-relative URL (leading
+ * `/`), also relative to `process.cwd()` — NOT to `outDir`. Sass never
+ * rebases a `url()` to the partial it came from, so a path relative to
+ * `outDir` only survives once the bundler compiles the CSS if the
+ * consumer's own entry stylesheet happens to sit at `outDir` too; a
+ * root-relative path resolves the same regardless of which stylesheet
+ * pulls it in. This assumes `process.cwd()` (where `trimscale.config.ts`
+ * lives) is also the bundler's project root — true for Vite/webpack's
+ * default setup — and, for a production build to serve the file at that
+ * same path, that the font file lives under the project's public/static
+ * directory (Vite's `public/`), not an arbitrary source folder.
  */
 export const computeFontData = async (
   cfg: TrimscaleConfig,
 ): Promise<{ metrics: FontMetricsMap; fontFaces: FontFace[]; fallbackFontFaces: FallbackFontFace[] }> => {
   const nextFontDefault = cfg.appFonts.nextFontDefault ?? false
-  const outDir = resolveOutDir(cfg)
 
   const metrics: FontMetricsMap = {}
   const fontFaces: FontFace[] = []
@@ -269,7 +275,7 @@ export const computeFontData = async (
 
         const src =
           fontSource.source === 'local'
-            ? path.relative(outDir, path.join(process.cwd(), entry)).split(path.sep).join('/')
+            ? `/${entry.replace(/^\.[\\/]/, '').split(path.sep).join('/')}`
             : entry
 
         const {
