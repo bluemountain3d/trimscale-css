@@ -48,8 +48,17 @@ Typography utility classes from `_typography-utilities.scss`. They form the **HT
 | `.trim-text-code`      | Code / pre context     |
 | `.trim-text-ui`        | UI elements context    |
 
+Apply `.trim-text-*` to a `<span>` nested inside the sized element, not the
+element itself. The fallback path (browsers without native `text-box-trim`)
+uses that element's own `::before`/`::after`, so applying the class directly
+risks it silently colliding with your own pseudo-elements on the same
+element. `%text-properties` sets `display: flow-root`, so the span stops
+being inline, intentional, but worth knowing if you're expecting inline flow.
+
 ```html
-<h1 class="trim-text-heading font-size-heading-1">Sized heading</h1>
+<h1 class="font-size-heading-1">
+  <span class="trim-text-heading">Sized heading</span>
+</h1>
 ```
 
 **Font family**, sets only `font-family`, nothing else; use this to swap typeface without touching size/line-height/trim:
@@ -75,11 +84,10 @@ Typography utility classes from `_typography-utilities.scss`. They form the **HT
 **Text color:** `.text-color-inherit` only, unlike font roles, color token names aren't a contract enforced anywhere else in the system, so fixed `.text-color-*` classes would risk going silently dead the moment a project renames its color tokens. Add your own next to your project's palette.
 
 ```html
-<h1
-  class="trim-text-heading font-size-heading-1 font-weight-bold">
-  Page heading
+<h1 class="font-size-heading-1 font-weight-bold">
+  <span class="trim-text-heading">Page heading</span>
 </h1>
-<p class="trim-text-body font-size-text-base" style="color: var(--color-text-muted);">
-  Body copy in muted tone.
+<p class="font-size-text-base" style="color: var(--color-text-muted);">
+  <span class="trim-text-body">Body copy in muted tone.</span>
 </p>
 ```
