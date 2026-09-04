@@ -1,4 +1,4 @@
-import type { FamilyFontMetrics, FontFace, FontMetricsMap } from './generateFonts.ts'
+import type { FallbackFontFace, FamilyFontMetrics, FontFace, FontMetricsMap } from './generateFonts.ts'
 import { raw, setNestedScssMap, setScssMapEntry, setScssMapValue, toKebabCase } from './helpers.ts'
 
 /**
@@ -33,6 +33,26 @@ export const fontFacesToScssListValue = (fontFaces: FontFace[]): string => {
       setScssMapEntry('ext', face.ext, 3),
       setScssMapEntry('weight', formatWeight(face.weight), 3),
       setScssMapEntry('style', face.style, 3),
+    ]
+    return `    (\n${innerEntries.join('')}    ),\n`
+  })
+  return `(\n${entries.join('')}  )`
+}
+
+/**
+ * Builds the `$fallback-font-faces` list VALUE, one map per `FallbackFontFace`,
+ * for use as a `@use 'trimscale-css' with ($fallback-font-faces: ...)`
+ * argument in the generated bridge file.
+ */
+export const fallbackFontFacesToScssListValue = (fallbackFontFaces: FallbackFontFace[]): string => {
+  const entries = fallbackFontFaces.map((face) => {
+    const innerEntries = [
+      setScssMapEntry('family', face.family, 3),
+      setScssMapEntry('fallback-family', face.fallbackFamily, 3),
+      setScssMapEntry('size-adjust', face.sizeAdjust, 3),
+      setScssMapEntry('ascent-override', face.ascentOverride, 3),
+      setScssMapEntry('descent-override', face.descentOverride, 3),
+      setScssMapEntry('line-gap-override', face.lineGapOverride, 3),
     ]
     return `    (\n${innerEntries.join('')}    ),\n`
   })

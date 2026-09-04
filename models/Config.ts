@@ -43,6 +43,23 @@ export type Breakpoints = {
 /** Generic CSS font-family fallback keywords usable in a `FontSource.fallback`/`AppFonts.fallbackDefault`. */
 export type FontFallbacks = 'sans-serif' | 'serif' | 'monospace' | 'system-ui' | 'cursive'
 
+/** Concrete system fonts trimscale has built-in metrics for, usable as a metric-matched `fallbackFamily`. Distinct from `FontFallbacks` (generic keywords), which can't be metric-matched. */
+export type MatchableFallbackFamily =
+  | 'Arial'
+  | 'Helvetica'
+  | 'Helvetica Neue'
+  | 'Times New Roman'
+  | 'Georgia'
+  | 'Noto Serif'
+  | 'Courier New'
+  | 'Consolas'
+  | 'Menlo'
+  | 'Segoe UI'
+  | 'Roboto'
+
+/** Named cross-platform fallback chains, each resolving to an ordered list of `MatchableFallbackFamily` covering Windows/macOS/Android: trimscale emits one `@font-face` per family in the chain (all sharing the same `font-family` name), and the browser uses the first one actually installed. See `FALLBACK_CHAINS` in generateFonts.ts. */
+export type MatchableFallbackChain = 'sans-serif' | 'serif' | 'monospace'
+
 /** The five trim/spacing metrics a font contributes, normalized to em. Same shape the generator extracts from a real font file — a `manual` `FontSource` supplies these by hand instead (see precisionspec.dev). */
 export type RawFontMetrics = {
   /** Average character width, normalized to em */
@@ -55,6 +72,12 @@ export type RawFontMetrics = {
   lsbAdjust: number
   /** Right side bearing adjustment, normalized to em (negative) */
   rsbAdjust: number
+  /** Raw (uncorrected) OS/2 typo ascender, normalized to em. Only needed when `fallbackFamily` is set (without it, no metric-matched @font-face override is generated). */
+  ascender?: number
+  /** Raw (uncorrected) OS/2 typo descender, normalized to em (positive). Only needed when `fallbackFamily` is set. */
+  descender?: number
+  /** Raw OS/2 typo line gap, normalized to em. Only needed when `fallbackFamily` is set. */
+  lineGap?: number
 }
 
 /**
@@ -73,6 +96,8 @@ export type FontSource =
       fallback?: FontFallbacks
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `false` here if most of your fonts go through `next/font` but this particular one doesn't. */
       nextFont?: boolean
+      /** Metric-matched fallback `@font-face` override(s): a chain (recommended, e.g. `'sans-serif'`), a single family, or your own array. See docs/adding-a-font.md. */
+      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
   | {
       source: 'cdn'
@@ -83,6 +108,8 @@ export type FontSource =
       generateFontFace?: boolean
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `true` here for a `next/font/google` font when most of your other fonts *aren't* going through `next/font`, or `false` if this one isn't even though most are. */
       nextFont?: boolean
+      /** Metric-matched fallback `@font-face` override(s): a chain (recommended, e.g. `'sans-serif'`), a single family, or your own array. See docs/adding-a-font.md. */
+      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
   | {
       source: 'manual'
@@ -91,6 +118,8 @@ export type FontSource =
       metrics: RawFontMetrics
       /** Overrides `AppFonts.nextFontDefault` for this family only. */
       nextFont?: boolean
+      /** Metric-matched fallback `@font-face` override(s), requires `ascender`/`descender`/`lineGap` in `metrics` too. See docs/adding-a-font.md. */
+      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
 
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
@@ -98,6 +127,14 @@ export type AppFonts = {
   fonts: Record<string, FontSource>
   /** Base folder, relative to `trimscale.config.ts`, for `local` families that omit `path`: looked up as `localFontsPath/<family's config key>/`, non-recursive, every font file found there is used. */
   localFontsPath?: string
+  /**
+   * Your bundler's static-passthrough folder (Vite/CRA/Astro: `'public'`,
+   * SvelteKit: `'static'`), relative to `trimscale.config.ts`. Stripped as a
+   * leading segment from the generated `local` `@font-face` `src`, see
+   * docs/adding-a-font.md for why. Doesn't affect `path`/`localFontsPath`.
+   * @default 'public'
+   */
+  publicDir?: string
   /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `fonts` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
   nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted

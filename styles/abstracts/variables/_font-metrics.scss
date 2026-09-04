@@ -71,3 +71,18 @@ $font-metrics: (
 /// @prop {String} weight - font-weight value, e.g. "700" or "100 900" (variable fonts)
 /// @prop {String} style - "normal" | "italic"
 $font-faces: () !default;
+
+/// @group Abstracts/Variables
+/// @name Fallback Font Faces
+/// @description One entry per metric-matched `@font-face` override to emit in
+/// base/_fonts.scss, written when a `FontSource` sets `fallbackFamily`, so
+/// the fallback system font takes on the web font's metrics during font-swap
+/// (reduces CLS). See docs/adding-a-font.md.
+/// @type List
+/// @prop {String} family - font-family value for the override ("${family} Fallback")
+/// @prop {String} fallback-family - the system font loaded via src: local(...)
+/// @prop {Number} size-adjust - percentage value (unitless, e.g. 107.06 for 107.06%)
+/// @prop {Number} ascent-override - percentage value
+/// @prop {Number} descent-override - percentage value
+/// @prop {Number} line-gap-override - percentage value
+$fallback-font-faces: () !default;
