@@ -14,8 +14,18 @@
 /// baseline. Plain `.{property}-*` classes set the real CSS property
 /// directly and work anywhere, trim system or not. Roles are defined in
 /// abstracts/variables/typography.
+///
+/// The pseudo-element fallback path occupies ::before/::after on whatever
+/// element carries `.trim-text-*`. Put it on a <span> nested inside the
+/// sized element rather than on the element itself, so your own ::before/
+/// ::after on that element can't silently collide with it. Note
+/// %text-properties sets display: flow-root, so the span stops being
+/// inline — intentional (the fallback margins need a box), but worth
+/// knowing if you're expecting inline flow.
 /// @example html
-///   <h1 class="trim-text-heading font-size-heading-1">Sized heading</h1>
+///   <h1 class="font-size-heading-1">
+///     <span class="trim-text-heading">Sized heading</span>
+///   </h1>
 ///   <span class="font-family-mono">inline code-style snippet</span>
 ///   <span class="font-size-text-sm">plain, no trim system involved</span>
 /// ===========================================================================
