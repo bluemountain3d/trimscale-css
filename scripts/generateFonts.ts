@@ -225,6 +225,21 @@ const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cd
   )
 }
 
+/**
+ * Builds the exact `next/font` CSS custom property name a family's `family`
+ * value expects (e.g. `--next-font-inter`), so it can both be embedded in
+ * that value and printed at generate time for the consumer to cross-check
+ * against their own `layout.tsx` by eye. `generate` only reads
+ * `trimscale.config.ts`, it never parses `layout.tsx` or any other
+ * consumer file, so nothing here can validate the match automatically, a
+ * mismatch fails silently at runtime (falls through to the fallback font,
+ * no error) rather than at generate time.
+ */
+const buildNextFontVariableName = (cfg: TrimscaleConfig, familyName: string): string => {
+  const nextPrefix = cfg.appFonts.nextFontPrefix ?? 'next-font'
+  return `--${nextPrefix}-${toKebabCase(familyName)}`
+}
+
 /** Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a quoted family name, both with the resolved fallback appended. When `fallbackFaceGenerated`, the metric-matched `"${familyName} Fallback"` override is inserted between the family and the generic fallback. */
 const buildFamilyString = (
   cfg: TrimscaleConfig,
@@ -234,11 +249,10 @@ const buildFamilyString = (
   fallbackFaceGenerated: boolean,
 ): string => {
   const resolvedFallback = fallback ?? cfg.appFonts.fallbackDefault
-  const nextPrefix = cfg.appFonts.nextFontPrefix ?? 'next-font'
   const fallbackFaceSegment = fallbackFaceGenerated ? `, "${familyName} Fallback"` : ''
 
   return usesNextFont
-    ? `'var(--${nextPrefix}-${toKebabCase(familyName)})${fallbackFaceSegment}, ${resolvedFallback}'`
+    ? `'var(${buildNextFontVariableName(cfg, familyName)})${fallbackFaceSegment}, ${resolvedFallback}'`
     : `'"${familyName}"${fallbackFaceSegment}, ${resolvedFallback}'`
 }
 
@@ -276,6 +290,12 @@ export const computeFontData = async (
 
   for (const [familyName, fontSource] of Object.entries(cfg.appFonts.fonts)) {
     const usesNextFont = fontSource.nextFont ?? nextFontDefault
+
+    if (usesNextFont) {
+      console.log(
+        `- "${familyName}" expects next/font's \`variable\` to be exactly "${buildNextFontVariableName(cfg, familyName)}"`,
+      )
+    }
 
     if (fontSource.source === 'manual') {
       warnIfFamilyNameUnverifiable(familyName, 'manual')

@@ -4,6 +4,17 @@ This guide covers the extra steps for integrating trimscale-css with a Next.js p
 
 `next/font` manages `@font-face` declarations itself and exposes each font as a CSS custom property. Setting `nextFontDefault: true` (globally in `appFonts`, or `nextFont: true` per-family, see below) tells the generator to build that family's `family` value starting with that CSS variable instead of a plain quoted name, and, for `local` sources, to skip writing `_fonts.scss` for it. You don't touch `_font-metrics.scss` by hand for this, it's automatic once the config is set correctly and `next/font`'s `variable` name matches the convention below.
 
+**Known issue: Turbopack can't build trimscale-css's `@property` tokens, regardless of `next/font`.** trimscale-css's spacing tokens (and others) use `@property` with a decimal `initial-value` (e.g. `initial-value: .25rem`, Sass's own output always drops the leading zero). Turbopack, Next.js's default bundler since v15, always uses Lightning CSS for its CSS processing (`experimental.useLightningcss` has no effect on Turbopack, only on webpack), and Lightning CSS currently fails to parse that syntax: `Parsing CSS source code failed ... Unexpected end of input`, see [vercel/next.js#76302](https://github.com/vercel/next.js/issues/76302), an open upstream bug, not something fixable from trimscale-css's side. Confirmed working around it by building without Turbopack:
+
+```json
+{
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack"
+  }
+}
+```
+
 ## Overview
 
 | Step | File                                            | What you do there                                                                                 |
@@ -49,6 +60,8 @@ appFonts: {
   nextFont: false, // loaded via Adobe Fonts' own script, not next/font
 },
 ```
+
+**Don't combine `fallbackFamily` with `next/font`'s own automatic fallback.** `next/font/local` already generates its own metric-matched fallback font to reduce CLS (`adjustFontFallback`, defaults to `'Arial'`, `next/font/google` defaults to `true`), independently of trimscale-css. Setting `fallbackFamily` on a `next/font`-managed family stacks trimscale-css's own metric-matched fallback on top of Next's, e.g. `font-family: var(--next-font-x), "x Fallback", "x-config-key Fallback", serif`, two different fallback fonts doing the same job. It isn't broken, the browser just never reaches the redundant one, but pick one: drop `fallbackFamily` for `next/font`-managed families and let Next handle it, or set `adjustFontFallback: false` on the `next/font` side and use trimscale-css's `fallbackFamily` instead.
 
 ## Step 2: Configure `next.config.ts`
 

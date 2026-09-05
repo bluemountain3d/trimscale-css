@@ -25,6 +25,12 @@ All notable changes to this project are documented in this file.
 - `utilities` config option (`spacing`, `typography`): opt out of individual
   utility-class groups, each a boolean or a per-flag object. Defaults to
   everything enabled, so existing configs are unaffected.
+- `generate` now prints the exact `next/font` `variable` name each
+  `nextFont`-enabled family expects (e.g. `"Inter" expects next/font's
+  \`variable\` to be exactly "--next-font-inter"`). `generate` can't
+  validate this against `layout.tsx` itself (it never reads consumer
+  files beyond `trimscale.config.ts`), a mismatch there fails silently at
+  runtime, so this gives something to check by eye instead of guessing.
 
 ### Changed
 
@@ -66,6 +72,19 @@ All notable changes to this project are documented in this file.
 
 ### Documentation
 
+- Documented that `FontSource.fallbackFamily` shouldn't be combined with
+  `next/font`'s own automatic fallback (`adjustFontFallback`, on by default
+  for both `next/font/local` and `next/font/google`): both generate a
+  metric-matched fallback font independently, stacking two redundant
+  fallback fonts in the same `font-family` list. Not broken, just
+  unnecessary, pick one.
+- Documented that Next.js's Turbopack (default since v15) can't build
+  trimscale-css's `@property`-based tokens at all, regardless of `next/font`
+  or `pkg:`/`loadPaths`: Lightning CSS, which Turbopack always uses for CSS
+  and can't be disabled there, fails to parse a decimal `initial-value`
+  with no leading zero (`.25rem`, Sass's own default output), a known open
+  upstream bug ([vercel/next.js#76302](https://github.com/vercel/next.js/issues/76302)).
+  Confirmed `next dev --webpack` / `next build --webpack` works around it.
 - Documented that the `pkg:` importer doesn't work with Next.js's Turbopack
   (the default bundler since v15): Turbopack only passes plain,
   JSON-serializable values through `sassOptions`, and a `NodePackageImporter`
