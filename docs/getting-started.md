@@ -4,7 +4,7 @@ trimscale-css is consumed as SCSS source plus a small CLI that generates your to
 
 ## Requirements
 
-- Node >=23.6.0. The CLI's `generate` command dynamically imports your `trimscale.config.ts` and relies on Node's built in TypeScript type stripping to run it directly, no build step, no `ts-node`. That support only became flagless default at 23.6.0, so it's a hard floor, not a suggestion.
+- Node >=22.18.0. The CLI's `generate` command dynamically imports your `trimscale.config.ts` and relies on Node's built in TypeScript type stripping to run it directly, no build step, no `ts-node`. That support only became flagless default at 22.18.0 (and 23.6.0 on the odd-numbered line), so it's a hard floor, not a suggestion.
 - Your own SCSS compiler (`sass-embedded` or `sass`) at **1.95.0 or later**, configured with a `loadPaths` entry pointing at the package's `styles/` folder. Vite and Next.js setups are shown below.
 - If your project has a `tsconfig.json` and you want editor type checking on `trimscale.config.ts`, set `moduleResolution` to `"nodenext"` or `"bundler"` so the config's `import type ... from 'trimscale-css/models/Config.ts'` subpath import resolves. This is purely for editor DX, the config runs fine at runtime either way.
 
