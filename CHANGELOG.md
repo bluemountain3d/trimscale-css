@@ -36,6 +36,11 @@ All notable changes to this project are documented in this file.
   with a frequency-weighted average over lowercase a-z and space.
   Regenerating shifts `--avg-char-width-*` and `--text-box-*` widths for
   fonts with OS/2 version 3 or 4 tables.
+- `generate` now converts `breakpoints`' px values to rem itself, instead of
+  emitting a `fn.px-to-rem(...)` call into the generated bridge file. Output
+  is identical (`320px` still becomes `20rem`), but the bridge file no
+  longer needs to `@use` anything beyond trimscale-css's main entry point,
+  which is already part of the package's public `exports` surface.
 
 ### Removed
 
@@ -45,6 +50,9 @@ All notable changes to this project are documented in this file.
 
 ### Documentation
 
+- Documented that the generated bridge file should be regenerated after
+  every trimscale-css version bump, not just after config changes, in case
+  a future version changes which config fields exist.
 - Documented the `<span>`-wrapper pattern for `.trim-text-*` classes: nest
   the class on a `<span>` inside the sized element rather than on the
   element itself, so the fallback path's `::before`/`::after` don't collide
