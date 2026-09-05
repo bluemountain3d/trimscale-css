@@ -140,6 +140,6 @@ Adding a component of your own? See [examples.md](https://github.com/bluemountai
 
 ---
 
-## Development
+## Changelog
 
-`docs/` covers using the published package; it ships with it. `devDocs/` does not ship, it's for working on trimscale-css itself: [devDocs/styleguide.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/styleguide.md) covers running the local Vite dev app used to visually test the system while building it, [devDocs/roadmap.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/roadmap.md) tracks planned work not yet reflected in the package, and [devDocs/maintenance.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/maintenance.md) tracks files that need a manual update pass when something else changes.
+See [CHANGELOG.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/CHANGELOG.md) for release history.
