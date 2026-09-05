@@ -328,6 +328,43 @@ export type SemanticAlias = {
 /** Map of semantic alias name to its `SemanticAlias` definition. */
 export type SemanticColorAliases = Record<string, SemanticAlias>
 
+
+/** Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. A `false` at the top level of a section also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops. */
+export type UtilitiesConfig = {
+  spacing?:
+    | boolean
+    | {
+        /** `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`. */
+        base?: boolean
+        /** `.{m|p}{side?}-{3xs..9xl}`. */
+        tshirt?: boolean
+        /** `.{m|p}{side?}-{1..numericScaleEnd}`. */
+        numeric?: boolean
+      }
+  typography?:
+    | boolean
+    | {
+        /** `.trim-text-*`. */
+        trim?: boolean
+        /** `.font-family-*`. */
+        family?: boolean
+        /** `.font-size-*`. */
+        size?: boolean
+        /** `.line-height-*`, plus `.line-height-dynamic`. */
+        lineHeight?: boolean
+        /** `.font-weight-*`. */
+        weight?: boolean
+        /** `.font-style-*`. */
+        style?: boolean
+        /** `.text-transform-*`. */
+        textTransform?: boolean
+        /** `.text-align-*`. */
+        textAlign?: boolean
+        /** `.num-*` (figure variants). */
+        numericFigures?: boolean
+      }
+}
+
 // ============================================================================
 // Full Config
 // ============================================================================
@@ -370,4 +407,8 @@ export type TrimscaleConfig = {
   /** Additional named palettes beyond `baseColorTokens` (e.g. a `campaign` palette), keyed by whatever name you like. Each gets its own `@include mx.generate-color-tokens(...)` alongside the base tokens. */
   customColorTokens?: Record<string, ColorTokensMap>
   semanticColorAliases?: SemanticColorAliases
+  /** Which utility-class groups `generate` emits. Every group defaults `true`, so omitting this field changes nothing. Set a group to `false` (or a sub-flag within it) to stop generating those classes entirely. */
+  utilities?: UtilitiesConfig
 }
+
+

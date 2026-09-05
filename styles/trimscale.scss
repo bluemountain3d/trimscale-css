@@ -39,7 +39,19 @@
   $numeric-scale-micro-end,
   $numeric-scale-macro-end,
   $base-grid-size,
-  $ultrawide-height-threshold-px;
+  $ultrawide-height-threshold-px,
+  $utilities-spacing-base,
+  $utilities-spacing-tshirt,
+  $utilities-spacing-numeric,
+  $utilities-typography-trim,
+  $utilities-typography-family,
+  $utilities-typography-size,
+  $utilities-typography-line-height,
+  $utilities-typography-weight,
+  $utilities-typography-style,
+  $utilities-typography-text-transform,
+  $utilities-typography-text-align,
+  $utilities-typography-numeric-figures;
 
 // Layer — Define CSS Layers specificity order
 @forward './layer';

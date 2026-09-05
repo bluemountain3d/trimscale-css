@@ -2,6 +2,28 @@
 
 This page documents the *shape* of each utility class using the example config's names. For the exact classes **your own** `trimscale.config.ts` produces, generate writes a resolved reference to `<outDir>/utility-classes.md`, see [getting-started.md](getting-started.md#generate).
 
+## Opting out of utility classes
+
+Every group documented below is on by default. If you write component SCSS
+and never reach for `.p-md`/`.trim-text-body`/etc. in markup, turn a group
+off in `trimscale.config.ts`'s `utilities` field so `generate` stops
+emitting it:
+
+```ts
+utilities: {
+  spacing: { numeric: false }, // keep t-shirt sizes, drop the 1-48 numeric scale
+  typography: false,           // drop every typography utility class
+}
+```
+
+`spacing`/`typography` each accept `true`/`false` for the whole section, or
+an object turning off individual groups (`base`, `tshirt`, `numeric` for
+spacing; `trim`, `family`, `size`, `lineHeight`, `weight`, `style`,
+`textTransform`, `textAlign`, `numericFigures` for typography). Turning off
+a section's top level also drops its small fixed classes, e.g.
+`spacing: false` removes `.m-none`/`.mx-auto`/etc. too, not just the scale
+loops. See `models/Config.ts`'s `UtilitiesConfig` for the exact shape.
+
 ## Spacing
 
 Pattern: `.{property}-{side?}-{size}`
@@ -16,14 +38,6 @@ All directional sides map to **logical properties**, not physical ones: `t`/`b` 
 ```html
 <div class="p-md mt-lg mx-auto">…</div>
 <div class="pt-3xl pb-xl px-md">…</div>
-```
-
-## Gap
-
-Pattern: `.gap-{size}`, using t-shirt and numeric scales.
-
-```html
-<div class="flex gap-md">…</div>
 ```
 
 ## Typography
@@ -80,8 +94,6 @@ being inline, intentional, but worth knowing if you're expecting inline flow.
 `.text-transform-*`, `capitalize`, `uppercase`, `lowercase`
 
 **Text alignment:** `.text-align-left`, `.text-align-center`, `.text-align-right`
-
-**Text color:** `.text-color-inherit` only, unlike font roles, color token names aren't a contract enforced anywhere else in the system, so fixed `.text-color-*` classes would risk going silently dead the moment a project renames its color tokens. Add your own next to your project's palette.
 
 ```html
 <h1 class="font-size-heading-1 font-weight-bold">
