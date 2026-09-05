@@ -52,7 +52,7 @@ const config: TrimscaleConfig = {
       // Local example (self-hosted font file, path relative to this file):
       // 'Roboto': {
       //   source: 'local',
-      //   path: ['./fonts/Roboto-Regular.woff2', './fonts/Roboto-Bold.woff2'],
+      //   path: ['./public/fonts/Roboto-Regular.woff2', './public/fonts/Roboto-Bold.woff2'],
       //   fallback: 'sans-serif',
       // },
       // CDN example (metrics auto-extracted, no @font-face written by default):
@@ -120,6 +120,7 @@ const config: TrimscaleConfig = {
    * → docs/customizing-type-scale.md · docs/full-config-reference.md#fluidscale
    */
   fluidScale: {
+    // System default
     minWidth: 360,
     maxWidth: 1440,
     minFontSize: 16,
