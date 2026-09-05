@@ -11,8 +11,7 @@
 
 /// The t-shirt-size scale actually in effect (var.$t-shirt-scale under the
 /// coupled approach, or the merge of var.$t-shirt-scale-micro/-macro under
-/// independent) — consumed by utilities/_spacing-utilities.scss and
-/// utilities/_gap-utilities.scss.
+/// independent) — consumed by utilities/_spacing-utilities.scss.
 /// @type Map
 $space-values: () !default;
 $_space-micro: () !default;

@@ -88,17 +88,17 @@ trimscale-css/
 ├── fixtures/                        # Default font files used by the shipped config
 ├── templates/                       # trimscale.config.ts, the consumer-safe template `init` copies into your project
 ├── docs/                            # Guides, see Documentation below
-├── styles/
-│   ├── trimscale.scss               # Main entry point: static, !default-configurable via `@use ... with (...)`
-│   ├── _layer.scss                  # @layer order, see cascade-layers.md
-│   ├── abstracts/
-│   │   ├── variables/               # Config surface: breakpoints, fluid scale, font metrics, typography, spacing, colors
-│   │   ├── functions/               # Fluid size calc, OKLCH helpers, unit utils
-│   │   └── mixins/                  # font-setup, breakpoints, color token generation
-│   ├── tokens/                      # CSS custom properties
-│   ├── base/                        # HTML defaults: reset, fonts, typography
-│   ├── utilities/                   # Spacing, gap, and typography utility classes
-│   └── components/                  # Empty by default, see examples.md
+└── styles/
+    ├── trimscale.scss               # Main entry point: static, !default-configurable via `@use ... with (...)`
+    ├── _layer.scss                  # @layer order, see cascade-layers.md
+    ├── abstracts/
+    │   ├── variables/               # Config surface: breakpoints, fluid scale, font metrics, typography, spacing, colors
+    │   ├── functions/               # Fluid size calc, OKLCH helpers, unit utils
+    │   └── mixins/                  # font-setup, breakpoints, color token generation
+    ├── tokens/                      # CSS custom properties
+    ├── base/                        # HTML defaults: reset, fonts, typography
+    ├── utilities/                   # Spacing and typography utility classes
+    └── components/                  # Empty by default, see examples.md
 ```
 
 ---
@@ -112,7 +112,7 @@ trimscale-css/
 | [cascade-layers.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/cascade-layers.md)                   | The `@layer` stack and why it matters          |
 | [design-tokens.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/design-tokens.md)                     | Every generated CSS custom property            |
 | [abstracts.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/abstracts.md)                             | Functions, mixins, and the breakpoint API      |
-| [utility-classes.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/utility-classes.md)                 | Spacing, gap, and typography utility classes   |
+| [utility-classes.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/utility-classes.md)                 | Spacing and typography utility classes         |
 | [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md)                               | Copy-paste component recipes (text-box)        |
 | [customizing-spacing.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-spacing.md)         | Coupled vs. independent spacing, tuning tiers  |
 | [customizing-breakpoints.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-breakpoints.md) | Changing breakpoint values                     |

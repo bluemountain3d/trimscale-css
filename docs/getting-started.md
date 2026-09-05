@@ -92,7 +92,7 @@ This single import includes:
 
 - All CSS custom property tokens, configured from your `trimscale.config.ts`
 - HTML element defaults and reset
-- Utility classes (spacing, gap, typography)
+- Utility classes (spacing, typography)
 
 Haven't run `generate` yet, or don't want to? `@use 'trimscale';` (via `loadPaths`) works too, it's the same static package, just with the shipped example config's default values instead of yours.
 

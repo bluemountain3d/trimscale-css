@@ -36,9 +36,11 @@
   /// text-transform are left unset — pair with a plain utility class below,
   /// or use font-setup, for those.
   /// =========================================================================
-  @each $key, $family in var.$font-roles {
-    .trim-text-#{$key} {
-      @extend %#{$key}-text;
+  @if var.$utilities-typography-trim {
+    @each $key, $family in var.$font-roles {
+      .trim-text-#{$key} {
+        @extend %#{$key}-text;
+      }
     }
   }
 
@@ -47,86 +49,102 @@
   /// =========================================================================
 
   /// Font Family — sets only font-family, nothing else
-  @each $key, $value in var.$font-roles {
-    .font-family-#{$key} {
-      font-family: var(--font-family-#{$key});
+  @if var.$utilities-typography-family {
+    @each $key, $value in var.$font-roles {
+      .font-family-#{$key} {
+        font-family: var(--font-family-#{$key});
+      }
     }
   }
 
   /// Font Size — sets font-size directly, no trim system dependency
-  @each $key, $value in var.$semantic-font-sizes {
-    .font-size-#{$key} {
-      font-size: var(--#{$key});
+  @if var.$utilities-typography-size {
+    @each $key, $value in var.$semantic-font-sizes {
+      .font-size-#{$key} {
+        font-size: var(--#{$key});
+      }
     }
   }
 
   /// Line Height — sets line-height directly, no trim system dependency
-  @each $key, $value in var.$line-heights {
-    .line-height-#{$key} {
-      line-height: var(--line-height-#{$key});
+  @if var.$utilities-typography-line-height {
+    @each $key, $value in var.$line-heights {
+      .line-height-#{$key} {
+        line-height: var(--line-height-#{$key});
+      }
     }
-  }
-  .line-height-dynamic {
-    line-height: var(--line-height-dynamic);
+    .line-height-dynamic {
+      line-height: var(--line-height-dynamic);
+    }
   }
 
   /// Font Weight — sets font-weight directly, no trim system dependency
-  @each $key, $value in var.$font-weights {
-    .font-weight-#{$key} {
-      font-weight: var(--font-weight-#{$key});
+  @if var.$utilities-typography-weight {
+    @each $key, $value in var.$font-weights {
+      .font-weight-#{$key} {
+        font-weight: var(--font-weight-#{$key});
+      }
     }
   }
 
   /// Font Style — sets font-style directly, no trim system dependency
-  @each $item in (normal, italic, oblique) {
-    .font-style-#{$item} {
-      font-style: #{$item};
+  @if var.$utilities-typography-style {
+    @each $item in (normal, italic, oblique) {
+      .font-style-#{$item} {
+        font-style: #{$item};
+      }
     }
   }
 
   /// Text Transform — sets text-transform directly, no trim system dependency
-  @each $item in (capitalize, uppercase, lowercase) {
-    .text-transform-#{$item} {
-      text-transform: #{$item};
+  @if var.$utilities-typography-text-transform {
+    @each $item in (capitalize, uppercase, lowercase) {
+      .text-transform-#{$item} {
+        text-transform: #{$item};
+      }
     }
   }
 
   /// Text Align
-  .text-align-left {
-    text-align: left;
-  }
-  .text-align-center {
-    text-align: center;
-  }
-  .text-align-right {
-    text-align: right;
-  }
-
-  /// Lining figures (default) — baseline-aligned, for UI/values
-  .num-lining-tabular {
-    font-variant-numeric: lining-nums tabular-nums;
+  @if var.$utilities-typography-text-align {
+    .text-align-left {
+      text-align: left;
+    }
+    .text-align-center {
+      text-align: center;
+    }
+    .text-align-right {
+      text-align: right;
+    }
   }
 
-  .num-lining-proportional {
-    font-variant-numeric: lining-nums proportional-nums;
-  }
+  @if var.$utilities-typography-numeric-figures {
+    /// Lining figures (default) — baseline-aligned, for UI/values
+    .num-lining-tabular {
+      font-variant-numeric: lining-nums tabular-nums;
+    }
 
-  /// Oldstyle figures — varying baseline, for running text/editorial contexts
-  .num-oldstyle-tabular {
-    font-variant-numeric: oldstyle-nums tabular-nums;
-  }
+    .num-lining-proportional {
+      font-variant-numeric: lining-nums proportional-nums;
+    }
 
-  .num-oldstyle-proportional {
-    font-variant-numeric: oldstyle-nums proportional-nums;
-  }
+    /// Oldstyle figures — varying baseline, for running text/editorial contexts
+    .num-oldstyle-tabular {
+      font-variant-numeric: oldstyle-nums tabular-nums;
+    }
 
-  /// Ordinal
-  .num-ordinal-tabular {
-    font-variant-numeric: ordinal-nums tabular-nums;
-  }
+    .num-oldstyle-proportional {
+      font-variant-numeric: oldstyle-nums proportional-nums;
+    }
 
-  .num-ordinal-proportional {
-    font-variant-numeric: ordinal-nums proportional-nums;
+    /// Ordinal
+    .num-ordinal-tabular {
+      font-variant-numeric: ordinal-nums tabular-nums;
+    }
+
+    .num-ordinal-proportional {
+      font-variant-numeric: ordinal-nums proportional-nums;
+    }
   }
 
   /// Text color
@@ -137,7 +155,7 @@
   /// `.text-color-*` classes here would risk going silently dead the moment
   /// a project doesn't use these exact token names. Add your own next to your
   /// project's palette instead.
-  .text-color-inherit {
-    color: inherit;
-  }
+  // .text-color-inherit {
+  //   color: inherit;
+  // }
 }
