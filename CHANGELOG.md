@@ -42,6 +42,22 @@ All notable changes to this project are documented in this file.
   longer needs to `@use` anything beyond trimscale-css's main entry point,
   which is already part of the package's public `exports` surface.
 
+### Fixed
+
+- `next/font` integration (`nextFontDefault`/`nextFont: true`) generated
+  invalid SCSS whenever the resulting `family` value had a fallback
+  appended: `var(--next-font-x), "X Fallback", sans-serif` was emitted
+  unquoted into a Sass map, and Sass reads each top-level comma there as a
+  new map entry, causing a parse error (`expected ":"`). The non-`next/font`
+  branch already worked because it manually wrapped its value in a Sass
+  string; the `next/font` branch was missing that wrapping.
+- `toKebabCase` (used to build the `next/font` CSS variable name from a
+  family name) didn't convert spaces to hyphens, so a multi-word family
+  like "Roboto Serif" produced `--next-font-roboto serif`, a CSS custom
+  property name with a literal space in it, invalid and non-functional.
+  Both bugs were only reachable together and were caught testing a
+  multi-word `next/font` family end-to-end in a real Next.js project.
+
 ### Removed
 
 - **Breaking:** gap utility classes (`.gap-*`, `.row-gap-*`,
@@ -50,6 +66,12 @@ All notable changes to this project are documented in this file.
 
 ### Documentation
 
+- Documented that the `pkg:` importer doesn't work with Next.js's Turbopack
+  (the default bundler since v15): Turbopack only passes plain,
+  JSON-serializable values through `sassOptions`, and a `NodePackageImporter`
+  instance's `canonicalize`/`load` methods don't survive that boundary.
+  Confirmed by reproducing the failure directly. `loadPaths` is unaffected
+  and stays the documented approach for Next.js.
 - Documented that the generated bridge file should be regenerated after
   every trimscale-css version bump, not just after config changes, in case
   a future version changes which config fields exist.

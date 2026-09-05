@@ -123,7 +123,7 @@ sass.compile('input.scss', { importers: [new NodePackageImporter()] });
 
 `pkg:` and `loadPaths` compile to identical output for the subpaths `pkg:` exposes, but **keep `loadPaths` configured either way**: the bridge file `generate` writes into your `<outDir>` uses a bare (non-`pkg:`) import for trimscale-css's main entry point, so it only resolves via `loadPaths`, same as it always has, `pkg:` doesn't change that. `pkg:` is additive for your own component-scoped `@use` statements, not a way to drop the `loadPaths` requirement. The available subpaths (`tokens`, `abstracts/variables`, `abstracts/functions`, `abstracts/mixins`, `base`, `utilities`, `components`) mirror the ones already used under `loadPaths` in the example above. Anything not listed there is an implementation detail, not part of the package's public surface, and isn't reachable via `pkg:` either.
 
-**Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration.
+**Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration. Use `loadPaths` there, not `pkg:`, Turbopack (Next.js's default bundler since v15) can't pass a `NodePackageImporter` instance through `sassOptions`, only plain JSON-serializable values.
 
 ## Usage
 

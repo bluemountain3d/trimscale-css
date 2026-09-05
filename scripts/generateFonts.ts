@@ -238,7 +238,7 @@ const buildFamilyString = (
   const fallbackFaceSegment = fallbackFaceGenerated ? `, "${familyName} Fallback"` : ''
 
   return usesNextFont
-    ? `var(--${nextPrefix}-${toKebabCase(familyName)})${fallbackFaceSegment}, ${resolvedFallback}`
+    ? `'var(--${nextPrefix}-${toKebabCase(familyName)})${fallbackFaceSegment}, ${resolvedFallback}'`
     : `'"${familyName}"${fallbackFaceSegment}, ${resolvedFallback}'`
 }
 

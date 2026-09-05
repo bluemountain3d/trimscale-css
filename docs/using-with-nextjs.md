@@ -70,6 +70,8 @@ export default nextConfig;
 
 After this, `@use 'trimscale'` resolves from anywhere in your SCSS files. Add your own project's SCSS root as a second `loadPaths` entry if you need it, trimscale-css never claims the bare `styles/` name for itself, so it won't collide with one of your own.
 
+**Use `loadPaths` here, not the [`pkg:` importer](getting-started.md#configure-your-scss-compiler).** `pkg:` needs a `NodePackageImporter` instance (real `canonicalize`/`load` methods) passed through `sassOptions.importers`, and Turbopack, Next.js's default bundler since v15, only passes plain, JSON-serializable values through `sassOptions` to its Rust-based Sass compilation, a class instance's methods don't survive that boundary. The build fails with `An importer must have either canonicalize and load methods, or a findFileUrl method.` `loadPaths` works because it's already a plain array of strings.
+
 ## Step 3: Load fonts in `layout.tsx`
 
 The `variable` you assign must be `--{nextFontPrefix}-{kebab-case family name}`. With the default prefix, a font named "Inter" needs `variable: '--next-font-inter'`; "Newsreader Text" needs `--next-font-newsreader-text`.
@@ -78,7 +80,7 @@ The `variable` you assign must be `--{nextFontPrefix}-{kebab-case family name}`.
 
 ```tsx
 import { Newsreader_Text } from 'next/font/google';
-import { localFont } from 'next/font/local';
+import localFont from 'next/font/local';
 
 const inter = localFont({
   src: [
