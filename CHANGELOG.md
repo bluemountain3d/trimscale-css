@@ -63,6 +63,18 @@ All notable changes to this project are documented in this file.
   property name with a literal space in it, invalid and non-functional.
   Both bugs were only reachable together and were caught testing a
   multi-word `next/font` family end-to-end in a real Next.js project.
+- `_z-index-tokens.scss` emitted its `--z-*` custom property declarations
+  directly inside `@layer tokens { ... }` with no selector wrapping them,
+  invalid CSS (a conditional group rule like `@layer` needs a qualified
+  rule or nested at-rule inside it, not bare declarations). Browsers and
+  Sass itself tolerate it silently, but it broke Next.js's Turbopack
+  outright (`Parsing CSS source code failed ... Unexpected end of input`,
+  Turbopack's Lightning CSS parser is strict about malformed CSS that
+  other tools ignore). Wrapped the declarations in `:root`, matching every
+  other token file. Confirmed fixed end to end in a real Next.js/Turbopack
+  project; `@property`'s decimal `initial-value` (`.25rem`) was a red
+  herring, ruled out by testing with whole-number placeholders first,
+  which made no difference until this fix landed.
 
 ### Removed
 
@@ -78,13 +90,6 @@ All notable changes to this project are documented in this file.
   metric-matched fallback font independently, stacking two redundant
   fallback fonts in the same `font-family` list. Not broken, just
   unnecessary, pick one.
-- Documented that Next.js's Turbopack (default since v15) can't build
-  trimscale-css's `@property`-based tokens at all, regardless of `next/font`
-  or `pkg:`/`loadPaths`: Lightning CSS, which Turbopack always uses for CSS
-  and can't be disabled there, fails to parse a decimal `initial-value`
-  with no leading zero (`.25rem`, Sass's own default output), a known open
-  upstream bug ([vercel/next.js#76302](https://github.com/vercel/next.js/issues/76302)).
-  Confirmed `next dev --webpack` / `next build --webpack` works around it.
 - Documented that the `pkg:` importer doesn't work with Next.js's Turbopack
   (the default bundler since v15): Turbopack only passes plain,
   JSON-serializable values through `sassOptions`, and a `NodePackageImporter`
