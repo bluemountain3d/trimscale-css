@@ -84,6 +84,10 @@ All notable changes to this project are documented in this file.
 
 ### Documentation
 
+- Changed the `using-with-nextjs.md` `next.config.ts` example to leave
+  `sassOptions.implementation` unset (Next.js's own default, plain `sass`)
+  instead of `'sass-embedded'`. Both were tested working with this setup;
+  noted `sass-embedded` as an option for faster compiles.
 - Documented that `FontSource.fallbackFamily` shouldn't be combined with
   `next/font`'s own automatic fallback (`adjustFontFallback`, on by default
   for both `next/font/local` and `next/font/google`): both generate a
