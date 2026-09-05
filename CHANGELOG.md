@@ -6,6 +6,14 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+- `package.json` `exports` field, defining the package's public surface
+  (`tokens`, `abstracts/variables`, `abstracts/functions`, `abstracts/mixins`,
+  `base`, `utilities`, `components`, `models/Config.ts`) and enabling Sass's
+  `pkg:` importer as an alternative to configuring `loadPaths`. `loadPaths`
+  keeps working unchanged, this is additive. Also formally locks `scripts/`
+  from external import, it was never meant to be consumer-facing; if
+  anything relied on importing `trimscale-css/scripts/*` directly
+  (undocumented, unlikely), that now fails.
 - `FontSource.fallbackFamily` (opt-in): generates a metric-matched `@font-face`
   override (`size-adjust`, `ascent-override`, `descent-override`,
   `line-gap-override`) between the webfont and its generic fallback keyword,

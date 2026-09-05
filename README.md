@@ -101,6 +101,8 @@ trimscale-css/
     └── components/                  # Empty by default, see examples.md
 ```
 
+The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`, `abstracts/mixins/`, `base/`, `utilities/`, `components/`, `styles/trimscale.scss`, and `models/Config.ts`, the exact set exposed via `package.json`'s `exports` field for the [`pkg:` importer](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#configure-your-scss-compiler). Anything else under `styles/` is an implementation detail, not covered by semver.
+
 ---
 
 ## Documentation

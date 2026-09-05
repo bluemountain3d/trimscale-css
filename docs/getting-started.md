@@ -76,6 +76,28 @@ export default {
 
 This `loadPaths` entry is only for trimscale-css's own static files (functions, mixins, base styles), it's separate from wherever `generate` writes your bridge file (`outDir`, see [Generate](#generate) above) — that one you `@use` by its actual location in your project (relative path, or add its parent directory to `loadPaths` too if you'd rather use a bare specifier).
 
+**`pkg:` importer (alternative to `loadPaths`):**
+
+Sass's built-in [package importer](https://sass-lang.com/documentation/at-rules/use/#pkg-importer) resolves `pkg:` URLs against a package's `exports` field, so you can skip configuring `loadPaths` for trimscale-css entirely:
+
+```scss
+@use 'pkg:trimscale-css/tokens';
+@use 'pkg:trimscale-css/abstracts/mixins' as mx;
+```
+
+Requires Dart Sass 1.71.0 or later, already covered by the 1.95.0-or-later requirement above. Vite with `sass-embedded` registers the package importer automatically. A bare `sass` CLI or JS/Dart API call needs it enabled explicitly:
+
+```bash
+sass --pkg-importer=node input.scss output.css
+```
+
+```js
+import { NodePackageImporter } from 'sass-embedded'; // or 'sass'
+sass.compile('input.scss', { importers: [new NodePackageImporter()] });
+```
+
+`pkg:` and `loadPaths` compile to identical output, `pkg:` isn't a replacement, just an alternative that skips `loadPaths` configuration entirely. The available subpaths (`tokens`, `abstracts/variables`, `abstracts/functions`, `abstracts/mixins`, `base`, `utilities`, `components`) mirror the ones already used under `loadPaths` in the example above. Anything not listed there is an implementation detail, not part of the package's public surface, and isn't reachable via `pkg:` either.
+
 **Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration.
 
 ## Usage
