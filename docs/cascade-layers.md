@@ -17,7 +17,7 @@ Layers are listed lowest to highest priority, a later layer always beats an earl
 | `base`       | HTML element defaults (`body`, headings, etc.)                                                                      |
 | `layouts`    | Reserved for your own layout styles (grids, page structure, containers), the system ships none of its own           |
 | `components` | Reserved for your own component classes, the system ships none of its own, see [examples.md](examples.md)           |
-| `utilities`  | All utility classes: spacing, gap, text, layout (highest priority)                                                  |
+| `utilities`  | All utility classes: spacing, text, layout (highest priority)                                                       |
 
 Because `trim` sits below `base`, `components`, and `utilities`, everything the trim placeholders set is a _default_: any component class, base element rule, or utility class overrides it automatically. This is also why `.trim-text-*` and a plain `.font-size-*` can be combined freely on the same element, the winner is decided by layer, not by class order or specificity.
 
