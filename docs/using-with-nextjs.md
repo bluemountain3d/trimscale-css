@@ -6,12 +6,12 @@ This guide covers the extra steps for integrating trimscale-css with a Next.js p
 
 ## Overview
 
-| Step | File                                            | What you do there                                                                                 |
-| ---- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Step | File                                            | What you do there                                                                                        |
+| ---- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | 1    | [`trimscale.config.ts`](../trimscale.config.ts) | Set `appFonts.nextFontDefault: true` (and `nextFontPrefix` if you want something other than `next-font`) |
-| 2    | `next.config.ts`                                | Add `sassOptions` with `loadPaths`                                                                 |
-| 3    | `layout.tsx` (or wherever you load fonts)       | Load fonts with `next/font`, variable name must match `--{prefix}-{kebab-family-name}`             |
-| 4    | Run `npx trimscale-css generate`                | Extracts metrics as usual, builds each family's `family` value around its CSS variable             |
+| 2    | `next.config.ts`                                | Add `sassOptions` with `loadPaths`                                                                       |
+| 3    | `layout.tsx` (or wherever you load fonts)       | Load fonts with `next/font`, variable name must match `--{prefix}-{kebab-family-name}`                   |
+| 4    | Run `npx trimscale-css generate`                | Extracts metrics as usual, builds each family's `family` value around its CSS variable                   |
 
 ## Step 1: Configure the package
 
@@ -50,6 +50,8 @@ appFonts: {
 },
 ```
 
+**Don't combine `fallbackFamily` with `next/font`'s own automatic fallback.** `next/font/local` already generates its own metric-matched fallback font to reduce CLS (`adjustFontFallback`, defaults to `'Arial'`, `next/font/google` defaults to `true`), independently of trimscale-css. Setting `fallbackFamily` on a `next/font`-managed family stacks trimscale-css's own metric-matched fallback on top of Next's, e.g. `font-family: var(--next-font-x), "x Fallback", "x-config-key Fallback", serif`, two different fallback fonts doing the same job. It isn't broken, the browser just never reaches the redundant one, but pick one: drop `fallbackFamily` for `next/font`-managed families and let Next handle it, or set `adjustFontFallback: false` on the `next/font` side and use trimscale-css's `fallbackFamily` instead.
+
 ## Step 2: Configure `next.config.ts`
 
 Point `loadPaths` at the installed package's `styles/` folder:
@@ -60,7 +62,6 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   sassOptions: {
-    implementation: 'sass-embedded',
     loadPaths: [path.join(process.cwd(), 'node_modules/trimscale-css/styles')],
   },
 };
@@ -70,6 +71,10 @@ export default nextConfig;
 
 After this, `@use 'trimscale'` resolves from anywhere in your SCSS files. Add your own project's SCSS root as a second `loadPaths` entry if you need it, trimscale-css never claims the bare `styles/` name for itself, so it won't collide with one of your own.
 
+`implementation` is left unset above (Next.js's own default, `sass`). Both `sass` and `sass-embedded` (an option for faster compiles, set `implementation: 'sass-embedded'`) work fine with this setup.
+
+**Use `loadPaths` here, not the [`pkg:` importer](getting-started.md#configure-your-scss-compiler).** Turbopack, Next.js's default bundler since v15, can't pass `pkg:`'s setup object through `sassOptions`, only plain values like `loadPaths`' string list, so `pkg:` fails to build under Turbopack.
+
 ## Step 3: Load fonts in `layout.tsx`
 
 The `variable` you assign must be `--{nextFontPrefix}-{kebab-case family name}`. With the default prefix, a font named "Inter" needs `variable: '--next-font-inter'`; "Newsreader Text" needs `--next-font-newsreader-text`.
@@ -78,7 +83,7 @@ The `variable` you assign must be `--{nextFontPrefix}-{kebab-case family name}`.
 
 ```tsx
 import { Newsreader_Text } from 'next/font/google';
-import { localFont } from 'next/font/local';
+import localFont from 'next/font/local';
 
 const inter = localFont({
   src: [

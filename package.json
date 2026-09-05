@@ -23,6 +23,17 @@
     "fixtures",
     "templates"
   ],
+  "exports": {
+    ".": "./styles/trimscale.scss",
+    "./tokens": "./styles/tokens/_index.scss",
+    "./abstracts/variables": "./styles/abstracts/variables/_index.scss",
+    "./abstracts/functions": "./styles/abstracts/functions/_index.scss",
+    "./abstracts/mixins": "./styles/abstracts/mixins/_index.scss",
+    "./base": "./styles/base/_index.scss",
+    "./utilities": "./styles/utilities/_index.scss",
+    "./components": "./styles/components/_index.scss",
+    "./models/Config.ts": "./models/Config.ts"
+  },
   "scripts": {
     "lint": "biome lint .",
     "format": "biome format --write .",

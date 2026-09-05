@@ -1,16 +1,18 @@
 /**
- * Converts a camelCase or alphanumeric identifier to kebab-case.
- * @param text - The string to convert (e.g. `fontSize`, `fs900`).
- * @returns The kebab-cased string (e.g. `font-size`, `fs-900`).
+ * Converts a camelCase, alphanumeric, or space-separated identifier to kebab-case.
+ * @param text - The string to convert (e.g. `fontSize`, `fs900`, `Roboto Serif`).
+ * @returns The kebab-cased string (e.g. `font-size`, `fs-900`, `roboto-serif`).
  * @example
- *   toKebabCase('fontSize'); // 'font-size'
- *   toKebabCase('fs900');    // 'fs-900'
+ *   toKebabCase('fontSize');     // 'font-size'
+ *   toKebabCase('fs900');        // 'fs-900'
+ *   toKebabCase('Roboto Serif'); // 'roboto-serif'
  */
 export const toKebabCase = (text: string) =>
   text
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2') // 1. Handles camelCase (eg fontSize -> font-Size)
     .replace(/([a-zA-Z])(\d)/g, '$1-$2') // 2. Separates letters and numbers (e.g., fs900 -> fs-900)
-    .toLowerCase() // 3. Convert everything to lowercase.
+    .replace(/\s+/g, '-') // 3. Collapses whitespace into a single hyphen (e.g., "Roboto Serif" -> "Roboto-Serif")
+    .toLowerCase() // 4. Convert everything to lowercase.
 
 /**
  *

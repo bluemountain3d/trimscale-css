@@ -50,7 +50,7 @@ Reads your `trimscale.config.ts` and writes two files into `<outDir>` (`outDir` 
 - `_index.scss`, the bridge file. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, and (if any of your fonts need `@font-face` rules) sits alongside the generated font faces.
 - `utility-classes.md`, a reference listing the exact utility classes _your_ config produces (font roles, sizes, weights, spacing tiers), not a generic example, see [utility-classes.md](utility-classes.md).
 
-Re-run this any time you change `trimscale.config.ts`. The output lives in your own project, so it survives a fresh install. Commit `<outDir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
+Re-run this any time you change `trimscale.config.ts`, and after every trimscale-css version bump, even if your config didn't change, in case a future version changes which config fields exist. The output lives in your own project, so it survives a fresh install. Commit `<outDir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
 
 ## Configure your SCSS compiler
 
@@ -76,7 +76,54 @@ export default {
 
 This `loadPaths` entry is only for trimscale-css's own static files (functions, mixins, base styles), it's separate from wherever `generate` writes your bridge file (`outDir`, see [Generate](#generate) above) — that one you `@use` by its actual location in your project (relative path, or add its parent directory to `loadPaths` too if you'd rather use a bare specifier).
 
-**Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration.
+**`pkg:` importer (additional to `loadPaths`, not a replacement):**
+
+Sass's built-in [package importer](https://sass-lang.com/documentation/at-rules/use/#pkg-importer) resolves `pkg:` URLs against a package's `exports` field, for your own component-scoped `@use` statements:
+
+```scss
+@use 'pkg:trimscale-css/tokens';
+@use 'pkg:trimscale-css/abstracts/mixins' as mx;
+```
+
+Requires Dart Sass 1.71.0 or later, already covered by the 1.95.0-or-later requirement above. It's not enabled automatically anywhere, every tool needs it registered explicitly.
+
+**Vite:** this has changed across Vite's own major versions, check what your installed version actually expects (Vite's `preprocessorOptions.scss` type, or [vite.dev/config](https://vite.dev/config/shared-options.html#css-preprocessoroptions)) rather than trusting a single snippet:
+
+```ts
+// vite.config.ts
+import { NodePackageImporter } from 'sass-embedded';
+
+export default {
+  css: {
+    preprocessorOptions: {
+      scss: {
+        importers: [new NodePackageImporter()],
+      },
+    },
+  },
+};
+```
+
+- **Vite 7+**: Sass's legacy API was dropped, there's only one mode left, no `api` field at all, `importers` goes directly under `scss` as shown above.
+- **Vite 5.4–6.x**: needs `api: 'modern-compiler'` alongside `importers` (plain `'modern'` doesn't support `importers`).
+- **Below Vite 5.4**: no modern Sass API support at all, the option is named `pkgImporter` instead of `importers` under the legacy API.
+
+**A bare `sass` CLI:**
+
+```bash
+sass --pkg-importer=node input.scss output.css
+```
+
+**JS/Dart Sass API directly:**
+
+```js
+import { NodePackageImporter } from 'sass-embedded'; // or 'sass'
+sass.compile('input.scss', { importers: [new NodePackageImporter()] });
+```
+
+`pkg:` and `loadPaths` compile to identical output for the subpaths `pkg:` exposes, but **keep `loadPaths` configured either way**: the bridge file `generate` writes into your `<outDir>` uses a bare (non-`pkg:`) import for trimscale-css's main entry point, so it only resolves via `loadPaths`, same as it always has, `pkg:` doesn't change that. `pkg:` is additive for your own component-scoped `@use` statements, not a way to drop the `loadPaths` requirement. The available subpaths (`tokens`, `abstracts/variables`, `abstracts/functions`, `abstracts/mixins`, `base`, `utilities`, `components`) mirror the ones already used under `loadPaths` in the example above. Anything not listed there is an implementation detail, not part of the package's public surface, and isn't reachable via `pkg:` either.
+
+**Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration. Use `loadPaths` there, not `pkg:`, Turbopack (Next.js's default bundler since v15) can't pass a `NodePackageImporter` instance through `sassOptions`, only plain JSON-serializable values.
 
 ## Usage
 
