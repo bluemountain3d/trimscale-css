@@ -25,12 +25,12 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  */
 const config: TrimscaleConfig = {
   /**
-   * Where `trimscale-css generate` writes this project's generated output
-   * (the bridge file + any @font-face rules), relative to this file.
-   * Optional, defaults to './trimscale-generated'.
+   * Where and what `trimscale-css generate` writes. Optional, every field
+   * falls back to its own default (output directory defaults to
+   * './trimscale-generated').
    * → docs/getting-started.md
    */
-  // outDir: './trimscale-generated',
+  // output: { dir: './trimscale-generated' },
 
   /**
    * Font sources (local file, CDN URL, or hand-entered metrics), keyed by
@@ -41,7 +41,7 @@ const config: TrimscaleConfig = {
     nextFontDefault: false,         // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
     fallbackDefault: 'sans-serif',  // used when a font entry below has no `fallback` of its own
-    fonts: {
+    families: {
       // Placeholder so `generate` produces working output before you've set
       // up a real font. Replace it, see docs/adding-a-font.md.
       'System Sans': {
@@ -77,7 +77,7 @@ const config: TrimscaleConfig = {
     },
 
     /**
-     * Maps semantic font roles to keys in `fonts` above.
+     * Maps semantic font roles to keys in `families` above.
      *
      * `primary` and `body` are required. Everything else is optional, and the
      * role names are yours to choose, the commented lines below are only
@@ -92,7 +92,7 @@ const config: TrimscaleConfig = {
       // The role body text uses
       body: 'System Sans',
 
-      // Common conventions, uncomment and point at a family in `fonts`:
+      // Common conventions, uncomment and point at a family in `families`:
       // secondary: '',
       // tertiary: '',
       // heading: '',

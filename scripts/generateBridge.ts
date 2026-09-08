@@ -32,7 +32,7 @@ const spacing = cfg.spacingSetup
 const baseGridSize = spacing.baseGridSize ?? 4
 
 const { metrics, fontFaces, fallbackFontFaces } = await computeFontData(cfg)
-const utilityFlags = resolveUtilityFlags(cfg.utilities)
+const utilityFlags = resolveUtilityFlags(cfg.output?.utilities)
 
 // Spacing: two mutually-exclusive shapes (coupled/independent), see
 // models/Config.ts's SpacingSetup and abstracts/variables/_spacing.scss.

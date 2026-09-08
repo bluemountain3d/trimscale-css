@@ -25,11 +25,10 @@ import type { TrimscaleConfig } from './models/Config.ts'
  */
 const config: TrimscaleConfig = {
   /**
-   * Where `trimscale-css generate` writes this project's generated output
-   * (the bridge file + any @font-face rules), relative to this file.
+   * Where and what `trimscale-css generate` writes.
    * → docs/getting-started.md
    */
-  outDir: './styles/generated',
+  output: { dir: './styles/generated' },
 
   /**
    * Font sources (local file, CDN URL, or hand-entered metrics), keyed by
@@ -41,7 +40,7 @@ const config: TrimscaleConfig = {
     nextFontDefault: false,         // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
     fallbackDefault: 'sans-serif',  // used when a font entry below has no `fallback` of its own
-    fonts: {
+    families: {
       'Roboto': {
         source: 'local',
         path: [
@@ -88,7 +87,7 @@ const config: TrimscaleConfig = {
     },
     /**
      * Maps semantic font roles (primary, heading, body, etc.) to font family
-     * names defined in appFonts.fonts. primary and body are required, the rest optional.
+     * names defined in appFonts.families. primary and body are required, the rest optional.
      * → docs/full-config-reference.md#appfontsfontroles
      */
     fontRoles: {

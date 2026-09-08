@@ -257,17 +257,17 @@ const buildFamilyString = (
 }
 
 /**
- * Scans every family in `appFonts.fonts`, extracts metrics from its
+ * Scans every family in `appFonts.families`, extracts metrics from its
  * `local`/`cdn` file(s) (or takes `manual` metrics as-is), and picks the
  * single best-matching file per family for metrics (preferring non-italic,
  * then whichever weight is closest to 400/Regular). Also builds one
  * `FontFace` per file that should get a `@font-face` rule. Local font paths
  * are resolved relative to `process.cwd()` (the directory containing
  * `trimscale.config.ts`); each `FontFace.src` is a root-relative URL (leading
- * `/`), also relative to `process.cwd()`, NOT to `outDir`. Sass never
+ * `/`), also relative to `process.cwd()`, NOT to `output.dir`. Sass never
  * rebases a `url()` to the partial it came from, so a path relative to
- * `outDir` only survives once the bundler compiles the CSS if the
- * consumer's own entry stylesheet happens to sit at `outDir` too; a
+ * `output.dir` only survives once the bundler compiles the CSS if the
+ * consumer's own entry stylesheet happens to sit at `output.dir` too; a
  * root-relative path resolves the same regardless of which stylesheet
  * pulls it in. This assumes `process.cwd()` (where `trimscale.config.ts`
  * lives) is also the bundler's project root, true for Vite/webpack's
@@ -288,7 +288,7 @@ export const computeFontData = async (
   const fontFaces: FontFace[] = []
   const fallbackFontFaces: FallbackFontFace[] = []
 
-  for (const [familyName, fontSource] of Object.entries(cfg.appFonts.fonts)) {
+  for (const [familyName, fontSource] of Object.entries(cfg.appFonts.families)) {
     const usesNextFont = fontSource.nextFont ?? nextFontDefault
 
     if (usesNextFont) {

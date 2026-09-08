@@ -17,10 +17,10 @@ export type ResolvedUtilityFlags = {
 }
 
 /**
- * Resolves `cfg.utilities`'s `boolean | { ...subFlags }` shape per section
- * into flat per-group booleans. A section set to `false` at the top level
- * (or omitted, since each section itself is optional) forces every one of
- * its sub-flags false too, so `spacing: false` really does mean zero
+ * Resolves `cfg.output.utilities`'s `boolean | { ...subFlags }` shape per
+ * section into flat per-group booleans. A section set to `false` at the top
+ * level (or omitted, since each section itself is optional) forces every
+ * one of its sub-flags false too, so `spacing: false` really does mean zero
  * spacing classes, not just the two scale loops. Omitting a section
  * entirely, or the whole `utilities` field, resolves every group to `true`.
  */
@@ -31,7 +31,7 @@ export const resolveUtilityFlags = (utilities: UtilitiesConfig | undefined): Res
   const spacingOn = spacing !== false
   const typographyOn = typography !== false
 
-  const spacingSub = (key: 'base' | 'tshirt' | 'numeric'): boolean =>
+  const spacingSub = (key: 'base' | 'tShirt' | 'numeric'): boolean =>
     spacingOn && (typeof spacing === 'object' ? (spacing[key] ?? true) : true)
 
   const typographySub = (
@@ -49,7 +49,7 @@ export const resolveUtilityFlags = (utilities: UtilitiesConfig | undefined): Res
 
   return {
     spacingBase: spacingSub('base'),
-    spacingTshirt: spacingSub('tshirt'),
+    spacingTshirt: spacingSub('tShirt'),
     spacingNumeric: spacingSub('numeric'),
     typographyTrim: typographySub('trim'),
     typographyFamily: typographySub('family'),

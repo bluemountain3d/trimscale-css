@@ -124,7 +124,7 @@ export type FontSource =
 
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
 export type AppFonts = {
-  fonts: Record<string, FontSource>
+  families: Record<string, FontSource>
   fontRoles: FontRoles
   /** Base folder, relative to `trimscale.config.ts`, for `local` families that omit `path`: looked up as `localFontsPath/<family's config key>/`, non-recursive, every font file found there is used. */
   localFontsPath?: string
@@ -136,14 +136,14 @@ export type AppFonts = {
    * @default 'public'
    */
   publicDir?: string
-  /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `fonts` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
+  /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `families` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
   nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted
   fallbackDefault: FontFallbacks
 }
 
 // FontRoles ==================================================================
-/** Maps semantic font roles (primary, heading, body, etc.) to font family names defined in appFonts/font-metrics. `primary` and `body` are required; all others, including arbitrary custom roles via the index signature, are optional. */
+/** Maps semantic font roles (primary, heading, body, etc.) to font family names defined in `appFonts.families`. `primary` and `body` are required; all others, including arbitrary custom roles via the index signature, are optional. */
 export type FontRoles = {
   primary: string
   secondary?: string
@@ -336,7 +336,7 @@ export type UtilitiesConfig = {
         /** `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`. */
         base?: boolean
         /** `.{m|p}{side?}-{3xs..9xl}`. */
-        tshirt?: boolean
+        tShirt?: boolean
         /** `.{m|p}{side?}-{1..numericScaleEnd}`. */
         numeric?: boolean
       }
@@ -365,11 +365,11 @@ export type UtilitiesConfig = {
 }
 
 // ============================================================================
-// Full Config
+// Output
 // ============================================================================
 
-/** The full trimscale-css configuration shape — see `trimscale.config.ts` for the actual values and field-by-field documentation. */
-export type TrimscaleConfig = {
+/** Where and what `generate` writes: the output directory, the SCSS bridge file, an optional standalone CSS file, which utility-class groups to include (shared by both targets), and whether to emit the package's own reset. */
+export type OutputConfig = {
   /**
    * Where `trimscale-css generate` writes this project's generated output
    * (the bridge file plus a `utility-classes.md` reference), relative to
@@ -378,9 +378,32 @@ export type TrimscaleConfig = {
    * file as SCSS values, not written as a separate file. The static parts
    * of the package (functions, mixins, and the rest of `styles/`) are
    * never written here — they stay in `node_modules` as normal package
-   * internals. @default './trimscale-generated'
+   * internals. @default 'trimscale-generated'
    */
-  outDir?: string
+  dir?: string
+  /** Emit the SCSS bridge file. @default true */
+  scss?: boolean
+  /** Emit a standalone, pre-compiled `.css` file, for consumers who don't want to configure Sass. @default false */
+  css?:
+    | boolean
+    | {
+        /** Also write a minified copy alongside the readable one. @default true */
+        minify?: boolean
+        /** URL prefix for `@font-face src`, as the browser requests it — not the filesystem path fonts are written to (see `AppFonts.publicDir`). @default '/fonts' */
+        fontUrlBase?: string
+      }
+  /** Which utility-class groups to generate. Shared by both `scss` and `css` targets — every group defaults `true`, so omitting this field changes nothing. Set a group to `false` (or a sub-flag within it) to stop generating those classes entirely. */
+  utilities?: UtilitiesConfig
+  /** Emit the package's own `@layer reset` block. @default true */
+  reset?: boolean
+}
+
+// ============================================================================
+// Full Config
+// ============================================================================
+
+/** The full trimscale-css configuration shape — see `trimscale.config.ts` for the actual values and field-by-field documentation. */
+export type TrimscaleConfig = {
   /* Typography */
   appFonts: AppFonts
   fluidScale: FluidScale
@@ -407,8 +430,8 @@ export type TrimscaleConfig = {
   /** Additional named palettes beyond `baseColorTokens` (e.g. a `campaign` palette), keyed by whatever name you like. Each gets its own `@include mx.generate-color-tokens(...)` alongside the base tokens. */
   customColorTokens?: Record<string, ColorTokensMap>
   semanticColorAliases?: SemanticColorAliases
-  /** Which utility-class groups `generate` emits. Every group defaults `true`, so omitting this field changes nothing. Set a group to `false` (or a sub-flag within it) to stop generating those classes entirely. */
-  utilities?: UtilitiesConfig
+  /** Where and what `generate` writes — output directory, SCSS/CSS targets, utility-class groups, and the reset block. */
+  output?: OutputConfig
 }
 
 

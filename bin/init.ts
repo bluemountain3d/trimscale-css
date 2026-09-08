@@ -50,7 +50,7 @@ const runInit = () => {
   }
 
   console.log(
-    '📁 `generate` writes to ./trimscale-generated/ by default (set outDir in trimscale.config.ts to change it). Commit it like any other source file, or gitignore it (along with .trimscale-cache/) and run `generate` in CI, your choice.',
+    '📁 `generate` writes to ./trimscale-generated/ by default (set output.dir in trimscale.config.ts to change it). Commit it like any other source file, or gitignore it (along with .trimscale-cache/) and run `generate` in CI, your choice.',
   )
   console.log('📖 Docs: node_modules/trimscale-css/docs/getting-started.md')
 }

@@ -24,7 +24,7 @@ const tShirtKeys = (spacing: TrimscaleConfig['spacingSetup']): string[] =>
  * `generateUtilities.ts`), so a group turned off there is left out here
  * too rather than documenting classes that don't exist. Written by
  * `generateBridge.ts` alongside the bridge file, into this project's own
- * `outDir`, never into node_modules.
+ * `output.dir`, never into node_modules.
  */
 export const buildUtilityClassesMarkdown = (cfg: TrimscaleConfig, flags: ResolvedUtilityFlags): string => {
   const fontRoleKeys = Object.keys(cfg.appFonts.fontRoles)
