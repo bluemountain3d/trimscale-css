@@ -57,7 +57,6 @@ export const buildUtilityClassesMarkdown = (cfg: TrimscaleConfig, flags: Resolve
     flags.typographyTextTransform && '`.text-transform-{capitalize|uppercase|lowercase}`',
     flags.typographyTextAlign && '`.text-align-{left|center|right}`',
     flags.typographyNumericFigures && '`.num-{lining|oldstyle|ordinal}-{tabular|proportional}`',
-    '`.text-color-inherit`',
   ].filter(Boolean)
 
   const spacingSections = [
