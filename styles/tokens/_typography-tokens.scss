@@ -18,6 +18,10 @@
 // comma-separated font stacks (only single <custom-ident> tokens are
 // supported). The only fallback would be syntax: "*", which strips
 // away all validation/typing — no real benefit over a plain custom property.
+//
+// Nor does --line-height-dynamic have an @property declaration,
+// see comment in _fn_dynamic-line-height.scss.
+// Registering as <number> computes 1em against :root and freezes the ratio.
 // ============================================================================
 
 @each $key, $value in var.$modular-typographic-scale {
@@ -59,13 +63,6 @@
     initial-value: 1;
   }
 }
-
-@property --line-height-dynamic {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
-}
-
 
 @each $key, $value in var.$font-roles {
   @property --avg-char-width-#{$key} {
@@ -121,6 +118,7 @@
     @each $name, $value in var.$line-heights {
       --line-height-#{$name}: #{$value};
     }
+
     --line-height-dynamic: #{fn.dynamic-line-height(
       $fs-base: map.get(var.$dynamic-line-height, "fs-base"),
       $ratio-base: map.get(var.$dynamic-line-height, "ratio-base"),

@@ -125,6 +125,7 @@ export type FontSource =
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
 export type AppFonts = {
   fonts: Record<string, FontSource>
+  fontRoles: FontRoles
   /** Base folder, relative to `trimscale.config.ts`, for `local` families that omit `path`: looked up as `localFontsPath/<family's config key>/`, non-recursive, every font file found there is used. */
   localFontsPath?: string
   /**
@@ -147,9 +148,6 @@ export type FontRoles = {
   primary: string
   secondary?: string
   tertiary?: string
-  sans?: string
-  serif?: string
-  mono?: string
   display?: string
   heading?: string
   subheading?: string
@@ -158,6 +156,7 @@ export type FontRoles = {
   quote?: string
   code?: string
   ui?: string
+  mono?: string
   [customRole: string]: string | undefined
 }
 
@@ -382,7 +381,6 @@ export type TrimscaleConfig = {
   outDir?: string
   /* Typography */
   appFonts: AppFonts
-  fontRoles: FontRoles
   fluidScale: FluidScale
   breakpoints: Breakpoints
   /**

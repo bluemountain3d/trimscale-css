@@ -27,7 +27,7 @@ const tShirtKeys = (spacing: TrimscaleConfig['spacingSetup']): string[] =>
  * `outDir`, never into node_modules.
  */
 export const buildUtilityClassesMarkdown = (cfg: TrimscaleConfig, flags: ResolvedUtilityFlags): string => {
-  const fontRoleKeys = Object.keys(cfg.fontRoles)
+  const fontRoleKeys = Object.keys(cfg.appFonts.fontRoles)
   // semanticFontSizes' keys are kebab-cased by generateTypography.ts before
   // becoming SCSS map keys (textLg -> text-lg); fontRoles/fontWeights/
   // lineHeights keys are used verbatim there, so they aren't converted here.

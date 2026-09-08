@@ -10,19 +10,38 @@
 /// underlying tan(atan2()) division resolves against each element's own
 /// computed font-size at render time.
 ///
+/// IMPORTANT: this only holds while the value stays unresolved — see the
+/// note below on why --line-height-dynamic must not be registered.
+///
 /// @access public
 /// @param {Number} $fs-base [16] - Pin point (px, unitless): the font-size where $ratio-base applies exactly
 /// @param {Number} $ratio-base [1.5] - Line-height ratio at $fs-base
 /// @param {Number} $fs-ceil [64] - Font-size (px) at and beyond which the ratio bottoms out at $ratio-ceil
 /// @param {Number} $ratio-ceil [1.05] - Ratio for large font-sizes (at/beyond $fs-ceil)
 /// @param {Number} $ratio-cap [1.6] - Ratio for small font-sizes (below the natural crossover point)
-/// @return {String} Unitless CSS clamp() expression, self-scaling per element
+/// @return {String} Unitless CSS clamp() expression, self-scaling per element.
+///   Must reach the property declaration unresolved: assign it to an
+///   unregistered custom property or straight to line-height, never to a
+///   custom property registered with @property.
 ///
 /// @example scss
 ///   body { line-height: #{fn.dynamic-line-height()}; }
 /// @example scss - Custom bounds
 ///   .display-1 { line-height: #{fn.dynamic-line-height($ratio-ceil: 1.05, $fs-ceil: 64)}; }
 ///
+/// @note --line-height-dynamic is deliberately NOT registered with @property.
+///   An unregistered custom property is substituted at the var() call site and
+///   computed there, so 1em resolves against the consuming element. Registering
+///   it with syntax: "<number>" computes the value at its declaration site
+///   (:root), freezing the ratio — every element then inherits the same number
+///   and the curve collapses.
+///
+///   Verified in browser (unregistered): 16px → 24px (1.5), 48px → 52.8px (1.1).
+///   Registered, both collapse to ~1.5.
+///
+///   Cost of not registering: no type checking, no transition/animation, no
+///   initial-value. None of these are wanted here.
+/// 
 @function dynamic-line-height(
   $fs-base: 16,
   $ratio-base: 1.5,
