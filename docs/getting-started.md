@@ -47,7 +47,7 @@ npx trimscale-css generate
 
 Reads your `trimscale.config.ts` and writes two files into `<outDir>` (`outDir` defaults to `./trimscale-generated`, configurable via `outDir` in `trimscale.config.ts`), into **your own project**, never into `node_modules`:
 
-- `_index.scss`, the bridge file. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, and (if any of your fonts need `@font-face` rules) sits alongside the generated font faces.
+- `_index.scss`, the bridge file. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, passing in your font metrics and (if any of your fonts need them) `@font-face` rules as part of the same call, not as a separate file.
 - `utility-classes.md`, a reference listing the exact utility classes _your_ config produces (font roles, sizes, weights, spacing tiers), not a generic example, see [utility-classes.md](utility-classes.md).
 
 Re-run this any time you change `trimscale.config.ts`, and after every trimscale-css version bump, even if your config didn't change, in case a future version changes which config fields exist. The output lives in your own project, so it survives a fresh install. Commit `<outDir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
