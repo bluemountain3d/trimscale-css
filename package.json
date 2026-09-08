@@ -17,6 +17,7 @@
     "bin/*.js",
     "styles",
     "!styles/generated",
+    "!styles/**/_*template.scss",
     "scripts/*.js",
     "models",
     "docs",
@@ -31,7 +32,6 @@
     "./abstracts/mixins": "./styles/abstracts/mixins/_index.scss",
     "./base": "./styles/base/_index.scss",
     "./utilities": "./styles/utilities/_index.scss",
-    "./components": "./styles/components/_index.scss",
     "./models/Config.ts": "./models/Config.ts"
   },
   "scripts": {
