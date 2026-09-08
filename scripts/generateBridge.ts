@@ -13,7 +13,8 @@ import {
   fontFacesToScssListValue,
   metricsToScssMapValue,
 } from './generateFontMetrics.scss.ts'
-import { computeFontData } from './generateFonts.ts'
+import { rewriteFontFacesForCss, writeCssOutput } from './generateCss.ts'
+import { computeFontData, type FontFace } from './generateFonts.ts'
 import {
   dynamicLineHeightToScssMapValue,
   fontRolesToScssMapValue,
@@ -52,6 +53,37 @@ const warnIfFontlessTypographyFlags = (cfg: TrimscaleConfig, flags: ResolvedUtil
   }
 }
 
+/**
+ * The CSS build has no SCSS escape hatch: `output.utilities.typography.trim`
+ * only controls whether `.trim-text-*` classes exist, `font-setup` and the
+ * `%{role}-text` placeholders stay reachable either way. In a compiled CSS
+ * file there's nothing to fall back on, `trim: false` means leading trim
+ * doesn't exist at all, not just that the classes are missing. Same
+ * reasoning, weaker, for `family`. Inform, don't force: tokens/spacing/
+ * colors without trim in a CSS build is a legitimate choice.
+ */
+const warnAboutCssOutputLimitations = (cfg: TrimscaleConfig, flags: ResolvedUtilityFlags): void => {
+  if (!flags.typographyTrim) {
+    console.warn(
+      '⚠ CSS output with output.utilities.typography.trim: false contains no leading trim at all, @layer trim will be empty. Set trim: true if you want trim in the CSS build.',
+    )
+  }
+  if (!flags.typographyFamily) {
+    console.warn(
+      '⚠ CSS output with output.utilities.typography.family: false has no way to set a font-role family, `.font-family-*` is the only path to one in a compiled CSS file. Set family: true if you want it in the CSS build.',
+    )
+  }
+
+  for (const [familyName, fontSource] of Object.entries(cfg.appFonts?.families ?? {})) {
+    const usesNextFont = fontSource.nextFont ?? cfg.appFonts?.nextFontDefault ?? false
+    if (usesNextFont) {
+      console.warn(
+        `⚠ "${familyName}" has nextFont enabled, its family will fall through to the generic fallback in the CSS build, var(--next-font-*) is only ever set by Next.js's own runtime, which a standalone CSS file never goes through.`,
+      )
+    }
+  }
+}
+
 const cfg = await loadConfig()
 const outDir = resolveOutDir(cfg)
 const spacing = cfg.spacingSetup
@@ -80,54 +112,66 @@ const spacingArgs =
         setWithArg('numeric-scale-macro-end', `${spacing.numericScaleMacroEnd}`),
       ]
 
-const withArgs = [
-  setWithArg('breakpoints', breakpointsToScssMapValue(cfg.breakpoints)),
-  setWithArg('ultrawide-height-threshold-px', `${cfg.ultrawideHeightThresholdPx ?? 944}px`),
-  setWithArg('fluid-scale', fluidScaleToScssMapValue(cfg.fluidScale)),
-  setWithArg('font-metrics', metricsToScssMapValue(metrics)),
-  setWithArg('font-faces', fontFacesToScssListValue(fontFaces)),
-  setWithArg('fallback-font-faces', fallbackFontFacesToScssListValue(fallbackFontFaces)),
-  setWithArg('font-roles', fontRolesToScssMapValue(cfg.appFonts?.fontRoles ?? {})),
-  setWithArg('modular-typographic-scale', modularTypographicScaleToScssMapValue(cfg.modularTypographicScale)),
-  setWithArg('semantic-font-sizes', semanticFontSizesToScssMapValue(cfg.semanticFontSizes)),
-  setWithArg('font-weights', fontWeightsToScssMapValue(cfg.fontWeights)),
-  setWithArg('line-heights', lineHeightsToScssMapValue(cfg.lineHeights)),
-  setWithArg('dynamic-line-height', dynamicLineHeightToScssMapValue(cfg.dynamicLineHeight)),
-  setWithArg('default-scheme', cfg.defaultScheme),
-  setWithArg('base-color-tokens', colorTokensMapToScssMapValue(cfg.baseColorTokens)),
-  setWithArg('custom-color-tokens', customColorTokensToScssMapValue(cfg.customColorTokens)),
-  setWithArg('semantic-color-alias-defs', semanticColorAliasDefsToScssMapValue(cfg.semanticColorAliases)),
-  setWithArg('base-grid-size', `${baseGridSize}`),
-  ...spacingArgs,
-  setWithArg('utilities-spacing-base', `${utilityFlags.spacingBase}`),
-  setWithArg('utilities-spacing-tshirt', `${utilityFlags.spacingTshirt}`),
-  setWithArg('utilities-spacing-numeric', `${utilityFlags.spacingNumeric}`),
-  setWithArg('utilities-typography-trim', `${utilityFlags.typographyTrim}`),
-  setWithArg('utilities-typography-family', `${utilityFlags.typographyFamily}`),
-  setWithArg('utilities-typography-size', `${utilityFlags.typographySize}`),
-  setWithArg('utilities-typography-line-height', `${utilityFlags.typographyLineHeight}`),
-  setWithArg('utilities-typography-weight', `${utilityFlags.typographyWeight}`),
-  setWithArg('utilities-typography-style', `${utilityFlags.typographyStyle}`),
-  setWithArg('utilities-typography-text-transform', `${utilityFlags.typographyTextTransform}`),
-  setWithArg('utilities-typography-text-align', `${utilityFlags.typographyTextAlign}`),
-  setWithArg('utilities-typography-numeric-figures', `${utilityFlags.typographyNumericFigures}`),
-  setWithArg('utilities-a11y', `${utilityFlags.a11y}`),
-  setWithArg('output-reset', `${cfg.output?.reset ?? true}`),
-].join('')
+// Built as a function, not a single array, because the CSS build (below)
+// needs the same with() args with one difference: font-faces' src values
+// rewritten for output.css.fontUrlBase instead of the SCSS build's
+// root-relative paths. Everything else is identical between targets.
+const buildWithArgs = (fontFacesForTarget: FontFace[]): string =>
+  [
+    setWithArg('breakpoints', breakpointsToScssMapValue(cfg.breakpoints)),
+    setWithArg('ultrawide-height-threshold-px', `${cfg.ultrawideHeightThresholdPx ?? 944}px`),
+    setWithArg('fluid-scale', fluidScaleToScssMapValue(cfg.fluidScale)),
+    setWithArg('font-metrics', metricsToScssMapValue(metrics)),
+    setWithArg('font-faces', fontFacesToScssListValue(fontFacesForTarget)),
+    setWithArg('fallback-font-faces', fallbackFontFacesToScssListValue(fallbackFontFaces)),
+    setWithArg('font-roles', fontRolesToScssMapValue(cfg.appFonts?.fontRoles ?? {})),
+    setWithArg('modular-typographic-scale', modularTypographicScaleToScssMapValue(cfg.modularTypographicScale)),
+    setWithArg('semantic-font-sizes', semanticFontSizesToScssMapValue(cfg.semanticFontSizes)),
+    setWithArg('font-weights', fontWeightsToScssMapValue(cfg.fontWeights)),
+    setWithArg('line-heights', lineHeightsToScssMapValue(cfg.lineHeights)),
+    setWithArg('dynamic-line-height', dynamicLineHeightToScssMapValue(cfg.dynamicLineHeight)),
+    setWithArg('default-scheme', cfg.defaultScheme),
+    setWithArg('base-color-tokens', colorTokensMapToScssMapValue(cfg.baseColorTokens)),
+    setWithArg('custom-color-tokens', customColorTokensToScssMapValue(cfg.customColorTokens)),
+    setWithArg('semantic-color-alias-defs', semanticColorAliasDefsToScssMapValue(cfg.semanticColorAliases)),
+    setWithArg('base-grid-size', `${baseGridSize}`),
+    ...spacingArgs,
+    setWithArg('utilities-spacing-base', `${utilityFlags.spacingBase}`),
+    setWithArg('utilities-spacing-tshirt', `${utilityFlags.spacingTshirt}`),
+    setWithArg('utilities-spacing-numeric', `${utilityFlags.spacingNumeric}`),
+    setWithArg('utilities-typography-trim', `${utilityFlags.typographyTrim}`),
+    setWithArg('utilities-typography-family', `${utilityFlags.typographyFamily}`),
+    setWithArg('utilities-typography-size', `${utilityFlags.typographySize}`),
+    setWithArg('utilities-typography-line-height', `${utilityFlags.typographyLineHeight}`),
+    setWithArg('utilities-typography-weight', `${utilityFlags.typographyWeight}`),
+    setWithArg('utilities-typography-style', `${utilityFlags.typographyStyle}`),
+    setWithArg('utilities-typography-text-transform', `${utilityFlags.typographyTextTransform}`),
+    setWithArg('utilities-typography-text-align', `${utilityFlags.typographyTextAlign}`),
+    setWithArg('utilities-typography-numeric-figures', `${utilityFlags.typographyNumericFigures}`),
+    setWithArg('utilities-a11y', `${utilityFlags.a11y}`),
+    setWithArg('output-reset', `${cfg.output?.reset ?? true}`),
+  ].join('')
 
-const output = `// AUTO-GENERATED by \`trimscale-css generate\` — do not edit by hand.
+const buildBridgeSource = (withArgs: string): string => `@use "trimscale" with (
+${withArgs});
+`
+
+fs.mkdirSync(outDir, { recursive: true })
+
+if (cfg.output?.scss ?? true) {
+  const withArgs = buildWithArgs(fontFaces)
+
+  const output = `// AUTO-GENERATED by \`trimscale-css generate\` — do not edit by hand.
 // Configures trimscale-css's static package internals (in node_modules,
 // never regenerated) with this project's trimscale.config.ts, passing in
 // this project's font metrics and @font-face rules as SCSS values.
 // → docs/getting-started.md
 
-@use "trimscale" with (
-${withArgs});
-`
+${buildBridgeSource(withArgs)}`
 
-fs.mkdirSync(outDir, { recursive: true })
-fs.writeFileSync(path.join(outDir, '_index.scss'), output)
-console.log(`- Bridge file is written to ${path.relative(process.cwd(), path.join(outDir, '_index.scss'))}`)
+  fs.writeFileSync(path.join(outDir, '_index.scss'), output)
+  console.log(`- Bridge file is written to ${path.relative(process.cwd(), path.join(outDir, '_index.scss'))}`)
+}
 
 fs.writeFileSync(path.join(outDir, 'utility-classes.md'), buildUtilityClassesMarkdown(cfg, utilityFlags))
 console.log(
@@ -139,4 +183,15 @@ if (cfg.output?.reset === false) {
   console.log(
     `- Reset requirements are written to ${path.relative(process.cwd(), path.join(outDir, 'reset-requirements.md'))}`,
   )
+}
+
+if (cfg.output?.css) {
+  warnAboutCssOutputLimitations(cfg, utilityFlags)
+
+  const cssConfig = typeof cfg.output.css === 'object' ? cfg.output.css : {}
+  const fontUrlBase = cssConfig.fontUrlBase ?? '/fonts'
+  const minify = cssConfig.minify ?? true
+
+  const cssWithArgs = buildWithArgs(rewriteFontFacesForCss(fontFaces, fontUrlBase))
+  await writeCssOutput(outDir, buildBridgeSource(cssWithArgs), minify)
 }
