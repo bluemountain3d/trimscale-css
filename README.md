@@ -38,6 +38,14 @@ the viewport. trimscale-css goes a step further in a few places:
   the native `text-box-trim` property once a browser supports it, no second
   code path to maintain yourself.
 
+- **Metric-matched font-swap fallbacks, so leading-trim precision survives font loading.**
+  Precise vertical control doesn't count for much if everything still jumps
+  the moment your web font finishes loading. `fallbackFamily` generates a
+  metric-matched `@font-face` override for a real system font (size-adjust,
+  ascent/descent/line-gap overrides computed from your font's own metrics),
+  inserted between your web font and the generic fallback keyword, so the
+  swap doesn't shift the layout.
+
 - **OKLCH colors with a real fallback, not just a "future CSS" gamble.**
   Every color token is set with a static hex fallback for `light-dark()`- or
   `oklch()`-unsupporting browsers, generated automatically from the same
@@ -137,6 +145,7 @@ The table below groups fields by topic; for every individual property, its type,
 | `breakpoints`                                                                   | Named viewport breakpoints                                                                                                                           | [customizing-breakpoints.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-breakpoints.md)                                                                                              |
 | `spacingSetup`                                                                  | `coupled` vs. `independent` spacing growth model, tier multipliers, numeric scale range                                                              | [customizing-spacing.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-spacing.md)                                                                                                      |
 | `defaultScheme`, `baseColorTokens`, `semanticColorAliases`, `customColorTokens` | The color palette. Ships with a placeholder palette; replace the values (or add your own token maps) rather than treating them as fixed brand colors | [design-tokens.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/design-tokens.md#color-tokens), [abstracts.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/abstracts.md#mixins) |
+| `utilities`                                                                     | Opt-out toggles for the generated utility-class groups (spacing, typography), on or off per group or per sub-group                                   | [utility-classes.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/utility-classes.md#opting-out-of-utility-classes)                                                                                |
 
 Adding a component of your own? See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md), the `components` cascade layer is reserved for exactly that.
 

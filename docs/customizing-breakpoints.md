@@ -55,7 +55,7 @@ Breakpoints are never read as raw values in component SCSS, always go through th
 }
 ```
 
-See [abstracts.md](abstracts.md#breakpoints) for the full mixin reference (`and-up`, `up-to`, `and-down`, `between`, `only`).
+See [abstracts.md](abstracts.md#breakpoints) for the full mixin reference (`and-up`, `up-to`, `and-down`, `between`, `only`). Every mixin also takes an optional trailing `$container` argument to query a container instead of the viewport (`@include mx.and-up('tablet', $container: true)`), see [abstracts.md](abstracts.md#mixins) for the container-query details.
 
 ## Quick checklist
 
