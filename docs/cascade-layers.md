@@ -16,9 +16,11 @@ Layers are listed lowest to highest priority, a later layer always beats an earl
 | `trim-defaults` | `%text-baseline`: the bare font-size/line-height baseline the trim system falls back to                                     |
 | `base`          | HTML element defaults (`body`, headings, etc.)                                                                              |
 | `trim`          | `%text-geometry`, the font-role placeholders, and `.trim-text-*`: leading-trim metrics, margins, pseudo-elements, font-family |
-| `layouts`       | Reserved for your own layout styles (grids, page structure, containers), the system ships none of its own                   |
-| `components`    | Reserved for your own component classes, the system ships none of its own, see [examples.md](examples.md)                   |
+| `layouts`       | Yours: grids, page structure, containers. The package ships nothing here                                                    |
+| `components`    | Yours: component classes. The package ships nothing here either, see [examples.md](examples.md)                             |
 | `utilities`     | Spacing, typography, and accessibility utility classes, except `.trim-text-*` (highest priority)                            |
+
+`layouts` and `components` are declared and left empty on purpose, and stay that way. Grids, page structure, and component classes are design decisions, and trimscale-css is a typography and spacing base, not a component library. Declaring the layers anyway means your own rules land in the right place in the cascade without you having to extend the layer list.
 
 ## Why the trim system straddles `base`
 

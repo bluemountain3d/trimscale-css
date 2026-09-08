@@ -77,13 +77,17 @@ typography, spacing, and color primitives most design systems build by hand.
 ## Getting Started
 
 ```bash
-npm install trimscale-css
+npm install -D trimscale-css
 npx trimscale-css init
 # edit trimscale.config.ts: fonts, type scale, breakpoints, spacing, colors
 npx trimscale-css generate
 ```
 
-`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes two files into your own project (`output.dir`, `./trimscale-generated` by default, never `node_modules`): the SCSS bridge file and a `utility-classes.md` reference. Point your SCSS compiler's `loadPaths` at the package's `styles/` folder for trimscale-css's own static files, and `@use` the generated bridge file for your project's actual config values.
+trimscale-css is a build-time dependency: SCSS sources plus a `generate` CLI, nothing ships to the browser from the package itself, so it belongs in `devDependencies`.
+
+`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes into your own project (`output.dir`, `./trimscale-generated` by default, never `node_modules`): the SCSS bridge file and a `utility-classes.md` reference, plus `trimscale.css`/`trimscale.min.css` if you set `output.css`, and `reset-requirements.md` if you set `output.reset: false`. Point your SCSS compiler's `loadPaths` at the package's `styles/` folder for trimscale-css's own static files, and `@use` the generated bridge file for your project's actual config values.
+
+**Don't want to configure Sass at all?** Set `output.css: true` and `generate` compiles a standalone stylesheet you can link directly, tokens and utility classes resolved against your config. You still run `install` → `generate`, just without touching `loadPaths`. See [getting-started.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#standalone-css-output) for what that build can and can't do.
 
 See [getting-started.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md) for the full walkthrough, requirements (Node version, editor config), and both import styles (global vs. component-scoped).
 
@@ -108,11 +112,12 @@ trimscale-css/
     │   └── mixins/                  # font-setup, breakpoints, color token generation
     ├── tokens/                      # CSS custom properties
     ├── base/                        # HTML defaults: reset, fonts, typography
-    ├── utilities/                   # Spacing and typography utility classes
-    └── components/                  # Empty by default, see examples.md
+    └── utilities/                   # Spacing and typography utility classes
 ```
 
-The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`, `abstracts/mixins/`, `base/`, `utilities/`, `components/`, `styles/trimscale.scss`, and `models/Config.ts`, the exact set exposed via `package.json`'s `exports` field for the [`pkg:` importer](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#configure-your-scss-compiler). Anything else under `styles/` is an implementation detail, not covered by semver.
+The `layouts` and `components` cascade layers are declared but stay empty: grids, page structure, and component classes are design decisions that belong in your project, not in a typography and spacing base. See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md) for recipes to copy in.
+
+The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`, `abstracts/mixins/`, `base/`, `utilities/`, `styles/trimscale.scss`, and `models/Config.ts`, the exact set exposed via `package.json`'s `exports` field for the [`pkg:` importer](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#configure-your-scss-compiler). Anything else under `styles/` is an implementation detail, not covered by semver.
 
 ---
 

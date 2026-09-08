@@ -47,13 +47,28 @@ Returns a `clamp()` value that spans between two grid levels.
 gap: fn.fluid-space-step(4, 8); // between grid level 4 and grid level 8
 ```
 
-### `fn.px-to-rem($px)`
+### `fn.px-to-rem($px, $base)`
 
-Converts a pixel value to rem (assumes 16 px root).
+Converts a pixel value to rem. `$base` defaults to `16px`. Unitless input is treated as px.
 
 ```scss
 margin: fn.px-to-rem(24); // → 1.5rem
 ```
+
+### Number and unit helpers
+
+Small utilities the fluid functions above are built on. They're forwarded from `abstracts/functions` like everything else on this page, so they're part of the public surface, but most component work never needs them directly.
+
+| Function                             | Returns                                                                                              |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `fn.rem-to-px($rem, $base)`          | The inverse of `px-to-rem`. `$base` defaults to `16px`; unitless input is treated as rem                |
+| `fn.strip-unit($value)`              | The number without its unit (`16px` → `16`). Already-unitless input passes through                     |
+| `fn.round($number, $decimals)`       | `$number` rounded to `$decimals` places, default `4`. Sass-side rounding, unrelated to CSS `round()`     |
+| `fn.precision($number, $decimals)`   | Alias of `fn.round`, same signature and behavior                                                        |
+| `fn.clamp-number($value, $min, $max)` | `$value` constrained to the range. Named to avoid colliding with the CSS `clamp()` function            |
+| `fn.to-percent($value, $total)`      | `$value / $total` as a percentage (`to-percent(3, 4)` → `75%`). `$total` defaults to `1`                |
+
+**Import these under a namespace, not with `as *`.** `fn.round` is a Sass function named `round`, so `@use 'abstracts/functions' as *` makes it shadow the CSS `round()` function for that whole file. `width: round(calc(100px + 1em), 1px)` then fails to compile (`Undefined operation "calc(100px + 1em) * 10"`) instead of emitting CSS rounding. Under `as fn` the CSS function passes through untouched, which is why every example on this page uses the namespace.
 
 ### `fn.dynamic-line-height($fs-base, $ratio-base, $fs-ceil, $ratio-ceil, $ratio-cap)`
 

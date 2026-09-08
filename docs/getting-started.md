@@ -11,10 +11,12 @@ trimscale-css is consumed as SCSS source plus a small CLI that generates your to
 ## Install
 
 ```bash
-npm install trimscale-css
-# or: pnpm add trimscale-css
-# or: yarn add trimscale-css
+npm install -D trimscale-css
+# or: pnpm add -D trimscale-css
+# or: yarn add -D trimscale-css
 ```
+
+A dev dependency, not a runtime one. The package is SCSS sources plus the `generate` CLI, both of which do their work at build time; nothing from it ends up in your JavaScript bundle.
 
 ## Initialize
 
