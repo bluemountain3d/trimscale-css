@@ -71,7 +71,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: var(--z-skip-link);
+    z-index: var(--z-skip-link, 9999);
     padding: 1rem 2rem;
     background: var(--color-surface-base, #fff);
     color: var(--color-text-primary, #000);
