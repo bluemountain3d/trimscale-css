@@ -35,8 +35,19 @@ the viewport. trimscale-css goes a step further in a few places:
   holds for one font at one size. trimscale-css extracts real
   ascender/descender-to-cap-height values from your font files at generate
   time, applies the exact trim per font role, and progressively enhances to
-  the native `text-box-trim` property once a browser supports it, no second
-  code path to maintain yourself.
+  the native `text-box-trim` property, no second code path to maintain
+  yourself. Native support reached Baseline (all major engines) in August
+  2026, but Baseline tracks the newest shipped versions, not what most
+  visitors are actually running, so the metrics-based fallback still
+  carries the majority of real-world traffic for a while yet.
+
+- **Metric-matched font-swap fallbacks, so leading-trim precision survives font loading.**
+  Precise vertical control doesn't count for much if everything still jumps
+  the moment your web font finishes loading. `fallbackFamily` generates a
+  metric-matched `@font-face` override for a real system font (size-adjust,
+  ascent/descent/line-gap overrides computed from your font's own metrics),
+  inserted between your web font and the generic fallback keyword, so the
+  swap doesn't shift the layout.
 
 - **OKLCH colors with a real fallback, not just a "future CSS" gamble.**
   Every color token is set with a static hex fallback for `light-dark()`- or
@@ -126,17 +137,18 @@ The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`,
 
 ## Customization
 
-Everything lives in one file: [`trimscale.config.ts`](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/templates/trimscale.config.ts). Edit a field, run `npx trimscale-css generate`, it derives everything else at compile time. Nothing under `styles/tokens/` or the generated files in `styles/abstracts/variables/`/`styles/base/` should be hand-edited, they get overwritten on the next generate.
+Everything lives in one file: [`trimscale.config.ts`](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/templates/trimscale.config.ts). Edit a field, run `npx trimscale-css generate`, it derives everything else at compile time and writes the result to `outDir` (a bridge file plus a `utility-classes.md` reference). Nothing in `outDir` should be hand-edited, it gets overwritten on the next generate.
 
 The table below groups fields by topic; for every individual property, its type, and whether it's required, see [full-config-reference.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/full-config-reference.md).
 
 | Config field                                                                    | Controls                                                                                                                                             | Guide                                                                                                                                                                                                                |
 | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `appFonts`, `fontRoles`                                                         | Font files, fallbacks, and role assignment                                                                                                           | [adding-a-font.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/adding-a-font.md), [using-with-nextjs.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/using-with-nextjs.md)     |
+| `appFonts` (incl. `appFonts.fontRoles`)                                         | Font files, fallbacks, and role assignment                                                                                                           | [adding-a-font.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/adding-a-font.md), [using-with-nextjs.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/using-with-nextjs.md)     |
 | `fluidScale`, `modularTypographicScale`, `semanticFontSizes`                    | Viewport range, base font sizes, modular scale ratios                                                                                                | [customizing-type-scale.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-type-scale.md)                                                                                                |
 | `breakpoints`                                                                   | Named viewport breakpoints                                                                                                                           | [customizing-breakpoints.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-breakpoints.md)                                                                                              |
 | `spacingSetup`                                                                  | `coupled` vs. `independent` spacing growth model, tier multipliers, numeric scale range                                                              | [customizing-spacing.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-spacing.md)                                                                                                      |
 | `defaultScheme`, `baseColorTokens`, `semanticColorAliases`, `customColorTokens` | The color palette. Ships with a placeholder palette; replace the values (or add your own token maps) rather than treating them as fixed brand colors | [design-tokens.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/design-tokens.md#color-tokens), [abstracts.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/abstracts.md#mixins) |
+| `utilities`                                                                     | Opt-out toggles for the generated utility-class groups (spacing, typography), on or off per group or per sub-group                                   | [utility-classes.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/utility-classes.md#opting-out-of-utility-classes)                                                                                |
 
 Adding a component of your own? See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md), the `components` cascade layer is reserved for exactly that.
 

@@ -1,6 +1,6 @@
 # Design Tokens
 
-All tokens are CSS custom properties scoped to `:root` inside the `tokens` cascade layer (see [cascade-layers.md](cascade-layers.md)), generated from [`trimscale.config.ts`](../trimscale.config.ts) by `npx trimscale-css generate` (see [getting-started.md](getting-started.md)).
+All tokens are CSS custom properties scoped to `:root` inside the `tokens` cascade layer (see [cascade-layers.md](cascade-layers.md)), generated from [`trimscale.config.ts`](../templates/trimscale.config.ts) by `npx trimscale-css generate` (see [getting-started.md](getting-started.md)).
 
 Every specific number in the tables below (px values, ratios, scale steps, tiers) is the shipped _default_ config's value, not a fixed characteristic of trimscale-css. Change any of them in `trimscale.config.ts` and re-generate, see the `customizing-*.md` guides linked throughout for how.
 
@@ -23,23 +23,23 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 
 **T-shirt sizes** (default config):
 
-| Token         | Multiplier | Base value (360 px viewport) | Base value (1440 px viewport) |
-| ------------- | ---------- | ---------------------------- | ----------------------------- |
-| `--space-3xs` | × 1        | 4 px                         | 4 px                          |
-| `--space-2xs` | × 2        | 8 px                         | 8 px                          |
-| `--space-xs`  | × 3        | 12 px                        | 12 px                         |
-| `--space-sm`  | × 4        | 16 px                        | 16 px                         |
-| `--space-md`  | × 5        | 20 px                        | 20 px                         |
-| `--space-lg`  | × 6        | 24 px (fixed)                | 24 px (fixed)                 |
-| `--space-xl`  | × 6        | 24 px                        | 48 px                         |
-| `--space-2xl` | × 8        | 32 px                        | 64 px                         |
-| `--space-3xl` | × 10       | 40 px                        | 80 px                         |
-| `--space-4xl` | × 12       | 48 px                        | 96 px                         |
-| `--space-5xl` | × 16       | 64 px                        | 128 px                        |
-| `--space-6xl` | × 20       | 80 px                        | 160 px                        |
-| `--space-7xl` | × 24       | 96 px                        | 192 px                        |
-| `--space-8xl` | × 28       | 112 px                       | 224 px                        |
-| `--space-9xl` | × 32       | 128 px                       | 256 px                        |
+| Token         | Unit            | Multiplier | Base value (360 px viewport) | Base value (1440 px viewport) |
+| ------------- | --------------- | ---------- | ----------------------------- | ------------------------------ |
+| `--space-3xs` | `--unit-micro`  | × 1        | 4 px                          | 4 px                           |
+| `--space-2xs` | `--unit-micro`  | × 2        | 8 px                          | 8 px                           |
+| `--space-xs`  | `--unit-micro`  | × 3        | 12 px                         | 12 px                          |
+| `--space-sm`  | `--unit-micro`  | × 4        | 16 px                         | 16 px                          |
+| `--space-md`  | `--unit-micro`  | × 5        | 20 px                         | 20 px                          |
+| `--space-lg`  | `--unit-micro`  | × 6        | 24 px                         | 24 px                          |
+| `--space-xl`  | `--unit-macro`  | × 6        | 24 px                         | 48 px                          |
+| `--space-2xl` | `--unit-macro`  | × 8        | 32 px                         | 64 px                          |
+| `--space-3xl` | `--unit-macro`  | × 10       | 40 px                         | 80 px                          |
+| `--space-4xl` | `--unit-macro`  | × 12       | 48 px                         | 96 px                          |
+| `--space-5xl` | `--unit-macro`  | × 16       | 64 px                         | 128 px                         |
+| `--space-6xl` | `--unit-macro`  | × 20       | 80 px                         | 160 px                         |
+| `--space-7xl` | `--unit-macro`  | × 24       | 96 px                         | 192 px                         |
+| `--space-8xl` | `--unit-macro`  | × 28       | 112 px                        | 224 px                         |
+| `--space-9xl` | `--unit-macro`  | × 32       | 128 px                        | 256 px                         |
 
 **Numeric scale:** `--space-1` through `--space-48` by default. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`. All of this is config driven, see [customizing-spacing.md](customizing-spacing.md) to change tiers, the numeric range, or switch growth model entirely.
 
@@ -80,7 +80,7 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 
 The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively, at mobile with the default 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables. All of this comes from `semanticFontSizes` in the config, see [customizing-type-scale.md](customizing-type-scale.md).
 
-**Font families:** one `--font-family-{role}` custom property per key in `fontRoles` (`primary`, `secondary`, `tertiary`, `sans`, `serif`, `mono`, `display`, `heading`, `subheading`, `body`, `quote`, `code`, `ui`, plus any custom roles you add). See [adding-a-font.md](adding-a-font.md).
+**Font families:** one `--font-family-{role}` custom property per key in `appFonts.fontRoles` (`primary`, `secondary`, `tertiary`, `mono`, `display`, `heading`, `subheading`, `body`, `quote`, `code`, `ui`, plus any custom roles you add). See [adding-a-font.md](adding-a-font.md).
 
 **Font weights:** `--font-weight-thin` (100) through `--font-weight-black` (900) by default, from `fontWeights` in the config.
 
@@ -88,7 +88,7 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 
 These static tokens are opt-in. By default, text styled through `font-setup` or any `%*-text` placeholder gets a _dynamic_, self-scaling line-height instead, computed once by the `dynamic-line-height()` Sass function (see [abstracts.md](abstracts.md)) and exposed as the `--line-height-dynamic` token, unless you pass an explicit `$line-height` to `font-setup` or a `--line-height-*` token. The curve itself (where the ratio is pinned, where it bottoms out, its cap for small sizes) comes from `dynamicLineHeight` in the config, every field optional and independently defaulted, see [full-config-reference.md#dynamiclineheight](full-config-reference.md#dynamiclineheight).
 
-`--text-base` (and every other `semanticFontSizes` entry) is optional in the config type, unlike `fontRoles.primary`/`body` which are required. `body`'s own `font-size: var(--text-base, 1rem)` in `styles/base/_typography.scss` falls back to a plain `1rem` if you never define `semanticFontSizes.textBase`, this is intentional, not a bug, but worth knowing if body text looks unexpectedly static-sized.
+`--text-base` (and every other `semanticFontSizes` entry) is optional in the config type, unlike `appFonts.fontRoles.primary`/`body` which are required. `body`'s own `font-size: var(--text-base, 1rem)` in `styles/base/_typography.scss` falls back to a plain `1rem` if you never define `semanticFontSizes.textBase`, this is intentional, not a bug, but worth knowing if body text looks unexpectedly static-sized.
 
 ## Color Tokens
 
@@ -98,7 +98,7 @@ Each `baseColorTokens`/`customColorTokens` entry is a hand-picked `{ oklch, hex 
 
 `semanticColorAliases` entries don't need their own hand-picked pair: instead of duplicating oklch math for a near-duplicate color, they reference an existing token by name and can adjust its `opacity` (absolute) and `lightnessMultiplier`/`chromaMultiplier` (multipliers, not absolute values), via the `get-color-token()` function (see [abstracts.md](abstracts.md)) under the hood.
 
-**`body`'s text color reads `--color-text-primary`, with a `#000` fallback** (`styles/base/_typography.scss`), same pattern as `font-size`/`--text-base` above. The default config doesn't ship a `text-primary` entry in `baseColorTokens`/`semanticColorAliases` yet, so out of the box the fallback is what actually applies. Add one to get `body` text properly theme-aware via `light-dark()` instead of a static black.
+**`body`'s text color reads `--color-text-primary`, with a `#000` fallback** (`styles/base/_typography.scss`), same pattern as `font-size`/`--text-base` above. The starter config ships a `textPrimary` entry in `baseColorTokens`, so `body` resolves through `light-dark()` out of the box; the `#000` fallback only ever applies if you remove that entry without replacing it.
 
 Colors use `light-dark()` for automatic theme switching driven by `prefers-color-scheme`. You can override the automatic detection by adding a class to `:root`:
 
@@ -109,6 +109,14 @@ Colors use `light-dark()` for automatic theme switching driven by `prefers-color
 <html class="theme-dark">
   <!-- force dark -->
 </html>
+```
+
+**Scoping a theme to part of the page:** every color token is generated on both `:root` and `.app-theme-container`, and `.theme-light`/`.theme-dark` work on either one. Add `app-theme-container` (plus, optionally, `theme-light`/`theme-dark`) to any element to give that subtree its own independently-controlled theme, regardless of what the rest of the page is set to:
+
+```html
+<div class="app-theme-container theme-dark">
+  <!-- this subtree stays dark even if :root is theme-light or follows the system scheme -->
+</div>
 ```
 
 Every token gets a triple-layered fallback (plain hex → static `oklch()` → `light-dark(oklch(), oklch())`) so the palette degrades gracefully on older browsers, plus a typed `@property` registration so invalid overrides fail safe to the fallback color instead of silently breaking the cascade. This is generated by `mx.generate-color-tokens` under the hood, see [abstracts.md](abstracts.md) for the mixin itself and how to add your own token map alongside the config-driven defaults.

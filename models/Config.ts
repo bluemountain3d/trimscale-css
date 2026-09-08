@@ -372,11 +372,13 @@ export type UtilitiesConfig = {
 export type TrimscaleConfig = {
   /**
    * Where `trimscale-css generate` writes this project's generated output
-   * (the bridge file plus, if any font sources need `@font-face` rules,
-   * `_fonts.scss`), relative to the directory containing this config file.
-   * The static parts of the package (functions, mixins, and the rest of
-   * `styles/`) are never written here — they stay in `node_modules` as
-   * normal package internals. @default './trimscale-generated'
+   * (the bridge file plus a `utility-classes.md` reference), relative to
+   * the directory containing this config file. Font metrics and, if any
+   * font sources need them, `@font-face` rules are passed into the bridge
+   * file as SCSS values, not written as a separate file. The static parts
+   * of the package (functions, mixins, and the rest of `styles/`) are
+   * never written here — they stay in `node_modules` as normal package
+   * internals. @default './trimscale-generated'
    */
   outDir?: string
   /* Typography */

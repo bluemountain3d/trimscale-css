@@ -4,7 +4,7 @@
   "bin": {
     "trimscale-css": "./bin/init.js"
   },
-  "description": "",
+  "description": "A framework-agnostic SCSS toolkit for fluid typography, leading-trim, and OKLCH tokens.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bluemountain3d/trimscale-css.git"
@@ -45,8 +45,19 @@
     "generate-all": "node ./scripts/generateAll.ts",
     "generate-bridge": "node ./scripts/generateBridge.ts"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "scss",
+    "sass",
+    "css",
+    "design-tokens",
+    "design-system",
+    "fluid-typography",
+    "leading-trim",
+    "oklch",
+    "css-utilities",
+    "responsive-design"
+  ],
+  "author": "Egil Eskilsson <egil@egileskilsson.se>",
   "license": "MIT",
   "engines": {
     "node": ">=22.18.0"

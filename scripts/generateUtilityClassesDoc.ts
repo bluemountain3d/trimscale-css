@@ -57,7 +57,6 @@ export const buildUtilityClassesMarkdown = (cfg: TrimscaleConfig, flags: Resolve
     flags.typographyTextTransform && '`.text-transform-{capitalize|uppercase|lowercase}`',
     flags.typographyTextAlign && '`.text-align-{left|center|right}`',
     flags.typographyNumericFigures && '`.num-{lining|oldstyle|ordinal}-{tabular|proportional}`',
-    '`.text-color-inherit`',
   ].filter(Boolean)
 
   const spacingSections = [
@@ -87,7 +86,7 @@ node_modules/trimscale-css/docs/utility-classes.md for full usage examples.
 A section is left out entirely if this project's \`utilities\` config turns
 it off, see docs/utility-classes.md#opting-out-of-utility-classes.
 
-## Typography (config-driven, from \`fontRoles\`/\`semanticFontSizes\`/\`fontWeights\`/\`lineHeights\`)
+## Typography (config-driven, from \`appFonts.fontRoles\`/\`semanticFontSizes\`/\`fontWeights\`/\`lineHeights\`)
 
 ${typographyConfigDriven.length > 0 ? typographyConfigDriven.join('\n') : '_none enabled_'}
 
@@ -96,10 +95,6 @@ ${typographyConfigDriven.length > 0 ? typographyConfigDriven.join('\n') : '_none
 ${typographyFixed.join(', ')}
 
 ${spacingSections.join('\n\n')}
-
-## Text Box (fixed)
-
-\`.text-box\`, \`.text-box--flow\`, \`.text-box--prose\`, \`.text-box--center-content\`, \`.text-box-{45|50|55|60|65|70|75}\`
 
 ## Accessibility (fixed)
 

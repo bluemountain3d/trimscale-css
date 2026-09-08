@@ -108,7 +108,7 @@ Import via:
 ```scss
 @include mx.font-setup(
   $font: 'primary',
-  // font role, see fontRoles in trimscale.config.ts
+  // font role, see appFonts.fontRoles in trimscale.config.ts
   $font-size: var(--heading-1),
   $line-height: 1.1,
   $font-weight: 700,
@@ -120,7 +120,7 @@ Parameters:
 
 | Parameter         | Type   | Default     | Description                                                     |
 | ----------------- | ------ | ----------- | --------------------------------------------------------------- |
-| `$font`           | string | `'primary'` | Font role key, from `fontRoles` in the config                   |
+| `$font`           | string | `'primary'` | Font role key, from `appFonts.fontRoles` in the config           |
 | `$font-size`      | value  | `null`      | CSS font-size value                                             |
 | `$line-height`    | number | `null`      | Line height multiplier (unitless)                               |
 | `$font-weight`    | number | `null`      | Font weight                                                     |
@@ -134,7 +134,7 @@ The mixin sets font metrics internally and applies leading-trim via `::before`/`
 
 ### `mx.generate-color-tokens($tokens, $default-scheme)`
 
-Emits CSS custom properties for every entry in a color-token map, with a progressive-enhancement fallback chain layered on `:root`/`.app-theme-container`: plain hex first (works everywhere), then static `oklch()` behind an `@supports` check for browsers without `light-dark()`, then full `light-dark(oklch(), oklch())` where supported. Because later blocks always win the cascade, an older browser simply never reaches the blocks it doesn't support and keeps resolving the plain hex (or static `oklch()`) tier instead, so colors degrade gracefully on older browsers rather than breaking outright.
+Emits CSS custom properties for every entry in a color-token map, with a progressive-enhancement fallback chain layered on `:root`/`.app-theme-container`: plain hex first (works everywhere), then static `oklch()` behind an `@supports` check for browsers without `light-dark()`, then full `light-dark(oklch(), oklch())` where supported. Because later blocks always win the cascade, an older browser simply never reaches the blocks it doesn't support and keeps resolving the plain hex (or static `oklch()`) tier instead, so colors degrade gracefully on older browsers rather than breaking outright. `.app-theme-container` is a scoped-theming hook: every token (and the `.theme-light`/`.theme-dark` override classes) is generated for it in addition to `:root`, so adding that class to any element gives its subtree an independently-controlled theme, see [design-tokens.md](design-tokens.md#color-tokens).
 
 This is the actual mechanism behind [Color Tokens](design-tokens.md#color-tokens). Call it again with your own map to add project-specific tokens alongside the config-driven defaults:
 

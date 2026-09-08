@@ -6,7 +6,7 @@ import type { TrimscaleConfig } from './models/Config.ts'
  * or docs/full-config-reference.md for a single-page property-by-property index.
  *
  * Where to find the docs for each section below:
- * - appFonts, fontRoles                                  
+ * - appFonts (incl. fontRoles)
  *   → docs/adding-a-font.md
  * - breakpoints
  *   → docs/customizing-breakpoints.md
@@ -89,7 +89,7 @@ const config: TrimscaleConfig = {
     /**
      * Maps semantic font roles (primary, heading, body, etc.) to font family
      * names defined in appFonts.fonts. primary and body are required, the rest optional.
-     * → docs/full-config-reference.md#fontroles
+     * → docs/full-config-reference.md#appfontsfontroles
      */
     fontRoles: {
       // System Default

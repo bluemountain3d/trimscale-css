@@ -6,7 +6,7 @@ Breakpoints are config-driven, not hand-edited SCSS:
 
 | File | What you do there |
 |------|-------------------|
-| [`trimscale.config.ts`](../trimscale.config.ts) | Edit the `breakpoints` field |
+| [`trimscale.config.ts`](../templates/trimscale.config.ts) | Edit the `breakpoints` field |
 | `styles/abstracts/variables/_breakpoints.scss` | Static — never edit by hand, reads `var.$breakpoints` |
 
 After changing `breakpoints`, run:
@@ -35,7 +35,7 @@ breakpoints: {
 },
 ```
 
-Keys become kebab-case in the generated map (`tabletLg` → `tablet-lg`), then get converted to `rem` via `fn.px-to-rem`. Add, remove, or rename keys freely, there's no fixed list you must match, the six defaults above are just a starting point.
+Keys become kebab-case in the generated map (`tabletLg` → `tablet-lg`), and values are converted from px to rem by `generate` itself (assuming the standard `1rem == 16px` root) before they're written into the bridge file. Add, remove, or rename keys freely, there's no fixed list you must match, the six defaults above are just a starting point.
 
 Order matters for `mx.and-down()` and `mx.only()`: both look up the *next* key after the one you pass, based on the map's insertion order. Keep `breakpoints` sorted smallest to largest, or those two mixins will resolve against the wrong neighbor.
 
@@ -55,7 +55,7 @@ Breakpoints are never read as raw values in component SCSS, always go through th
 }
 ```
 
-See [abstracts.md](abstracts.md#breakpoints) for the full mixin reference (`and-up`, `up-to`, `and-down`, `between`, `only`).
+See [abstracts.md](abstracts.md#breakpoints) for the full mixin reference (`and-up`, `up-to`, `and-down`, `between`, `only`). Every mixin also takes an optional trailing `$container` argument to query a container instead of the viewport (`@include mx.and-up('tablet', $container: true)`), see [abstracts.md](abstracts.md#mixins) for the container-query details.
 
 ## Quick checklist
 

@@ -46,21 +46,20 @@ Typography utility classes from `_typography-utilities.scss`. They form the **HT
 
 **Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `font-setup` when authoring components) for role-specific sizing or anything beyond the baseline:
 
-| Class                  | Role                   |
-| ---------------------- | ---------------------- |
-| `.trim-text-primary`   | Primary brand typeface |
-| `.trim-text-secondary` | Secondary typeface     |
-| `.trim-text-tertiary`  | Tertiary typeface      |
-| `.trim-text-sans`      | Sans-serif category    |
-| `.trim-text-serif`     | Serif category         |
-| `.trim-text-mono`      | Monospace category     |
-| `.trim-text-display`   | Display / hero context |
-| `.trim-text-heading`   | Heading context        |
-| `.trim-text-subheading`| Subheading context     |
-| `.trim-text-body`      | Body text context      |
-| `.trim-text-quote`     | Blockquote context     |
-| `.trim-text-code`      | Code / pre context     |
-| `.trim-text-ui`        | UI elements context    |
+| Class                   | Role                   |
+| ----------------------- | ---------------------- |
+| `.trim-text-primary`    | Primary brand typeface |
+| `.trim-text-secondary`  | Secondary typeface     |
+| `.trim-text-tertiary`   | Tertiary typeface      |
+| `.trim-text-display`    | Display / hero context |
+| `.trim-text-heading`    | Heading context        |
+| `.trim-text-subheading` | Subheading context     |
+| `.trim-text-body`       | Body text context      |
+| `.trim-text-decorative` | Decorative context     |
+| `.trim-text-quote`      | Blockquote context     |
+| `.trim-text-code`       | Code / pre context     |
+| `.trim-text-ui`         | UI elements context    |
+| `.trim-text-mono`       | Monospace category     |
 
 Apply `.trim-text-*` to a `<span>` nested inside the sized element, not the
 element itself. The fallback path (browsers without native `text-box-trim`)
@@ -76,7 +75,7 @@ being inline, intentional, but worth knowing if you're expecting inline flow.
 ```
 
 **Font family**, sets only `font-family`, nothing else; use this to swap typeface without touching size/line-height/trim:
-`.font-family-primary`, `.font-family-secondary`, `.font-family-tertiary`, `.font-family-sans`, `.font-family-serif`, `.font-family-mono`, `.font-family-display`, `.font-family-heading`, `.font-family-subheading`, `.font-family-body`, `.font-family-quote`, `.font-family-code`, `.font-family-ui`
+`.font-family-primary`, `.font-family-secondary`, `.font-family-tertiary`, `.font-family-display`, `.font-family-heading`, `.font-family-subheading`, `.font-family-body`, `.font-family-decorative`, `.font-family-quote`, `.font-family-code`, `.font-family-ui`, `.font-family-mono`
 
 **Font size:**
 `.font-size-*`, `display-1`, `display-2`, `heading-1` through `heading-4`, `text-lg`, `text-md`, `text-base`, `text-sm`, `text-xs`
@@ -95,11 +94,32 @@ being inline, intentional, but worth knowing if you're expecting inline flow.
 
 **Text alignment:** `.text-align-left`, `.text-align-center`, `.text-align-right`
 
+**Numeric figures:**
+`.num-{lining|oldstyle|ordinal}-{tabular|proportional}` (six classes total, e.g. `.num-oldstyle-proportional`). Sets `font-variant-numeric`. `lining` figures sit on the baseline at a uniform height, the default in most fonts and generally the better fit for UI/tabular data; `oldstyle` figures vary in height (some descend below the baseline), often preferred in running prose; `ordinal` enables ordinal-indicator glyph variants (1st, 2nd). `tabular`/`proportional` picks whether digits share one fixed width (so they align in columns) or keep their natural proportional widths.
+
 ```html
 <h1 class="font-size-heading-1 font-weight-bold">
   <span class="trim-text-heading">Page heading</span>
 </h1>
-<p class="font-size-text-base" style="color: var(--color-text-muted);">
-  <span class="trim-text-body">Body copy in muted tone.</span>
+<p class="font-size-text-base">
+  <span class="trim-text-body">Body copy.</span>
 </p>
+```
+
+## Accessibility
+
+Screen-reader and focus utilities from `_a11y-utilities.scss`. Unlike everything else on this page, this group has no `utilities` opt-out flag, it's always emitted.
+
+| Class                                        | Effect                                                                                                                                      |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.sr-only`                                    | Visually hides an element while keeping it in the accessibility tree (the standard clip-based screen-reader-only pattern).                  |
+| `.sr-only-focusable`                          | Same as `.sr-only`, but becomes visible once focused. For skip links and similar "hidden until you tab to it" content.                      |
+| `.focus-none`                                 | Removes the focus outline. Use with caution, only when pairing it with your own visible focus indicator.                                    |
+| `.focus-visible`                              | Adds a visible outline on `:focus-visible` (keyboard/programmatic focus, not a mouse click).                                                 |
+| `.skip-link`                                  | Positions an element off-screen until it receives focus, then slides it into view at the top-left. Pair with `.sr-only-focusable`'s pattern. |
+| `.aria-live-polite`, `.aria-live-assertive`   | Visually hidden live-region containers (same styling as `.sr-only`). Pair with a matching `aria-live` attribute for announcements screen readers pick up without moving focus. |
+
+```html
+<a href="#main" class="skip-link">Skip to main content</a>
+<div class="aria-live-polite" aria-live="polite">Saved.</div>
 ```

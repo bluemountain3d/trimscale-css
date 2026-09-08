@@ -1,10 +1,10 @@
 # Full Config Reference
 
-A single-page index of every property in [`trimscale.config.ts`](../trimscale.config.ts), in the same order they appear in `const config`. Each section is a quick lookup, not the full explanation, follow the link for rationale, examples, and how a property affects the generated output.
+A single-page index of every property in [`trimscale.config.ts`](../templates/trimscale.config.ts), in the same order they appear in `const config`. Each section is a quick lookup, not the full explanation, follow the link for rationale, examples, and how a property affects the generated output.
 
 ## `outDir`
 
-Where `trimscale-css generate` writes this project's generated bridge file (and, if any font sources need `@font-face` rules, `_fonts.scss`'s data), relative to this config file. Never `node_modules`.
+Where `trimscale-css generate` writes this project's generated output (the bridge file plus a `utility-classes.md` reference), relative to this config file. Never `node_modules`.
 
 | Property | Type     | Required | Description                                                                             |
 | -------- | -------- | :------: | --------------------------------------------------------------------------------------- |
@@ -19,22 +19,39 @@ Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name
 | Property          | Type                         | Required | Description                                                                                                                                                 |
 | ----------------- | ---------------------------- | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `fonts`           | `Record<string, FontSource>` |   Yes    | Font sources keyed by family name; `source` picks the shape (`'local'`, `'cdn'`, or `'manual'`), see [adding-a-font.md](adding-a-font.md).                  |
+| `fontRoles`       | `FontRoles`                  |   Yes    | Maps semantic roles to a family name from `fonts`. See table below.                                                                                          |
 | `localFontsPath`  | `string`                     |    No    | Base folder, relative to this config file. A `local` family that omits `path` looks for its files under `localFontsPath/<family key>/` instead.             |
+| `publicDir`       | `string`                     |    No    | Your bundler's static-passthrough folder (Vite/CRA/Astro: `'public'`, SvelteKit: `'static'`). Stripped as a leading segment from a `local` family's generated `@font-face` `src`. Default `'public'`.  |
 | `nextFontDefault` | `boolean`                    |    No    | Whether `family` values build around a `next/font` CSS variable by default. A family's own `nextFont` overrides this for just that family. Default `false`. |
 | `nextFontPrefix`  | `string`                     |    No    | Prefix half of the `next/font` CSS variable name (`--{prefix}-{family}`). Default `'next-font'`.                                                            |
 | `fallbackDefault` | `FontFallbacks`              |   Yes    | Fallback stack used when a family has no `fallback` of its own. One of `'sans-serif'`, `'serif'`, `'monospace'`, `'system-ui'`, or `'cursive'`.             |
 
 → Full guide: [adding-a-font.md](adding-a-font.md) (sources, `@font-face` rules) · [using-with-nextjs.md](using-with-nextjs.md) (`next/font` integration)
 
-## `fontRoles`
+### `appFonts.fonts[x]` (per-family `FontSource`)
+
+| Property           | Type                                                                            | Required | Applies to | Description                                                                                                        |
+| ------------------ | -------------------------------------------------------------------------------- | :------: | ---------- | ------------------------------------------------------------------------------------------------------------------- |
+| `source`           | `'local'` \| `'cdn'` \| `'manual'`                                              |   Yes    | All        | Picks the shape below.                                                                                             |
+| `fallback`         | `FontFallbacks`                                                                 |    No    | All        | Generic CSS fallback keyword for this family. Falls back to `appFonts.fallbackDefault` if unset.                  |
+| `nextFont`         | `boolean`                                                                       |    No    | All        | Overrides `appFonts.nextFontDefault` for this family only.                                                        |
+| `fallbackFamily`   | `MatchableFallbackChain` \| `MatchableFallbackFamily` \| `MatchableFallbackFamily[]` |    No    | All        | Metric-matched fallback `@font-face` override(s), reduces layout shift (CLS) while the real font is still loading. |
+| `path`             | `string[]`                                                                      |    No    | `local`    | Font file path(s), relative to this config file. Omit to use the `appFonts.localFontsPath` convention instead.   |
+| `url`              | `string[]`                                                                      |   Yes    | `cdn`      | Direct font file URL(s), not a CSS-generating endpoint (e.g. not Google Fonts' `css2?family=...`).                |
+| `generateFontFace` | `boolean`                                                                       |    No    | `cdn`      | Write `@font-face` rules pointing at `url` directly (self-hosting). Default `false`.                              |
+| `metrics`          | `RawFontMetrics`                                                                |   Yes    | `manual`   | Hand-entered metrics from [precisionspec.dev](https://precisionspec.dev).                                          |
+
+→ Full guide: [adding-a-font.md](adding-a-font.md), `fallbackFamily`: [adding-a-font.md#metric-matched-fallback-fonts-fallbackfamily](adding-a-font.md#metric-matched-fallback-fonts-fallbackfamily)
+
+### `appFonts.fontRoles`
 
 Maps semantic roles to a family name from `appFonts.fonts`. A family not mapped to any role still gets metrics generated, but no `--font-family-*` token.
 
-| Property                                                                                                 | Type     | Required | Description                               |
-| -------------------------------------------------------------------------------------------------------- | -------- | :------: | ----------------------------------------- |
-| `primary`, `body`                                                                                        | `string` |   Yes    | The two required roles.                   |
+| Property                                                                                    | Type     | Required | Description                               |
+| --------------------------------------------------------------------------------------------- | -------- | :------: | ----------------------------------------- |
+| `primary`, `body`                                                                              | `string` |   Yes    | The two required roles.                   |
 | `secondary`, `tertiary`, `display`, `heading`, `subheading`, `decorative`, `quote`, `code`, `ui`, `mono` | `string` |    No    | Optional built-in roles.                  |
-| `[customRole: string]`                                                                                   | `string` |    No    | Any other role name, via index signature. |
+| `[customRole: string]`                                                                         | `string` |    No    | Any other role name, via index signature. |
 
 → Full guide: [adding-a-font.md](adding-a-font.md#map-to-roles)
 
@@ -191,3 +208,26 @@ Optional. Semantic names (e.g. `'text-muted'`) aliasing a token from `baseColorT
 | `chromaMultiplier`    | `number` or `{ light: number, dark: number }` |    No    | Multiplier applied to the token's current chroma, single or per-mode. Not an absolute chroma value.       |
 
 → Full guide: [design-tokens.md#color-tokens](design-tokens.md#color-tokens) · derivation mechanics: [abstracts.md](abstracts.md#fnget-color-tokentoken-tokens-opacity-lightness-multiplier-chroma-multiplier)
+
+## `utilities`
+
+Optional. Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. Every group defaults `true`, omitting this field (or any sub-flag within it) changes nothing. Setting a group to `false` also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops.
+
+| Property                        | Type      | Required | Description                                                       |
+| -------------------------------- | --------- | :------: | -------------------------------------------------------------------- |
+| `spacing`                        | `boolean` or object |    No    | `true`/`false` for the whole group, or an object to toggle sub-groups individually (see below). |
+| `spacing.base`                   | `boolean` |    No    | `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`. |
+| `spacing.tshirt`                 | `boolean` |    No    | `.{m\|p}{side?}-{3xs..9xl}`.                                        |
+| `spacing.numeric`                | `boolean` |    No    | `.{m\|p}{side?}-{1..numericScaleEnd}`.                               |
+| `typography`                     | `boolean` or object |    No    | `true`/`false` for the whole group, or an object to toggle sub-groups individually (see below). |
+| `typography.trim`                | `boolean` |    No    | `.trim-text-*`.                                                     |
+| `typography.family`              | `boolean` |    No    | `.font-family-*`.                                                   |
+| `typography.size`                | `boolean` |    No    | `.font-size-*`.                                                     |
+| `typography.lineHeight`          | `boolean` |    No    | `.line-height-*`, plus `.line-height-dynamic`.                      |
+| `typography.weight`              | `boolean` |    No    | `.font-weight-*`.                                                   |
+| `typography.style`               | `boolean` |    No    | `.font-style-*`.                                                    |
+| `typography.textTransform`       | `boolean` |    No    | `.text-transform-*`.                                                |
+| `typography.textAlign`           | `boolean` |    No    | `.text-align-*`.                                                    |
+| `typography.numericFigures`      | `boolean` |    No    | `.num-*` (figure variants).                                         |
+
+→ Full guide: [utility-classes.md](utility-classes.md#opting-out-of-utility-classes)
