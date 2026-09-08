@@ -35,8 +35,11 @@ the viewport. trimscale-css goes a step further in a few places:
   holds for one font at one size. trimscale-css extracts real
   ascender/descender-to-cap-height values from your font files at generate
   time, applies the exact trim per font role, and progressively enhances to
-  the native `text-box-trim` property once a browser supports it, no second
-  code path to maintain yourself.
+  the native `text-box-trim` property, no second code path to maintain
+  yourself. Native support reached Baseline (all major engines) in August
+  2026, but Baseline tracks the newest shipped versions, not what most
+  visitors are actually running, so the metrics-based fallback still
+  carries the majority of real-world traffic for a while yet.
 
 - **Metric-matched font-swap fallbacks, so leading-trim precision survives font loading.**
   Precise vertical control doesn't count for much if everything still jumps

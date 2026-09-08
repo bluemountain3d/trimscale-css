@@ -14,11 +14,6 @@
 /// 2. Apply negative margins on ::before/::after pseudo-elements to remove space
 /// 3. Automatically upgrades to native text-box-trim when browser support arrives
 ///
-/// Browser Compatibility:
-/// - Chrome/Edge: Fully supported (Chromium 88+)
-/// - Firefox: Fully supported (Firefox 78+)
-/// - Safari: Fully supported (Safari 14+)
-///
 /// See @supports-not fallback below re: removal timeline for native
 /// text-box-trim support (reached all engines Aug 2026).
 ///
@@ -26,10 +21,9 @@
 /// Firefox requires explicit unit specification (e.g., '0.196em' not '0.196')
 /// This is stricter than Chrome's more forgiving calc() implementation
 ///
-/// Available placeholders for each font role:
-/// - Hierarchical: %primary-text, %secondary-text, %tertiary-text
-/// - Category: %sans-text, %serif-text, %mono-text
-/// - Contextual: %display-text, %heading-text, %body-text, %quote-text, %code-text, %ui-text
+/// One %{role}-text placeholder is generated per key actually present in
+/// appFonts.fontRoles, e.g. %primary-text, %heading-text, %mono-text, plus
+/// one for any custom role name you add.
 ///
 /// Base placeholder:
 /// - %text-properties: Shared trim geometry (margins + pseudo-element formulas)
