@@ -103,21 +103,16 @@ All notable changes to this project are documented in this file.
   property name with a literal space in it, invalid and non-functional.
   Both bugs were only reachable together and were caught testing a
   multi-word `next/font` family end-to-end in a real Next.js project.
-- `_z-index-tokens.scss` emitted its `--z-*` custom property declarations
-  directly inside `@layer tokens { ... }` with no selector wrapping them,
-  invalid CSS (a conditional group rule like `@layer` needs a qualified
-  rule or nested at-rule inside it, not bare declarations). Browsers and
-  Sass itself tolerate it silently, but it broke Next.js's Turbopack
-  outright (`Parsing CSS source code failed ... Unexpected end of input`,
-  Turbopack's Lightning CSS parser is strict about malformed CSS that
-  other tools ignore). Wrapped the declarations in `:root`, matching every
-  other token file. Confirmed fixed end to end in a real Next.js/Turbopack
-  project; `@property`'s decimal `initial-value` (`.25rem`) was a red
-  herring, ruled out by testing with whole-number placeholders first,
-  which made no difference until this fix landed.
-
 ### Removed
 
+- **Breaking:** `_z-index-tokens.scss` and its eleven `--z-*` custom
+  properties (`dropdown`, `sticky`, `header`, `fixed`, `overlay`, `drawer`,
+  `modal`, `popover`, `tooltip`, `toast`, `skip-link`). Only `skip-link`
+  was ever used by the package itself (`.skip-link`'s `z-index`), the rest
+  shipped a stacking-context design decision that's outside what a
+  typography/spacing toolkit says it does. `.skip-link` now reads
+  `var(--z-skip-link, 9999)`, copy the old values into your own project
+  if you were using them directly.
 - **Breaking:** gap utility classes (`.gap-*`, `.row-gap-*`,
   `.column-gap-*`). No opt-back-in. Gap utilities without a matching
   flex/grid utility set didn't fit the toolkit's scope.

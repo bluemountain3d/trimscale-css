@@ -127,3 +127,5 @@ Screen-reader and focus utilities from `_a11y-utilities.scss`. Unlike everything
 <a href="#main" class="skip-link">Skip to main content</a>
 <div class="aria-live-polite" aria-live="polite">Saved.</div>
 ```
+
+`.skip-link` uses `z-index: var(--z-skip-link, 9999)`, no z-index scale is shipped for anything else, layering is a design-system decision outside this package's scope. Set `--z-skip-link` yourself if `9999` ever collides with something in your own stacking context.
