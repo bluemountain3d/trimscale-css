@@ -72,11 +72,14 @@ All notable changes to this project are documented in this file.
   file URLs are rewritten to `output.css.fontUrlBase` (default `'/fonts'`,
   distinct from `AppFonts.publicDir`: one is where the SCSS build's `src`
   is rebased from, the other is what URL a standalone CSS file requests).
-  `output.utilities.typography.trim`/`family: false` are function flags in
-  this build, not size flags, `generate` warns since there's no SCSS
-  escape hatch (`font-setup`, the placeholders) left to fall back on, same
-  for a `nextFont`-enabled family, whose `var(--next-font-x)` value is
-  never set outside Next.js's own runtime. Default `false`, opt-in.
+  `output.utilities.typography.trim: false` is a function flag in this
+  build, not a size flag, and `generate` warns about it: there's no SCSS
+  escape hatch (`font-setup`, the placeholders) left to fall back on, and
+  a role's trim metrics only reach the file through `.trim-text-*`.
+  `family` needs no such warning, `--font-family-{role}` is emitted either
+  way and your own CSS can use it. `generate` also warns per
+  `nextFont`-enabled family, whose `var(--next-font-x)` value is never set
+  outside Next.js's own runtime. Default `false`, opt-in.
   See [why-scss.md](docs/why-scss.md) for why the file still needs
   `generate` and can't ship pre-built.
 

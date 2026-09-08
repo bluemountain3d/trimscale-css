@@ -54,28 +54,43 @@ const warnIfFontlessTypographyFlags = (cfg: TrimscaleConfig, flags: ResolvedUtil
 }
 
 /**
- * The CSS build has no SCSS escape hatch: `output.utilities.typography.trim`
- * only controls whether `.trim-text-*` classes exist, `font-setup` and the
- * `%{role}-text` placeholders stay reachable either way. In a compiled CSS
- * file there's nothing to fall back on, `trim: false` means leading trim
- * doesn't exist at all, not just that the classes are missing. Same
- * reasoning, weaker, for `family`. Inform, don't force: tokens/spacing/
- * colors without trim in a CSS build is a legitimate choice.
+ * A consumer of the CSS build has no SCSS escape hatch.
+ * `output.utilities.typography.trim` only controls whether `.trim-text-*`
+ * classes exist; `font-setup` and the `%{role}-text` placeholders stay
+ * reachable from a consumer's own SCSS either way. Someone linking the
+ * compiled file has no stylesheet in that pipeline to reach them from, so
+ * `trim: false` means leading trim doesn't exist at all, not just that the
+ * classes are missing: each role's metrics are declared inside
+ * `%{role}-text`, which reaches the file only when `.trim-text-*` extends
+ * it, so with the class gone the values are nowhere to be found and nothing
+ * can reproduce them by hand.
+ *
+ * `family` is not the same kind of loss and gets no warning:
+ * `--font-family-{role}` is emitted in `@layer tokens` for every role
+ * regardless of the flag, so `font-family: var(--font-family-heading)` in
+ * the consumer's own CSS does what the class does. `.font-family-*` is a
+ * convenience, not the only path.
+ *
+ * Inform, don't force: tokens/spacing/colors without trim in a CSS build is
+ * a legitimate choice.
+ *
+ * Every warning here is about font roles, so a config without `appFonts`
+ * gets none of them: the flags have no effect at all without roles to loop
+ * over, and telling someone to set `trim: true` would send them after trim
+ * that can't exist without metrics. `warnIfFontlessTypographyFlags` owns
+ * that case and points at `appFonts` instead.
  */
 const warnAboutCssOutputLimitations = (cfg: TrimscaleConfig, flags: ResolvedUtilityFlags): void => {
+  if (!cfg.appFonts) return
+
   if (!flags.typographyTrim) {
     console.warn(
-      '⚠ CSS output with output.utilities.typography.trim: false contains no leading trim at all, @layer trim will be empty. Set trim: true if you want trim in the CSS build.',
-    )
-  }
-  if (!flags.typographyFamily) {
-    console.warn(
-      '⚠ CSS output with output.utilities.typography.family: false has no way to set a font-role family, `.font-family-*` is the only path to one in a compiled CSS file. Set family: true if you want it in the CSS build.',
+      '⚠ CSS output with output.utilities.typography.trim: false contains no leading trim at all, @layer trim-defaults and @layer trim are both empty. Set trim: true if you want trim in the CSS build.',
     )
   }
 
-  for (const [familyName, fontSource] of Object.entries(cfg.appFonts?.families ?? {})) {
-    const usesNextFont = fontSource.nextFont ?? cfg.appFonts?.nextFontDefault ?? false
+  for (const [familyName, fontSource] of Object.entries(cfg.appFonts.families)) {
+    const usesNextFont = fontSource.nextFont ?? cfg.appFonts.nextFontDefault ?? false
     if (usesNextFont) {
       console.warn(
         `⚠ "${familyName}" has nextFont enabled, its family will fall through to the generic fallback in the CSS build, var(--next-font-*) is only ever set by Next.js's own runtime, which a standalone CSS file never goes through.`,
