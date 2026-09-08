@@ -101,8 +101,8 @@ being inline, intentional, but worth knowing if you're expecting inline flow.
 <h1 class="font-size-heading-1 font-weight-bold">
   <span class="trim-text-heading">Page heading</span>
 </h1>
-<p class="font-size-text-base" style="color: var(--color-text-muted);">
-  <span class="trim-text-body">Body copy in muted tone.</span>
+<p class="font-size-text-base">
+  <span class="trim-text-body">Body copy.</span>
 </p>
 ```
 

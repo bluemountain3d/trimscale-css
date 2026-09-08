@@ -23,23 +23,23 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 
 **T-shirt sizes** (default config):
 
-| Token         | Multiplier | Base value (360 px viewport) | Base value (1440 px viewport) |
-| ------------- | ---------- | ---------------------------- | ----------------------------- |
-| `--space-3xs` | × 1        | 4 px                         | 4 px                          |
-| `--space-2xs` | × 2        | 8 px                         | 8 px                          |
-| `--space-xs`  | × 3        | 12 px                        | 12 px                         |
-| `--space-sm`  | × 4        | 16 px                        | 16 px                         |
-| `--space-md`  | × 5        | 20 px                        | 20 px                         |
-| `--space-lg`  | × 6        | 24 px (fixed)                | 24 px (fixed)                 |
-| `--space-xl`  | × 6        | 24 px                        | 48 px                         |
-| `--space-2xl` | × 8        | 32 px                        | 64 px                         |
-| `--space-3xl` | × 10       | 40 px                        | 80 px                         |
-| `--space-4xl` | × 12       | 48 px                        | 96 px                         |
-| `--space-5xl` | × 16       | 64 px                        | 128 px                        |
-| `--space-6xl` | × 20       | 80 px                        | 160 px                        |
-| `--space-7xl` | × 24       | 96 px                        | 192 px                        |
-| `--space-8xl` | × 28       | 112 px                       | 224 px                        |
-| `--space-9xl` | × 32       | 128 px                       | 256 px                        |
+| Token         | Unit            | Multiplier | Base value (360 px viewport) | Base value (1440 px viewport) |
+| ------------- | --------------- | ---------- | ----------------------------- | ------------------------------ |
+| `--space-3xs` | `--unit-micro`  | × 1        | 4 px                          | 4 px                           |
+| `--space-2xs` | `--unit-micro`  | × 2        | 8 px                          | 8 px                           |
+| `--space-xs`  | `--unit-micro`  | × 3        | 12 px                         | 12 px                          |
+| `--space-sm`  | `--unit-micro`  | × 4        | 16 px                         | 16 px                          |
+| `--space-md`  | `--unit-micro`  | × 5        | 20 px                         | 20 px                          |
+| `--space-lg`  | `--unit-micro`  | × 6        | 24 px                         | 24 px                          |
+| `--space-xl`  | `--unit-macro`  | × 6        | 24 px                         | 48 px                          |
+| `--space-2xl` | `--unit-macro`  | × 8        | 32 px                         | 64 px                          |
+| `--space-3xl` | `--unit-macro`  | × 10       | 40 px                         | 80 px                          |
+| `--space-4xl` | `--unit-macro`  | × 12       | 48 px                         | 96 px                          |
+| `--space-5xl` | `--unit-macro`  | × 16       | 64 px                         | 128 px                         |
+| `--space-6xl` | `--unit-macro`  | × 20       | 80 px                         | 160 px                         |
+| `--space-7xl` | `--unit-macro`  | × 24       | 96 px                         | 192 px                         |
+| `--space-8xl` | `--unit-macro`  | × 28       | 112 px                        | 224 px                         |
+| `--space-9xl` | `--unit-macro`  | × 32       | 128 px                        | 256 px                         |
 
 **Numeric scale:** `--space-1` through `--space-48` by default. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`. All of this is config driven, see [customizing-spacing.md](customizing-spacing.md) to change tiers, the numeric range, or switch growth model entirely.
 
@@ -98,7 +98,7 @@ Each `baseColorTokens`/`customColorTokens` entry is a hand-picked `{ oklch, hex 
 
 `semanticColorAliases` entries don't need their own hand-picked pair: instead of duplicating oklch math for a near-duplicate color, they reference an existing token by name and can adjust its `opacity` (absolute) and `lightnessMultiplier`/`chromaMultiplier` (multipliers, not absolute values), via the `get-color-token()` function (see [abstracts.md](abstracts.md)) under the hood.
 
-**`body`'s text color reads `--color-text-primary`, with a `#000` fallback** (`styles/base/_typography.scss`), same pattern as `font-size`/`--text-base` above. The default config doesn't ship a `text-primary` entry in `baseColorTokens`/`semanticColorAliases` yet, so out of the box the fallback is what actually applies. Add one to get `body` text properly theme-aware via `light-dark()` instead of a static black.
+**`body`'s text color reads `--color-text-primary`, with a `#000` fallback** (`styles/base/_typography.scss`), same pattern as `font-size`/`--text-base` above. The starter config ships a `textPrimary` entry in `baseColorTokens`, so `body` resolves through `light-dark()` out of the box; the `#000` fallback only ever applies if you remove that entry without replacing it.
 
 Colors use `light-dark()` for automatic theme switching driven by `prefers-color-scheme`. You can override the automatic detection by adding a class to `:root`:
 

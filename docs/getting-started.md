@@ -155,10 +155,7 @@ import '../trimscale-generated/_index.scss'; // relative to your entry file
 For component styles that need mixins, functions, or token variables without re-emitting global CSS:
 
 ```scss
-@use 'abstracts/variables' as var;
-@use 'abstracts/functions' as fn;
 @use 'abstracts/mixins' as mx;
-@use 'tokens/leading-trim' as *;
 
 .card {
   @include mx.font-setup($font: 'body', $font-size: var(--text-md));
