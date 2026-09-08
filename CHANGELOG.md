@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [1.0.0-beta.5]
+
 ### Added
 
 - `package.json` `exports` field, defining the package's public surface
