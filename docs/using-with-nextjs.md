@@ -22,7 +22,7 @@ appFonts: {
   nextFontDefault: true,
   nextFontPrefix: 'next-font', // defaults to 'next-font' if omitted
   fallbackDefault: 'sans-serif',
-  fonts: {
+  families: {
     'Inter': {
       source: 'local', // loaded with next/font/local
       path: ['../assets/fonts/Inter-Variable.woff2'],
@@ -39,7 +39,7 @@ appFonts: {
 
 `nextFontPrefix` only sets the prefix half of the variable name, the family half is derived from the config key (kebab-cased), not from anything read out of a font file.
 
-**Mixing in a font that isn't loaded via `next/font` at all?** `nextFontDefault: true` at the top level applies to every family in `fonts` by default, so a `manual`/`cdn` family loaded some other way (a CDN's own `<link>` tag or JS loader) would otherwise also get the `var(--next-font-x)` treatment, pointing at a CSS variable that's never actually defined. Override `nextFont: false` on that specific family instead:
+**Mixing in a font that isn't loaded via `next/font` at all?** `nextFontDefault: true` at the top level applies to every family in `families` by default, so a `manual`/`cdn` family loaded some other way (a CDN's own `<link>` tag or JS loader) would otherwise also get the `var(--next-font-x)` treatment, pointing at a CSS variable that's never actually defined. Override `nextFont: false` on that specific family instead:
 
 ```ts
 'Proxima Nova': {

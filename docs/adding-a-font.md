@@ -1,6 +1,6 @@
 # Adding a Font
 
-Font metrics, `@font-face` declarations, and role assignment are generated from `appFonts.fonts` in [`trimscale.config.ts`](../templates/trimscale.config.ts). Each entry is a family name mapped to a `source`, which decides where its metrics (and, if applicable, its `@font-face` rules) come from.
+Font metrics, `@font-face` declarations, and role assignment are generated from `appFonts.families` in [`trimscale.config.ts`](../templates/trimscale.config.ts). Each entry is a family name mapped to a `source`, which decides where its metrics (and, if applicable, its `@font-face` rules) come from.
 
 ## Choose a source
 
@@ -15,7 +15,7 @@ Font metrics, `@font-face` declarations, and role assignment are generated from 
 ```ts
 appFonts: {
   fallbackDefault: 'sans-serif',
-  fonts: {
+  families: {
     'Roboto': {
       source: 'local',
       path: [
@@ -33,14 +33,14 @@ appFonts: {
 
 The family name is always the config key (`'Roboto'` above), not whatever the font file's own internal name table says, that's what makes `manual` families able to have a name at all despite having no file to read one from.
 
-**The generated `@font-face` `src: url(...)` is root-relative** (relative to `process.cwd()`, i.e. wherever `trimscale.config.ts` lives), never relative to `outDir` or to whichever stylesheet actually `@use`s the generated bridge file. Sass doesn't rebase `url()` values to the partial they came from, so a root-relative path is the only form that resolves the same regardless of where in your SCSS tree it ends up.
+**The generated `@font-face` `src: url(...)` is root-relative** (relative to `process.cwd()`, i.e. wherever `trimscale.config.ts` lives), never relative to `output.dir` or to whichever stylesheet actually `@use`s the generated bridge file. Sass doesn't rebase `url()` values to the partial they came from, so a root-relative path is the only form that resolves the same regardless of where in your SCSS tree it ends up.
 
 That's enough for **dev**, where Vite serves the whole project root. For a **production build** to also work, the font file needs to exist at that exact path in the built output, which only happens automatically for files under your bundler's static-passthrough folder (Vite/CRA/Astro: `public/`, SvelteKit: `static/`), copied verbatim to the site root, folder name stripped. trimscale knows this via `appFonts.publicDir` (default `'public'`, only change it if your bundler uses a different name): when a font file's `path` starts with that folder, trimscale strips it from the generated `src` too, matching what your bundler actually does:
 
 ```ts
 appFonts: {
   // publicDir: 'public', // default, only set if your bundler's folder is named differently
-  fonts: {
+  families: {
     'Roboto': {
       source: 'local',
       path: ['./public/fonts/Roboto-Regular.woff2'], // → src: url("/fonts/Roboto-Regular.woff2")
@@ -60,7 +60,7 @@ appFonts: {
 appFonts: {
   localFontsPath: './fonts',
   fallbackDefault: 'sans-serif',
-  fonts: {
+  families: {
     'Roboto': { source: 'local', fallback: 'sans-serif' }, // reads every font file in ./fonts/Roboto/
   },
 },
@@ -190,7 +190,7 @@ Whatever the source, a family only becomes usable once it's mapped to at least o
 
 ```ts
 appFonts: {
-  // ...fonts, etc.
+  // ...families, etc.
   fontRoles: {
     primary: 'Roboto',
     secondary: 'Roboto Serif',
@@ -209,7 +209,7 @@ appFonts: {
 },
 ```
 
-`primary` and `body` are required, everything else, including custom roles via the index signature, is optional. A family present in `appFonts.fonts` but not mapped to any role still generates metrics but never gets a `--font-family-*` token or shows up in `font-setup`/`.trim-text-*`.
+`primary` and `body` are required, everything else, including custom roles via the index signature, is optional. A family present in `appFonts.families` but not mapped to any role still generates metrics but never gets a `--font-family-*` token or shows up in `font-setup`/`.trim-text-*`.
 
 ## Generate
 
@@ -217,7 +217,7 @@ appFonts: {
 npx trimscale-css generate
 ```
 
-This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width, top-trim, bottom-trim, lsb-adjust, and rsb-adjust, normalized to em units (plus ascender/descender/line-gap for `local`/`cdn`, or if supplied for `manual`), plus one metric-matched fallback `@font-face` per `fallbackFamily` entry, if any, and passes all of it, along with each family's resolved `family` value, `@font-face` rules per the table above, and role assignments from `appFonts.fontRoles`, as SCSS values into the generated bridge file at `<outDir>/_index.scss`. Nothing is written into the package's own `styles/` folder in `node_modules`.
+This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width, top-trim, bottom-trim, lsb-adjust, and rsb-adjust, normalized to em units (plus ascender/descender/line-gap for `local`/`cdn`, or if supplied for `manual`), plus one metric-matched fallback `@font-face` per `fallbackFamily` entry, if any, and passes all of it, along with each family's resolved `family` value, `@font-face` rules per the table above, and role assignments from `appFonts.fontRoles`, as SCSS values into the generated bridge file at `<output.dir>/_index.scss`. Nothing is written into the package's own `styles/` folder in `node_modules`.
 
 `lsb-adjust`/`rsb-adjust` (side bearing adjustments) remove the optical whitespace font designers build into a typeface's side bearings, so text sits flush against its container without manual negative margins at every use site.
 
@@ -226,12 +226,12 @@ This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width
 After generating, check three things:
 
 1. **Compile without errors.** Run your project's dev server and confirm no SCSS errors.
-2. **Leading trim is working.** Open a heading in the browser and inspect the element. If your browser supports `text-box-trim` natively (Baseline since August 2026, so any current browser does, though a real visitor on an older version may not), that's applied directly, DevTools' Computed panel should show `text-box-trim: trim-both`, no `::before`/`::after` pseudo-elements are involved and their absence isn't a failure, this path doesn't even depend on trimscale's own metrics, the browser reads the font file itself. Without native support (or with it force-disabled in DevTools), trimscale falls back to `::before`/`::after` instead, those should have negative `margin-bottom` values, if they both show `0`, the role in `appFonts.fontRoles` doesn't resolve to a family that has metrics, double check the family name matches the key you used in `appFonts.fonts`.
+2. **Leading trim is working.** Open a heading in the browser and inspect the element. If your browser supports `text-box-trim` natively (Baseline since August 2026, so any current browser does, though a real visitor on an older version may not), that's applied directly, DevTools' Computed panel should show `text-box-trim: trim-both`, no `::before`/`::after` pseudo-elements are involved and their absence isn't a failure, this path doesn't even depend on trimscale's own metrics, the browser reads the font file itself. Without native support (or with it force-disabled in DevTools), trimscale falls back to `::before`/`::after` instead, those should have negative `margin-bottom` values, if they both show `0`, the role in `appFonts.fontRoles` doesn't resolve to a family that has metrics, double check the family name matches the key you used in `appFonts.families`.
 3. **Side bearings look right.** View a large display heading. The first letter's left edge should sit close to flush with the container.
 
 ## Quick checklist
 
-- [ ] Family added to `appFonts.fonts` with the right `source` (`local`/`cdn`/`manual`)
+- [ ] Family added to `appFonts.families` with the right `source` (`local`/`cdn`/`manual`)
 - [ ] `local`: font file(s) placed at the configured `path`(s), or under `localFontsPath/<family key>/` if `path` is omitted, and, for a production build, under `appFonts.publicDir` (default `'public'`), not just `src/`
 - [ ] `cdn`: `url`(s) point at real font files, not a CSS-generating endpoint
 - [ ] `manual`: metrics copied from precisionspec.dev's **TrimScale** export

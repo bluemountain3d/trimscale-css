@@ -22,9 +22,9 @@ All notable changes to this project are documented in this file.
   `and-down`, `between`, `only`): pass a container name, or `true` for the
   nearest anonymous container, to emit a `@container` query instead of
   `@media`. Defaults to `null`, existing calls are unaffected.
-- `utilities` config option (`spacing`, `typography`): opt out of individual
-  utility-class groups, each a boolean or a per-flag object. Defaults to
-  everything enabled, so existing configs are unaffected.
+- `output.utilities` config option (`spacing`, `typography`): opt out of
+  individual utility-class groups, each a boolean or a per-flag object.
+  Defaults to everything enabled, so existing configs are unaffected.
 - `generate` now prints the exact `next/font` `variable` name each
   `nextFont`-enabled family expects (e.g. `"Inter" expects next/font's
   \`variable\` to be exactly "--next-font-inter"`). `generate` can't
@@ -34,6 +34,30 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Breaking:** `appFonts.fontRoles` moved from a top-level `TrimscaleConfig`
+  field into `appFonts.fontRoles` (a property of `AppFonts` itself). The
+  values in `fontRoles` are keys in `appFonts.families` (see below), nesting
+  them together makes that relationship visible, and makes an upcoming
+  optional-fonts change straightforward: either the whole font
+  configuration exists, or none of it does. `loadConfig` throws a clear
+  error naming the new path if a config still sets `fontRoles` at the top
+  level.
+- **Breaking:** `outDir` and `utilities` (top-level config fields) collected
+  under a new `output` object: `output.dir` (was `outDir`) and
+  `output.utilities` (was `utilities`). `output` also declares `scss`,
+  `css`, and `reset`, reserved for upcoming standalone-CSS-output and
+  opt-out-reset work, neither does anything yet. `loadConfig` throws a
+  clear error naming the new path if a config still sets `outDir` or
+  `utilities` at the top level, and throws if `output.scss` and
+  `output.css` are both `false` (nothing would be generated).
+- **Breaking:** `appFonts.fonts` renamed to `appFonts.families`. An entry
+  describes a whole family, not a single file, `path`/`url` already accept
+  multiple files to cover a family's full weight/style range, and every
+  other property on `AppFonts`/`FontRoles` already talks about "family"
+  rather than "font".
+- **Breaking:** `utilities.spacing.tshirt` renamed to
+  `output.utilities.spacing.tShirt`, matching `tShirtScale`'s existing
+  casing elsewhere in the config.
 - Lowered the Node requirement from `>=23.6.0` to `>=22.18.0`. Flagless
   TypeScript type stripping, which `generate` relies on to run
   `trimscale.config.ts` directly, became the default on the 22.x LTS line

@@ -1,23 +1,25 @@
 # Utility Classes
 
-This page documents the *shape* of each utility class using the example config's names. For the exact classes **your own** `trimscale.config.ts` produces, generate writes a resolved reference to `<outDir>/utility-classes.md`, see [getting-started.md](getting-started.md#generate).
+This page documents the *shape* of each utility class using the example config's names. For the exact classes **your own** `trimscale.config.ts` produces, generate writes a resolved reference to `<output.dir>/utility-classes.md`, see [getting-started.md](getting-started.md#generate).
 
 ## Opting out of utility classes
 
 Every group documented below is on by default. If you write component SCSS
 and never reach for `.p-md`/`.trim-text-body`/etc. in markup, turn a group
-off in `trimscale.config.ts`'s `utilities` field so `generate` stops
+off in `trimscale.config.ts`'s `output.utilities` field so `generate` stops
 emitting it:
 
 ```ts
-utilities: {
-  spacing: { numeric: false }, // keep t-shirt sizes, drop the 1-48 numeric scale
-  typography: false,           // drop every typography utility class
+output: {
+  utilities: {
+    spacing: { numeric: false }, // keep t-shirt sizes, drop the 1-48 numeric scale
+    typography: false,           // drop every typography utility class
+  },
 }
 ```
 
 `spacing`/`typography` each accept `true`/`false` for the whole section, or
-an object turning off individual groups (`base`, `tshirt`, `numeric` for
+an object turning off individual groups (`base`, `tShirt`, `numeric` for
 spacing; `trim`, `family`, `size`, `lineHeight`, `weight`, `style`,
 `textTransform`, `textAlign`, `numericFigures` for typography). Turning off
 a section's top level also drops its small fixed classes, e.g.

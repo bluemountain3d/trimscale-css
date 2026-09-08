@@ -2,15 +2,40 @@
 
 A single-page index of every property in [`trimscale.config.ts`](../templates/trimscale.config.ts), in the same order they appear in `const config`. Each section is a quick lookup, not the full explanation, follow the link for rationale, examples, and how a property affects the generated output.
 
-## `outDir`
+## `output`
 
-Where `trimscale-css generate` writes this project's generated output (the bridge file plus a `utility-classes.md` reference), relative to this config file. Never `node_modules`.
+Optional. Where and what `trimscale-css generate` writes: the output directory (never `node_modules`), whether the SCSS bridge file is written, and which utility-class groups to include.
 
-| Property | Type     | Required | Description                                                                             |
-| -------- | -------- | :------: | --------------------------------------------------------------------------------------- |
-| `outDir` | `string` |    No    | Output directory, relative to `trimscale.config.ts`. Default `'./trimscale-generated'`. |
+| Property            | Type                 | Required | Description                                                                              |
+| -------------------- | -------------------- | :------: | ------------------------------------------------------------------------------------------ |
+| `output.dir`         | `string`             |    No    | Output directory, relative to `trimscale.config.ts`. Default `'./trimscale-generated'`. |
+| `output.scss`        | `boolean`            |    No    | Emit the SCSS bridge file. Default `true`.                                              |
+| `output.utilities`   | `boolean` or object  |    No    | Which utility-class groups to generate, shared by every output target. See below.       |
 
 → Full guide: [getting-started.md](getting-started.md#generate)
+
+### `output.utilities`
+
+Optional. Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. Every group defaults `true`, omitting this field (or any sub-flag within it) changes nothing. Setting a group to `false` also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops.
+
+| Property                                | Type      | Required | Description                                                       |
+| ----------------------------------------- | --------- | :------: | -------------------------------------------------------------------- |
+| `output.utilities.spacing`                | `boolean` or object |    No    | `true`/`false` for the whole group, or an object to toggle sub-groups individually (see below). |
+| `output.utilities.spacing.base`           | `boolean` |    No    | `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`. |
+| `output.utilities.spacing.tShirt`         | `boolean` |    No    | `.{m\|p}{side?}-{3xs..9xl}`.                                        |
+| `output.utilities.spacing.numeric`        | `boolean` |    No    | `.{m\|p}{side?}-{1..numericScaleEnd}`.                               |
+| `output.utilities.typography`             | `boolean` or object |    No    | `true`/`false` for the whole group, or an object to toggle sub-groups individually (see below). |
+| `output.utilities.typography.trim`        | `boolean` |    No    | `.trim-text-*`.                                                     |
+| `output.utilities.typography.family`      | `boolean` |    No    | `.font-family-*`.                                                   |
+| `output.utilities.typography.size`        | `boolean` |    No    | `.font-size-*`.                                                     |
+| `output.utilities.typography.lineHeight`  | `boolean` |    No    | `.line-height-*`, plus `.line-height-dynamic`.                      |
+| `output.utilities.typography.weight`      | `boolean` |    No    | `.font-weight-*`.                                                   |
+| `output.utilities.typography.style`       | `boolean` |    No    | `.font-style-*`.                                                    |
+| `output.utilities.typography.textTransform` | `boolean` |    No    | `.text-transform-*`.                                                |
+| `output.utilities.typography.textAlign`   | `boolean` |    No    | `.text-align-*`.                                                    |
+| `output.utilities.typography.numericFigures` | `boolean` |    No    | `.num-*` (figure variants).                                         |
+
+→ Full guide: [utility-classes.md](utility-classes.md#opting-out-of-utility-classes)
 
 ## `appFonts`
 
@@ -18,8 +43,8 @@ Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name
 
 | Property          | Type                         | Required | Description                                                                                                                                                 |
 | ----------------- | ---------------------------- | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `fonts`           | `Record<string, FontSource>` |   Yes    | Font sources keyed by family name; `source` picks the shape (`'local'`, `'cdn'`, or `'manual'`), see [adding-a-font.md](adding-a-font.md).                  |
-| `fontRoles`       | `FontRoles`                  |   Yes    | Maps semantic roles to a family name from `fonts`. See table below.                                                                                          |
+| `families`        | `Record<string, FontSource>` |   Yes    | Font sources keyed by family name; `source` picks the shape (`'local'`, `'cdn'`, or `'manual'`), see [adding-a-font.md](adding-a-font.md).                  |
+| `fontRoles`       | `FontRoles`                  |   Yes    | Maps semantic roles to a family name from `families`. See table below.                                                                                       |
 | `localFontsPath`  | `string`                     |    No    | Base folder, relative to this config file. A `local` family that omits `path` looks for its files under `localFontsPath/<family key>/` instead.             |
 | `publicDir`       | `string`                     |    No    | Your bundler's static-passthrough folder (Vite/CRA/Astro: `'public'`, SvelteKit: `'static'`). Stripped as a leading segment from a `local` family's generated `@font-face` `src`. Default `'public'`.  |
 | `nextFontDefault` | `boolean`                    |    No    | Whether `family` values build around a `next/font` CSS variable by default. A family's own `nextFont` overrides this for just that family. Default `false`. |
@@ -28,7 +53,7 @@ Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name
 
 → Full guide: [adding-a-font.md](adding-a-font.md) (sources, `@font-face` rules) · [using-with-nextjs.md](using-with-nextjs.md) (`next/font` integration)
 
-### `appFonts.fonts[x]` (per-family `FontSource`)
+### `appFonts.families[x]` (per-family `FontSource`)
 
 | Property           | Type                                                                            | Required | Applies to | Description                                                                                                        |
 | ------------------ | -------------------------------------------------------------------------------- | :------: | ---------- | ------------------------------------------------------------------------------------------------------------------- |
@@ -45,7 +70,7 @@ Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name
 
 ### `appFonts.fontRoles`
 
-Maps semantic roles to a family name from `appFonts.fonts`. A family not mapped to any role still gets metrics generated, but no `--font-family-*` token.
+Maps semantic roles to a family name from `appFonts.families`. A family not mapped to any role still gets metrics generated, but no `--font-family-*` token.
 
 | Property                                                                                    | Type     | Required | Description                               |
 | --------------------------------------------------------------------------------------------- | -------- | :------: | ----------------------------------------- |
@@ -209,25 +234,3 @@ Optional. Semantic names (e.g. `'text-muted'`) aliasing a token from `baseColorT
 
 → Full guide: [design-tokens.md#color-tokens](design-tokens.md#color-tokens) · derivation mechanics: [abstracts.md](abstracts.md#fnget-color-tokentoken-tokens-opacity-lightness-multiplier-chroma-multiplier)
 
-## `utilities`
-
-Optional. Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. Every group defaults `true`, omitting this field (or any sub-flag within it) changes nothing. Setting a group to `false` also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops.
-
-| Property                        | Type      | Required | Description                                                       |
-| -------------------------------- | --------- | :------: | -------------------------------------------------------------------- |
-| `spacing`                        | `boolean` or object |    No    | `true`/`false` for the whole group, or an object to toggle sub-groups individually (see below). |
-| `spacing.base`                   | `boolean` |    No    | `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`. |
-| `spacing.tshirt`                 | `boolean` |    No    | `.{m\|p}{side?}-{3xs..9xl}`.                                        |
-| `spacing.numeric`                | `boolean` |    No    | `.{m\|p}{side?}-{1..numericScaleEnd}`.                               |
-| `typography`                     | `boolean` or object |    No    | `true`/`false` for the whole group, or an object to toggle sub-groups individually (see below). |
-| `typography.trim`                | `boolean` |    No    | `.trim-text-*`.                                                     |
-| `typography.family`              | `boolean` |    No    | `.font-family-*`.                                                   |
-| `typography.size`                | `boolean` |    No    | `.font-size-*`.                                                     |
-| `typography.lineHeight`          | `boolean` |    No    | `.line-height-*`, plus `.line-height-dynamic`.                      |
-| `typography.weight`              | `boolean` |    No    | `.font-weight-*`.                                                   |
-| `typography.style`               | `boolean` |    No    | `.font-style-*`.                                                    |
-| `typography.textTransform`       | `boolean` |    No    | `.text-transform-*`.                                                |
-| `typography.textAlign`           | `boolean` |    No    | `.text-align-*`.                                                    |
-| `typography.numericFigures`      | `boolean` |    No    | `.num-*` (figure variants).                                         |
-
-→ Full guide: [utility-classes.md](utility-classes.md#opting-out-of-utility-classes)

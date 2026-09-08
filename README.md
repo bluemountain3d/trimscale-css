@@ -83,7 +83,7 @@ npx trimscale-css init
 npx trimscale-css generate
 ```
 
-`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes two files into your own project (`outDir`, `./trimscale-generated` by default, never `node_modules`): the SCSS bridge file and a `utility-classes.md` reference. Point your SCSS compiler's `loadPaths` at the package's `styles/` folder for trimscale-css's own static files, and `@use` the generated bridge file for your project's actual config values.
+`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes two files into your own project (`output.dir`, `./trimscale-generated` by default, never `node_modules`): the SCSS bridge file and a `utility-classes.md` reference. Point your SCSS compiler's `loadPaths` at the package's `styles/` folder for trimscale-css's own static files, and `@use` the generated bridge file for your project's actual config values.
 
 See [getting-started.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md) for the full walkthrough, requirements (Node version, editor config), and both import styles (global vs. component-scoped).
 
@@ -95,7 +95,7 @@ See [getting-started.md](https://github.com/bluemountain3d/trimscale-css/blob/HE
 trimscale-css/
 ├── bin/                             # CLI entry point (init/generate)
 ├── models/                          # Config.ts, the TrimscaleConfig type
-├── scripts/                         # generateBridge.js/generateFonts.js, read trimscale.config.ts, write <outDir>/ (your project, not styles/)
+├── scripts/                         # generateBridge.js/generateFonts.js, read trimscale.config.ts, write <output.dir>/ (your project, not styles/)
 ├── fixtures/                        # Default font files used by the shipped config
 ├── templates/                       # trimscale.config.ts, the consumer-safe template `init` copies into your project
 ├── docs/                            # Guides, see Documentation below
@@ -137,7 +137,7 @@ The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`,
 
 ## Customization
 
-Everything lives in one file: [`trimscale.config.ts`](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/templates/trimscale.config.ts). Edit a field, run `npx trimscale-css generate`, it derives everything else at compile time and writes the result to `outDir` (a bridge file plus a `utility-classes.md` reference). Nothing in `outDir` should be hand-edited, it gets overwritten on the next generate.
+Everything lives in one file: [`trimscale.config.ts`](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/templates/trimscale.config.ts). Edit a field, run `npx trimscale-css generate`, it derives everything else at compile time and writes the result to `output.dir` (a bridge file plus a `utility-classes.md` reference). Nothing in `output.dir` should be hand-edited, it gets overwritten on the next generate.
 
 The table below groups fields by topic; for every individual property, its type, and whether it's required, see [full-config-reference.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/full-config-reference.md).
 
@@ -148,7 +148,7 @@ The table below groups fields by topic; for every individual property, its type,
 | `breakpoints`                                                                   | Named viewport breakpoints                                                                                                                           | [customizing-breakpoints.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-breakpoints.md)                                                                                              |
 | `spacingSetup`                                                                  | `coupled` vs. `independent` spacing growth model, tier multipliers, numeric scale range                                                              | [customizing-spacing.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-spacing.md)                                                                                                      |
 | `defaultScheme`, `baseColorTokens`, `semanticColorAliases`, `customColorTokens` | The color palette. Ships with a placeholder palette; replace the values (or add your own token maps) rather than treating them as fixed brand colors | [design-tokens.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/design-tokens.md#color-tokens), [abstracts.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/abstracts.md#mixins) |
-| `utilities`                                                                     | Opt-out toggles for the generated utility-class groups (spacing, typography), on or off per group or per sub-group                                   | [utility-classes.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/utility-classes.md#opting-out-of-utility-classes)                                                                                |
+| `output.utilities`                                                              | Opt-out toggles for the generated utility-class groups (spacing, typography), on or off per group or per sub-group                                   | [utility-classes.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/utility-classes.md#opting-out-of-utility-classes)                                                                                |
 
 Adding a component of your own? See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md), the `components` cascade layer is reserved for exactly that.
 
