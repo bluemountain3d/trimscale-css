@@ -86,33 +86,29 @@ const config: TrimscaleConfig = {
       //   },
       // },
     },
-  },
-
-  /**
-   * Maps semantic font roles (primary, heading, body, etc.) to font family
-   * names defined in appFonts.fonts. primary and body are required, the rest optional.
-   * → docs/full-config-reference.md#fontroles
-   */
-  fontRoles: {
-    // System Default
-    // Hierarchical
-    primary: 'Roboto',
-    secondary: 'Roboto Serif',
-    tertiary: 'Roboto Mono',
-    // Category
-    sans: 'Roboto',
-    serif: 'Roboto Serif',
-    mono: 'Roboto Mono',
-    // Contextual
-    display: 'Roboto Serif',
-    heading: 'Roboto Serif',
-    subheading: 'Roboto',
-    body: 'Roboto',
-    quote: 'Roboto Serif',
-    code: 'Roboto Mono',
-    ui: 'Roboto',
-    // Custom
-    // E.g. ink: 'Some Font Name',
+    /**
+     * Maps semantic font roles (primary, heading, body, etc.) to font family
+     * names defined in appFonts.fonts. primary and body are required, the rest optional.
+     * → docs/full-config-reference.md#fontroles
+     */
+    fontRoles: {
+      // System Default
+      // Hierarchical
+      primary: 'Roboto',
+      secondary: 'Roboto Serif',
+      tertiary: 'Roboto Mono',
+      // Contextual
+      display: 'Roboto Serif',
+      heading: 'Roboto Serif',
+      subheading: 'Roboto',
+      body: 'Roboto',
+      quote: 'Roboto Serif',
+      code: 'Roboto Mono',
+      ui: 'Roboto',
+      mono: 'Roboto Mono',
+      // Custom
+      // E.g. ink: 'Some Font Name',
+    },
   },
 
   /**

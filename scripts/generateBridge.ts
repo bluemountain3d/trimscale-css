@@ -59,7 +59,7 @@ const withArgs = [
   setWithArg('font-metrics', metricsToScssMapValue(metrics)),
   setWithArg('font-faces', fontFacesToScssListValue(fontFaces)),
   setWithArg('fallback-font-faces', fallbackFontFacesToScssListValue(fallbackFontFaces)),
-  setWithArg('font-roles', fontRolesToScssMapValue(cfg.fontRoles)),
+  setWithArg('font-roles', fontRolesToScssMapValue(cfg.appFonts.fontRoles)), 
   setWithArg('modular-typographic-scale', modularTypographicScaleToScssMapValue(cfg.modularTypographicScale)),
   setWithArg('semantic-font-sizes', semanticFontSizesToScssMapValue(cfg.semanticFontSizes)),
   setWithArg('font-weights', fontWeightsToScssMapValue(cfg.fontWeights)),

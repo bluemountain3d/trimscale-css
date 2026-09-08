@@ -75,19 +75,34 @@ const config: TrimscaleConfig = {
       //   },
       // },
     },
-  },
 
-  /**
-   * Maps semantic font roles (primary, heading, body, etc.) to font family
-   * names defined in appFonts.fonts. primary and body are required, the rest optional.
-   * → docs/full-config-reference.md#fontroles
-   */
-  fontRoles: {
-    primary: 'System Sans',
-    body: 'System Sans',
-    // Add more roles once you've replaced the placeholder above, e.g.:
-    // secondary: 'Some Font Name',
-    // heading: 'Some Font Name',
+    /**
+     * Maps semantic font roles to keys in `fonts` above.
+     *
+     * `primary` and `body` are required. Everything else is optional, and the
+     * role names are yours to choose, the commented lines below are only
+     * common conventions, not a fixed set. A role named `caption` or `nav`
+     * works exactly the same and generates `.trim-text-caption` etc.
+     *
+     * → docs/full-config-reference.md#fontroles
+     */
+    fontRoles: {
+      // The default role, used when font-setup is called without arguments
+      primary: 'System Sans',
+      // The role body text uses
+      body: 'System Sans',
+
+      // Common conventions, uncomment and point at a family in `fonts`:
+      // secondary: '',
+      // tertiary: '',
+      // heading: '',
+      // subheading: '',
+      // display: '',
+      // quote: '',
+      // code: '',
+      // mono: '',
+      // ui: '',
+    },
   },
 
   /**

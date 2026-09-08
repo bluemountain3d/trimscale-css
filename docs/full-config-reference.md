@@ -30,11 +30,11 @@ Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name
 
 Maps semantic roles to a family name from `appFonts.fonts`. A family not mapped to any role still gets metrics generated, but no `--font-family-*` token.
 
-| Property                                                                                                                  | Type     | Required | Description                               |
-| ------------------------------------------------------------------------------------------------------------------------- | -------- | :------: | ----------------------------------------- |
-| `primary`, `body`                                                                                                         | `string` |   Yes    | The two required roles.                   |
-| `secondary`, `tertiary`, `sans`, `serif`, `mono`, `display`, `heading`, `subheading`, `decorative`, `quote`, `code`, `ui` | `string` |    No    | Optional built-in roles.                  |
-| `[customRole: string]`                                                                                                    | `string` |    No    | Any other role name, via index signature. |
+| Property                                                                                                 | Type     | Required | Description                               |
+| -------------------------------------------------------------------------------------------------------- | -------- | :------: | ----------------------------------------- |
+| `primary`, `body`                                                                                        | `string` |   Yes    | The two required roles.                   |
+| `secondary`, `tertiary`, `display`, `heading`, `subheading`, `decorative`, `quote`, `code`, `ui`, `mono` | `string` |    No    | Optional built-in roles.                  |
+| `[customRole: string]`                                                                                   | `string` |    No    | Any other role name, via index signature. |
 
 → Full guide: [adding-a-font.md](adding-a-font.md#map-to-roles)
 
