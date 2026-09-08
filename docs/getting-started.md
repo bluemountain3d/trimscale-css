@@ -87,7 +87,7 @@ Tokens (as CSS custom properties) and utility classes, resolved against your act
 
 ### Utility flags are function flags here, not size flags
 
-In the SCSS build, `output.utilities.typography.trim: false` just means the `.trim-text-*` classes aren't generated, `font-setup` and the underlying placeholders still work if you reach for them directly. In the CSS build there's no SCSS left to fall back on: `trim: false` means leading trim doesn't exist in the file at all, `@layer trim` is empty. `generate` warns about this (and the equivalent for `family`) rather than forcing the flag on, tokens/spacing/colors without trim in a CSS build is still a legitimate choice.
+In the SCSS build, `output.utilities.typography.trim: false` just means the `.trim-text-*` classes aren't generated, `font-setup` and the underlying placeholders still work if you reach for them directly. In the CSS build there's no SCSS left to fall back on: `trim: false` means leading trim doesn't exist in the file at all, and both `@layer trim-defaults` and `@layer trim` are empty (placeholders emit nothing until something extends them, and `.trim-text-*` is the only thing that does). `generate` warns about this (and the equivalent for `family`) rather than forcing the flag on, tokens/spacing/colors without trim in a CSS build is still a legitimate choice.
 
 A family with `nextFont: true` doesn't work in the CSS build either: its `family` value is `var(--next-font-x)`, a CSS variable only ever set by Next.js's own runtime, which a standalone CSS file never goes through. `generate` warns per family when this combination is detected.
 

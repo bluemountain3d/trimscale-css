@@ -72,6 +72,33 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Breaking:** the cascade layer order gained a layer and `trim` moved. It is
+  now `reset, tokens, functions, trim-defaults, base, trim, layouts,
+  components, utilities` (was `reset, tokens, functions, trim, base, layouts,
+  components, utilities`). The trim system straddles `base` because its two
+  halves need opposite positions relative to it: the bare font-size/line-height
+  baseline belongs below `base`, so `small { font-size: 0.875em }` still wins,
+  while the `--_*` metrics and the role's `font-family` belong above it, so a
+  base rule like `code { font-family: ... }` can't leave an element rendering
+  in one typeface while trimmed by another's metrics. Previously
+  `<code class="trim-text-body">` rendered in the code face with body metrics.
+  **Migration:** if you declare the layer order yourself (component-scoped
+  import without `@use 'layer'`), add `trim-defaults` and move `trim` after
+  `base` to match. An undeclared layer name is not an error in CSS, it creates
+  a new layer at the end with the highest priority, so a stale declaration
+  fails silently rather than loudly.
+- **Breaking:** `%text-properties` split into `%text-baseline` (in
+  `@layer trim-defaults`) and `%text-geometry` (in `@layer trim`). Extend the
+  role placeholders (`%heading-text` etc.) or use `mx.font-setup` as before,
+  both pull in each half automatically. Only a direct `@extend
+  %text-properties` needs changing, and that placeholder was never the
+  documented entry point.
+- **Breaking:** `.trim-text-*` is declared in `@layer trim` instead of
+  `@layer utilities`. No output changes from this on its own: `@extend` emits
+  into the placeholder's own position, so the class was already landing in the
+  trim layer while leaving an empty `utilities` block behind. It matters only
+  if you were relying on `.trim-text-*` outranking a rule in `layouts` or
+  `components`, which it never did.
 - **Breaking:** `appFonts.fontRoles` moved from a top-level `TrimscaleConfig`
   field into `appFonts.fontRoles` (a property of `AppFonts` itself). The
   values in `fontRoles` are keys in `appFonts.families` (see below), nesting

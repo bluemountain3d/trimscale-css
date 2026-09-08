@@ -86,7 +86,8 @@ So breakpoint values can't be tokens, they have to be substituted before the
 CSS is parsed, which means a build step.
 
 The same applies to [`mx.font-setup`](abstracts.md#mxfont-setup), which
-`@extend`s a font-role placeholder and emits the trim geometry inline, and to
+`@extend`s a font-role placeholder so one shared trim rule covers every
+caller, and to
 [`mx.generate-color-tokens`](abstracts.md#mxgenerate-color-tokenstokens-default-scheme),
 which emits a three-tier `@supports` fallback chain per token from a single
 source map.

@@ -3,23 +3,36 @@
 The layer order is declared once, in `_layer.scss`:
 
 ```scss
-@layer reset, tokens, functions, trim, base, layouts, components, utilities;
+@layer reset, tokens, functions, trim-defaults, base, trim, layouts, components, utilities;
 ```
 
 Layers are listed lowest to highest priority, a later layer always beats an earlier one, regardless of selector specificity (short of `!important`). This is what lets utility classes and `font-setup`-authored component styles override the framework's own defaults with zero specificity management:
 
-| Layer        | Contains                                                                                                            |
-| ------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `reset`      | Browser-default reset (lowest priority)                                                                             |
-| `tokens`     | CSS custom property declarations on `:root`                                                                         |
-| `functions`  | Reserved, currently unused |
-| `trim`       | `%text-properties` and the font-role placeholders, leading-trim geometry plus a bare font-size/line-height baseline |
-| `base`       | HTML element defaults (`body`, headings, etc.)                                                                      |
-| `layouts`    | Reserved for your own layout styles (grids, page structure, containers), the system ships none of its own           |
-| `components` | Reserved for your own component classes, the system ships none of its own, see [examples.md](examples.md)           |
-| `utilities`  | All utility classes: spacing, typography, accessibility (highest priority)                                          |
+| Layer           | Contains                                                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `reset`         | Browser-default reset (lowest priority)                                                                                     |
+| `tokens`        | CSS custom property declarations on `:root`                                                                                 |
+| `functions`     | Reserved, currently unused                                                                                                  |
+| `trim-defaults` | `%text-baseline`: the bare font-size/line-height baseline the trim system falls back to                                     |
+| `base`          | HTML element defaults (`body`, headings, etc.)                                                                              |
+| `trim`          | `%text-geometry`, the font-role placeholders, and `.trim-text-*`: leading-trim metrics, margins, pseudo-elements, font-family |
+| `layouts`       | Reserved for your own layout styles (grids, page structure, containers), the system ships none of its own                   |
+| `components`    | Reserved for your own component classes, the system ships none of its own, see [examples.md](examples.md)                   |
+| `utilities`     | Spacing, typography, and accessibility utility classes, except `.trim-text-*` (highest priority)                            |
 
-Because `trim` sits below `base`, `components`, and `utilities`, everything the trim placeholders set is a _default_: any component class, base element rule, or utility class overrides it automatically. This is also why `.trim-text-*` and a plain `.font-size-*` can be combined freely on the same element, the winner is decided by layer, not by class order or specificity.
+## Why the trim system straddles `base`
+
+The trim system is split across two layers because its two halves need opposite positions relative to `base`.
+
+**`trim-defaults`, below `base`.** The bare `font-size: var(--text-base)` / `line-height: var(--line-height-dynamic)` baseline exists so a trim placeholder is usable standalone rather than depending on inherited values. It is meant to lose to everything: `small { font-size: 0.875em }` in `base` keeps `<small class="trim-text-body">` small, and `.font-size-*` in `utilities` overrides it too.
+
+**`trim`, above `base`.** The four `--_*` metrics are measured from one specific font file and are only correct alongside the `font-family` they were measured from. If `base`'s `code, kbd, samp, pre { font-family: var(--font-family-code) }` outranked them, `<code class="trim-text-body">` would render in the code typeface while trimmed by the body typeface's metrics. Keeping this half above `base` prevents that silently happening.
+
+Utilities can still separate the two, and that is deliberate: `.font-family-mono` sets only `font-family`, so `class="trim-text-body font-family-mono"` renders in mono with body metrics. The difference is that you asked for it. Nothing splits them implicitly any more.
+
+`.trim-text-*` is written in `@layer trim` rather than `@layer utilities` because that is where it lands regardless. `@extend` emits into the placeholder's own position, not the position of the rule doing the extending, so a `.trim-text-*` rule declared under `utilities` would be hoisted into the trim layers anyway and leave an empty `utilities` block behind. The same applies to `mx.font-setup`, see [abstracts.md](abstracts.md#mxfont-setup).
+
+This is why `.trim-text-*` and a plain `.font-size-*` can be combined freely on the same element: the winner is decided by layer, not by class order or specificity, and `.trim-text-*`'s own size baseline sits in the lowest of the two trim layers.
 
 **Adding your own reset rules?** Wrap them in `@layer reset { ... }` too, matching the layer name declared above. Unlayered CSS always wins over every layer regardless of specificity, so a reset rule you add outside `@layer reset` would outrank everything in the system, not just the browser defaults it's meant to normalize. Declaring `@layer reset { ... }` again in your own file doesn't create a second layer, it appends to the same one; normal cascade order still applies within it, so load your additions after `styles/base/_reset.scss` if you need them to win over a specific rule there.
 

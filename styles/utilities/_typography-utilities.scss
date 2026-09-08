@@ -19,7 +19,7 @@
 /// element carries `.trim-text-*`. Put it on a <span> nested inside the
 /// sized element rather than on the element itself, so your own ::before/
 /// ::after on that element can't silently collide with it. Note
-/// %text-properties sets display: flow-root, so the span stops being
+/// %text-geometry sets display: flow-root, so the span stops being
 /// inline — intentional (the fallback margins need a box), but worth
 /// knowing if you're expecting inline flow.
 /// @example html
@@ -29,7 +29,14 @@
 ///   <span class="font-family-mono">inline code-style snippet</span>
 ///   <span class="font-size-text-sm">plain, no trim system involved</span>
 /// ===========================================================================
-@layer utilities {
+/// Written in @layer trim, not @layer utilities, because that is where it
+/// ends up either way: `@extend` emits into the placeholder's own position,
+/// so a `.trim-text-*` rule written under `@layer utilities` would still be
+/// hoisted into the trim layers and leave an empty utilities block behind.
+/// Declaring the real layer here keeps the source honest about the cascade.
+/// The role placeholders straddle @layer base, so the baseline half lands in
+/// trim-defaults and the geometry half in trim, see tokens/leading-trim.
+@layer trim {
   /// =========================================================================
   /// Trim Text — font-family, leading-trim metrics, and a bare font-size/
   /// line-height baseline per font role. Weight, style, letter-spacing, and
@@ -43,7 +50,9 @@
       }
     }
   }
+}
 
+@layer utilities {
   /// =========================================================================
   /// Non "trim" specific utility classes
   /// =========================================================================

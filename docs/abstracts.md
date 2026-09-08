@@ -134,7 +134,26 @@ Every parameter except `$font` defaults to `null` and is only emitted as a real 
 
 The mixin sets font metrics internally and applies leading-trim via `::before`/`::after` pseudo-elements. When the browser supports `text-box-trim`, native trimming is used instead.
 
-**A note on `@extend` and layers, if you reach for `%{role}-text` directly instead of `font-setup`:** `@extend` puts the extending selector wherever the placeholder was *defined*, not wherever the `@extend` is written. `%{role}-text` lives in `@layer trim`, so `@extend %heading-text` from your own `@layer components` rule doesn't keep that rule in `components`, it moves it into `trim`, below every utility class and even `base`, regardless of where you wrote it. `font-setup` doesn't have this problem, it emits properties on the spot rather than extending anything. This is why this page recommends the mixin over `@extend`-ing placeholders directly.
+**A note on `@extend` and layers.** `font-setup` reaches the font role through `@extend`, and `@extend` puts the extending selector wherever the placeholder was *defined*, not wherever the `@extend` is written. A rule that calls `font-setup` is therefore split across three layers:
+
+```scss
+@layer components {
+  .card__title {
+    @include mx.font-setup($font: 'heading', $font-size: var(--heading-1), $font-weight: 700);
+    color: var(--text-strong);
+  }
+}
+```
+
+```css
+@layer trim-defaults { .card__title { font-size: var(--text-base); line-height: var(--line-height-dynamic); } }
+@layer trim          { .card__title { --_top-trim: 0.196em; font-family: var(--font-family-heading); ... } }
+@layer components    { .card__title { font-size: var(--heading-1); font-weight: 700; color: var(--text-strong); } }
+```
+
+Only what you pass as parameters (and anything else you write in the rule) stays in `components`. The font role's own values land in the trim layers, which is what makes them defaults your declarations win over, see [cascade-layers.md](cascade-layers.md#why-the-trim-system-straddles-base).
+
+`@extend %heading-text` by hand behaves identically, so the recommendation for `font-setup` over the placeholder is about the role validation and the typography parameters, not about layering. What both mean in practice is that a component rule using the trim system does not sit wholly inside `@layer components`, so a later rule in `layouts` or `components` can beat its font-family without beating the rest of it.
 
 ### `mx.generate-color-tokens($tokens, $default-scheme)`
 

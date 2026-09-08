@@ -80,8 +80,22 @@ Apply `.trim-text-*` to a `<span>` nested inside the sized element, not the
 element itself. The fallback path (browsers without native `text-box-trim`)
 uses that element's own `::before`/`::after`, so applying the class directly
 risks it silently colliding with your own pseudo-elements on the same
-element. `%text-properties` sets `display: flow-root`, so the span stops
+element. `%text-geometry` sets `display: flow-root`, so the span stops
 being inline, intentional, but worth knowing if you're expecting inline flow.
+
+`.trim-text-*` is emitted into `@layer trim`, not `@layer utilities`, so its
+font-size baseline loses to `.font-size-*` and to element defaults like
+`small { font-size: 0.875em }`, while its font-family and trim metrics beat
+element defaults and stay paired with each other. See
+[cascade-layers.md](cascade-layers.md#why-the-trim-system-straddles-base).
+
+Combining `.trim-text-*` with `.font-family-*` is the one case where the two
+come apart: `.font-family-*` sets only `font-family` and sits in `utilities`,
+above both trim layers, so `class="trim-text-body font-family-mono"` renders
+in the mono typeface while still trimmed by the body typeface's metrics. That
+is the documented purpose of `.font-family-*`, but it means the pair is worth
+reaching for deliberately rather than by habit. If you want the mono face
+trimmed correctly, use `.trim-text-mono`.
 
 ```html
 <h1 class="font-size-heading-1">

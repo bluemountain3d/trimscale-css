@@ -4,7 +4,9 @@ A lean, opinionated SCSS toolkit, published as an npm package (see [package.json
 
 ## Layer order
 
-`styles/_layer.scss` fixes the cascade: `reset, tokens, functions, trim, base, layouts, components, utilities`. Don't reorder without a deliberate reason — later layers are meant to win regardless of source order or specificity.
+`styles/_layer.scss` fixes the cascade: `reset, tokens, functions, trim-defaults, base, trim, layouts, components, utilities`. Don't reorder without a deliberate reason — later layers are meant to win regardless of source order or specificity.
+
+The trim system straddles `base` on purpose. `trim-defaults` holds the bare font-size/line-height baseline and must lose to element defaults like `small { font-size: 0.875em }`. `trim` holds the trim mechanism, the `--_*` metrics and the role's `font-family`, and must beat element defaults like `code { font-family: ... }` so the metrics stay paired with the typeface they were measured from. Anything added to `styles/tokens/_leading-trim.scss` has to go in whichever half matches that rule.
 
 ## Scope discipline
 

@@ -25,12 +25,20 @@
 /// appFonts.fontRoles, e.g. %primary-text, %heading-text, %mono-text, plus
 /// one for any custom role name you add.
 ///
-/// Base placeholder:
-/// - %text-properties: Shared trim geometry (margins + pseudo-element formulas)
-///   plus a bare font-size/line-height baseline — pair with font-setup or plain
-///   utility classes for role-specific sizing and everything else
+/// Base placeholders, split across two layers because the two halves need
+/// opposite positions relative to @layer base:
+/// - %text-baseline (@layer trim-defaults, below base): the bare
+///   font-size/line-height baseline. Low, so element defaults such as
+///   `small { font-size: 0.875em }` still win.
+/// - %text-geometry (@layer trim, above base): the trim mechanism itself.
+///   Above base, so the geometry stays paired with the font-family it was
+///   measured from. A base rule like `code { font-family: ... }` would
+///   otherwise leave the trim measured against a typeface that isn't rendered.
 ///
-/// Usage: Extend placeholders OR use font-setup mixin (recommended)
+/// Usage: Extend %{role}-text OR use font-setup (recommended, it validates the
+/// role and takes typography parameters). Both go through @extend, so either
+/// way the trim half of the rule lands in @layer trim rather than wherever it
+/// was written.
 ///
 /// @requires abstracts/functions
 /// @requires abstracts/variables
@@ -38,7 +46,8 @@
 /// @see abstracts/mixins/mx_font-setup For convenient API
 /// @see abstracts/variables/font-metrics For source data
 ///
-/// @example scss - Direct usage (not recommended)
+/// @example scss - Direct usage (works, but font-setup validates the role and
+///   reads better)
 ///   .heading-1 {
 ///     @extend %heading-text;
 ///     font-size: var(--heading-1);
@@ -123,23 +132,46 @@
   initial-value: 0em;
 }
  
+@layer trim-defaults {
+  /// Bare typographic baseline, below @layer base on purpose.
+  ///
+  /// font-size and line-height default to --text-base / --line-height-dynamic
+  /// so any placeholder is usable standalone rather than depending on
+  /// inheritance (e.g. body's own defaults) staying intact. Font-weight,
+  /// font-style, letter-spacing, and text-transform are left unset, the CSS
+  /// initial values already match what we'd set anyway. Override any of these
+  /// via font-setup or the plain utility classes in
+  /// utilities/typography-utilities.
+  ///
+  /// This half sits in trim-defaults, below base, so element defaults still
+  /// win over it: `small { font-size: 0.875em }` in base keeps <small> small
+  /// even when it carries a trim class.
+  %text-baseline {
+    text-rendering: geometricPrecision;
+    font-size: var(--text-base);
+    line-height: var(--line-height-dynamic);
+  }
+}
+
 @layer trim {
-  /// Base text properties placeholder
-  /// Provides trim geometry plus a bare typographic baseline: font-size and
-  /// line-height default to --text-base / --line-height-dynamic, so any
-  /// placeholder is usable standalone rather than depending on inheritance
-  /// (e.g. body's own defaults) staying intact. Font-weight, font-style,
-  /// letter-spacing, and text-transform are left unset — the CSS initial
-  /// values already match what we'd set anyway. Override any of these via
-  /// font-setup or the plain utility classes in utilities/typography-utilities;
-  /// the four --_* metrics stay custom properties since they only exist to
+  /// The trim mechanism, above @layer base on purpose.
+  ///
+  /// The four --_* metrics are measured from one specific font file and are
+  /// only correct alongside the font-family they were measured from. This half
+  /// therefore sits above base, so a base rule like
+  /// `code { font-family: var(--font-family-code) }` can't leave an element
+  /// rendering in one typeface while trimmed by another's metrics. Utilities
+  /// can still separate them (`.font-family-*` is documented as doing exactly
+  /// that), but nothing does it implicitly.
+  ///
+  /// The four --_* metrics stay custom properties since they only exist to
   /// feed the calc() formulas below.
   ///
   /// IMPLEMENTATION NOTES:
   /// - Pseudo-elements (::before, ::after) use the 'lh' unit, which reads
-  ///   whatever line-height is actually computed on the element — set by
-  ///   font-setup, a utility class, or this placeholder's own default — no
-  ///   --_line-height custom property needed
+  ///   whatever line-height is actually computed on the element, set by
+  ///   font-setup, a utility class, or %text-baseline, no --_line-height
+  ///   custom property needed
   /// - Formula: (1lh - 1em) * -0.5 subtracts half the leading space
   /// - trim values are already in em units from leading-trim mixin
   /// - Firefox requires explicit units; Chrome is more forgiving
@@ -148,7 +180,7 @@
   /// @property {Length} --_bottom-trim [0] - Bottom trim value in em (set by font placeholders)
   /// @property {Length} --_lsb-adjust [0] - Left side bearing adjustment in em
   /// @property {Length} --_rsb-adjust [0] - Right side bearing adjustment in em
-  %text-properties {
+  %text-geometry {
     /// Default metrics
     --_top-trim: 0;
     --_bottom-trim: 0;
@@ -158,10 +190,6 @@
     /// Creates block formatting context to prevent margin collapse
     display: flow-root;
 
-    /// Apply default typography values
-    text-rendering: geometricPrecision;
-    font-size: var(--text-base);
-    line-height: var(--line-height-dynamic);
     margin-left: var(--_lsb-adjust);
     margin-right: var(--_rsb-adjust);
 
@@ -214,18 +242,24 @@
   /// ============================================================================
   /// Font-Specific Placeholders
   /// ============================================================================
-  /// One %{role}-text placeholder per var.$font-roles key, each extending
-  /// %text-properties and applying that role's leading-trim metrics +
+  /// One %{role}-text placeholder per var.$font-roles key, each extending both
+  /// base placeholders and applying that role's leading-trim metrics +
   /// font-family.
   ///
-  /// IMPORTANT: All placeholders must @extend %text-properties BEFORE the mixin
-  /// This ensures ::before and ::after pseudo-elements are inherited
-  /// Sass does not allow @extend inside mixins across files
+  /// The role's font-family belongs with the geometry, not the baseline, so it
+  /// is declared here in @layer trim rather than in trim-defaults.
   ///
-  /// Use these directly OR via font-setup mixin (recommended)
+  /// IMPORTANT: %text-geometry must be *defined* above this block. @extend
+  /// emits into the placeholder's own position, so that ordering is what puts
+  /// the zeroed --_* defaults before each role's real values within @layer
+  /// trim. Writing the @extend first inside the rule doesn't achieve it.
+  ///
+  /// Use these directly OR via font-setup mixin (recommended, it validates the
+  /// role and takes typography parameters)
   @each $key, $family in var.$font-roles {
     %#{$key}-text {
-      @extend %text-properties;
+      @extend %text-baseline;
+      @extend %text-geometry;
       @include leading-trim($key);
       font-family: var(--font-family-#{$key});
     }
