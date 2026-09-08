@@ -46,6 +46,8 @@ All directional sides map to **logical properties**, not physical ones: `t`/`b` 
 
 Typography utility classes from `_typography-utilities.scss`. They form the **HTML-level API** for the typography system, compose them in markup to apply font roles, sizes, weights, and alignment without writing any SCSS.
 
+`.trim-text-*` and `.font-family-*` both require `appFonts` to be configured, they're generated per font role, so a config with none produces neither class, regardless of the `output.utilities.typography.trim`/`family` flags (see [adding-a-font.md](adding-a-font.md)). Everything else on this page works with or without fonts.
+
 **Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `font-setup` when authoring components) for role-specific sizing or anything beyond the baseline:
 
 | Class                   | Role                   |

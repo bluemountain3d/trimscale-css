@@ -31,25 +31,36 @@ All notable changes to this project are documented in this file.
   validate this against `layout.tsx` itself (it never reads consumer
   files beyond `trimscale.config.ts`), a mismatch there fails silently at
   runtime, so this gives something to check by eye instead of guessing.
+- `appFonts` is optional. A config with none of it still gets the full
+  fluid type scale, spacing, breakpoints, and color tokens, it just has no
+  leading trim and no `--font-family-*` tokens, both need font metrics
+  that don't exist without a configured font. `generate` skips font
+  parsing entirely (no downloads, no `.trimscale-cache/` writes) when
+  `appFonts` is absent or has no `families`, `mx.font-setup` errors with a
+  message pointing at `appFonts` when called without any fonts configured
+  instead of an empty "valid roles are:" list, and `generate` warns if
+  `output.utilities.typography.trim`/`family` is left on with no
+  `appFonts` configured, that combination is coherent (SCSS still compiles)
+  but produces zero classes, which reads as a bug otherwise.
 
 ### Changed
 
 - **Breaking:** `appFonts.fontRoles` moved from a top-level `TrimscaleConfig`
   field into `appFonts.fontRoles` (a property of `AppFonts` itself). The
   values in `fontRoles` are keys in `appFonts.families` (see below), nesting
-  them together makes that relationship visible, and makes an upcoming
-  optional-fonts change straightforward: either the whole font
-  configuration exists, or none of it does. `loadConfig` throws a clear
-  error naming the new path if a config still sets `fontRoles` at the top
-  level.
+  them together makes that relationship visible, and keeps "both exist or
+  neither does" a fact the type enforces on its own, now that `appFonts`
+  itself is optional (see below). `loadConfig` throws a clear error naming
+  the new path if a config still sets `fontRoles` at the top level.
 - **Breaking:** `outDir` and `utilities` (top-level config fields) collected
   under a new `output` object: `output.dir` (was `outDir`) and
   `output.utilities` (was `utilities`). `output` also declares `scss`,
-  `css`, and `reset`, reserved for upcoming standalone-CSS-output and
-  opt-out-reset work, neither does anything yet. `loadConfig` throws a
-  clear error naming the new path if a config still sets `outDir` or
-  `utilities` at the top level, and throws if `output.scss` and
-  `output.css` are both `false` (nothing would be generated).
+  `css`, and `reset`; only `dir` and `utilities` affect anything today, the
+  other three are reserved for standalone-CSS-output and opt-out-reset
+  work. `loadConfig` throws a clear error naming the new path if a config
+  still sets `outDir` or `utilities` at the top level, and throws if
+  `output.scss` and `output.css` are both `false` (nothing would be
+  generated).
 - **Breaking:** `appFonts.fonts` renamed to `appFonts.families`. An entry
   describes a whole family, not a single file, `path`/`url` already accept
   multiple files to cover a family's full weight/style range, and every
@@ -74,6 +85,11 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- `body`'s `font-family: var(--font-family-body)` had no fallback, unlike
+  `code`'s `var(--font-family-code, monospace)`. Found testing a config
+  with no `appFonts`: `--font-family-body` is never defined in that case,
+  so `body` fell through to the browser's raw default instead of a sane
+  `sans-serif`. Added the same fallback pattern `code` already had.
 - `next/font` integration (`nextFontDefault`/`nextFont: true`) generated
   invalid SCSS whenever the resulting `family` value had a fallback
   appended: `var(--next-font-x), "X Fallback", sans-serif` was emitted

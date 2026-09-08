@@ -38,6 +38,8 @@ Run it (`npm run trimscale:generate`) whenever you change `trimscale.config.ts`.
 
 Open `trimscale.config.ts` and edit the fields for your project: fonts, font roles, fluid type scale, breakpoints, spacing, and colors. Each field is commented inline; see the guides linked from the [Customization](../README.md#customization) table for the full reference on any one of them.
 
+`appFonts` is the one section you can skip entirely (remove it, don't leave it commented out with no families). Without it, you still get the full fluid type scale, spacing system, breakpoints, and color tokens, working exactly as they do with fonts configured. What you don't get is leading trim and `--font-family-*` tokens, both need font metrics that only exist once a font is configured. See [adding-a-font.md](adding-a-font.md) when you're ready to add one.
+
 ## Generate
 
 ```bash

@@ -34,7 +34,10 @@ const config: TrimscaleConfig = {
 
   /**
    * Font sources (local file, CDN URL, or hand-entered metrics), keyed by
-   * family name, and their fallback stacks.
+   * family name, and their fallback stacks. Optional: remove this whole
+   * field to skip fonts entirely, the type scale, spacing, breakpoints, and
+   * color tokens below all work without it, you only lose leading trim and
+   * `--font-family-*` tokens.
    * → docs/adding-a-font.md · docs/full-config-reference.md#appfonts
    */
   appFonts: {

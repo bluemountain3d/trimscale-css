@@ -105,6 +105,8 @@ Import via:
 
 `font-setup` is the **SCSS component API** for the typography system. Use it when writing component SCSS and you want to apply a font role together with size, weight, and line-height in a single declaration. For HTML-level styling, use `.trim-text-*` and the other [typography utility](utility-classes.md) classes instead, `.trim-text-*` is the class-based equivalent of `font-setup`'s font-role preset.
 
+Requires `appFonts` to be configured (see [adding-a-font.md](adding-a-font.md)). With no font roles, `$font` has nothing valid to resolve to, and `font-setup` errors at compile time rather than silently doing nothing.
+
 ```scss
 @include mx.font-setup(
   $font: 'primary',

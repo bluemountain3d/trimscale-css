@@ -39,7 +39,7 @@ Optional. Opt-out toggles for the config-driven utility-class groups in `styles/
 
 ## `appFonts`
 
-Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name, plus `next/font` integration settings.
+Optional. Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name, plus `next/font` integration settings. Omit the whole field to skip fonts entirely, the fluid type scale, spacing, breakpoints, and color tokens all work without it, you only lose leading trim and `--font-family-*` tokens (both need font metrics). When `appFonts` is present, `families`, `fontRoles`, and `fallbackDefault` below are still required.
 
 | Property          | Type                         | Required | Description                                                                                                                                                 |
 | ----------------- | ---------------------------- | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |

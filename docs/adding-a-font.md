@@ -1,5 +1,7 @@
 # Adding a Font
 
+`appFonts` is optional, a config with none of it still gets the full fluid type scale, spacing, breakpoints, and color tokens, see [getting-started.md](getting-started.md#initialize). This guide covers adding a font to a config that has none yet, which works the same as adding an additional one to a config that already has some.
+
 Font metrics, `@font-face` declarations, and role assignment are generated from `appFonts.families` in [`trimscale.config.ts`](../templates/trimscale.config.ts). Each entry is a family name mapped to a `source`, which decides where its metrics (and, if applicable, its `@font-face` rules) come from.
 
 ## Choose a source
