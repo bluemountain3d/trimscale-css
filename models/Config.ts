@@ -362,6 +362,8 @@ export type UtilitiesConfig = {
         /** `.num-*` (figure variants). */
         numericFigures?: boolean
       }
+  /** `.sr-only`, `.sr-only-focusable`, `.focus-none`, `.focus-visible`, `.skip-link`, `.aria-live-polite`, `.aria-live-assertive`. Boolean only, not granular: `.sr-only-focusable`/`.aria-live-*` `@extend .sr-only`, so a partial opt-out would break the Sass compile. @default true */
+  a11y?: boolean
 }
 
 // ============================================================================

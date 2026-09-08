@@ -51,7 +51,9 @@
   $utilities-typography-style,
   $utilities-typography-text-transform,
   $utilities-typography-text-align,
-  $utilities-typography-numeric-figures;
+  $utilities-typography-numeric-figures,
+  $utilities-a11y,
+  $output-reset;
 
 // Layer — Define CSS Layers specificity order
 @forward './layer';

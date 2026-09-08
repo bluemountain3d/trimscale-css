@@ -14,6 +14,7 @@ export type ResolvedUtilityFlags = {
   typographyTextTransform: boolean
   typographyTextAlign: boolean
   typographyNumericFigures: boolean
+  a11y: boolean
 }
 
 /**
@@ -60,5 +61,6 @@ export const resolveUtilityFlags = (utilities: UtilitiesConfig | undefined): Res
     typographyTextTransform: typographySub('textTransform'),
     typographyTextAlign: typographySub('textAlign'),
     typographyNumericFigures: typographySub('numericFigures'),
+    a11y: utilities?.a11y ?? true,
   }
 }

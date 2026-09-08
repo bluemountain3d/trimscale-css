@@ -1,0 +1,11 @@
+/// @group Abstracts/Variables
+/// @name Output Toggles
+/// @description Output-level opt-outs that aren't utility-class groups.
+/// A project's `trimscale.config.ts` `output` field resolves down to this via
+/// `scripts/generateBridge.ts`, then flows in through the generated bridge
+/// file's `@use ... with (...)`.
+/// ===========================================================================
+
+/// Whether the package's own `@layer reset` block is emitted.
+/// @type Boolean
+$output-reset: true !default;

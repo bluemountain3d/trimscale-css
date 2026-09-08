@@ -2,9 +2,9 @@
 /// @group Abstracts/Variables
 /// @name Utility Class Toggles
 /// @description Which utility-class groups `styles/utilities/` emits.
-/// All default `true`; a project's `trimscale.config.ts` `utilities` field
-/// resolves down to these via `scripts/generateUtilities.ts`, then flows in
-/// through the generated bridge file's `@use ... with (...)`.
+/// All default `true`; a project's `trimscale.config.ts` `output.utilities`
+/// field resolves down to these via `scripts/generateUtilities.ts`, then
+/// flows in through the generated bridge file's `@use ... with (...)`.
 /// ===========================================================================
 
 /// @type Boolean
@@ -32,3 +32,6 @@ $utilities-typography-text-transform: true !default;
 $utilities-typography-text-align: true !default;
 /// @type Boolean
 $utilities-typography-numeric-figures: true !default;
+
+/// @type Boolean
+$utilities-a11y: true !default;
