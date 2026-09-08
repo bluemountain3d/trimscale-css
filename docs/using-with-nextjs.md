@@ -8,7 +8,7 @@ This guide covers the extra steps for integrating trimscale-css with a Next.js p
 
 | Step | File                                            | What you do there                                                                                        |
 | ---- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| 1    | [`trimscale.config.ts`](../trimscale.config.ts) | Set `appFonts.nextFontDefault: true` (and `nextFontPrefix` if you want something other than `next-font`) |
+| 1    | [`trimscale.config.ts`](../templates/trimscale.config.ts) | Set `appFonts.nextFontDefault: true` (and `nextFontPrefix` if you want something other than `next-font`) |
 | 2    | `next.config.ts`                                | Add `sassOptions` with `loadPaths`                                                                       |
 | 3    | `layout.tsx` (or wherever you load fonts)       | Load fonts with `next/font`, variable name must match `--{prefix}-{kebab-family-name}`                   |
 | 4    | Run `npx trimscale-css generate`                | Extracts metrics as usual, builds each family's `family` value around its CSS variable                   |
@@ -126,7 +126,7 @@ For every family resolving to `true` (via `nextFontDefault`, or its own `nextFon
 
 ## Why the CSS variable must come first
 
-Next.js does not expose fonts by family name, it exposes them via the CSS custom property you define in `variable`. If `family` only contained the raw font name, the browser would look for an `@font-face` rule with that name, but Next.js uses its own internal name for the generated rule, so the font would never resolve and the system would fall back to the generic stack. Putting `var(--next-font-inter)` first ensures the browser resolves to Next.js's generated font; the fallback after it only applies for non-Next environments (or the styleguide, which doesn't run Next.js's font pipeline).
+Next.js does not expose fonts by family name, it exposes them via the CSS custom property you define in `variable`. If `family` only contained the raw font name, the browser would look for an `@font-face` rule with that name, but Next.js uses its own internal name for the generated rule, so the font would never resolve and the system would fall back to the generic stack. Putting `var(--next-font-inter)` first ensures the browser resolves to Next.js's generated font; the fallback after it only applies in environments that don't run Next.js's font pipeline.
 
 ## Quick checklist
 

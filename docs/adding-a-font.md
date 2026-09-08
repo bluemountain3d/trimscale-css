@@ -1,6 +1,6 @@
 # Adding a Font
 
-Font metrics, `@font-face` declarations, and role assignment are generated from `appFonts.fonts` in [`trimscale.config.ts`](../trimscale.config.ts). Each entry is a family name mapped to a `source`, which decides where its metrics (and, if applicable, its `@font-face` rules) come from.
+Font metrics, `@font-face` declarations, and role assignment are generated from `appFonts.fonts` in [`trimscale.config.ts`](../templates/trimscale.config.ts). Each entry is a family name mapped to a `source`, which decides where its metrics (and, if applicable, its `@font-face` rules) come from.
 
 ## Choose a source
 
@@ -225,7 +225,7 @@ This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width
 
 After generating, check three things:
 
-1. **Compile without errors.** Run your project's dev server and confirm no SCSS errors. (Working inside this repo itself instead, see [devDocs/styleguide.md](../devDocs/styleguide.md).)
+1. **Compile without errors.** Run your project's dev server and confirm no SCSS errors.
 2. **Leading trim is working.** Open a heading in the browser and inspect the element. If your browser supports `text-box-trim` natively (most current ones do), that's applied directly, DevTools' Computed panel should show `text-box-trim: trim-both`, no `::before`/`::after` pseudo-elements are involved and their absence isn't a failure, this path doesn't even depend on trimscale's own metrics, the browser reads the font file itself. Without native support (or with it force-disabled in DevTools), trimscale falls back to `::before`/`::after` instead, those should have negative `margin-bottom` values, if they both show `0`, the role in `appFonts.fontRoles` doesn't resolve to a family that has metrics, double check the family name matches the key you used in `appFonts.fonts`.
 3. **Side bearings look right.** View a large display heading. The first letter's left edge should sit close to flush with the container.
 

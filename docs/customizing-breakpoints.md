@@ -6,7 +6,7 @@ Breakpoints are config-driven, not hand-edited SCSS:
 
 | File | What you do there |
 |------|-------------------|
-| [`trimscale.config.ts`](../trimscale.config.ts) | Edit the `breakpoints` field |
+| [`trimscale.config.ts`](../templates/trimscale.config.ts) | Edit the `breakpoints` field |
 | `styles/abstracts/variables/_breakpoints.scss` | Static — never edit by hand, reads `var.$breakpoints` |
 
 After changing `breakpoints`, run:

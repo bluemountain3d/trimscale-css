@@ -1,6 +1,6 @@
 # Full Config Reference
 
-A single-page index of every property in [`trimscale.config.ts`](../trimscale.config.ts), in the same order they appear in `const config`. Each section is a quick lookup, not the full explanation, follow the link for rationale, examples, and how a property affects the generated output.
+A single-page index of every property in [`trimscale.config.ts`](../templates/trimscale.config.ts), in the same order they appear in `const config`. Each section is a quick lookup, not the full explanation, follow the link for rationale, examples, and how a property affects the generated output.
 
 ## `outDir`
 
