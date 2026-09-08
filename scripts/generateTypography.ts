@@ -18,7 +18,8 @@ import { setNestedScssMap, setScssMapEntries, setScssMapEntry, setScssMapValue, 
  */
 
 // Font Roles ==================================================================
-export const fontRolesToScssMapValue = (data: FontRoles): string => setScssMapValue(setScssMapEntries(data, 2))
+/** `data` is `Partial<FontRoles>` rather than `FontRoles` so `{}` (no `appFonts` configured) is a valid call, not just a config with `primary`/`body` set. */
+export const fontRolesToScssMapValue = (data: Partial<FontRoles>): string => setScssMapValue(setScssMapEntries(data, 2))
 
 // Modular Typographic Scale ==================================================
 export const modularTypographicScaleToScssMapValue = (data: ModularTypographicScale): string => {

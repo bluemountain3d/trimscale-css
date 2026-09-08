@@ -77,7 +77,12 @@ $_valid-font-roles: map.keys(var.$font-roles);
   $text-transform: null
 ) {
   // Validate and extend font-specific placeholder
-  @if list.index($_valid-font-roles, $font) {
+  @if list.length($_valid-font-roles) == 0 {
+    @error 'font-setup requires fonts. No `appFonts` is configured in '
+         + 'trimscale.config.ts, so no font roles exist. Add `appFonts` with '
+         + 'at least one family and its `fontRoles`, then re-run '
+         + '`npx trimscale-css generate`.';
+  } @else if list.index($_valid-font-roles, $font) {
     @extend %#{$font}-text;
   } @else {
     @error 'Invalid font role: "#{$font}". Valid roles are: #{$_valid-font-roles}';

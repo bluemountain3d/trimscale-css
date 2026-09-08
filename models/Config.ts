@@ -404,8 +404,13 @@ export type OutputConfig = {
 
 /** The full trimscale-css configuration shape — see `trimscale.config.ts` for the actual values and field-by-field documentation. */
 export type TrimscaleConfig = {
-  /* Typography */
-  appFonts: AppFonts
+  /**
+   * Font sources, fallbacks, and role assignment. Optional: a config with no
+   * `appFonts` at all still gets the full fluid type scale, spacing,
+   * breakpoints, and color tokens, it just has no leading trim and no
+   * `--font-family-*` tokens, since both need font metrics to exist.
+   */
+  appFonts?: AppFonts
   fluidScale: FluidScale
   breakpoints: Breakpoints
   /**

@@ -22,7 +22,7 @@ export type ResolvedUtilityFlags = {
  * level (or omitted, since each section itself is optional) forces every
  * one of its sub-flags false too, so `spacing: false` really does mean zero
  * spacing classes, not just the two scale loops. Omitting a section
- * entirely, or the whole `utilities` field, resolves every group to `true`.
+ * entirely, or the whole `output.utilities` field, resolves every group to `true`.
  */
 export const resolveUtilityFlags = (utilities: UtilitiesConfig | undefined): ResolvedUtilityFlags => {
   const spacing = utilities?.spacing ?? true

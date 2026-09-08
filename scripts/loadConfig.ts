@@ -38,6 +38,20 @@ const assertHasOutputTarget = (cfg: TrimscaleConfig): void => {
 }
 
 /**
+ * `undefined` and `{ families: {}, ... }` both mean "no fonts configured",
+ * but only one of them short-circuits `computeFontData` and every other
+ * `cfg.appFonts` reader downstream. Collapsing the second into the first
+ * here means nothing past this point has to check both.
+ */
+const normalizeConfig = (cfg: TrimscaleConfig): TrimscaleConfig => {
+  if (cfg.appFonts && Object.keys(cfg.appFonts.families).length === 0) {
+    const { appFonts, ...rest } = cfg
+    return rest
+  }
+  return cfg
+}
+
+/**
  * Loads `trimscale.config.ts` from the current working directory (the
  * consumer's own project root when this package is published and run via
  * `npx trimscale-css generate`), not from this package's own install
@@ -64,7 +78,7 @@ export const loadConfig = async (): Promise<TrimscaleConfig> => {
   const cfg = mod.default
   assertNoLegacyFields(cfg)
   assertHasOutputTarget(cfg)
-  return cfg
+  return normalizeConfig(cfg)
 }
 
 /** Default `output.dir`, relative to the directory containing `trimscale.config.ts`, when the config doesn't set its own. */

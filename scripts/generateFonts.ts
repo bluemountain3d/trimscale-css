@@ -1,5 +1,6 @@
 import path from 'node:path'
 import type {
+  AppFonts,
   FontSource,
   MatchableFallbackChain,
   MatchableFallbackFamily,
@@ -189,19 +190,19 @@ export type FontMetricsMap = Record<string, FamilyFontMetrics>
 
 /** Explicit `path` wins outright; otherwise looks under `localFontsPath/<familyName>/`. */
 const resolveLocalFontPaths = async (
-  cfg: TrimscaleConfig,
+  appFonts: AppFonts,
   familyName: string,
   fontSource: Extract<FontSource, { source: 'local' }>,
 ): Promise<string[]> => {
   if (fontSource.path) return fontSource.path
 
-  if (!cfg.appFonts.localFontsPath) {
+  if (!appFonts.localFontsPath) {
     throw new Error(
       `Font family "${familyName}" has no \`path\` and \`appFonts.localFontsPath\` is not set. Set one or the other.`,
     )
   }
 
-  const dir = path.join(process.cwd(), cfg.appFonts.localFontsPath, familyName)
+  const dir = path.join(process.cwd(), appFonts.localFontsPath, familyName)
   const found = await listLocalFontDir(dir)
 
   if (found.length === 0) {
@@ -235,24 +236,24 @@ const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cd
  * mismatch fails silently at runtime (falls through to the fallback font,
  * no error) rather than at generate time.
  */
-const buildNextFontVariableName = (cfg: TrimscaleConfig, familyName: string): string => {
-  const nextPrefix = cfg.appFonts.nextFontPrefix ?? 'next-font'
+const buildNextFontVariableName = (appFonts: AppFonts, familyName: string): string => {
+  const nextPrefix = appFonts.nextFontPrefix ?? 'next-font'
   return `--${nextPrefix}-${toKebabCase(familyName)}`
 }
 
 /** Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a quoted family name, both with the resolved fallback appended. When `fallbackFaceGenerated`, the metric-matched `"${familyName} Fallback"` override is inserted between the family and the generic fallback. */
 const buildFamilyString = (
-  cfg: TrimscaleConfig,
+  appFonts: AppFonts,
   familyName: string,
   fallback: string | undefined,
   usesNextFont: boolean,
   fallbackFaceGenerated: boolean,
 ): string => {
-  const resolvedFallback = fallback ?? cfg.appFonts.fallbackDefault
+  const resolvedFallback = fallback ?? appFonts.fallbackDefault
   const fallbackFaceSegment = fallbackFaceGenerated ? `, "${familyName} Fallback"` : ''
 
   return usesNextFont
-    ? `'var(${buildNextFontVariableName(cfg, familyName)})${fallbackFaceSegment}, ${resolvedFallback}'`
+    ? `'var(${buildNextFontVariableName(appFonts, familyName)})${fallbackFaceSegment}, ${resolvedFallback}'`
     : `'"${familyName}"${fallbackFaceSegment}, ${resolvedFallback}'`
 }
 
@@ -281,19 +282,24 @@ const buildFamilyString = (
 export const computeFontData = async (
   cfg: TrimscaleConfig,
 ): Promise<{ metrics: FontMetricsMap; fontFaces: FontFace[]; fallbackFontFaces: FallbackFontFace[] }> => {
-  const nextFontDefault = cfg.appFonts.nextFontDefault ?? false
-  const publicDir = cfg.appFonts.publicDir ?? 'public'
+  if (!cfg.appFonts) {
+    return { metrics: {}, fontFaces: [], fallbackFontFaces: [] }
+  }
+  const appFonts = cfg.appFonts
+
+  const nextFontDefault = appFonts.nextFontDefault ?? false
+  const publicDir = appFonts.publicDir ?? 'public'
 
   const metrics: FontMetricsMap = {}
   const fontFaces: FontFace[] = []
   const fallbackFontFaces: FallbackFontFace[] = []
 
-  for (const [familyName, fontSource] of Object.entries(cfg.appFonts.families)) {
+  for (const [familyName, fontSource] of Object.entries(appFonts.families)) {
     const usesNextFont = fontSource.nextFont ?? nextFontDefault
 
     if (usesNextFont) {
       console.log(
-        `- "${familyName}" expects next/font's \`variable\` to be exactly "${buildNextFontVariableName(cfg, familyName)}"`,
+        `- "${familyName}" expects next/font's \`variable\` to be exactly "${buildNextFontVariableName(appFonts, familyName)}"`,
       )
     }
 
@@ -305,13 +311,13 @@ export const computeFontData = async (
         : []
       fallbackFontFaces.push(...fallbackFaces)
 
-      const family = buildFamilyString(cfg, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
+      const family = buildFamilyString(appFonts, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
       metrics[familyName] = { ...fontSource.metrics, family }
       continue
     }
 
     const entries =
-      fontSource.source === 'local' ? await resolveLocalFontPaths(cfg, familyName, fontSource) : fontSource.url
+      fontSource.source === 'local' ? await resolveLocalFontPaths(appFonts, familyName, fontSource) : fontSource.url
     const parsedEntries: ParsedEntry[] = []
 
     for (const entry of entries) {
@@ -356,7 +362,7 @@ export const computeFontData = async (
       : []
     fallbackFontFaces.push(...fallbackFaces)
 
-    const family = buildFamilyString(cfg, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
+    const family = buildFamilyString(appFonts, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
     metrics[familyName] = { ...best.raw, family }
 
     const shouldGenerateFontFace =

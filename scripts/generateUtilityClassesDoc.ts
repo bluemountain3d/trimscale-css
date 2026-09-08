@@ -27,7 +27,7 @@ const tShirtKeys = (spacing: TrimscaleConfig['spacingSetup']): string[] =>
  * `output.dir`, never into node_modules.
  */
 export const buildUtilityClassesMarkdown = (cfg: TrimscaleConfig, flags: ResolvedUtilityFlags): string => {
-  const fontRoleKeys = Object.keys(cfg.appFonts.fontRoles)
+  const fontRoleKeys = Object.keys(cfg.appFonts?.fontRoles ?? {})
   // semanticFontSizes' keys are kebab-cased by generateTypography.ts before
   // becoming SCSS map keys (textLg -> text-lg); fontRoles/fontWeights/
   // lineHeights keys are used verbatim there, so they aren't converted here.
@@ -43,9 +43,13 @@ export const buildUtilityClassesMarkdown = (cfg: TrimscaleConfig, flags: Resolve
     cfg.spacingSetup.approach === 'coupled' ? cfg.spacingSetup.numericScaleEnd : cfg.spacingSetup.numericScaleMacroEnd
 
   const typographyConfigDriven = [
+    // Both sections require font roles: with no `appFonts` configured,
+    // `.trim-text-*`/`.font-family-*` don't exist regardless of the flag,
+    // so omit the line entirely rather than listing it with zero classes.
     flags.typographyTrim &&
+      cfg.appFonts &&
       `- Trim text (font-family + leading-trim + baseline size): ${list(fontRoleKeys, 'trim-text-')}`,
-    flags.typographyFamily && `- Font family only: ${list(fontRoleKeys, 'font-family-')}`,
+    flags.typographyFamily && cfg.appFonts && `- Font family only: ${list(fontRoleKeys, 'font-family-')}`,
     flags.typographySize && `- Font size only: ${list(fontSizeKeys, 'font-size-')}`,
     flags.typographyLineHeight &&
       `- Line height only: ${list(lineHeightKeys, 'line-height-')}, plus \`.line-height-dynamic\``,
@@ -83,8 +87,8 @@ The "config-driven" sections below list the exact classes your current
 \`trimscale.config.ts\` produces. The "fixed" sections never change, they're
 listed here for a single one-stop reference; see
 node_modules/trimscale-css/docs/utility-classes.md for full usage examples.
-A section is left out entirely if this project's \`utilities\` config turns
-it off, see docs/utility-classes.md#opting-out-of-utility-classes.
+A section is left out entirely if this project's \`output.utilities\` config
+turns it off, see docs/utility-classes.md#opting-out-of-utility-classes.
 
 ## Typography (config-driven, from \`appFonts.fontRoles\`/\`semanticFontSizes\`/\`fontWeights\`/\`lineHeights\`)
 

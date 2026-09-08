@@ -1,5 +1,6 @@
 import * as fs from 'node:fs'
 import path from 'node:path'
+import type { TrimscaleConfig } from '../models/Config.ts'
 import { breakpointsToScssMapValue } from './generateBreakpoints.ts'
 import {
   colorTokensMapToScssMapValue,
@@ -21,18 +22,44 @@ import {
   modularTypographicScaleToScssMapValue,
   semanticFontSizesToScssMapValue,
 } from './generateTypography.ts'
-import { resolveUtilityFlags } from './generateUtilities.ts'
+import { type ResolvedUtilityFlags, resolveUtilityFlags } from './generateUtilities.ts'
 import { buildUtilityClassesMarkdown } from './generateUtilityClassesDoc.ts'
 import { setScssMapEntries, setScssMapValue, setWithArg } from './helpers.ts'
 import { loadConfig, resolveOutDir } from './loadConfig.ts'
+
+/**
+ * `typography.trim`/`typography.family` being on is coherent whether or not
+ * `appFonts` is configured, SCSS still keeps `font-setup`/the placeholders
+ * either way, only the CSS *classes* need font roles to exist. So an
+ * explicit `true` with no `appFonts` produces zero classes despite the
+ * opt-in, which reads as a bug rather than the correct (empty) result it
+ * actually is. `false` needs no warning either way, and `true` with
+ * `appFonts` configured is the normal path.
+ */
+const warnIfFontlessTypographyFlags = (cfg: TrimscaleConfig, flags: ResolvedUtilityFlags): void => {
+  if (cfg.appFonts) return
+
+  if (flags.typographyTrim) {
+    console.warn(
+      '⚠ output.utilities.typography.trim is true but appFonts is not configured, so no .trim-text-* classes will be generated. Leading trim requires font metrics. Either add appFonts or set output.utilities.typography.trim: false to silence this.',
+    )
+  }
+  if (flags.typographyFamily) {
+    console.warn(
+      '⚠ output.utilities.typography.family is true but appFonts is not configured, so no .font-family-* classes will be generated. Either add appFonts or set output.utilities.typography.family: false to silence this.',
+    )
+  }
+}
 
 const cfg = await loadConfig()
 const outDir = resolveOutDir(cfg)
 const spacing = cfg.spacingSetup
 const baseGridSize = spacing.baseGridSize ?? 4
+const utilityFlags = resolveUtilityFlags(cfg.output?.utilities)
+
+warnIfFontlessTypographyFlags(cfg, utilityFlags)
 
 const { metrics, fontFaces, fallbackFontFaces } = await computeFontData(cfg)
-const utilityFlags = resolveUtilityFlags(cfg.output?.utilities)
 
 // Spacing: two mutually-exclusive shapes (coupled/independent), see
 // models/Config.ts's SpacingSetup and abstracts/variables/_spacing.scss.
@@ -59,7 +86,7 @@ const withArgs = [
   setWithArg('font-metrics', metricsToScssMapValue(metrics)),
   setWithArg('font-faces', fontFacesToScssListValue(fontFaces)),
   setWithArg('fallback-font-faces', fallbackFontFacesToScssListValue(fallbackFontFaces)),
-  setWithArg('font-roles', fontRolesToScssMapValue(cfg.appFonts.fontRoles)), 
+  setWithArg('font-roles', fontRolesToScssMapValue(cfg.appFonts?.fontRoles ?? {})),
   setWithArg('modular-typographic-scale', modularTypographicScaleToScssMapValue(cfg.modularTypographicScale)),
   setWithArg('semantic-font-sizes', semanticFontSizesToScssMapValue(cfg.semanticFontSizes)),
   setWithArg('font-weights', fontWeightsToScssMapValue(cfg.fontWeights)),
