@@ -53,6 +53,22 @@ All notable changes to this project are documented in this file.
   `output.utilities.typography.trim`/`family` is left on with no
   `appFonts` configured, that combination is coherent (SCSS still compiles)
   but produces zero classes, which reads as a bug otherwise.
+- `output.css` config option: `generate` compiles the same static SCSS the
+  bridge file configures (via a Sass compiler installed in the project at
+  generate time, `sass-embedded` or `sass`, there's no separate hand-written
+  CSS emitter) and writes `trimscale.css` (and, unless
+  `output.css: { minify: false }`, a minified `trimscale.min.css`) into
+  `output.dir`, for consumers who don't want to configure Sass at all. Font
+  file URLs are rewritten to `output.css.fontUrlBase` (default `'/fonts'`,
+  distinct from `AppFonts.publicDir`: one is where the SCSS build's `src`
+  is rebased from, the other is what URL a standalone CSS file requests).
+  `output.utilities.typography.trim`/`family: false` are function flags in
+  this build, not size flags, `generate` warns since there's no SCSS
+  escape hatch (`font-setup`, the placeholders) left to fall back on, same
+  for a `nextFont`-enabled family, whose `var(--next-font-x)` value is
+  never set outside Next.js's own runtime. Default `false`, opt-in.
+  See [why-scss.md](docs/why-scss.md) for why the file still needs
+  `generate` and can't ship pre-built.
 
 ### Changed
 

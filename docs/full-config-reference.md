@@ -4,14 +4,26 @@ A single-page index of every property in [`trimscale.config.ts`](../templates/tr
 
 ## `output`
 
-Optional. Where and what `trimscale-css generate` writes: the output directory (never `node_modules`), whether the SCSS bridge file is written, and which utility-class groups to include.
+Optional. Where and what `trimscale-css generate` writes: the output directory (never `node_modules`), whether the SCSS bridge file and/or a standalone CSS file are written, and which utility-class groups to include (shared by both targets).
 
 | Property            | Type                 | Required | Description                                                                              |
 | -------------------- | -------------------- | :------: | ------------------------------------------------------------------------------------------ |
 | `output.dir`         | `string`             |    No    | Output directory, relative to `trimscale.config.ts`. Default `'./trimscale-generated'`. |
 | `output.scss`        | `boolean`            |    No    | Emit the SCSS bridge file. Default `true`.                                              |
+| `output.css`         | `boolean` or object  |    No    | Emit a standalone, pre-compiled `.css` file. Default `false`. See below.                |
 | `output.utilities`   | `boolean` or object  |    No    | Which utility-class groups to generate, shared by every output target. See below.       |
 | `output.reset`       | `boolean`            |    No    | Emit the package's own `@layer reset` block. Default `true`. Not about size, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset) for what you take on by turning it off. |
+
+`output.scss` and `output.css` can both be `true` at once (the normal case while migrating from one to the other, or during development of this package itself), but not both `false`, `loadConfig` throws if so, since there would be nothing to generate.
+
+### `output.css`
+
+Optional. A standalone, pre-compiled `.css` file for consumers who don't want to configure Sass at all, an alternative output target alongside (or instead of) the SCSS bridge file. Requires a Sass compiler (`sass-embedded` or `sass`) installed in your project at generate time, the same one your bundler already needs for the SCSS build. See [getting-started.md](getting-started.md#standalone-css-output) for what is and isn't in the file.
+
+| Property                  | Type      | Required | Description                                                                                     |
+| --------------------------- | --------- | :------: | --------------------------------------------------------------------------------------------------- |
+| `output.css.minify`         | `boolean` |    No    | Also write a minified `trimscale.min.css` alongside the readable `trimscale.css`. Default `true`. |
+| `output.css.fontUrlBase`    | `string`  |    No    | URL prefix for `@font-face src`, as the browser requests it. Default `'/fonts'`. Distinct from `appFonts.publicDir`, which governs where the SCSS build's `src` is rebased *from*, not what URL a standalone file requests. |
 
 → Full guide: [getting-started.md](getting-started.md#generate)
 

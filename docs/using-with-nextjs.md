@@ -2,6 +2,8 @@
 
 This guide covers the extra steps for integrating trimscale-css with a Next.js project that uses `next/font` for font loading.
 
+This is the SCSS path (`loadPaths`, not `pkg:`, see [why](getting-started.md#configure-your-scss-compiler)). The [standalone CSS output](getting-started.md#standalone-css-output) isn't a fit for a Next.js project using `next/font`: a `nextFont`-enabled family's `family` value is `var(--next-font-x)`, a variable only Next's own runtime ever sets, so it falls through to the generic fallback in a plain CSS file. `generate` warns about this per family when `output.css` is on. A project already set up for `next/font` already has the SCSS pipeline this guide describes, so there's nothing to gain from the CSS output anyway.
+
 `next/font` manages `@font-face` declarations itself and exposes each font as a CSS custom property. Setting `nextFontDefault: true` (globally in `appFonts`, or `nextFont: true` per-family, see below) tells the generator to build that family's `family` value starting with that CSS variable instead of a plain quoted name, and, for `local` sources, to skip emitting `@font-face` rules for it (Next.js's own `next/font/local` writes those instead). You don't touch the generated output by hand for this, it's automatic once the config is set correctly and `next/font`'s `variable` name matches the convention below.
 
 ## Overview

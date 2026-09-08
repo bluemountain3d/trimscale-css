@@ -132,6 +132,7 @@ The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`,
 | [customizing-type-scale.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/customizing-type-scale.md)   | Tuning the fluid type scale                    |
 | [adding-a-font.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/adding-a-font.md)                     | Adding a font and assigning roles              |
 | [using-with-nextjs.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/using-with-nextjs.md)             | `next/font` integration                        |
+| [why-scss.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/why-scss.md)                               | What SCSS buys you, and the standalone CSS alternative |
 
 ---
 

@@ -47,12 +47,49 @@ npx trimscale-css generate
 # or, once init has added the script: npm run trimscale:generate / pnpm trimscale:generate / yarn trimscale:generate
 ```
 
-Reads your `trimscale.config.ts` and writes two files into `<output.dir>` (defaults to `./trimscale-generated`, configurable via `output.dir` in `trimscale.config.ts`), into **your own project**, never into `node_modules`:
+Reads your `trimscale.config.ts` and writes into `<output.dir>` (defaults to `./trimscale-generated`, configurable via `output.dir` in `trimscale.config.ts`), into **your own project**, never into `node_modules`:
 
-- `_index.scss`, the bridge file. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, passing in your font metrics and (if any of your fonts need them) `@font-face` rules as part of the same call, not as a separate file.
+- `_index.scss`, the bridge file, unless `output.scss: false`. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, passing in your font metrics and (if any of your fonts need them) `@font-face` rules as part of the same call, not as a separate file.
 - `utility-classes.md`, a reference listing the exact utility classes _your_ config produces (font roles, sizes, weights, spacing tiers), not a generic example, see [utility-classes.md](utility-classes.md).
+- `trimscale.css` and (unless `output.css.minify: false`) `trimscale.min.css`, if `output.css` is set, see [Standalone CSS Output](#standalone-css-output) below.
+- `reset-requirements.md`, if `output.reset: false`, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset).
 
 Re-run this any time you change `trimscale.config.ts`, and after every trimscale-css version bump, even if your config didn't change, in case a future version changes which config fields exist. The output lives in your own project, so it survives a fresh install. Commit `<output.dir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
+
+## Standalone CSS Output
+
+For consumers who want the tokens and utility classes without configuring Sass at all. Set `output.css: true` in `trimscale.config.ts` and `generate` writes `trimscale.css` (and, unless you set `output.css: { minify: false }`, a minified `trimscale.min.css` alongside it) into `<output.dir>`:
+
+```ts
+output: {
+  css: true,
+  // or: css: { minify: false, fontUrlBase: '/assets/fonts' },
+}
+```
+
+```html
+<link rel="stylesheet" href="/trimscale-generated/trimscale.min.css">
+```
+
+**This isn't "no setup," it's "no Sass setup."** The file still has to come from `generate`, font metrics, color tokens, spacing, and breakpoints are all config-driven and can't ship pre-built in the package, see [why-scss.md](why-scss.md) for why none of this can be plain CSS at the source level. The flow is still `npm install` → `npx trimscale-css generate` → link the file, just without touching `loadPaths` or the `pkg:` importer.
+
+**Generating CSS requires a Sass compiler** (`sass-embedded` or `sass`) installed in your project at generate time, compiling the same static SCSS the bridge file configures, there's no separate hand-written CSS emitter to keep in sync with it. If you're only ever using the CSS output and never `@use` this package's SCSS yourself, that Sass compiler is still a one-time `generate`-time dependency, not something your bundler needs.
+
+### What's in the file
+
+Tokens (as CSS custom properties) and utility classes, resolved against your actual config, same as the SCSS build produces. That's the complete list, not a subset with gaps:
+
+- `mx.font-setup` — the component-authoring API doesn't exist, there's no SCSS left to call it from
+- The breakpoint mixins (`mx.and-up` etc.) — write your own `@media`/`@container` queries instead
+- `@extend %{role}-text` from your own SCSS — same reason
+- `mx.generate-color-tokens` with your own palette — the file has the palette from your config baked in already, but no way to generate a new one at your own build time
+- `fn.px-to-rem` and the rest of `abstracts/functions` — nothing left to call them from
+
+### Utility flags are function flags here, not size flags
+
+In the SCSS build, `output.utilities.typography.trim: false` just means the `.trim-text-*` classes aren't generated, `font-setup` and the underlying placeholders still work if you reach for them directly. In the CSS build there's no SCSS left to fall back on: `trim: false` means leading trim doesn't exist in the file at all, `@layer trim` is empty. `generate` warns about this (and the equivalent for `family`) rather than forcing the flag on, tokens/spacing/colors without trim in a CSS build is still a legitimate choice.
+
+A family with `nextFont: true` doesn't work in the CSS build either: its `family` value is `var(--next-font-x)`, a CSS variable only ever set by Next.js's own runtime, which a standalone CSS file never goes through. `generate` warns per family when this combination is detected.
 
 ## Configure your SCSS compiler
 
