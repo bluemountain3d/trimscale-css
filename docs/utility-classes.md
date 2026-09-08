@@ -59,22 +59,30 @@ Typography utility classes from `_typography-utilities.scss`. They form the **HT
 
 `.trim-text-*` and `.font-family-*` both require `appFonts` to be configured, they're generated per font role, so a config with none produces neither class, regardless of the `output.utilities.typography.trim`/`family` flags (see [adding-a-font.md](adding-a-font.md)). Everything else on this page works with or without fonts.
 
+### One class per role you define
+
+**These classes exist per key in `appFonts.fontRoles`, not as a fixed set.** The table below lists the roles `FontRoles` in [`models/Config.ts`](../models/Config.ts) knows by name, but you only get a class for a role you actually assign a family to. `primary` and `body` are required, the other ten are optional, and the config `init` copies into your project starts with `primary` and `body` filled in and the rest commented out. So a fresh install produces two `.trim-text-*` classes, not twelve, until you uncomment the roles you want.
+
+Custom role names work too: any key you add beyond this list gets the same treatment, so `brand: 'Some Family'` produces `.trim-text-brand` and `--font-family-brand`.
+
+For the exact classes _your_ config produces, read `<output.dir>/utility-classes.md` rather than this table, `generate` writes it against your real config.
+
 **Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `font-setup` when authoring components) for role-specific sizing or anything beyond the baseline:
 
-| Class                   | Role                   |
-| ----------------------- | ---------------------- |
-| `.trim-text-primary`    | Primary brand typeface |
-| `.trim-text-secondary`  | Secondary typeface     |
-| `.trim-text-tertiary`   | Tertiary typeface      |
-| `.trim-text-display`    | Display / hero context |
-| `.trim-text-heading`    | Heading context        |
-| `.trim-text-subheading` | Subheading context     |
-| `.trim-text-body`       | Body text context      |
-| `.trim-text-decorative` | Decorative context     |
-| `.trim-text-quote`      | Blockquote context     |
-| `.trim-text-code`       | Code / pre context     |
-| `.trim-text-ui`         | UI elements context    |
-| `.trim-text-mono`       | Monospace category     |
+| Class                   | Role                   | In the config     |
+| ----------------------- | ---------------------- | ----------------- |
+| `.trim-text-primary`    | Primary brand typeface | Required          |
+| `.trim-text-body`       | Body text context      | Required          |
+| `.trim-text-secondary`  | Secondary typeface     | Optional          |
+| `.trim-text-tertiary`   | Tertiary typeface      | Optional          |
+| `.trim-text-display`    | Display / hero context | Optional          |
+| `.trim-text-heading`    | Heading context        | Optional          |
+| `.trim-text-subheading` | Subheading context     | Optional          |
+| `.trim-text-decorative` | Decorative context     | Optional          |
+| `.trim-text-quote`      | Blockquote context     | Optional          |
+| `.trim-text-code`       | Code / pre context     | Optional          |
+| `.trim-text-ui`         | UI elements context    | Optional          |
+| `.trim-text-mono`       | Monospace category     | Optional          |
 
 Apply `.trim-text-*` to a `<span>` nested inside the sized element, not the
 element itself. The fallback path (browsers without native `text-box-trim`)
@@ -103,8 +111,8 @@ trimmed correctly, use `.trim-text-mono`.
 </h1>
 ```
 
-**Font family**, sets only `font-family`, nothing else; use this to swap typeface without touching size/line-height/trim:
-`.font-family-primary`, `.font-family-secondary`, `.font-family-tertiary`, `.font-family-display`, `.font-family-heading`, `.font-family-subheading`, `.font-family-body`, `.font-family-decorative`, `.font-family-quote`, `.font-family-code`, `.font-family-ui`, `.font-family-mono`
+**Font family**, sets only `font-family`, nothing else; use this to swap typeface without touching size/line-height/trim. Same one-per-defined-role rule as `.trim-text-*` above:
+`.font-family-primary`, `.font-family-body`, `.font-family-secondary`, `.font-family-tertiary`, `.font-family-display`, `.font-family-heading`, `.font-family-subheading`, `.font-family-decorative`, `.font-family-quote`, `.font-family-code`, `.font-family-ui`, `.font-family-mono`
 
 **Font size:**
 `.font-size-*`, `display-1`, `display-2`, `heading-1` through `heading-4`, `text-lg`, `text-md`, `text-base`, `text-sm`, `text-xs`

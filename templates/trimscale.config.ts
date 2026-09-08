@@ -95,12 +95,16 @@ const config: TrimscaleConfig = {
       // The role body text uses
       body: 'System Sans',
 
-      // Common conventions, uncomment and point at a family in `families`:
+      // Common conventions, uncomment and point at a family in `families`.
+      // Each one you define adds a --font-family-{role} token plus
+      // .trim-text-{role} and .font-family-{role} classes. Custom names
+      // beyond this list work the same way.
       // secondary: '',
       // tertiary: '',
       // heading: '',
       // subheading: '',
       // display: '',
+      // decorative: '',
       // quote: '',
       // code: '',
       // mono: '',
