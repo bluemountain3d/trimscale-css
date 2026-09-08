@@ -99,4 +99,4 @@ Both approaches share the same shape for their scale maps:
 - [ ] Picked `approach` deliberately, `'coupled'` and `'independent'` aren't interchangeable field-for-field
 - [ ] Ran `npx trimscale-css generate` after any change
 - [ ] Dev server compiles without errors
-- [ ] Verify spacing still feels proportional at both ends of the viewport range in the styleguide
+- [ ] Verify spacing still feels proportional at both ends of the viewport range in the browser
