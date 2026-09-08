@@ -82,6 +82,13 @@ All notable changes to this project are documented in this file.
   outside Next.js's own runtime. Default `false`, opt-in.
   See [why-scss.md](docs/why-scss.md) for why the file still needs
   `generate` and can't ship pre-built.
+- `generate` prints the size of each CSS file it writes, including the
+  gzipped size of the one you'd actually ship (`zlib.gzipSync`, no new
+  dependency), so what an `output.utilities` flag costs is visible right
+  when you change it rather than after a build. Reference figures for four
+  configs, and what a spacing step, font role, color token and
+  `@font-face` rule each cost, are in
+  [getting-started.md](docs/getting-started.md#output-size).
 
 ### Changed
 

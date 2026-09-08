@@ -93,6 +93,32 @@ In the SCSS build, `output.utilities.typography.trim: false` just means the `.tr
 
 A family with `nextFont: true` doesn't work in the CSS build either: its `family` value is `var(--next-font-x)`, a CSS variable only ever set by Next.js's own runtime, which a standalone CSS file never goes through. `generate` warns per family when this combination is detected.
 
+### Output size
+
+Every time `generate` writes CSS it prints the size of each file, including the gzipped size of the one you'd ship. That figure is for your config. The ones below are reference points, measured against four configs by compiling each one the same way `generate` does:
+
+| config | | raw | minified | min + gzip | min + brotli |
+| --- | --- | --- | --- | --- | --- |
+| `init` default | `trimscale.config.ts` as `init` writes it | 73.9 kB | 56.4 kB | 8.8 kB | 4.6 kB |
+| full | every group on, 3 families, 11 roles, numeric spacing to 48 | 84.3 kB | 65.5 kB | 10.2 kB | 5.8 kB |
+| trim only | fonts and `.trim-text-*`, no other utility group | 31.9 kB | 26.6 kB | 4.2 kB | 3.4 kB |
+| floor | no `appFonts`, no utility classes: tokens, reset and base only | 24.6 kB | 20.4 kB | 3.4 kB | 2.7 kB |
+
+Everything compresses to roughly an eighth of its raw size, so the raw figure is the one that misleads. The utility classes compress a little better than the tokens do, being the same few declarations repeated with one value changed, but only a little: turning off every group but trim saves 52 kB raw and 6 kB gzipped.
+
+What moves the number is easier to read per unit:
+
+| one more… | raw | minified | min + gzip |
+| --- | --- | --- | --- |
+| numeric spacing step (14 classes) | 876 B | 658 B | 89 B |
+| font role (`.trim-text-*`, `.font-family-*`, tokens) | 558 B | 478 B | 52 B |
+| color token (light + dark, oklch + hex) | 192 B | 173 B | 37 B |
+| `@font-face` rule (one file, one weight or style) | 206 B | 182 B | 10 B |
+
+The numeric spacing scale is the single largest item at its default end of 48, on the order of 4 of the full config's 10.2 kB, and it's one number in the config rather than a flag anyone thinks about. Fonts are the cheapest axis by a wide margin: two or three families with a few static weights each is a rounding error, whether they're static or variable. Colors are the axis without a ceiling. Twenty tokens is under a kilobyte, but a tonal palette of ten steps across a dozen hues passes the spacing scale on its own.
+
+**There's no purge step, by design.** Tailwind and friends scan your markup to know which classes survive. trimscale-css generates from your config and never reads your source files, so it has no way to know which classes you use. Run [PurgeCSS](https://purgecss.com) against the generated file if you want one, it works fine.
+
 ## Configure your SCSS compiler
 
 **Vite + sass-embedded:**
