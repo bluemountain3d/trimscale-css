@@ -2,7 +2,7 @@
 
 This guide covers the extra steps for integrating trimscale-css with a Next.js project that uses `next/font` for font loading.
 
-`next/font` manages `@font-face` declarations itself and exposes each font as a CSS custom property. Setting `nextFontDefault: true` (globally in `appFonts`, or `nextFont: true` per-family, see below) tells the generator to build that family's `family` value starting with that CSS variable instead of a plain quoted name, and, for `local` sources, to skip writing `_fonts.scss` for it. You don't touch `_font-metrics.scss` by hand for this, it's automatic once the config is set correctly and `next/font`'s `variable` name matches the convention below.
+`next/font` manages `@font-face` declarations itself and exposes each font as a CSS custom property. Setting `nextFontDefault: true` (globally in `appFonts`, or `nextFont: true` per-family, see below) tells the generator to build that family's `family` value starting with that CSS variable instead of a plain quoted name, and, for `local` sources, to skip emitting `@font-face` rules for it (Next.js's own `next/font/local` writes those instead). You don't touch the generated output by hand for this, it's automatic once the config is set correctly and `next/font`'s `variable` name matches the convention below.
 
 ## Overview
 
@@ -122,7 +122,7 @@ Add every font's `variable` class to `<html>`, otherwise the custom property is 
 npx trimscale-css generate
 ```
 
-For every family resolving to `true` (via `nextFontDefault`, or its own `nextFont` override), this writes `_font-metrics.scss` with that family's `family` value built around its CSS variable, e.g. `var(--next-font-inter), sans-serif`, and, for `local` sources, skips its `@font-face` rules (Next.js's own `next/font/local` writes those). `cdn` sources never write `@font-face` unless `generateFontFace: true` is set explicitly, regardless of `nextFont`, that's what leaves `next/font/google` free to write its own. If nothing across the whole config ends up needing `@font-face`, `_fonts.scss` isn't written and `styles/base/_index.scss` stops forwarding it. Roles are assigned from `fontRoles` exactly as in the standard flow, see [adding-a-font.md](adding-a-font.md) for that part.
+For every family resolving to `true` (via `nextFontDefault`, or its own `nextFont` override), this builds that family's `family` value around its CSS variable, e.g. `var(--next-font-inter), sans-serif`, and, for `local` sources, skips its `@font-face` rules (Next.js's own `next/font/local` writes those). `cdn` sources never write `@font-face` unless `generateFontFace: true` is set explicitly, regardless of `nextFont`, that's what leaves `next/font/google` free to write its own. Roles are assigned from `appFonts.fontRoles` exactly as in the standard flow, see [adding-a-font.md](adding-a-font.md) for that part.
 
 ## Why the CSS variable must come first
 
@@ -136,6 +136,6 @@ Next.js does not expose fonts by family name, it exposes them via the CSS custom
 - [ ] Each font's `next/font` `variable` matches `--{nextFontPrefix}-{kebab-family-name}` exactly, checked by hand: a typo fails silently (falls back to the fallback font, no error)
 - [ ] All `variable` classes added to the `<html>` element in `layout.tsx`
 - [ ] Ran `npx trimscale-css generate`
-- [ ] Fonts mapped to roles in `fontRoles` (see [adding-a-font.md](adding-a-font.md))
+- [ ] Fonts mapped to roles in `appFonts.fontRoles` (see [adding-a-font.md](adding-a-font.md))
 - [ ] Dev server compiles without errors
 - [ ] Inspect a heading in the browser, the computed `font-family` should show the correct typeface

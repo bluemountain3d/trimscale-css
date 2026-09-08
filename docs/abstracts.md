@@ -108,7 +108,7 @@ Import via:
 ```scss
 @include mx.font-setup(
   $font: 'primary',
-  // font role, see fontRoles in trimscale.config.ts
+  // font role, see appFonts.fontRoles in trimscale.config.ts
   $font-size: var(--heading-1),
   $line-height: 1.1,
   $font-weight: 700,
@@ -120,7 +120,7 @@ Parameters:
 
 | Parameter         | Type   | Default     | Description                                                     |
 | ----------------- | ------ | ----------- | --------------------------------------------------------------- |
-| `$font`           | string | `'primary'` | Font role key, from `fontRoles` in the config                   |
+| `$font`           | string | `'primary'` | Font role key, from `appFonts.fontRoles` in the config           |
 | `$font-size`      | value  | `null`      | CSS font-size value                                             |
 | `$line-height`    | number | `null`      | Line height multiplier (unitless)                               |
 | `$font-weight`    | number | `null`      | Font weight                                                     |

@@ -186,25 +186,26 @@ precisionspec.dev's **TrimScale** export includes these three as an optional blo
 
 ## Map to roles
 
-Whatever the source, a family only becomes usable once it's mapped to at least one role in `fontRoles`:
+Whatever the source, a family only becomes usable once it's mapped to at least one role in `appFonts.fontRoles`:
 
 ```ts
-fontRoles: {
-  primary: 'Roboto',
-  secondary: 'Roboto Serif',
-  tertiary: 'Roboto Mono',
-  sans: 'Roboto',
-  serif: 'Roboto Serif',
-  mono: 'Roboto Mono',
-  display: 'Roboto Serif',
-  heading: 'Roboto',
-  subheading: 'Roboto',
-  body: 'Roboto',
-  quote: 'Roboto Serif',
-  code: 'Roboto Mono',
-  ui: 'Roboto',
-  // Custom roles work too:
-  // ink: 'Some Font Family Name',
+appFonts: {
+  // ...fonts, etc.
+  fontRoles: {
+    primary: 'Roboto',
+    secondary: 'Roboto Serif',
+    tertiary: 'Roboto Mono',
+    mono: 'Roboto Mono',
+    display: 'Roboto Serif',
+    heading: 'Roboto',
+    subheading: 'Roboto',
+    body: 'Roboto',
+    quote: 'Roboto Serif',
+    code: 'Roboto Mono',
+    ui: 'Roboto',
+    // Custom roles work too:
+    // ink: 'Some Font Family Name',
+  },
 },
 ```
 
@@ -216,7 +217,7 @@ fontRoles: {
 npx trimscale-css generate
 ```
 
-This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width, top-trim, bottom-trim, lsb-adjust, and rsb-adjust, normalized to em units (plus ascender/descender/line-gap for `local`/`cdn`, or if supplied for `manual`), and writes them into `styles/abstracts/variables/_font-metrics.scss` alongside each family's resolved `family` value. It writes `@font-face` rules into `styles/base/_fonts.scss` per the table above (omitting the file, and un-forwarding it from `styles/base/_index.scss`, if nothing ended up needing one) plus one metric-matched fallback `@font-face` per `fallbackFamily` entry, if any, and regenerates `styles/abstracts/variables/_typography.scss` from `fontRoles`.
+This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width, top-trim, bottom-trim, lsb-adjust, and rsb-adjust, normalized to em units (plus ascender/descender/line-gap for `local`/`cdn`, or if supplied for `manual`), plus one metric-matched fallback `@font-face` per `fallbackFamily` entry, if any, and passes all of it, along with each family's resolved `family` value, `@font-face` rules per the table above, and role assignments from `appFonts.fontRoles`, as SCSS values into the generated bridge file at `<outDir>/_index.scss`. Nothing is written into the package's own `styles/` folder in `node_modules`.
 
 `lsb-adjust`/`rsb-adjust` (side bearing adjustments) remove the optical whitespace font designers build into a typeface's side bearings, so text sits flush against its container without manual negative margins at every use site.
 
@@ -225,7 +226,7 @@ This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width
 After generating, check three things:
 
 1. **Compile without errors.** Run your project's dev server and confirm no SCSS errors. (Working inside this repo itself instead, see [devDocs/styleguide.md](../devDocs/styleguide.md).)
-2. **Leading trim is working.** Open a heading in the browser and inspect the element. If your browser supports `text-box-trim` natively (most current ones do), that's applied directly, DevTools' Computed panel should show `text-box-trim: trim-both`, no `::before`/`::after` pseudo-elements are involved and their absence isn't a failure, this path doesn't even depend on trimscale's own metrics, the browser reads the font file itself. Without native support (or with it force-disabled in DevTools), trimscale falls back to `::before`/`::after` instead, those should have negative `margin-bottom` values, if they both show `0`, the role in `fontRoles` doesn't resolve to a family that has metrics, double check the family name matches the key you used in `appFonts.fonts`.
+2. **Leading trim is working.** Open a heading in the browser and inspect the element. If your browser supports `text-box-trim` natively (most current ones do), that's applied directly, DevTools' Computed panel should show `text-box-trim: trim-both`, no `::before`/`::after` pseudo-elements are involved and their absence isn't a failure, this path doesn't even depend on trimscale's own metrics, the browser reads the font file itself. Without native support (or with it force-disabled in DevTools), trimscale falls back to `::before`/`::after` instead, those should have negative `margin-bottom` values, if they both show `0`, the role in `appFonts.fontRoles` doesn't resolve to a family that has metrics, double check the family name matches the key you used in `appFonts.fonts`.
 3. **Side bearings look right.** View a large display heading. The first letter's left edge should sit close to flush with the container.
 
 ## Quick checklist
@@ -236,7 +237,7 @@ After generating, check three things:
 - [ ] `manual`: metrics copied from precisionspec.dev's **TrimScale** export
 - [ ] Fallback set (or relying on `fallbackDefault`)
 - [ ] `fallbackFamily` set if you want metric-matched font-swap (optional; `manual` needs `ascender`/`descender`/`lineGap` added to `metrics` for it to take effect)
-- [ ] Family mapped to at least one role in `fontRoles`
+- [ ] Family mapped to at least one role in `appFonts.fontRoles`
 - [ ] Ran `npx trimscale-css generate`
 - [ ] Dev server compiles without errors
 - [ ] Native `text-box-trim` applied (DevTools Computed panel), or, without support, `::before`/`::after` pseudo-elements have non-zero margins

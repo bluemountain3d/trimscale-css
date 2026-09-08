@@ -80,7 +80,7 @@ Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro`
 
 The `text-*` tokens intentionally do not follow the modular scale below base. Using the scale steps `--fs-200` and `--fs-100` for body text variants would shrink too aggressively, at mobile with the default 1.2 ratio, `--fs-200` is already ~13 px and `--fs-100` ~11 px. Instead, `--text-sm` and `--text-xs` are gentle fractions of `--text-base`, giving you predictable and readable small text. The `--fs-100` and `--fs-200` tokens remain available for cases where that level of size contrast is genuinely needed, such as legal disclaimers or dense data tables. All of this comes from `semanticFontSizes` in the config, see [customizing-type-scale.md](customizing-type-scale.md).
 
-**Font families:** one `--font-family-{role}` custom property per key in `fontRoles` (`primary`, `secondary`, `tertiary`, `sans`, `serif`, `mono`, `display`, `heading`, `subheading`, `body`, `quote`, `code`, `ui`, plus any custom roles you add). See [adding-a-font.md](adding-a-font.md).
+**Font families:** one `--font-family-{role}` custom property per key in `appFonts.fontRoles` (`primary`, `secondary`, `tertiary`, `mono`, `display`, `heading`, `subheading`, `body`, `quote`, `code`, `ui`, plus any custom roles you add). See [adding-a-font.md](adding-a-font.md).
 
 **Font weights:** `--font-weight-thin` (100) through `--font-weight-black` (900) by default, from `fontWeights` in the config.
 
@@ -88,7 +88,7 @@ The `text-*` tokens intentionally do not follow the modular scale below base. Us
 
 These static tokens are opt-in. By default, text styled through `font-setup` or any `%*-text` placeholder gets a _dynamic_, self-scaling line-height instead, computed once by the `dynamic-line-height()` Sass function (see [abstracts.md](abstracts.md)) and exposed as the `--line-height-dynamic` token, unless you pass an explicit `$line-height` to `font-setup` or a `--line-height-*` token. The curve itself (where the ratio is pinned, where it bottoms out, its cap for small sizes) comes from `dynamicLineHeight` in the config, every field optional and independently defaulted, see [full-config-reference.md#dynamiclineheight](full-config-reference.md#dynamiclineheight).
 
-`--text-base` (and every other `semanticFontSizes` entry) is optional in the config type, unlike `fontRoles.primary`/`body` which are required. `body`'s own `font-size: var(--text-base, 1rem)` in `styles/base/_typography.scss` falls back to a plain `1rem` if you never define `semanticFontSizes.textBase`, this is intentional, not a bug, but worth knowing if body text looks unexpectedly static-sized.
+`--text-base` (and every other `semanticFontSizes` entry) is optional in the config type, unlike `appFonts.fontRoles.primary`/`body` which are required. `body`'s own `font-size: var(--text-base, 1rem)` in `styles/base/_typography.scss` falls back to a plain `1rem` if you never define `semanticFontSizes.textBase`, this is intentional, not a bug, but worth knowing if body text looks unexpectedly static-sized.
 
 ## Color Tokens
 

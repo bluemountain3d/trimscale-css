@@ -4,7 +4,7 @@ A single-page index of every property in [`trimscale.config.ts`](../trimscale.co
 
 ## `outDir`
 
-Where `trimscale-css generate` writes this project's generated bridge file (and, if any font sources need `@font-face` rules, `_fonts.scss`'s data), relative to this config file. Never `node_modules`.
+Where `trimscale-css generate` writes this project's generated output (the bridge file plus a `utility-classes.md` reference), relative to this config file. Never `node_modules`.
 
 | Property | Type     | Required | Description                                                                             |
 | -------- | -------- | :------: | --------------------------------------------------------------------------------------- |
@@ -19,6 +19,7 @@ Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name
 | Property          | Type                         | Required | Description                                                                                                                                                 |
 | ----------------- | ---------------------------- | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `fonts`           | `Record<string, FontSource>` |   Yes    | Font sources keyed by family name; `source` picks the shape (`'local'`, `'cdn'`, or `'manual'`), see [adding-a-font.md](adding-a-font.md).                  |
+| `fontRoles`       | `FontRoles`                  |   Yes    | Maps semantic roles to a family name from `fonts`. See table below.                                                                                          |
 | `localFontsPath`  | `string`                     |    No    | Base folder, relative to this config file. A `local` family that omits `path` looks for its files under `localFontsPath/<family key>/` instead.             |
 | `nextFontDefault` | `boolean`                    |    No    | Whether `family` values build around a `next/font` CSS variable by default. A family's own `nextFont` overrides this for just that family. Default `false`. |
 | `nextFontPrefix`  | `string`                     |    No    | Prefix half of the `next/font` CSS variable name (`--{prefix}-{family}`). Default `'next-font'`.                                                            |
@@ -26,15 +27,15 @@ Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name
 
 → Full guide: [adding-a-font.md](adding-a-font.md) (sources, `@font-face` rules) · [using-with-nextjs.md](using-with-nextjs.md) (`next/font` integration)
 
-## `fontRoles`
+### `appFonts.fontRoles`
 
 Maps semantic roles to a family name from `appFonts.fonts`. A family not mapped to any role still gets metrics generated, but no `--font-family-*` token.
 
-| Property                                                                                                 | Type     | Required | Description                               |
-| -------------------------------------------------------------------------------------------------------- | -------- | :------: | ----------------------------------------- |
-| `primary`, `body`                                                                                        | `string` |   Yes    | The two required roles.                   |
+| Property                                                                                    | Type     | Required | Description                               |
+| --------------------------------------------------------------------------------------------- | -------- | :------: | ----------------------------------------- |
+| `primary`, `body`                                                                              | `string` |   Yes    | The two required roles.                   |
 | `secondary`, `tertiary`, `display`, `heading`, `subheading`, `decorative`, `quote`, `code`, `ui`, `mono` | `string` |    No    | Optional built-in roles.                  |
-| `[customRole: string]`                                                                                   | `string` |    No    | Any other role name, via index signature. |
+| `[customRole: string]`                                                                         | `string` |    No    | Any other role name, via index signature. |
 
 → Full guide: [adding-a-font.md](adding-a-font.md#map-to-roles)
 

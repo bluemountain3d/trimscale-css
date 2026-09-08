@@ -6,7 +6,7 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  * or docs/full-config-reference.md for a single-page property-by-property index.
  *
  * Where to find the docs for each section below:
- * - appFonts, fontRoles
+ * - appFonts (incl. fontRoles)
  *   → docs/adding-a-font.md
  * - breakpoints
  *   → docs/customizing-breakpoints.md
@@ -84,7 +84,7 @@ const config: TrimscaleConfig = {
      * common conventions, not a fixed set. A role named `caption` or `nav`
      * works exactly the same and generates `.trim-text-caption` etc.
      *
-     * → docs/full-config-reference.md#fontroles
+     * → docs/full-config-reference.md#appfontsfontroles
      */
     fontRoles: {
       // The default role, used when font-setup is called without arguments
