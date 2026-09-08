@@ -1,5 +1,6 @@
 import * as fs from 'node:fs'
 import path from 'node:path'
+import zlib from 'node:zlib'
 import type { FontFace } from './generateFonts.ts'
 
 /** The subset of Dart Sass's compiler API (shared between `sass` and `sass-embedded`) `writeCssOutput` needs. */
@@ -56,25 +57,52 @@ const STYLES_LOAD_PATH = path.join(import.meta.dirname, '..', 'styles')
 /**
  * Compiles `bridgeSource` (the same `@use "trimscale" with (...)` shape as
  * the SCSS bridge file, just with CSS-appropriate font-face `src` values)
- * with Dart Sass and writes `trimscale.css`, plus `trimscale.min.css` when
- * `minify`. Compiling the real static SCSS is the only CSS-generation path,
- * there's no separate hand-written emitter to keep in sync with it.
+ * against the package's own `styles/`. Compiling the real static SCSS is
+ * the only CSS-generation path, there's no separate hand-written emitter to
+ * keep in sync with it.
+ *
+ * The dynamic import behind `loadSassCompiler` is module-cached, so calling
+ * this repeatedly costs one resolution, not one per call.
+ */
+export const compileCss = async (bridgeSource: string, style: 'expanded' | 'compressed'): Promise<string> => {
+  const compiler = await loadSassCompiler()
+  return compiler.compileString(bridgeSource, { loadPaths: [STYLES_LOAD_PATH], style }).css
+}
+
+/** Formats a byte count as kB (1000 bytes, the unit browsers and CDNs report). */
+export const formatBytes = (bytes: number): string => `${(bytes / 1000).toFixed(1)} kB`
+
+/**
+ * Transfer size of `css` under gzip. Node's default level, not `-9`: it's
+ * faster and, on output this repetitive, actually compresses *better* (a
+ * full config measures 10160 B at the default against 10356 B at level 9).
+ * Brotli would be a truer number for most hosts but is slow at maximum
+ * quality, and gzip is close enough for an at-a-glance indicator.
+ */
+const gzippedSize = (css: string): number => zlib.gzipSync(Buffer.from(css, 'utf8')).byteLength
+
+/**
+ * Writes `trimscale.css`, plus `trimscale.min.css` when `minify`, and logs
+ * each file's size. The gzipped figure goes on whichever file is the one to
+ * ship, so it follows the minified file when there is one and falls back to
+ * the expanded file when there isn't. In the log rather than the docs
+ * because this is the consumer's own config, unlike any number a doc page
+ * can quote, and this is the moment they'd want to see what a flag cost.
  */
 export const writeCssOutput = async (outDir: string, bridgeSource: string, minify: boolean): Promise<void> => {
-  const compiler = await loadSassCompiler()
-
-  const { css } = compiler.compileString(bridgeSource, { loadPaths: [STYLES_LOAD_PATH], style: 'expanded' })
+  const css = await compileCss(bridgeSource, 'expanded')
   const cssPath = path.join(outDir, 'trimscale.css')
   fs.writeFileSync(cssPath, css)
-  console.log(`- CSS is written to ${path.relative(process.cwd(), cssPath)}`)
+
+  const rawSize = formatBytes(Buffer.byteLength(css))
+  const expandedSizes = minify ? rawSize : `${rawSize}, ${formatBytes(gzippedSize(css))} gzipped`
+  console.log(`- CSS is written to ${path.relative(process.cwd(), cssPath)} (${expandedSizes})`)
 
   if (minify) {
-    const { css: minCss } = compiler.compileString(bridgeSource, {
-      loadPaths: [STYLES_LOAD_PATH],
-      style: 'compressed',
-    })
+    const minCss = await compileCss(bridgeSource, 'compressed')
     const minPath = path.join(outDir, 'trimscale.min.css')
     fs.writeFileSync(minPath, minCss)
-    console.log(`- Minified CSS is written to ${path.relative(process.cwd(), minPath)}`)
+    const minSizes = `${formatBytes(Buffer.byteLength(minCss))}, ${formatBytes(gzippedSize(minCss))} gzipped`
+    console.log(`- Minified CSS is written to ${path.relative(process.cwd(), minPath)} (${minSizes})`)
   }
 }

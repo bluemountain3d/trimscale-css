@@ -43,7 +43,8 @@
     "build": "tsc -p tsconfig.build.json",
     "prepack": "pnpm run build",
     "generate-all": "node ./scripts/generateAll.ts",
-    "generate-bridge": "node ./scripts/generateBridge.ts"
+    "generate-bridge": "node ./scripts/generateBridge.ts",
+    "measure": "node ./devScripts/measureOutput.ts"
   },
   "keywords": [
     "scss",
