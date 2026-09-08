@@ -8,16 +8,26 @@ All notable changes to this project are documented in this file.
 
 - `package.json` `exports` field, defining the package's public surface
   (`tokens`, `abstracts/variables`, `abstracts/functions`, `abstracts/mixins`,
-  `base`, `utilities`, `components`, `models/Config.ts`) and enabling Sass's
+  `base`, `utilities`, `models/Config.ts`) and enabling Sass's
   `pkg:` importer as an alternative to configuring `loadPaths`. `loadPaths`
   keeps working unchanged, this is additive. Also formally locks `scripts/`
   from external import, it was never meant to be consumer-facing; if
   anything relied on importing `trimscale-css/scripts/*` directly
   (undocumented, unlikely), that now fails.
+  **The `pkg:` importer does not work with Next.js's Turbopack** (the
+  default bundler since v15): Turbopack only passes plain,
+  JSON-serializable values through `sassOptions`, and a
+  `NodePackageImporter` instance's `canonicalize`/`load` methods don't
+  survive that boundary. Confirmed by reproducing the failure directly.
+  `loadPaths` is unaffected and stays the documented approach for Next.js.
 - `FontSource.fallbackFamily` (opt-in): generates a metric-matched `@font-face`
   override (`size-adjust`, `ascent-override`, `descent-override`,
   `line-gap-override`) between the webfont and its generic fallback keyword,
-  to reduce layout shift on font swap.
+  to reduce layout shift on font swap. Don't combine it with `next/font`'s
+  own `adjustFontFallback` (on by default for both `next/font/local` and
+  `next/font/google`): both generate a metric-matched fallback
+  independently, stacking two redundant fallback fonts in the same
+  `font-family` list. Not broken, just unnecessary, pick one.
 - `$container` parameter on all five breakpoint mixins (`up-to`, `and-up`,
   `and-down`, `between`, `only`): pass a container name, or `true` for the
   nearest anonymous container, to emit a `@container` query instead of
@@ -99,6 +109,15 @@ All notable changes to this project are documented in this file.
   trim layer while leaving an empty `utilities` block behind. It matters only
   if you were relying on `.trim-text-*` outranking a rule in `layouts` or
   `components`, which it never did.
+- `.trim-text-*` belongs on a `<span>` nested inside the sized element, not
+  on the element itself. The fallback path (browsers without native
+  `text-box-trim`) occupies that element's `::before`/`::after`, so putting
+  the class directly on an element that has its own pseudo-elements makes
+  them collide silently. Previously unstated; the constraint has always
+  existed.
+- After every trimscale-css version bump, re-run `generate` even if your
+  config didn't change, in case a newer version changes which config fields
+  exist. Previously only documented as a response to config edits.
 - **Breaking:** `appFonts.fontRoles` moved from a top-level `TrimscaleConfig`
   field into `appFonts.fontRoles` (a property of `AppFonts` itself). The
   values in `fontRoles` are keys in `appFonts.families` (see below), nesting
@@ -157,8 +176,21 @@ All notable changes to this project are documented in this file.
   property name with a literal space in it, invalid and non-functional.
   Both bugs were only reachable together and were caught testing a
   multi-word `next/font` family end-to-end in a real Next.js project.
+
 ### Removed
 
+- `styles/components/` and its `.text-box` component. The package ships
+  nothing into the `layouts` and `components` layers, both are declared in
+  `_layer.scss` and left empty by design. `_index.scss` never forwarded the
+  component, so it emitted no CSS, but the partial was in the published
+  tarball and reachable via a `loadPaths` deep import. The recipe stays in
+  [examples.md](docs/examples.md) to copy into your own `components/` folder.
+- The internal SCSS scaffolding partials (`_fn_[NAME].scss`,
+  `_mx_[NAME].scss`, `_[NAME].scss`) no longer ship. They were copy-me
+  starting points for this repo's own authoring, never forwarded from any
+  index and never documented. Renamed to `_*template.scss` and excluded via
+  `files`. Unrelated to `templates/trimscale.config.ts`, the config template
+  `init` copies, which still ships.
 - **Breaking:** `_z-index-tokens.scss` and its eleven `--z-*` custom
   properties (`dropdown`, `sticky`, `header`, `fixed`, `overlay`, `drawer`,
   `modal`, `popover`, `tooltip`, `toast`, `skip-link`). Only `skip-link`
@@ -171,28 +203,3 @@ All notable changes to this project are documented in this file.
   `.column-gap-*`). No opt-back-in. Gap utilities without a matching
   flex/grid utility set didn't fit the toolkit's scope.
 
-### Documentation
-
-- Changed the `using-with-nextjs.md` `next.config.ts` example to leave
-  `sassOptions.implementation` unset (Next.js's own default, plain `sass`)
-  instead of `'sass-embedded'`. Both were tested working with this setup;
-  noted `sass-embedded` as an option for faster compiles.
-- Documented that `FontSource.fallbackFamily` shouldn't be combined with
-  `next/font`'s own automatic fallback (`adjustFontFallback`, on by default
-  for both `next/font/local` and `next/font/google`): both generate a
-  metric-matched fallback font independently, stacking two redundant
-  fallback fonts in the same `font-family` list. Not broken, just
-  unnecessary, pick one.
-- Documented that the `pkg:` importer doesn't work with Next.js's Turbopack
-  (the default bundler since v15): Turbopack only passes plain,
-  JSON-serializable values through `sassOptions`, and a `NodePackageImporter`
-  instance's `canonicalize`/`load` methods don't survive that boundary.
-  Confirmed by reproducing the failure directly. `loadPaths` is unaffected
-  and stays the documented approach for Next.js.
-- Documented that the generated bridge file should be regenerated after
-  every trimscale-css version bump, not just after config changes, in case
-  a future version changes which config fields exist.
-- Documented the `<span>`-wrapper pattern for `.trim-text-*` classes: nest
-  the class on a `<span>` inside the sized element rather than on the
-  element itself, so the fallback path's `::before`/`::after` don't collide
-  with your own.
