@@ -141,7 +141,9 @@ This single import includes:
 
 - All CSS custom property tokens, configured from your `trimscale.config.ts`
 - HTML element defaults and reset
-- Utility classes (spacing, typography)
+- Utility classes (spacing, typography, accessibility)
+
+The reset (`output.reset`) and the accessibility utilities (`output.utilities.a11y`) can both be turned off, for a project that already has its own, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset) and [utility-classes.md](utility-classes.md#accessibility).
 
 Haven't run `generate` yet, or don't want to? `@use 'trimscale';` (via `loadPaths`) works too, it's the same static package, just with the shipped example config's default values instead of yours.
 

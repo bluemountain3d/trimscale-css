@@ -22,9 +22,20 @@ All notable changes to this project are documented in this file.
   `and-down`, `between`, `only`): pass a container name, or `true` for the
   nearest anonymous container, to emit a `@container` query instead of
   `@media`. Defaults to `null`, existing calls are unaffected.
-- `output.utilities` config option (`spacing`, `typography`): opt out of
-  individual utility-class groups, each a boolean or a per-flag object.
-  Defaults to everything enabled, so existing configs are unaffected.
+- `output.utilities` config option (`spacing`, `typography`, `a11y`): opt
+  out of individual utility-class groups. `spacing`/`typography` are each a
+  boolean or a per-flag object; `a11y` is boolean only, `.sr-only-focusable`
+  and `.aria-live-*` both `@extend .sr-only`, so a partial opt-out would
+  break the Sass compile. Defaults to everything enabled, so existing
+  configs are unaffected.
+- `output.reset` config option: opt out of the package's own `@layer reset`
+  block, for a project that already has its own. Default `true`. The
+  `@layer reset, tokens, ...` declaration itself is unaffected either way,
+  only the block's contents are conditional. `reset: false` also makes
+  `generate` write `<output.dir>/reset-requirements.md`, listing exactly
+  what your own reset needs to cover (margin resets, `box-sizing`,
+  `line-height`), since skipping the package's reset without replacing
+  what it does compiles cleanly and fails silently otherwise.
 - `generate` now prints the exact `next/font` `variable` name each
   `nextFont`-enabled family expects (e.g. `"Inter" expects next/font's
   \`variable\` to be exactly "--next-font-inter"`). `generate` can't

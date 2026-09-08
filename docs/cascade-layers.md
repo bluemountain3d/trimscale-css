@@ -23,6 +23,19 @@ Because `trim` sits below `base`, `components`, and `utilities`, everything the 
 
 **Adding your own reset rules?** Wrap them in `@layer reset { ... }` too, matching the layer name declared above. Unlayered CSS always wins over every layer regardless of specificity, so a reset rule you add outside `@layer reset` would outrank everything in the system, not just the browser defaults it's meant to normalize. Declaring `@layer reset { ... }` again in your own file doesn't create a second layer, it appends to the same one; normal cascade order still applies within it, so load your additions after `styles/base/_reset.scss` if you need them to win over a specific rule there.
 
+## Turning off the built-in reset
+
+`output.reset: false` drops the *contents* of `@layer reset { ... }` in `styles/base/_reset.scss`, but the `@layer reset, tokens, ...` declaration at the top of this page stays exactly as-is regardless. Dropping `reset` from the declaration itself would put your own `@layer reset { ... }` in first-seen-in-source order instead, almost certainly last (and therefore highest priority), the same failure mode described above but caused by the opt-out flag rather than a mistake in your own CSS.
+
+Turning the reset off means the typography and spacing system's assumptions are now your own reset's job:
+
+- `margin: 0` on headings, paragraphs, lists, `blockquote`, and `figure`
+- `body { margin: 0 }`
+- `box-sizing: border-box` throughout
+- Nothing that reintroduces `line-height: normal` on elements meant to inherit `--line-height-dynamic`
+
+Nothing fails to compile if these are missing, spacing just looks subtly wrong: unexpectedly large gaps between headings and body text, spacing tokens that look like they aren't being applied. A popular reset like `normalize.css` **keeps** margins on headings and paragraphs, so following generic "bring your own reset" advice can still leave these unmet. `generate` writes this same list into `<output.dir>/reset-requirements.md` whenever `output.reset` is `false`, so it lives in your project rather than needing to be found here.
+
 With the [global import](getting-started.md#global-import) (`@use 'trimscale'`), the layer order above is always guaranteed, `_layer.scss` is the first thing that entry point forwards.
 
 If you only ever use [component-scoped import](getting-started.md#component-scoped-import) and never load the global entry point anywhere in your build, the layer order doesn't exist on its own, add `@use 'layer';` once at your app's own entry point too. Otherwise layers fall back to first-seen-in-source order, which may not match the stack above.

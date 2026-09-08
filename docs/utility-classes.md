@@ -5,8 +5,9 @@ This page documents the *shape* of each utility class using the example config's
 ## Opting out of utility classes
 
 Every group documented below is on by default. If you write component SCSS
-and never reach for `.p-md`/`.trim-text-body`/etc. in markup, turn a group
-off in `trimscale.config.ts`'s `output.utilities` field so `generate` stops
+and never reach for `.p-md`/`.trim-text-body`/etc. in markup, or you
+already have your own a11y classes, turn a group off in
+`trimscale.config.ts`'s `output.utilities` field so `generate` stops
 emitting it:
 
 ```ts
@@ -14,6 +15,7 @@ output: {
   utilities: {
     spacing: { numeric: false }, // keep t-shirt sizes, drop the 1-48 numeric scale
     typography: false,           // drop every typography utility class
+    a11y: false,                 // you have your own sr-only/skip-link/etc.
   },
 }
 ```
@@ -24,7 +26,16 @@ spacing; `trim`, `family`, `size`, `lineHeight`, `weight`, `style`,
 `textTransform`, `textAlign`, `numericFigures` for typography). Turning off
 a section's top level also drops its small fixed classes, e.g.
 `spacing: false` removes `.m-none`/`.mx-auto`/etc. too, not just the scale
-loops. See `models/Config.ts`'s `UtilitiesConfig` for the exact shape.
+loops. `a11y` is `true`/`false` only, not nestable, see
+[Accessibility](#accessibility) below for why. See `models/Config.ts`'s
+`UtilitiesConfig` for the exact shape.
+
+These flags are about what you want in the file, not primarily about
+size: at typical gzip ratios the utility classes are a small fraction of
+the total, the real reasons are that component SCSS using the custom
+properties directly never touches the classes at all (dead weight
+regardless of size), and that a project with its own reset or a11y
+classes doesn't want two competing sets in the cascade.
 
 ## Spacing
 
@@ -112,7 +123,7 @@ being inline, intentional, but worth knowing if you're expecting inline flow.
 
 ## Accessibility
 
-Screen-reader and focus utilities from `_a11y-utilities.scss`. Unlike everything else on this page, this group has no `utilities` opt-out flag, it's always emitted.
+Screen-reader and focus utilities from `_a11y-utilities.scss`. Toggled as a whole via `output.utilities.a11y`, `true`/`false` only, not nestable like `spacing`/`typography`: `.sr-only-focusable` and `.aria-live-*` both `@extend .sr-only`, so turning off just `.sr-only` while keeping the others would leave an `@extend` pointing at a class the compile never emitted, a hard Sass error rather than a missing utility. Turning it off is for a project that already has its own screen-reader/focus/live-region classes and doesn't want two competing sets in the cascade, not primarily a size decision.
 
 | Class                                        | Effect                                                                                                                                      |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |

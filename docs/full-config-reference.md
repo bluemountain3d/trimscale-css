@@ -11,6 +11,7 @@ Optional. Where and what `trimscale-css generate` writes: the output directory (
 | `output.dir`         | `string`             |    No    | Output directory, relative to `trimscale.config.ts`. Default `'./trimscale-generated'`. |
 | `output.scss`        | `boolean`            |    No    | Emit the SCSS bridge file. Default `true`.                                              |
 | `output.utilities`   | `boolean` or object  |    No    | Which utility-class groups to generate, shared by every output target. See below.       |
+| `output.reset`       | `boolean`            |    No    | Emit the package's own `@layer reset` block. Default `true`. Not about size, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset) for what you take on by turning it off. |
 
 → Full guide: [getting-started.md](getting-started.md#generate)
 
@@ -34,6 +35,9 @@ Optional. Opt-out toggles for the config-driven utility-class groups in `styles/
 | `output.utilities.typography.textTransform` | `boolean` |    No    | `.text-transform-*`.                                                |
 | `output.utilities.typography.textAlign`   | `boolean` |    No    | `.text-align-*`.                                                    |
 | `output.utilities.typography.numericFigures` | `boolean` |    No    | `.num-*` (figure variants).                                         |
+| `output.utilities.a11y`                   | `boolean` |    No    | `.sr-only`, `.sr-only-focusable`, `.focus-*`, `.skip-link`, `.aria-live-*`. Boolean only, not granular (see below). Not about size, see [utility-classes.md](utility-classes.md#accessibility) for why. |
+
+`a11y` isn't nestable like `spacing`/`typography` because `.sr-only-focusable` and `.aria-live-*` `@extend .sr-only`: a partial opt-out (e.g. keeping `.sr-only` but dropping the live-region classes) would leave an `@extend` pointing at a selector that was never emitted, a hard Sass compile error, not a missing class.
 
 → Full guide: [utility-classes.md](utility-classes.md#opting-out-of-utility-classes)
 
