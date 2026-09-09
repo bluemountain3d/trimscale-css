@@ -29,7 +29,7 @@ Optional. A standalone, pre-compiled `.css` file for consumers who don't want to
 
 ### `output.utilities`
 
-Optional. Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. Every group defaults `true`, omitting this field (or any sub-flag within it) changes nothing. Setting a group to `false` also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops.
+Optional. Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. Every group defaults `true`, omitting this field (or any sub-flag within it) changes nothing. Setting a group to `false` also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops. `utilities: false` turns every group off at once; tokens, the reset and the base element styles are unaffected.
 
 | Property                                | Type      | Required | Description                                                       |
 | ----------------------------------------- | --------- | :------: | -------------------------------------------------------------------- |

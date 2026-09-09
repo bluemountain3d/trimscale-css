@@ -394,8 +394,8 @@ export type OutputConfig = {
         /** URL prefix for `@font-face src`, as the browser requests it — not the filesystem path fonts are written to (see `AppFonts.publicDir`). @default '/fonts' */
         fontUrlBase?: string
       }
-  /** Which utility-class groups to generate. Shared by both `scss` and `css` targets — every group defaults `true`, so omitting this field changes nothing. Set a group to `false` (or a sub-flag within it) to stop generating those classes entirely. */
-  utilities?: UtilitiesConfig
+  /** Which utility-class groups to generate. Shared by both `scss` and `css` targets — every group defaults `true`, so omitting this field changes nothing. Set a group to `false` (or a sub-flag within it) to stop generating those classes entirely, or `false` here for no utility classes at all. Tokens, reset and base styles are unaffected either way. */
+  utilities?: boolean | UtilitiesConfig
   /** Emit the package's own `@layer reset` block. @default true */
   reset?: boolean
 }

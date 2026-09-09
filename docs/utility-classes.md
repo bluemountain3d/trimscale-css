@@ -20,6 +20,10 @@ output: {
 }
 ```
 
+`utilities: false` is the shorthand for wanting none of them at all, the
+same result as turning all three sections off by hand. Tokens, the reset and
+the base element styles are unaffected.
+
 `spacing`/`typography` each accept `true`/`false` for the whole section, or
 an object turning off individual groups (`base`, `tShirt`, `numeric` for
 spacing; `trim`, `family`, `size`, `lineHeight`, `weight`, `style`,

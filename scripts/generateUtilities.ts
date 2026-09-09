@@ -23,11 +23,23 @@ export type ResolvedUtilityFlags = {
  * level (or omitted, since each section itself is optional) forces every
  * one of its sub-flags false too, so `spacing: false` really does mean zero
  * spacing classes, not just the two scale loops. Omitting a section
- * entirely, or the whole `output.utilities` field, resolves every group to `true`.
+ * entirely, or the whole `output.utilities` field, resolves every group to
+ * `true`; `output.utilities: false` resolves every group to `false`, the
+ * same shape as turning each section off by hand.
  */
-export const resolveUtilityFlags = (utilities: UtilitiesConfig | undefined): ResolvedUtilityFlags => {
-  const spacing = utilities?.spacing ?? true
-  const typography = utilities?.typography ?? true
+export const resolveUtilityFlags = (utilities: boolean | UtilitiesConfig | undefined): ResolvedUtilityFlags => {
+  // Normalized to the object form once, so everything below has one shape to
+  // read: `true` and `undefined` are what an empty object already resolves
+  // to, and `false` is every section turned off by hand.
+  const sections: UtilitiesConfig =
+    typeof utilities === 'boolean'
+      ? utilities
+        ? {}
+        : { spacing: false, typography: false, a11y: false }
+      : (utilities ?? {})
+
+  const spacing = sections.spacing ?? true
+  const typography = sections.typography ?? true
 
   const spacingOn = spacing !== false
   const typographyOn = typography !== false
@@ -61,6 +73,6 @@ export const resolveUtilityFlags = (utilities: UtilitiesConfig | undefined): Res
     typographyTextTransform: typographySub('textTransform'),
     typographyTextAlign: typographySub('textAlign'),
     typographyNumericFigures: typographySub('numericFigures'),
-    a11y: utilities?.a11y ?? true,
+    a11y: sections.a11y ?? true,
   }
 }

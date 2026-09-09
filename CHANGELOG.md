@@ -209,6 +209,16 @@ All notable changes to this project are documented in this file.
   (`color(srgb 2.66 2.10 2.25)`) whenever a multiplier pushed the color past
   sRGB. It now maps into gamut (`color.to-gamut`, `local-minde`) and rounds
   to 8-bit `rgb()`/`rgba()`.
+- `output.utilities` was documented as accepting `boolean` or an object, but
+  its type only accepted the object, so `utilities: false` (every group off
+  at once, the shorthand the other three levels already had) didn't
+  type-check. The type matches the documentation now, and the generated
+  `utility-classes.md` says every group is off rather than printing an empty
+  section list.
+- `utility-classes.md` listed the accessibility classes whatever
+  `output.utilities.a11y` was set to, the one section that never consulted
+  its flag. A section whose classes are all turned off now leaves no heading
+  behind either, rather than an empty one.
 - Anything that stopped `generate` reached the terminal as a Node stack
   trace under an unhandled-rejection banner, with the message it was written
   to carry (a config field that moved, a font family with no `path`, no Sass
