@@ -28,25 +28,30 @@ const runInit = () => {
 
   const pkgPath = path.join(projectRoot, 'package.json')
 
+  // The config is the actual deliverable and is written either way: `generate`
+  // reads it from the working directory and never touches package.json, so a
+  // project that isn't npm-shaped (or isn't yet) still gets a working setup.
+  // Only the convenience script needs a package.json.
   if (!fs.existsSync(pkgPath)) {
-    console.warn('❌ Could not find a package.json in this folder.')
-    return
-  }
+    console.warn(
+      '⚠️  No package.json in this folder, so the "trimscale:generate" script was not added. Run `npx trimscale-css generate` directly, or add the script yourself once there is one.',
+    )
+  } else {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
 
-  try {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
+      if (!pkg.scripts) pkg.scripts = {}
 
-    if (!pkg.scripts) pkg.scripts = {}
-
-    if (!pkg.scripts['trimscale:generate']) {
-      pkg.scripts['trimscale:generate'] = 'trimscale-css generate'
-      fs.writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`, 'utf8')
-      console.log('✅ Added the "trimscale:generate" script to package.json.')
-    } else {
-      console.log('⚠️  The "trimscale:generate" script already existed.')
+      if (!pkg.scripts['trimscale:generate']) {
+        pkg.scripts['trimscale:generate'] = 'trimscale-css generate'
+        fs.writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`, 'utf8')
+        console.log('✅ Added the "trimscale:generate" script to package.json.')
+      } else {
+        console.log('⚠️  The "trimscale:generate" script already existed.')
+      }
+    } catch (error) {
+      console.error('❌ Something went wrong:', (error as Error).message)
     }
-  } catch (error) {
-    console.error('❌ Something went wrong:', (error as Error).message)
   }
 
   console.log(
