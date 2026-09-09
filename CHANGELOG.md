@@ -209,6 +209,24 @@ All notable changes to this project are documented in this file.
   (`color(srgb 2.66 2.10 2.25)`) whenever a multiplier pushed the color past
   sRGB. It now maps into gamut (`color.to-gamut`, `local-minde`) and rounds
   to 8-bit `rgb()`/`rgba()`.
+- A font file without the characters the metrics are measured from produced
+  fabricated metrics instead of an error. `getAvgAdvanceWidth` drops missing
+  characters and renormalizes the rest, which is right for a font missing a
+  `q` and wrong for one missing everything: with only a space glyph present
+  it returned the width of a space as the average character (0.26 against a
+  real 0.465 for Playfair Display). Side bearings were worse, averaging an
+  empty list to `0`, a value that reads downstream as "needs no horizontal
+  trim" rather than as a failure, so horizontal trim silently turned itself
+  off. The `size-adjust` on the metric-matched fallback `@font-face` came out
+  at 62.79% instead of 112.3%, which renders as the right font drawn far too
+  small. `generate` now refuses a file it can't measure, and names the usual
+  cause: a Google Fonts URL for a subset other than `latin`. Same for a
+  missing cap height with no `H`/`I`/`E`/`T` to measure one from.
+- A family whose every font file failed to parse was skipped silently, with
+  `generate` reporting success and simply emitting no metrics, no
+  `@font-face` and no `--font-family-*` token for it. One unreadable file
+  among several is still survivable and now warns; all of them failing is an
+  error.
 - A `local` family discovered through `localFontsPath` built its
   `@font-face` `src` from the config key rather than from the folder on
   disk. On a case-insensitive filesystem an `Inter` key opens a folder named

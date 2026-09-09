@@ -7,6 +7,7 @@ import {
   getAvgAdvanceWidth,
   getBBoxHeight,
   getCorrectedAscenderDescender,
+  getSampleCoverage,
 } from './generateFontMetrics.helpers.ts'
 
 export type ParsedFont = {
@@ -25,6 +26,14 @@ export type ParsedFont = {
 // otherwise the font's un-varied outline already represents the target
 // weight (guaranteed by the OpenType spec).
 const TARGET_WEIGHT = 400
+
+/**
+ * Share of the character sample (see `getSampleCoverage`) a font has to cover
+ * for its measured metrics to mean anything. Half is deliberately generous:
+ * every real Latin font covers all of it, and the failure this guards against
+ * lands at 18% (the space glyph alone).
+ */
+const MIN_SAMPLE_COVERAGE = 0.5
 
 /**
  * Extracts leading-trim and side-bearing metrics from a single font file's
@@ -85,12 +94,29 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
 
   const upm: number = font.unitsPerEm
 
+  const coverage = getSampleCoverage(activeFont)
+
+  if (coverage < MIN_SAMPLE_COVERAGE) {
+    throw new Error(
+      `${label} has glyphs for only ${Math.round(coverage * 100)}% of the basic Latin characters the metrics are measured from, so its average character width and side bearings can't be read out of it. The usual cause is a Google Fonts URL for a subset other than \`latin\`: \`latin-ext\` holds Ā-ž and no basic lowercase at all. Take the \`src\` from the \`/* latin */\` block, see docs/adding-a-font.md. For a font that genuinely isn't Latin, supply the metrics yourself with \`source: 'manual'\`.`,
+    )
+  }
+
   // Read capHeight from the ORIGINAL font to avoid a "reading 'ascent'" crash
   // if activeFont is a broken instance. Measure H/I/E/T on activeFont instead
   // if the table doesn't have it.
   let capHeight = font.capHeight
   if (!capHeight || capHeight <= 0) {
     capHeight = getBBoxHeight(activeFont, ['H', 'I', 'E', 'T'])
+  }
+
+  // Both sources can come up empty: no `sCapHeight` in OS/2 and no H/I/E/T to
+  // measure. A zero here doesn't fail, it silently becomes a top trim of a
+  // full ascender, so it's caught rather than carried.
+  if (capHeight <= 0) {
+    throw new Error(
+      `${label} declares no cap height in its OS/2 table and has no H, I, E or T glyph to measure one from, so its leading-trim values can't be derived. Supply the metrics yourself with \`source: 'manual'\`.`,
+    )
   }
 
   const avgCharWidth: number = getAvgAdvanceWidth(activeFont)

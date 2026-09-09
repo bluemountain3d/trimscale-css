@@ -85,6 +85,42 @@ If neither `path` nor a matching `localFontsPath` subfolder turns up any files, 
 
 `url` must point at the actual font file, not a CSS-generating endpoint. Google Fonts' `fonts.googleapis.com/css2?family=...` URL, for example, isn't a font file, it's a stylesheet that in turn lists several real file URLs (one per weight, sometimes per subset), and which files it returns depends on the request's `User-Agent`. Open it in a browser, or check the developer tools' Network tab, and copy the actual `fonts.gstatic.com/...` URL(s) from inside it.
 
+### Picking the right Google Fonts URL
+
+That stylesheet holds one `@font-face` block per subset, and **you want the one commented `/* latin */`**. Take any other and you get a file with no basic lowercase in it at all: `latin-ext` covers Ā-ž, `cyrillic` covers а-я, and so on. Google's own CSS keeps them apart with `unicode-range`, so the browser only reaches for each file when a page actually uses those characters.
+
+1. Open the CSS URL in a browser:
+
+   ```
+   https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap
+   ```
+
+2. The browser shows the CSS itself. Find the `@font-face` that is under `/* latin */` **and** has `font-style: normal`. Asking for `ital,wght` gives you an italic block and an upright one per subset, both commented `/* latin */`. Google groups every italic block first and then repeats the subsets upright, so the one you want is the last block in the whole response:
+
+   ```css
+   /* latin */
+   @font-face {
+     font-family: 'Playfair Display';
+     font-style: normal;
+     font-weight: 400 900;
+     font-display: swap;
+     src: url(https://fonts.gstatic.com/s/playfairdisplay/v40/nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgA.woff2) format('woff2');
+     unicode-range: U+0000-00FF, U+0131, U+0152-0153, /* … */;
+   }
+   ```
+
+3. Copy what's **between the parentheses** of that block's `src: url(...)`, the bare address and nothing else. Not the `url(` and `)` around it, and not the ` format('woff2')` after it:
+
+   ```ts
+   url: ['https://fonts.gstatic.com/s/playfairdisplay/v40/nuFiD-vYSZviVYUb_rj3ij__anPXDTzYgA.woff2'],
+   ```
+
+   Want the italic file too? Add it as a second entry in the same `url` array. `generate` reads every file listed, keeps the upright one for metrics (italic side bearings would skew the trim) and writes an `@font-face` per file when `generateFontFace` is on.
+
+Two things make the wrong pick easy to miss. `latin-ext` sits directly above `latin` in each group and looks equally plausible. And trimscale writes no `unicode-range` of its own, so the browser tries your file for every character on the page, finds nothing, and falls back per character: the text still renders, in the metric-matched fallback font at its `size-adjust`, which looks like the right font drawn slightly too small rather than like an error.
+
+`generate` refuses a file it can't read the basic Latin characters out of, naming this as the likely cause, so you'll hear about it either way. If you'd rather not think about subsets at all, download the family from [fonts.google.com](https://fonts.google.com), keep the files in your own project and use `source: 'local'`: those files are complete.
+
 The file is fetched once and cached under `.trimscale-cache/fonts/` (gitignored, safe regardless of the font's license since nothing is redistributed, it never leaves your machine and is never committed), subsequent `generate` runs reuse the cached copy instead of re-fetching.
 
 By default no `@font-face` is written, `cdn` only extracts metrics, on the assumption the font is already loaded some other way (a `<link>` tag, `next/font/google`, a CDN's JS loader). Set `generateFontFace: true` if you actually want trimscale to self-host by writing `@font-face` rules pointing at `url` directly.

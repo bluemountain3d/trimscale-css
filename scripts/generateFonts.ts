@@ -340,6 +340,7 @@ export const computeFontData = async (
     const entries =
       fontSource.source === 'local' ? await resolveLocalFontPaths(appFonts, familyName, fontSource) : fontSource.url
     const parsedEntries: ParsedEntry[] = []
+    const failures: string[] = []
 
     for (const entry of entries) {
       try {
@@ -359,11 +360,27 @@ export const computeFontData = async (
 
         parsedEntries.push({ src, ext: getFontExtension(entry), isItalic, weightClass, weightRange, raw })
       } catch (err: unknown) {
-        console.error(`Failed to parse ${familyName} (${entry}):`, err)
+        // Collected rather than reported here: one unreadable file among
+        // several is survivable (the family still gets its metrics from
+        // whichever files did parse), but all of them failing is not, and the
+        // two cases want different wording. Every message already names the
+        // file it came from.
+        failures.push(err instanceof Error ? err.message : String(err))
       }
     }
 
-    if (parsedEntries.length === 0) continue
+    // Every file for this family failed, so it would contribute no metrics, no
+    // @font-face and no font-family token, while `generate` still exited 0 and
+    // reported success. It's configured, so that's a failure.
+    if (parsedEntries.length === 0) {
+      throw new Error(`No usable font file for "${familyName}". ${failures.join(' ')}`)
+    }
+
+    if (failures.length > 0) {
+      console.warn(
+        `⚠ "${familyName}": ${failures.length} of ${entries.length} files were skipped, metrics come from the rest. ${failures.join(' ')}`,
+      )
+    }
 
     // Lower score wins. The 10_000 italic penalty always dominates the
     // weight distance (which maxes out around 600, since usWeightClass

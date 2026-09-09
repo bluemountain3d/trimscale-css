@@ -166,3 +166,32 @@ export const getAvgAdvanceWidth = (font: Font): number => {
 
   return weightedAverage * REAL_TEXT_CORRECTION
 }
+
+/**
+ * Share of `CHAR_WEIGHTS`' total weight the font actually has glyphs for,
+ * 0 to 1.
+ *
+ * `getAvgAdvanceWidth` drops missing characters and renormalizes the rest,
+ * which is right for a font missing a `q` or a `z` and badly wrong for a font
+ * missing everything: with only the space glyph present it returns the width
+ * of a space and calls it the average character. `getAverageSideBearings`
+ * fails in a nastier way still, averaging an empty list to `0`, which reads
+ * downstream as "this font needs no horizontal trim" rather than as a
+ * failure.
+ *
+ * The case that produces this in practice is a Google Fonts subset URL that
+ * isn't the `latin` one: `latin-ext` covers Ā-ž and has no basic lowercase at
+ * all. See `docs/adding-a-font.md`.
+ * @param font - The fontkit Font object
+ * @returns Covered share of the sample's total weight
+ */
+export const getSampleCoverage = (font: Font): number => {
+  const entries = Object.entries(CHAR_WEIGHTS)
+  const totalWeight = entries.reduce((sum, [, weight]) => sum + weight, 0)
+  const coveredWeight = entries.reduce(
+    (sum, [char, weight]) => (font.hasGlyphForCodePoint(char.codePointAt(0) ?? 0) ? sum + weight : sum),
+    0,
+  )
+
+  return coveredWeight / totalWeight
+}
