@@ -56,12 +56,44 @@ const runInit = () => {
 }
 
 /**
+ * Prints a failed `generate` as the message it was written to be. Everything
+ * that stops `generate` throws a sentence aimed at the person who ran it (a
+ * config field that moved, a font family with no `path`, no Sass compiler for
+ * `output.css`), and letting that reach the top level uncaught buries it in a
+ * Node stack trace, under an unhandled-rejection banner, under whatever
+ * "command failed" line the package manager adds. The message is the part
+ * that matters; the stack is about this package's internals, not the
+ * consumer's config.
+ *
+ * The `cause` chain is unwrapped because `loadConfig` uses it to carry why a
+ * config file wouldn't load, which is where a syntax error's real message
+ * lives.
+ */
+const reportFailure = (error: unknown): void => {
+  console.error(`❌ ${error instanceof Error ? error.message : String(error)}`)
+
+  let cause: unknown = error instanceof Error ? error.cause : undefined
+  while (cause instanceof Error) {
+    console.error(`   Caused by: ${cause.message}`)
+    cause = cause.cause
+  }
+
+  if (process.env.TRIMSCALE_DEBUG) console.error(error)
+  else console.error('   Set TRIMSCALE_DEBUG=1 for the full stack trace.')
+}
+
+/**
  * Runs the package's token generators against the consumer's own
  * `trimscale.config.ts` (read from `process.cwd()` by `scripts/loadConfig.ts`,
  * not this package's own template).
  */
 const runGenerate = async () => {
-  await import('../scripts/generateAll.ts')
+  try {
+    await import('../scripts/generateAll.ts')
+  } catch (error) {
+    reportFailure(error)
+    process.exit(1)
+  }
 }
 
 switch (command) {

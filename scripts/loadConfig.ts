@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import type { TrimscaleConfig } from '../models/Config.ts'
@@ -65,14 +66,21 @@ const normalizeConfig = (cfg: TrimscaleConfig): TrimscaleConfig => {
 export const loadConfig = async (): Promise<TrimscaleConfig> => {
   const configPath = path.join(process.cwd(), 'trimscale.config.ts')
 
+  if (!fs.existsSync(configPath)) {
+    throw new Error(
+      `Could not find trimscale.config.ts in ${process.cwd()}. Run \`npx trimscale-css init\` to create one, or run this from the directory that has it.`,
+    )
+  }
+
   let mod: { default: TrimscaleConfig }
   try {
     mod = await import(pathToFileURL(configPath).href)
   } catch (err) {
-    throw new Error(
-      `Could not load trimscale.config.ts from ${configPath}. Run \`npx trimscale-css init\` first if you haven't yet.`,
-      { cause: err },
-    )
+    // A config that exists but won't load is a different problem from one
+    // that isn't there, and pointing at `init` would be wrong advice: it
+    // refuses to overwrite an existing config. The reason (a syntax error's
+    // own message, usually) rides along as `cause`.
+    throw new Error(`Could not load ${configPath}.`, { cause: err })
   }
 
   const cfg = mod.default

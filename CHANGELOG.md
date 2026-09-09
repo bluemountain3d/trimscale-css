@@ -209,6 +209,18 @@ All notable changes to this project are documented in this file.
   (`color(srgb 2.66 2.10 2.25)`) whenever a multiplier pushed the color past
   sRGB. It now maps into gamut (`color.to-gamut`, `local-minde`) and rounds
   to 8-bit `rgb()`/`rgba()`.
+- Anything that stopped `generate` reached the terminal as a Node stack
+  trace under an unhandled-rejection banner, with the message it was written
+  to carry (a config field that moved, a font family with no `path`, no Sass
+  compiler for `output.css`) somewhere in the middle. The message is now the
+  whole output, one `❌` line plus the `cause` chain, and the stack is behind
+  `TRIMSCALE_DEBUG=1`. A package manager still adds its own "command failed
+  with exit code 1" line, which is correct: `generate` exits non-zero.
+- A config that exists but won't parse reported the same "Run
+  `npx trimscale-css init` first" as one that isn't there, which is wrong
+  advice twice over: the file is there, and `init` refuses to overwrite it.
+  Missing and unparseable are separate messages now, and the parse error's
+  own text (`Expected ',', got '<eof>'`) comes through as the cause.
 - A `lightnessMultiplier` that pushed OKLCH lightness past its 0-100%
   definition produced a color Sass can't write as `oklch()`, falling back to
   `color-mix(in oklch, color(xyz ...) 100%, black)` in the output. Lightness
