@@ -68,9 +68,9 @@ All notable changes to this project are documented in this file.
 - `output.css` config option: `generate` compiles the same static SCSS the
   bridge file configures (via a Sass compiler installed in the project at
   generate time, `sass-embedded` or `sass`, there's no separate hand-written
-  CSS emitter) and writes `trimscale.css` (and, unless
-  `output.css: { minify: false }`, a minified `trimscale.min.css`) into
-  `output.dir`, for consumers who don't want to configure Sass at all. Font
+  CSS emitter) and writes `trimscale.bundle.css` (and, unless
+  `output.css: { minify: false }`, a minified `trimscale.bundle.min.css`)
+  into `output.dir`, for consumers who don't want to configure Sass at all. Font
   file URLs are rewritten to `output.css.fontUrlBase` (default `'/fonts'`,
   distinct from `AppFonts.publicDir`: one is where the SCSS build's `src`
   is rebased from, the other is what URL a standalone CSS file requests).
@@ -188,6 +188,33 @@ All notable changes to this project are documented in this file.
   property name with a literal space in it, invalid and non-functional.
   Both bugs were only reachable together and were caught testing a
   multi-word `next/font` family end-to-end in a real Next.js project.
+- No color token was registered with `@property`. `generate-color-tokens`
+  looped over the outer `(prefix:, tokens:)` wrapper instead of the token
+  map inside it, so each palette registered exactly two properties named
+  after its own wrapper keys (`--color-prefix`, `--color-tokens`) and not
+  one real token. Registration is what gives a custom property its type and
+  `initial-value`, so every color property was an untyped string as far as
+  the browser was concerned.
+- A color token with an `opacity` key failed to compile at all.
+  `generate-color-tokens` passed `$opacity` to `color.change()` for its two
+  `oklch()` tiers, and `opacity` isn't a channel name in the oklch color
+  space (`$alpha` is), so Sass stopped with "Color space oklch doesn't have
+  a channel with this name". Only the plain-color tier, which builds its
+  value through `rgba()`, was unaffected.
+- The plain-color fallback tier for `semanticColorAliases` entries wasn't
+  plain. `get-color-token` converted to the `srgb` space without
+  gamut-mapping first, and Sass serializes that space as `color(srgb ...)`,
+  a function with worse browser support than the `oklch()` this tier exists
+  to back up. Out-of-gamut channels came through as-is
+  (`color(srgb 2.66 2.10 2.25)`) whenever a multiplier pushed the color past
+  sRGB. It now maps into gamut (`color.to-gamut`, `local-minde`) and rounds
+  to 8-bit `rgb()`/`rgba()`.
+- A `lightnessMultiplier` that pushed OKLCH lightness past its 0-100%
+  definition produced a color Sass can't write as `oklch()`, falling back to
+  `color-mix(in oklch, color(xyz ...) 100%, black)` in the output. Lightness
+  and chroma are clamped to what the color space holds, and `generate` warns
+  which `semanticColorAliases` field overshot and whether it landed on white,
+  black, or gray. Derived color channels are rounded to three decimals.
 
 ### Removed
 

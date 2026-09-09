@@ -53,14 +53,14 @@ Reads your `trimscale.config.ts` and writes into `<output.dir>` (defaults to `./
 
 - `_index.scss`, the bridge file, unless `output.scss: false`. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, passing in your font metrics and (if any of your fonts need them) `@font-face` rules as part of the same call, not as a separate file.
 - `utility-classes.md`, a reference listing the exact utility classes _your_ config produces (font roles, sizes, weights, spacing tiers), not a generic example, see [utility-classes.md](utility-classes.md).
-- `trimscale.css` and (unless `output.css.minify: false`) `trimscale.min.css`, if `output.css` is set, see [Standalone CSS Output](#standalone-css-output) below.
+- `trimscale.bundle.css` and (unless `output.css.minify: false`) `trimscale.bundle.min.css`, if `output.css` is set, see [Standalone CSS Output](#standalone-css-output) below.
 - `reset-requirements.md`, if `output.reset: false`, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset).
 
 Re-run this any time you change `trimscale.config.ts`, and after every trimscale-css version bump, even if your config didn't change, in case a future version changes which config fields exist. The output lives in your own project, so it survives a fresh install. Commit `<output.dir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
 
 ## Standalone CSS Output
 
-For consumers who want the tokens and utility classes without configuring Sass at all. Set `output.css: true` in `trimscale.config.ts` and `generate` writes `trimscale.css` (and, unless you set `output.css: { minify: false }`, a minified `trimscale.min.css` alongside it) into `<output.dir>`:
+For consumers who want the tokens and utility classes without configuring Sass at all. Set `output.css: true` in `trimscale.config.ts` and `generate` writes `trimscale.bundle.css` (and, unless you set `output.css: { minify: false }`, a minified `trimscale.bundle.min.css` alongside it) into `<output.dir>`:
 
 ```ts
 output: {
@@ -70,7 +70,7 @@ output: {
 ```
 
 ```html
-<link rel="stylesheet" href="/trimscale-generated/trimscale.min.css">
+<link rel="stylesheet" href="/trimscale-generated/trimscale.bundle.min.css">
 ```
 
 **This isn't "no setup," it's "no Sass setup."** The file still has to come from `generate`, font metrics, color tokens, spacing, and breakpoints are all config-driven and can't ship pre-built in the package, see [why-scss.md](why-scss.md) for why none of this can be plain CSS at the source level. The flow is still `npm install` → `npx trimscale-css generate` → link the file, just without touching `loadPaths` or the `pkg:` importer.
@@ -99,10 +99,10 @@ Every time `generate` writes CSS it prints the size of each file, including the 
 
 | config | | raw | minified | min + gzip | min + brotli |
 | --- | --- | --- | --- | --- | --- |
-| `init` default | `trimscale.config.ts` as `init` writes it | 73.9 kB | 56.4 kB | 8.8 kB | 4.6 kB |
-| full | every group on, 3 families, 11 roles, numeric spacing to 48 | 84.3 kB | 65.5 kB | 10.2 kB | 5.8 kB |
-| trim only | fonts and `.trim-text-*`, no other utility group | 31.9 kB | 26.6 kB | 4.2 kB | 3.4 kB |
-| floor | no `appFonts`, no utility classes: tokens, reset and base only | 24.6 kB | 20.4 kB | 3.4 kB | 2.7 kB |
+| `init` default | `trimscale.config.ts` as `init` writes it | 73.7 kB | 56.3 kB | 8.8 kB | 4.7 kB |
+| full | every group on, 3 families, 11 roles, numeric spacing to 48 | 85.7 kB | 66.5 kB | 10.2 kB | 6.1 kB |
+| trim only | fonts and `.trim-text-*`, no other utility group | 33.3 kB | 27.7 kB | 4.2 kB | 3.5 kB |
+| floor | no `appFonts`, no utility classes: tokens, reset and base only | 26.0 kB | 21.5 kB | 3.4 kB | 2.8 kB |
 
 Everything compresses to roughly an eighth of its raw size, so the raw figure is the one that misleads. The utility classes compress a little better than the tokens do, being the same few declarations repeated with one value changed, but only a little: turning off every group but trim saves 52 kB raw and 6 kB gzipped.
 
@@ -112,7 +112,7 @@ What moves the number is easier to read per unit:
 | --- | --- | --- | --- |
 | numeric spacing step (14 classes) | 876 B | 658 B | 89 B |
 | font role (`.trim-text-*`, `.font-family-*`, tokens) | 558 B | 478 B | 52 B |
-| color token (light + dark, oklch + hex) | 192 B | 173 B | 37 B |
+| color token (light + dark, oklch + hex) | 298 B | 253 B | 43 B |
 | `@font-face` rule (one file, one weight or style) | 206 B | 182 B | 10 B |
 
 The numeric spacing scale is the single largest item at its default end of 48, on the order of 4 of the full config's 10.2 kB, and it's one number in the config rather than a flag anyone thinks about. Fonts are the cheapest axis by a wide margin: two or three families with a few static weights each is a rounding error, whether they're static or variable. Colors are the axis without a ceiling. Twenty tokens is under a kilobyte, but a tonal palette of ten steps across a dozen hues passes the spacing scale on its own.

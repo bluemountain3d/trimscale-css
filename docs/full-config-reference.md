@@ -22,7 +22,7 @@ Optional. A standalone, pre-compiled `.css` file for consumers who don't want to
 
 | Property                  | Type      | Required | Description                                                                                     |
 | --------------------------- | --------- | :------: | --------------------------------------------------------------------------------------------------- |
-| `output.css.minify`         | `boolean` |    No    | Also write a minified `trimscale.min.css` alongside the readable `trimscale.css`. Default `true`. |
+| `output.css.minify`         | `boolean` |    No    | Also write a minified `trimscale.bundle.min.css` alongside the readable `trimscale.bundle.css`. Default `true`. |
 | `output.css.fontUrlBase`    | `string`  |    No    | URL prefix for `@font-face src`, as the browser requests it. Default `'/fonts'`. Distinct from `appFonts.publicDir`, which governs where the SCSS build's `src` is rebased *from*, not what URL a standalone file requests. |
 
 → Full guide: [getting-started.md](getting-started.md#generate)

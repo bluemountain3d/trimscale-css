@@ -108,6 +108,8 @@ Parameters:
 
 `$lightness-multiplier`/`$chroma-multiplier` multiply the token's *existing* channel value, they don't set an absolute target (unlike `$opacity`), and accept a `(light:, dark:)` map because the light/dark base values aren't perceptual mirrors of each other, a flat multiplier can land differently in each mode. The return value is shaped like a single `$tokens` entry, so it feeds straight into `semanticColorAliases` or your own `mx.generate-color-tokens` call.
 
+Both multipliers are clamped to what OKLCH can hold: lightness to 0-100%, chroma to 0 and up. A multiplier that overshoots lands on white, black, or gray rather than on an unrepresentable color, and `generate` warns which `semanticColorAliases` field caused it. The returned `hex` entry is the plain-color tier, gamut-mapped into sRGB and rounded to 8-bit channels so it works in browsers with no `oklch()` support; the `oklch` entry keeps the full precision and the wide-gamut value.
+
 ## Mixins
 
 Import via:

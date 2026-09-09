@@ -1,4 +1,10 @@
-import type { ColorDefinition, ColorToken, ColorTokensMap, SemanticColorAliases } from '../models/Config.ts'
+import type {
+  ColorDefinition,
+  ColorToken,
+  ColorTokensMap,
+  SemanticColorAliases,
+  TrimscaleConfig,
+} from '../models/Config.ts'
 import { raw, setNestedScssMap, setScssMapEntry, setScssMapValue, toKebabCase } from './helpers.ts'
 
 /**
@@ -28,6 +34,79 @@ const colorTokenEntries = (token: ColorToken, nestedLevel: number): string[] => 
   if (token.opacity !== undefined) entries.push(setScssMapEntry('opacity', token.opacity, nestedLevel))
 
   return entries
+}
+
+const MODES = ['light', 'dark'] as const
+type Mode = (typeof MODES)[number]
+type SemanticAliasMultiplier = number | { light: number; dark: number } | undefined
+
+/** A multiplier is either one number for both modes or a `(light:, dark:)` pair; `undefined` means "leave the channel alone". */
+const multiplierFor = (multiplier: SemanticAliasMultiplier, mode: Mode): number =>
+  multiplier === undefined ? 1 : typeof multiplier === 'number' ? multiplier : multiplier[mode]
+
+/**
+ * Reads the lightness out of a token's `oklch()` string, as a 0-1 number.
+ * The config carries these as raw CSS (`oklch(45.6% 0.14 273deg)`), and CSS
+ * allows the channel either as a percentage or as a plain 0-1 number.
+ * @returns The lightness, or `null` for anything this can't read, which the
+ *   caller treats as "nothing to check" rather than as an error.
+ */
+const parseOklchLightness = (oklch: string): number | null => {
+  const match = /oklch\(\s*(\d*\.?\d+)(%?)/i.exec(oklch)
+  if (!match) return null
+
+  const value = Number(match[1])
+  return Number.isNaN(value) ? null : match[2] === '%' ? value / 100 : value
+}
+
+/**
+ * Warns when a `semanticColorAliases` multiplier pushes a channel outside
+ * what OKLCH can hold: lightness is defined 0-100%, chroma can't be negative.
+ * `get-color-token` clamps both, so the output stays valid CSS either way,
+ * but a clamped lightness is silently white or black and a clamped chroma is
+ * silently gray, neither of which resembles the config that caused it.
+ *
+ * This belongs here rather than in the SCSS because only `generate` can name
+ * the offending field. By the time Sass sees it, it's a map of values, not
+ * `semanticColorAliases.textMuted.lightnessMultiplier`.
+ */
+export const warnAboutClampedAliases = (cfg: TrimscaleConfig): void => {
+  for (const [aliasName, alias] of Object.entries(cfg.semanticColorAliases ?? {})) {
+    const tokens =
+      !alias.tokenMap || alias.tokenMap === 'baseColorTokens'
+        ? cfg.baseColorTokens.tokens
+        : cfg.customColorTokens?.[alias.tokenMap]?.tokens
+    const token = tokens?.[alias.token]
+
+    if (!token) continue
+
+    // One warning per alias per channel, listing whichever modes overshot.
+    // A single multiplier applies to both modes, so warning per mode says the
+    // same thing twice for the common case.
+    const negativeChroma = MODES.filter((mode) => multiplierFor(alias.chromaMultiplier, mode) < 0)
+    if (negativeChroma.length > 0) {
+      console.warn(
+        `⚠ semanticColorAliases.${aliasName}.chromaMultiplier is negative for ${negativeChroma.join(' and ')}, which clamps to 0 and leaves the color gray.`,
+      )
+    }
+
+    const overshoots = MODES.flatMap((mode) => {
+      const lightness = parseOklchLightness(token[mode].oklch)
+      if (lightness === null) return []
+
+      const scaled = lightness * multiplierFor(alias.lightnessMultiplier, mode)
+      if (scaled >= 0 && scaled <= 1) return []
+
+      const percent = (value: number) => `${(value * 100).toFixed(1)}%`
+      return [`${mode} ${percent(lightness)} to ${percent(scaled)} (clamps to ${scaled > 1 ? 'white' : 'black'})`]
+    })
+
+    if (overshoots.length > 0) {
+      console.warn(
+        `⚠ semanticColorAliases.${aliasName}.lightnessMultiplier takes "${alias.token}" outside OKLCH's 0-100% lightness: ${overshoots.join(', ')}. Lower the multiplier, or start from a different token.`,
+      )
+    }
+  }
 }
 
 /** Builds a `(prefix:, tokens:)` map VALUE from a single `ColorTokensMap`. */

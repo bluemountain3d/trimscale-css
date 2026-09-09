@@ -1,8 +1,43 @@
 // @use "abstracts/variables/colors" as colors;
+@use "./fn_number-utils" as *;
+
 @use "sass:map";
 @use "sass:color";
 @use "sass:meta";
 @use "sass:math";
+
+/// Decimal places every derived channel value is rounded to. Sass carries 10
+/// significant digits, which lands values like `oklch(72.9553208225% ...)` in
+/// the output; three decimals is finer than any display can resolve.
+$_color-decimals: 3;
+
+/// The plain-color tier of `mx.generate-color-tokens` is the one that has to
+/// work in browsers with no `oklch()` support, so it can hold nothing but
+/// legacy sRGB. Two steps are needed to get there, and skipping either one
+/// produces a value that looks fine in the source and fails in a browser:
+///
+/// 1. `color.to-gamut`, because a derived color can sit outside sRGB (either
+///    from a wide-gamut base token or from a chroma multiplier). Converting
+///    without mapping keeps the out-of-range channels, e.g.
+///    `color(srgb 2.66 2.10 2.25)`.
+/// 2. `rgb` rather than `srgb` as the target space, because Sass serializes
+///    the `srgb` space as `color(srgb ...)`, a function with *worse* support
+///    than the `oklch()` this tier exists to back up.
+///
+/// Channels are rounded to 8-bit integers: this tier can't reach a display
+/// that resolves more than that, and integers serialize as `rgb(139, 160,
+/// 255)` instead of a percentage with ten decimals.
+/// @access private
+@function _to-srgb-fallback($color) {
+  $srgb: color.to-space(color.to-gamut($color, $space: srgb, $method: local-minde), rgb);
+
+  @return rgba(
+    math.round(color.channel($srgb, "red")),
+    math.round(color.channel($srgb, "green")),
+    math.round(color.channel($srgb, "blue")),
+    round(color.channel($srgb, "alpha"), $_color-decimals)
+  );
+}
 
 /// @group Abstracts/Functions
 /// @name Get Color Token
@@ -77,17 +112,22 @@
   $light-lightness: if(sass(meta.type-of($lightness-multiplier) == map): map.get($lightness-multiplier, light); else: $lightness-multiplier );
   $dark-lightness: if(sass(meta.type-of($lightness-multiplier) == map): map.get($lightness-multiplier, dark); else: $lightness-multiplier );
 
-  // Adjust Channels
-  $light-h: color.channel($light-oklch, "hue");
-  $light-c: if(sass($chroma-multiplier): color.channel($light-oklch, "chroma") * $light-chroma;
+  // Adjust Channels. OKLCH lightness is defined 0-100% and chroma can't go
+  // negative, so a multiplier that overshoots is clamped here rather than
+  // passed on. An out-of-range lightness isn't even representable: Sass
+  // serializes it as `color-mix(in oklch, color(xyz ...) 100%, black)`, which
+  // no fallback tier can do anything useful with. Clamping is silent by
+  // design, `generate` warns about the config that caused it (see
+  // `scripts/generateColorTokens.ts`), which is the layer that can name the
+  // offending field.
+  $light-c: if(sass($chroma-multiplier): math.max(0, color.channel($light-oklch, "chroma") * $light-chroma);
             else: color.channel($light-oklch, "chroma"));
-  $light-l: if(sass($lightness-multiplier): color.channel($light-oklch, "lightness") * $light-lightness;
+  $light-l: if(sass($lightness-multiplier): math.clamp(0%, color.channel($light-oklch, "lightness") * $light-lightness, 100%);
             else: color.channel($light-oklch, "lightness"));
 
-  $dark-h: color.channel($dark-oklch, "hue");
-  $dark-c: if(sass($chroma-multiplier): color.channel($dark-oklch, "chroma") * $dark-chroma;
+  $dark-c: if(sass($chroma-multiplier): math.max(0, color.channel($dark-oklch, "chroma") * $dark-chroma);
            else: color.channel($dark-oklch, "chroma"));
-  $dark-l: if(sass($lightness-multiplier): color.channel($dark-oklch, "lightness") * $dark-lightness;
+  $dark-l: if(sass($lightness-multiplier): math.clamp(0%, color.channel($dark-oklch, "lightness") * $dark-lightness, 100%);
            else: color.channel($dark-oklch, "lightness"));
 
   // Normalize Opacity
@@ -96,25 +136,25 @@
   // Set New Values
   $new-light-oklch: color.change(
     $light-oklch,
-    $lightness: $light-l,
-    $chroma: $light-c,
-    $alpha: if(sass($safe-opacity != null): $safe-opacity; else: color.channel($light-oklch, "alpha"))
+    $lightness: round($light-l, $_color-decimals),
+    $chroma: round($light-c, $_color-decimals),
+    $alpha: round(if(sass($safe-opacity != null): $safe-opacity; else: color.channel($light-oklch, "alpha")), $_color-decimals)
   );
   $new-dark-oklch: color.change(
     $dark-oklch,
-    $lightness: $dark-l,
-    $chroma: $dark-c,
-    $alpha: if(sass($safe-opacity != null): $safe-opacity; else: color.channel($dark-oklch, "alpha"))
+    $lightness: round($dark-l, $_color-decimals),
+    $chroma: round($dark-c, $_color-decimals),
+    $alpha: round(if(sass($safe-opacity != null): $safe-opacity; else: color.channel($dark-oklch, "alpha")), $_color-decimals)
   );
 
   @return (
     light: (
       oklch: $new-light-oklch,
-      hex: color.to-space($new-light-oklch, srgb)
+      hex: _to-srgb-fallback($new-light-oklch)
     ),
     dark: (
       oklch: $new-dark-oklch,
-      hex: color.to-space($new-dark-oklch, srgb)
+      hex: _to-srgb-fallback($new-dark-oklch)
     )
   );
 }

@@ -38,7 +38,7 @@
   $prefix: map.get($tokens, "prefix");
   $token-map: map.get($tokens, "tokens");
 
-  @each $name, $modes in $tokens {
+  @each $name, $modes in $token-map {
     @property --#{$prefix}-#{$name} {
       syntax: "<color>";
       inherits: true;
@@ -79,7 +79,7 @@
 
         $safe-opacity: if(sass($opacity != null and $opacity > 1): math.div($opacity, 100); else: $opacity);
         $fallback-oklch: if(sass($default-scheme == dark): $dark-oklch; else: $light-oklch);
-        $fallback-oklch: if(sass($opacity != null): color.change($fallback-oklch, $opacity: $safe-opacity); else: $fallback-oklch);
+        $fallback-oklch: if(sass($opacity != null): color.change($fallback-oklch, $alpha: $safe-opacity); else: $fallback-oklch);
         --#{$prefix}-#{$name}: #{$fallback-oklch};
       }
     }
@@ -98,8 +98,8 @@
         $opacity: map.get($modes, opacity);
 
         $safe-opacity: if(sass($opacity != null and $opacity > 1): math.div($opacity, 100); else: $opacity);
-        $light-val: if(sass($opacity != null): color.change($light-oklch, $opacity: $safe-opacity); else: $light-oklch);
-        $dark-val: if(sass($opacity != null): color.change($dark-oklch, $opacity: $safe-opacity); else: $dark-oklch);
+        $light-val: if(sass($opacity != null): color.change($light-oklch, $alpha: $safe-opacity); else: $light-oklch);
+        $dark-val: if(sass($opacity != null): color.change($dark-oklch, $alpha: $safe-opacity); else: $dark-oklch);
 
         --#{$prefix}-#{$name}: light-dark(#{$light-val}, #{$dark-val});
       }

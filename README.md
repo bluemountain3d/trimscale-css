@@ -17,7 +17,7 @@ trimscale-css is built around three core ideas:
 
 It generates CSS custom properties, utility classes, and base styles from a single config file: no JavaScript ships to the browser.
 
-A config with every utility group on generates about 84 kB of CSS, 66 kB minified and 10 kB gzipped. Groups can be turned off individually, though that's mostly about what you want in the file rather than about size, see [output size](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#output-size) for the figures per config and what actually drives them.
+A config with every utility group on generates about 86 kB of CSS, 66 kB minified and 10 kB gzipped. Groups can be turned off individually, though that's mostly about what you want in the file rather than about size, see [output size](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#output-size) for the figures per config and what actually drives them.
 
 ---
 

@@ -3,6 +3,7 @@ import path from 'node:path'
 import type { TrimscaleConfig } from '../models/Config.ts'
 import { buildBridgeSource } from './buildBridgeSource.ts'
 import { rewriteFontFacesForCss, writeCssOutput } from './generateCss.ts'
+import { warnAboutClampedAliases } from './generateColorTokens.ts'
 import { computeFontData } from './generateFonts.ts'
 import { buildResetRequirementsMarkdown } from './generateResetRequirementsDoc.ts'
 import { type ResolvedUtilityFlags, resolveUtilityFlags } from './generateUtilities.ts'
@@ -79,11 +80,50 @@ const warnAboutCssOutputLimitations = (cfg: TrimscaleConfig, flags: ResolvedUtil
   }
 }
 
+/**
+ * Names Sass would accept for the module `trimscale`, resolved relative to
+ * the importing file's own directory. `.css` is in here because Sass
+ * resolves plain CSS files too.
+ */
+const SHADOWING_FILES = [
+  'trimscale.scss',
+  'trimscale.sass',
+  'trimscale.css',
+  '_trimscale.scss',
+  '_trimscale.sass',
+  '_trimscale.css',
+  path.join('trimscale', '_index.scss'),
+  path.join('trimscale', '_index.sass'),
+]
+
+/**
+ * The bridge file's `@use "trimscale"` is a bare specifier, and Sass tries
+ * the importing file's own directory before `loadPaths`. So a file in
+ * `output.dir` that Sass would resolve for that name shadows the package's
+ * `styles/trimscale.scss` for the bridge sitting next to it. The bridge then
+ * configures a module with no variables in it and fails on the first
+ * `with()` argument, reported as `This variable was not declared with
+ * !default in the @used module` against `$breakpoints`, which says nothing
+ * about the actual cause.
+ *
+ * This package's own CSS output is named `trimscale.bundle.css` precisely to
+ * stay out of that way (see `generateCss.ts`), so what's left to catch is a
+ * file the consumer put there themselves.
+ */
+const warnAboutShadowingFiles = (outDir: string): void => {
+  for (const name of SHADOWING_FILES.filter((file) => fs.existsSync(path.join(outDir, file)))) {
+    console.warn(
+      `⚠ ${path.relative(process.cwd(), path.join(outDir, name))} shadows this package for the bridge file next to it. Sass resolves \`@use "trimscale"\` against the bridge's own directory first, so your SCSS build will fail with "This variable was not declared with !default in the @used module" on $breakpoints. Rename or move that file.`,
+    )
+  }
+}
+
 const cfg = await loadConfig()
 const outDir = resolveOutDir(cfg)
 const utilityFlags = resolveUtilityFlags(cfg.output?.utilities)
 
 warnIfFontlessTypographyFlags(cfg, utilityFlags)
+warnAboutClampedAliases(cfg)
 
 const fontData = await computeFontData(cfg)
 
@@ -100,6 +140,8 @@ ${buildBridgeSource(cfg, utilityFlags, fontData)}`
 
   fs.writeFileSync(path.join(outDir, '_index.scss'), output)
   console.log(`- Bridge file is written to ${path.relative(process.cwd(), path.join(outDir, '_index.scss'))}`)
+
+  warnAboutShadowingFiles(outDir)
 }
 
 fs.writeFileSync(path.join(outDir, 'utility-classes.md'), buildUtilityClassesMarkdown(cfg, utilityFlags))

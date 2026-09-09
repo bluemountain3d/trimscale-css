@@ -82,16 +82,27 @@ export const formatBytes = (bytes: number): string => `${(bytes / 1000).toFixed(
 const gzippedSize = (css: string): number => zlib.gzipSync(Buffer.from(css, 'utf8')).byteLength
 
 /**
- * Writes `trimscale.css`, plus `trimscale.min.css` when `minify`, and logs
- * each file's size. The gzipped figure goes on whichever file is the one to
- * ship, so it follows the minified file when there is one and falls back to
- * the expanded file when there isn't. In the log rather than the docs
- * because this is the consumer's own config, unlike any number a doc page
- * can quote, and this is the moment they'd want to see what a flag cost.
+ * Writes `trimscale.bundle.css`, plus `trimscale.bundle.min.css` when
+ * `minify`, and logs each file's size. The gzipped figure goes on whichever
+ * file is the one to ship, so it follows the minified file when there is one
+ * and falls back to the expanded file when there isn't. In the log rather
+ * than the docs because this is the consumer's own config, unlike any number
+ * a doc page can quote, and this is the moment they'd want to see what a flag
+ * cost.
+ *
+ * The `.bundle` in both names is load-bearing, not decoration. Sass resolves
+ * a bare `@use "trimscale"` against the importing file's own directory before
+ * `loadPaths`, and it resolves plain `.css` files too, so a file named
+ * `trimscale.css` sitting next to the bridge file in `output.dir` shadows the
+ * package's `styles/trimscale.scss` for the bridge's own `@use "trimscale"`.
+ * The CSS file has no variables to configure, so every `with()` argument
+ * fails, reported against the first one (`$breakpoints`). Any name Sass won't
+ * resolve for the module `trimscale` avoids this; don't rename these back to
+ * `trimscale.css` without changing what the bridge file imports.
  */
 export const writeCssOutput = async (outDir: string, bridgeSource: string, minify: boolean): Promise<void> => {
   const css = await compileCss(bridgeSource, 'expanded')
-  const cssPath = path.join(outDir, 'trimscale.css')
+  const cssPath = path.join(outDir, 'trimscale.bundle.css')
   fs.writeFileSync(cssPath, css)
 
   const rawSize = formatBytes(Buffer.byteLength(css))
@@ -100,7 +111,7 @@ export const writeCssOutput = async (outDir: string, bridgeSource: string, minif
 
   if (minify) {
     const minCss = await compileCss(bridgeSource, 'compressed')
-    const minPath = path.join(outDir, 'trimscale.min.css')
+    const minPath = path.join(outDir, 'trimscale.bundle.min.css')
     fs.writeFileSync(minPath, minCss)
     const minSizes = `${formatBytes(Buffer.byteLength(minCss))}, ${formatBytes(gzippedSize(minCss))} gzipped`
     console.log(`- Minified CSS is written to ${path.relative(process.cwd(), minPath)} (${minSizes})`)
