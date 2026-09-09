@@ -56,6 +56,8 @@ Reads your `trimscale.config.ts` and writes into `<output.dir>` (defaults to `./
 - `trimscale.bundle.css` and (unless `output.css.minify: false`) `trimscale.bundle.min.css`, if `output.css` is set, see [Standalone CSS Output](#standalone-css-output) below.
 - `reset-requirements.md`, if `output.reset: false`, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset).
 
+Each run also removes files from `<output.dir>` that it no longer produces, so turning `output.css` off takes the CSS with it instead of leaving a stale copy for someone to keep linking. Only the files in the list above are ever removed, never anything else in the folder, so your own files are safe there. The one thing this can't clean up is a change to `output.dir` itself: the old folder is left where it is, since nothing in the new run knows it existed.
+
 Re-run this any time you change `trimscale.config.ts`, and after every trimscale-css version bump, even if your config didn't change, in case a future version changes which config fields exist. The output lives in your own project, so it survives a fresh install. Commit `<output.dir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
 
 ## Standalone CSS Output

@@ -83,7 +83,9 @@ const gzippedSize = (css: string): number => zlib.gzipSync(Buffer.from(css, 'utf
 
 /**
  * Writes `trimscale.bundle.css`, plus `trimscale.bundle.min.css` when
- * `minify`, and logs each file's size. The gzipped figure goes on whichever
+ * `minify`, and logs each file's size. Returns the basenames it wrote, which
+ * `generateBridge.ts` needs to know which of the known output files this run
+ * did *not* produce. The gzipped figure goes on whichever
  * file is the one to ship, so it follows the minified file when there is one
  * and falls back to the expanded file when there isn't. In the log rather
  * than the docs because this is the consumer's own config, unlike any number
@@ -100,7 +102,7 @@ const gzippedSize = (css: string): number => zlib.gzipSync(Buffer.from(css, 'utf
  * resolve for the module `trimscale` avoids this; don't rename these back to
  * `trimscale.css` without changing what the bridge file imports.
  */
-export const writeCssOutput = async (outDir: string, bridgeSource: string, minify: boolean): Promise<void> => {
+export const writeCssOutput = async (outDir: string, bridgeSource: string, minify: boolean): Promise<string[]> => {
   const css = await compileCss(bridgeSource, 'expanded')
   const cssPath = path.join(outDir, 'trimscale.bundle.css')
   fs.writeFileSync(cssPath, css)
@@ -109,11 +111,13 @@ export const writeCssOutput = async (outDir: string, bridgeSource: string, minif
   const expandedSizes = minify ? rawSize : `${rawSize}, ${formatBytes(gzippedSize(css))} gzipped`
   console.log(`- CSS is written to ${path.relative(process.cwd(), cssPath)} (${expandedSizes})`)
 
-  if (minify) {
-    const minCss = await compileCss(bridgeSource, 'compressed')
-    const minPath = path.join(outDir, 'trimscale.bundle.min.css')
-    fs.writeFileSync(minPath, minCss)
-    const minSizes = `${formatBytes(Buffer.byteLength(minCss))}, ${formatBytes(gzippedSize(minCss))} gzipped`
-    console.log(`- Minified CSS is written to ${path.relative(process.cwd(), minPath)} (${minSizes})`)
-  }
+  if (!minify) return [path.basename(cssPath)]
+
+  const minCss = await compileCss(bridgeSource, 'compressed')
+  const minPath = path.join(outDir, 'trimscale.bundle.min.css')
+  fs.writeFileSync(minPath, minCss)
+  const minSizes = `${formatBytes(Buffer.byteLength(minCss))}, ${formatBytes(gzippedSize(minCss))} gzipped`
+  console.log(`- Minified CSS is written to ${path.relative(process.cwd(), minPath)} (${minSizes})`)
+
+  return [path.basename(cssPath), path.basename(minPath)]
 }

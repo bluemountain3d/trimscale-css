@@ -209,6 +209,14 @@ All notable changes to this project are documented in this file.
   (`color(srgb 2.66 2.10 2.25)`) whenever a multiplier pushed the color past
   sRGB. It now maps into gamut (`color.to-gamut`, `local-minde`) and rounds
   to 8-bit `rgb()`/`rgba()`.
+- `generate` never removed output it stopped producing. Turning `output.css`
+  off left the CSS files behind, still linkable and frozen at whatever the
+  config said when they were last written; turning `output.reset` back on
+  left a `reset-requirements.md` describing a requirement that no longer
+  applied. Each run now removes the files in its own known set that it didn't
+  write this time, and nothing else in the folder: `output.dir` belongs to
+  the project, not to the generator. Changing `output.dir` still leaves the
+  old folder behind, since nothing in the new run knows it existed.
 - A font file without the characters the metrics are measured from produced
   fabricated metrics instead of an error. `getAvgAdvanceWidth` drops missing
   characters and renormalizes the rest, which is right for a font missing a
