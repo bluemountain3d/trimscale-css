@@ -7,7 +7,13 @@ import type {
   RawFontMetrics,
   TrimscaleConfig,
 } from '../models/Config.ts'
-import { fetchRemoteFont, getFontExtension, listLocalFontDir, readLocalFont } from './generateFontMetrics.io.ts'
+import {
+  fetchRemoteFont,
+  getFontExtension,
+  listLocalFontDir,
+  readLocalFont,
+  resolveFamilyDirName,
+} from './generateFontMetrics.io.ts'
 import { parseFontBuffer } from './generateFontMetrics.parser.ts'
 import { toKebabCase } from './helpers.ts'
 
@@ -188,7 +194,7 @@ export type FamilyFontMetrics = RawFontMetrics & { family: string }
 /** Map of resolved font family name to its extracted metrics */
 export type FontMetricsMap = Record<string, FamilyFontMetrics>
 
-/** Explicit `path` wins outright; otherwise looks under `localFontsPath/<familyName>/`. */
+/** Explicit `path` wins outright; otherwise looks under `localFontsPath/`, in the folder named after the family as it's spelled on disk (see `resolveFamilyDirName`). */
 const resolveLocalFontPaths = async (
   appFonts: AppFonts,
   familyName: string,
@@ -202,7 +208,22 @@ const resolveLocalFontPaths = async (
     )
   }
 
-  const dir = path.join(process.cwd(), appFonts.localFontsPath, familyName)
+  const fontsRoot = path.join(process.cwd(), appFonts.localFontsPath)
+  const dirName = await resolveFamilyDirName(fontsRoot, familyName)
+
+  if (dirName === null) {
+    throw new Error(
+      `No folder for "${familyName}" in ${path.relative(process.cwd(), fontsRoot)}. Create ${path.relative(process.cwd(), path.join(fontsRoot, familyName))} and put the family's files there, or set \`path\` explicitly.`,
+    )
+  }
+
+  if (dirName !== familyName) {
+    console.warn(
+      `⚠ Font family "${familyName}" is in a folder named "${dirName}". The @font-face src follows the folder, since the other spelling would 404 on a case-sensitive host even though it resolves here. Rename one of the two to match.`,
+    )
+  }
+
+  const dir = path.join(fontsRoot, dirName)
   const found = await listLocalFontDir(dir)
 
   if (found.length === 0) {

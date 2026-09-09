@@ -30,6 +30,40 @@ export const listLocalFontDir = async (dir: string): Promise<string[]> => {
     .sort()
 }
 
+/**
+ * Finds a family's folder inside `fontsRoot`, returning the name as it is
+ * actually spelled on disk.
+ *
+ * By convention the folder is named after the config key, and on a
+ * case-insensitive filesystem (Windows, macOS by default) a key of `Inter`
+ * happily opens a folder named `inter`. The `@font-face` `src` is then built
+ * from the *key*, so the generated URL is `/fonts/Inter/...` for a folder
+ * that is really `fonts/inter/`: correct in local dev, 404 once it's served
+ * from a case-sensitive host. Resolving to the real name keeps the URL right
+ * on both, and the caller warns about the mismatch, since the two spellings
+ * drifting apart is still worth knowing about.
+ *
+ * An exact match always wins, so a case-sensitive filesystem holding both
+ * `Inter/` and `inter/` resolves to the one that was actually asked for.
+ *
+ * @returns The real folder name, or `null` when there's no folder for this
+ *   family under `fontsRoot` at all (including a missing `fontsRoot`).
+ */
+export const resolveFamilyDirName = async (fontsRoot: string, familyName: string): Promise<string | null> => {
+  let entries: fs.Dirent[]
+
+  try {
+    entries = await fs.promises.readdir(fontsRoot, { withFileTypes: true })
+  } catch {
+    return null
+  }
+
+  const directories = entries.filter((entry) => entry.isDirectory())
+  if (directories.some((entry) => entry.name === familyName)) return familyName
+
+  return directories.find((entry) => entry.name.toLowerCase() === familyName.toLowerCase())?.name ?? null
+}
+
 /** File extension (no dot) for a local path or a remote URL, used as the `format(...)` hint in `@font-face`. */
 export const getFontExtension = (source: string): string => {
   const pathname = source.startsWith('http') ? new URL(source).pathname : source

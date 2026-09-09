@@ -209,6 +209,15 @@ All notable changes to this project are documented in this file.
   (`color(srgb 2.66 2.10 2.25)`) whenever a multiplier pushed the color past
   sRGB. It now maps into gamut (`color.to-gamut`, `local-minde`) and rounds
   to 8-bit `rgb()`/`rgba()`.
+- A `local` family discovered through `localFontsPath` built its
+  `@font-face` `src` from the config key rather than from the folder on
+  disk. On a case-insensitive filesystem an `Inter` key opens a folder named
+  `inter` without complaint, so the URL came out as `/fonts/Inter/...` for a
+  folder that is really `fonts/inter/`: correct in local dev, 404 as soon as
+  it's served from a case-sensitive host, and invisible until then. The
+  folder's own spelling is what reaches the `src` now, with a warning about
+  the mismatch. A missing folder and a folder with no font files in it are
+  also separate errors now, rather than one message for both.
 - `output.utilities` was documented as accepting `boolean` or an object, but
   its type only accepted the object, so `utilities: false` (every group off
   at once, the shorthand the other three levels already had) didn't

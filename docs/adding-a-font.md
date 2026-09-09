@@ -68,7 +68,7 @@ appFonts: {
 },
 ```
 
-The subfolder must be named exactly like the config key, not the font file's internal name, same rule as above: `Roboto`'s files live in `./fonts/Roboto/` regardless of what the file's own name table says. A family can still set its own `path` to opt out of the convention (e.g. a font that lives outside `localFontsPath`, or under a differently-named folder), `path`, when set, always wins over the convention.
+The subfolder must be named exactly like the config key, not the font file's internal name, same rule as above: `Roboto`'s files live in `./fonts/Roboto/` regardless of what the file's own name table says. Case counts, even though your filesystem may not: Windows and macOS open `./fonts/roboto/` for a `Roboto` key without complaint, and the `src` in the generated `@font-face` would then 404 the moment it's served from a case-sensitive host. `generate` follows the folder's own spelling and warns, so the URL is right on both, but rename one of the two to match and the warning goes away. A family can still set its own `path` to opt out of the convention (e.g. a font that lives outside `localFontsPath`, or under a differently-named folder), `path`, when set, always wins over the convention.
 
 If neither `path` nor a matching `localFontsPath` subfolder turns up any files, `generate` fails with an error naming the family and the folder it looked in, rather than silently skipping it.
 
