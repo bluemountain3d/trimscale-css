@@ -76,6 +76,17 @@ export const loadConfig = async (): Promise<TrimscaleConfig> => {
   try {
     mod = await import(pathToFileURL(configPath).href)
   } catch (err) {
+    // Node can't load a `.ts` file at all below 22.18.0, where flagless type
+    // stripping became the default. `engines` stops that install under pnpm,
+    // but npm only warns, so this is reachable, and Node's own
+    // ERR_UNKNOWN_FILE_EXTENSION says nothing about Node versions.
+    if ((err as NodeJS.ErrnoException).code === 'ERR_UNKNOWN_FILE_EXTENSION') {
+      throw new Error(
+        `Loading trimscale.config.ts needs Node's built-in TypeScript type stripping, which is only on by default from Node 22.18.0 (23.6.0 on the odd-numbered line). This is Node ${process.version}. Upgrade Node and re-run \`generate\`.`,
+        { cause: err },
+      )
+    }
+
     // A config that exists but won't load is a different problem from one
     // that isn't there, and pointing at `init` would be wrong advice: it
     // refuses to overwrite an existing config. The reason (a syntax error's
