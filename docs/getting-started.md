@@ -7,6 +7,16 @@ trimscale-css is consumed as SCSS source plus a small CLI that generates your to
 - Node >=22.18.0. The CLI's `generate` command dynamically imports your `trimscale.config.ts` and relies on Node's built in TypeScript type stripping to run it directly, no build step, no `ts-node`. That support only became flagless default at 22.18.0 (and 23.6.0 on the odd-numbered line), so it's a hard floor, not a suggestion.
 - Your own SCSS compiler (`sass-embedded` or `sass`) at **1.95.0 or later**, configured with a `loadPaths` entry pointing at the package's `styles/` folder. Vite and Next.js setups are shown below.
 - If your project has a `tsconfig.json` and you want editor type checking on `trimscale.config.ts`, set `moduleResolution` to `"nodenext"` or `"bundler"` so the config's `import type ... from 'trimscale-css/models/Config.ts'` subpath import resolves. This is purely for editor DX, the config runs fine at runtime either way.
+- A config in the project root also tends to fall outside every tsconfig's `include`. Vite's `tsconfig.app.json` covers only `src`, so the file belongs in the Node-side project alongside `vite.config.ts`. Your editor checks it either way, through an inferred project with default compiler options, but a `tsc --noEmit` in CI skips a file no tsconfig includes, so a mistyped field passes CI while showing a red squiggly on your own screen.
+
+  ```jsonc
+  // tsconfig.node.json, in a Vite project
+  {
+    "include": ["vite.config.ts", "trimscale.config.ts"]
+  }
+  ```
+
+  Next.js needs nothing here, its generated root `tsconfig.json` already includes `**/*.ts`. To check where a given editor puts the file, run `TypeScript: Go to Project Configuration` from the command palette with the config open: "File is not part of a TypeScript project" means no tsconfig includes it.
 
 ## Install
 
