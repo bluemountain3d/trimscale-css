@@ -111,25 +111,25 @@
 @property --_top-trim {
   syntax: '<length>';
   inherits: true;
-  initial-value: 0em;
+  initial-value: 0px;
 }
 
 @property --_bottom-trim {
   syntax: '<length>';
   inherits: true;
-  initial-value: 0em;
+  initial-value: 0px;
 }
 
 @property --_lsb-adjust {
   syntax: '<length>';
   inherits: true;
-  initial-value: 0em;
+  initial-value: 0px;
 }
 
 @property --_rsb-adjust {
   syntax: '<length>';
   inherits: true;
-  initial-value: 0em;
+  initial-value: 0px;
 }
  
 @layer trim-defaults {

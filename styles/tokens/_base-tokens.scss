@@ -20,33 +20,33 @@
 @property --fluid-base {
   syntax: "<length>";
   inherits: true;
-  initial-value: 1rem;
+  initial-value: 16px;
 }
 
 @if var.$spacing-approach == "coupled" {
   @property --unit {
     syntax: "<length>";
     inherits: true;
-    initial-value: 0.25rem;
+    initial-value: 4px;
   }
 } @else {
   @property --unit-micro {
     syntax: "<length>";
     inherits: true;
-    initial-value: 0.25rem;
+    initial-value: 4px;
   }
 
   @property --unit-macro {
     syntax: "<length>";
     inherits: true;
-    initial-value: 0.25rem;
+    initial-value: 4px;
   }
 }
 
 @property --header-height {
   syntax: "<length>";
   inherits: true;
-  initial-value: 8rem;
+  initial-value: 128px;
 }
 
 @layer tokens {
