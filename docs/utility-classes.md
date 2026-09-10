@@ -108,10 +108,19 @@ the trim uses no pseudo-elements at all, yours behave exactly as they would if
 the trim system were absent, and the page looks right. Check the trim in an
 engine without native support before shipping.
 
-`display` works the same way. The fallback spacers need the trim's own
-`display: flow-root` box, so a `display: block`, `flex` or `grid` of your own
-on the trimmed element breaks the trim on the fallback path while leaving the
-native path untouched.
+`display` is the other half of the same rule, and it does not split along the
+same line. `text-box-trim` applies to block containers, multi-column
+containers and inline boxes, and the spec is explicit that it neither applies
+to nor propagates through flex, grid or table formatting contexts. A
+`display: flex`, `grid` or `table` of your own on the trimmed element removes
+the trim in every engine, native path included. A `display: block`,
+`inline-block` or `list-item` leaves the native path intact but costs the
+fallback its block formatting context: `::after`'s negative `margin-bottom`
+adjoins the element's bottom edge and collapses out of it, so the box renders
+too tall by the bottom-trim amount while the gap to the next sibling shrinks
+by the same amount. The trim's own `display: flow-root` is what prevents
+that, which is one more reason to keep your `display` on the wrapper and the
+class on the span.
 
 Second, size. `.trim-text-*` carries `font-size: 1em`, so it renders at
 whatever size it inherits. A size class on an ancestor does not reach it,

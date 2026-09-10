@@ -20,8 +20,12 @@
 /// display: flow-root. Put the class on a <span> nested inside the element
 /// you are styling rather than on the element itself, so your own
 /// ::before/::after or display on that element can't silently collide with
-/// it. Both collisions are invisible in a browser with native
-/// text-box-trim, which uses neither, so verify in an engine without it.
+/// it. A ::before/::after collision is invisible in a browser with native
+/// text-box-trim, which uses neither, so verify in an engine without it. A
+/// display collision is not: text-box-trim neither applies to nor propagates
+/// through flex, grid or table formatting contexts, so those three remove
+/// the trim in every engine, while block/inline-block/list-item keep the
+/// native path and cost the fallback only its margin containment.
 ///
 /// Put the size class on that same span. `.trim-text-*` carries
 /// font-size: 1em, so it renders at whatever it inherits, and a size class

@@ -318,6 +318,18 @@ All notable changes to this project are documented in this file.
   compiler you haven't declared gives the "requires a Sass compiler" error
   instead of a working `output.css`. **If `output.css` stops working after
   upgrading**, add `sass-embedded` or `sass` to your own devDependencies.
+- The documented effect of a custom `display` on a trimmed element was wrong.
+  Both `docs/utility-classes.md` and the doc comment in
+  `styles/utilities/_typography-utilities.scss` said a `display` of your own
+  breaks the fallback path while leaving native `text-box-trim` untouched.
+  That holds for `block`, `inline-block` and `list-item`, which cost the
+  fallback only its block formatting context. It does not hold for `flex`,
+  `grid` or `table`: the spec is explicit that `text-box-trim` neither
+  applies to nor propagates through those formatting contexts, so the trim is
+  absent in every engine, native included. **If you put a `display: flex`,
+  `grid` or `table` on an element carrying `.trim-text-*`**, that element is
+  not trimmed anywhere; move the display to a wrapper and keep the class on
+  the span.
 
 ### Removed
 
