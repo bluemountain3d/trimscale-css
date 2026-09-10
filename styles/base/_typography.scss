@@ -27,7 +27,7 @@
   body {
     font-family: var(--font-family-body, sans-serif);
     line-height: var(--line-height-dynamic);
-    font-size: var(--text-base, 1rem);
+    font-size: var(--text-base, var(--fluid-base));
   }
 
   // ============================================================================
