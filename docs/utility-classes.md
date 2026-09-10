@@ -71,7 +71,7 @@ Custom role names work too: any key you add beyond this list gets the same treat
 
 For the exact classes _your_ config produces, read `<output.dir>/utility-classes.md` rather than this table, `generate` writes it against your real config.
 
-**Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `font-setup` when authoring components) for role-specific sizing or anything beyond the baseline:
+**Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`1em`, the inherited size, / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `font-setup` when authoring components) for role-specific sizing or anything beyond the baseline:
 
 | Class                   | Role                   | In the config     |
 | ----------------------- | ---------------------- | ----------------- |
@@ -88,11 +88,39 @@ For the exact classes _your_ config produces, read `<output.dir>/utility-classes
 | `.trim-text-ui`         | UI elements context    | Optional          |
 | `.trim-text-mono`       | Monospace category     | Optional          |
 
-Apply `.trim-text-*` to a `<span>` nested inside the sized element, not the
-element itself. The fallback path (browsers without native `text-box-trim`)
-uses that element's own `::before`/`::after`, so applying the class directly
-risks it silently colliding with your own pseudo-elements on the same
-element. `%text-geometry` sets `display: flow-root`, so the span stops
+Apply `.trim-text-*` to a `<span>` nested inside the element you are styling,
+not to that element itself, and put the size class on the same span. Two
+separate things sit behind that rule.
+
+First, pseudo-elements. The fallback path (browsers without native
+`text-box-trim`) uses the element's own `::before`/`::after`. `@layer trim`
+sits before `layouts`, `components` and `utilities` in the layer order, so
+anything you write in those layers, or outside layers entirely, wins over the
+trim's declarations. That ordering is deliberate, your CSS is supposed to beat
+the design system's, and the trim's pseudo-elements are not an exception to
+it. Your declarations replace the trim's on every property you set, while the
+trim's remaining declarations (`display: table`, the negative margin) still
+apply to your content, so neither your pseudo-element nor the trim survives
+intact.
+
+That collision is invisible in a browser with native `text-box-trim`. There
+the trim uses no pseudo-elements at all, yours behave exactly as they would if
+the trim system were absent, and the page looks right. Check the trim in an
+engine without native support before shipping.
+
+`display` works the same way. The fallback spacers need the trim's own
+`display: flow-root` box, so a `display: block`, `flex` or `grid` of your own
+on the trimmed element breaks the trim on the fallback path while leaving the
+native path untouched.
+
+Second, size. `.trim-text-*` carries `font-size: 1em`, so it renders at
+whatever size it inherits. A size class on an ancestor does not reach it,
+which is why `.font-size-*` belongs on the same element as `.trim-text-*`
+rather than on the wrapper. The same holds when authoring components:
+`font-setup`'s `$font-size`, and any `font-size` you write by hand, land in
+your rule's own layer and override the baseline there.
+
+`%text-geometry` sets `display: flow-root`, so the span stops
 being inline, intentional, but worth knowing if you're expecting inline flow.
 
 `.trim-text-*` is emitted into `@layer trim`, not `@layer utilities`, so its
@@ -110,8 +138,8 @@ reaching for deliberately rather than by habit. If you want the mono face
 trimmed correctly, use `.trim-text-mono`.
 
 ```html
-<h1 class="font-size-heading-1">
-  <span class="trim-text-heading">Sized heading</span>
+<h1>
+  <span class="trim-text-heading font-size-heading-1">Sized heading</span>
 </h1>
 ```
 

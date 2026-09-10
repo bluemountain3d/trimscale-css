@@ -26,7 +26,7 @@ Layers are listed lowest to highest priority, a later layer always beats an earl
 
 The trim system is split across two layers because its two halves need opposite positions relative to `base`.
 
-**`trim-defaults`, below `base`.** The bare `font-size: var(--text-base)` / `line-height: var(--line-height-dynamic)` baseline exists so a trim placeholder is usable standalone rather than depending on inherited values. It is meant to lose to everything: `small { font-size: 0.875em }` in `base` keeps `<small class="trim-text-body">` small, and `.font-size-*` in `utilities` overrides it too.
+**`trim-defaults`, below `base`.** The bare `font-size: 1em` / `line-height: var(--line-height-dynamic)` baseline is meant to lose to everything: `small { font-size: 0.875em }` in `base` keeps `<small class="trim-text-body">` small, and `.font-size-*` in `utilities` overrides it too. `1em` computes to the parent's font-size, so a placeholder follows its context rather than pinning a size that would beat inheritance on a nested element.
 
 **`trim`, above `base`.** The four `--_*` metrics are measured from one specific font file and are only correct alongside the `font-family` they were measured from. If `base`'s `code, kbd, samp, pre { font-family: var(--font-family-code) }` outranked them, `<code class="trim-text-body">` would render in the code typeface while trimmed by the body typeface's metrics. Keeping this half above `base` prevents that silently happening.
 

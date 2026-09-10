@@ -147,9 +147,11 @@ Parameters:
 | `$letter-spacing` | value  | `null`      | Letter spacing                                                  |
 | `$text-transform` | string | `null`      | Text transform (`none`, `uppercase`, `lowercase`, `capitalize`) |
 
-Every parameter except `$font` defaults to `null` and is only emitted as a real CSS property (`font-size`, `line-height`, etc., set directly, not via custom properties) if you pass it explicitly. Omitted `$font-size`/`$line-height` fall through to the font role's placeholder, which carries a bare baseline of its own (`font-size: var(--text-base)`, `line-height: var(--line-height-dynamic)`, see [design-tokens.md](design-tokens.md)); the other four parameters have no such placeholder default and fall through further, to whatever's inherited (or the CSS initial value).
+Every parameter except `$font` defaults to `null` and is only emitted as a real CSS property (`font-size`, `line-height`, etc., set directly, not via custom properties) if you pass it explicitly. Omitted `$font-size`/`$line-height` fall through to the font role's placeholder, which carries a bare baseline of its own (`font-size: 1em`, so the rule renders at whatever size it inherits, and `line-height: var(--line-height-dynamic)`, see [design-tokens.md](design-tokens.md)); the other four parameters have no such placeholder default and fall through further, to whatever's inherited (or the CSS initial value).
 
 The mixin sets font metrics internally and applies leading-trim via `::before`/`::after` pseudo-elements. When the browser supports `text-box-trim`, native trimming is used instead.
+
+On the fallback path those are `::before` and `::after` on the selector you called the mixin in, so that rule cannot carry pseudo-elements of its own, and a `display` of your own on it breaks the trim the same way. The failure mode, and why it stays invisible in a browser with native support, is described under [Trim text](utility-classes.md#typography). The fix in component SCSS is the one from markup: put the trim on an inner element and keep your decoration on the outer one.
 
 **A note on `@extend` and layers.** `font-setup` reaches the font role through `@extend`, and `@extend` puts the extending selector wherever the placeholder was *defined*, not wherever the `@extend` is written. A rule that calls `font-setup` is therefore split across three layers:
 
@@ -163,7 +165,7 @@ The mixin sets font metrics internally and applies leading-trim via `::before`/`
 ```
 
 ```css
-@layer trim-defaults { .card__title { font-size: var(--text-base); line-height: var(--line-height-dynamic); } }
+@layer trim-defaults { .card__title { font-size: 1em; line-height: var(--line-height-dynamic); } }
 @layer trim          { .card__title { --_top-trim: 0.196em; font-family: var(--font-family-heading); ... } }
 @layer components    { .card__title { font-size: var(--heading-1); font-weight: 700; color: var(--text-strong); } }
 ```

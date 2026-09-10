@@ -135,20 +135,22 @@
 @layer trim-defaults {
   /// Bare typographic baseline, below @layer base on purpose.
   ///
-  /// font-size and line-height default to --text-base / --line-height-dynamic
-  /// so any placeholder is usable standalone rather than depending on
-  /// inheritance (e.g. body's own defaults) staying intact. Font-weight,
-  /// font-style, letter-spacing, and text-transform are left unset, the CSS
-  /// initial values already match what we'd set anyway. Override any of these
-  /// via font-setup or the plain utility classes in
-  /// utilities/typography-utilities.
+  /// font-size is 1em, which computes to the parent's font-size, so a
+  /// placeholder follows its context instead of pinning a size of its own. An
+  /// absolute size here beats inheritance on any nested element:
+  /// `<p class="font-size-text-lg"><span class="trim-text-body">` would render
+  /// the span at that absolute size rather than at text-lg. line-height
+  /// carries the system default. Font-weight, font-style, letter-spacing, and
+  /// text-transform are left unset, the CSS initial values already match what
+  /// we'd set anyway. Override any of these via font-setup or the plain
+  /// utility classes in utilities/typography-utilities.
   ///
   /// This half sits in trim-defaults, below base, so element defaults still
   /// win over it: `small { font-size: 0.875em }` in base keeps <small> small
   /// even when it carries a trim class.
   %text-baseline {
     text-rendering: geometricPrecision;
-    font-size: var(--text-base);
+    font-size: 1em;
     line-height: var(--line-height-dynamic);
   }
 }
@@ -187,7 +189,16 @@
     --_lsb-adjust: 0;
     --_rsb-adjust: 0;
 
-    /// Creates block formatting context to prevent margin collapse
+    /// Block formatting context, so the fallback spacers' margins stay inside
+    /// the element. Without it, ::after's negative margin-bottom adjoins the
+    /// element's bottom edge and collapses out into the element's own margin:
+    /// the box renders too tall by the bottom-trim amount while the gap to the
+    /// next sibling shrinks by the same amount. That nets out to nearly
+    /// nothing on plain text and becomes obvious once the box is painted.
+    ///
+    /// Outside both @supports branches on purpose. The native path has no use
+    /// for it, but a display that differs between engines would move layout
+    /// around per browser.
     display: flow-root;
 
     margin-left: var(--_lsb-adjust);

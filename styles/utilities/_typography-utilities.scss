@@ -7,7 +7,7 @@
 /// @description Utility classes for font family, size, weight, style, and alignment.
 /// `.trim-text-{role}` applies a font-family, leading-trim metrics (margins +
 /// pseudo-element formulas), and a bare font-size/line-height baseline
-/// (--text-base / --line-height-dynamic) for the given role. Font-weight,
+/// (1em, the inherited size, / --line-height-dynamic) for the given role. Font-weight,
 /// font-style, letter-spacing, and text-transform are left unset — pair it
 /// with the plain `.{property}-*` utility classes below (or with font-setup,
 /// for component authoring) for role-specific sizing or anything beyond the
@@ -16,15 +16,22 @@
 /// abstracts/variables/typography.
 ///
 /// The pseudo-element fallback path occupies ::before/::after on whatever
-/// element carries `.trim-text-*`. Put it on a <span> nested inside the
-/// sized element rather than on the element itself, so your own ::before/
-/// ::after on that element can't silently collide with it. Note
-/// %text-geometry sets display: flow-root, so the span stops being
-/// inline — intentional (the fallback margins need a box), but worth
-/// knowing if you're expecting inline flow.
+/// element carries `.trim-text-*`, and needs that element's own
+/// display: flow-root. Put the class on a <span> nested inside the element
+/// you are styling rather than on the element itself, so your own
+/// ::before/::after or display on that element can't silently collide with
+/// it. Both collisions are invisible in a browser with native
+/// text-box-trim, which uses neither, so verify in an engine without it.
+///
+/// Put the size class on that same span. `.trim-text-*` carries
+/// font-size: 1em, so it renders at whatever it inherits, and a size class
+/// on an ancestor never reaches it. Note %text-geometry sets
+/// display: flow-root, so the span stops being inline — intentional (the
+/// fallback margins need a box), but worth knowing if you're expecting
+/// inline flow.
 /// @example html
-///   <h1 class="font-size-heading-1">
-///     <span class="trim-text-heading">Sized heading</span>
+///   <h1>
+///     <span class="trim-text-heading font-size-heading-1">Sized heading</span>
 ///   </h1>
 ///   <span class="font-family-mono">inline code-style snippet</span>
 ///   <span class="font-size-text-sm">plain, no trim system involved</span>
