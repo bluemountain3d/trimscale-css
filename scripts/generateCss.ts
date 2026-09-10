@@ -1,4 +1,5 @@
 import * as fs from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import zlib from 'node:zlib'
 import type { FontFace } from './generateFonts.ts'
@@ -15,6 +16,31 @@ type SassCompiler = {
 const importOptional = (specifier: string): Promise<unknown> => import(specifier)
 
 /**
+ * Whether the consumer's own project can reach `specifier`, which is a
+ * different question from whether *this file* can. Under pnpm this file lives
+ * inside `node_modules/.pnpm/`, and that lookup chain passes pnpm's hoisted
+ * directory, so a compiler that is only a transitive dependency of something
+ * else (or a leftover in the virtual store after an uninstall) resolves from
+ * here while the consumer's bundler, resolving from the project root, can't
+ * reach it. The project root is the address that decides, since the whole
+ * point is to use the compiler the bundler already uses.
+ *
+ * The path passed to `createRequire` doesn't need to exist; it only anchors
+ * the lookup, and `generate` already reads `trimscale.config.ts` from `cwd`,
+ * so `cwd` is the project root by definition.
+ */
+const projectRequire = createRequire(path.join(process.cwd(), 'package.json'))
+
+const isInstalledInProject = (specifier: string): boolean => {
+  try {
+    projectRequire.resolve(specifier)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
  * `output.css` needs Dart Sass at generate time, distinct from the SCSS
  * build's requirement that the *consumer's own bundler* has one configured.
  * Neither `sass` nor `sass-embedded` is a dependency of this package, so
@@ -23,20 +49,28 @@ const importOptional = (specifier: string): Promise<unknown> => import(specifier
  * consumer-provided Sass compiler. `sass-embedded` is tried first since
  * it's the faster, actively-recommended option; both expose the same
  * `compileString` shape.
+ *
+ * The reachability check gates the import rather than replacing it: the
+ * import itself stays a bare specifier so the package's own `import`
+ * export condition picks the file, the same one the bundler loads.
  */
 const loadSassCompiler = async (): Promise<SassCompiler> => {
-  try {
-    return (await importOptional('sass-embedded')) as SassCompiler
-  } catch {
+  let failure: unknown
+
+  for (const specifier of ['sass-embedded', 'sass']) {
+    if (!isInstalledInProject(specifier)) continue
+
     try {
-      return (await importOptional('sass')) as SassCompiler
+      return (await importOptional(specifier)) as SassCompiler
     } catch (err) {
-      throw new Error(
-        '`output.css` requires a Sass compiler (`sass-embedded` or `sass`) installed in this project, the same one your bundler already needs for the SCSS build. Install one and re-run `generate`.',
-        { cause: err },
-      )
+      failure = err
     }
   }
+
+  throw new Error(
+    '`output.css` requires a Sass compiler (`sass-embedded` or `sass`) installed in this project, the same one your bundler already needs for the SCSS build. Install one and re-run `generate`.',
+    { cause: failure },
+  )
 }
 
 /**
