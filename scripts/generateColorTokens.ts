@@ -109,6 +109,51 @@ export const warnAboutClampedAliases = (cfg: TrimscaleConfig): void => {
   }
 }
 
+/**
+ * The colors the fallback tier can hold: the legacy sRGB syntaxes every
+ * engine has parsed for years, plus the bare identifiers (named colors,
+ * `transparent`, `currentColor`). `hwb()` counts, it's sRGB and landed just
+ * before `oklch()` everywhere, so excluding it would buy no real coverage.
+ */
+const LEGACY_SRGB_COLOR = /^(#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|(rgba?|hsla?|hwb)\(.*\)|[a-z]+)$/i
+
+/**
+ * Warns when a `hex` value is something a browser without `oklch()` support
+ * can't parse. Serving those browsers is the entire reason that tier exists,
+ * and a base token's value reaches it exactly as written (only a
+ * `semanticColorAliases` entry with a multiplier derives its own, gamut-mapped
+ * in `get-color-token`). A `color()`, `lab()` or `oklch()` there compiles
+ * cleanly and fails only where nobody looks: every browser new enough to run
+ * a dev server matches one of the `oklch()` tiers below and never reads this
+ * one.
+ *
+ * Here rather than in the SCSS for the same reason as
+ * {@link warnAboutClampedAliases}: by the time Sass sees the value, the field
+ * it came from is gone.
+ */
+export const warnAboutFallbackColors = (cfg: TrimscaleConfig): void => {
+  const maps: [string, ColorTokensMap][] = [
+    ['baseColorTokens', cfg.baseColorTokens],
+    ...Object.entries(cfg.customColorTokens ?? {}).map(
+      ([name, map]) => [`customColorTokens.${name}`, map] as [string, ColorTokensMap],
+    ),
+  ]
+
+  const offenders = maps.flatMap(([mapPath, map]) =>
+    Object.entries(map.tokens).flatMap(([tokenName, token]) =>
+      MODES.filter((mode) => !LEGACY_SRGB_COLOR.test(token[mode].hex.trim())).map(
+        (mode) => `${mapPath}.tokens.${tokenName}.${mode}.hex ("${token[mode].hex}")`,
+      ),
+    ),
+  )
+
+  if (offenders.length === 0) return
+
+  console.warn(
+    `⚠ The static fallback tier only ever reaches browsers without oklch() support, and these values are ones those browsers can't parse: ${offenders.join(', ')}. Use a hex, rgb(), hsl(), or a named color, gamut-mapped into sRGB if the oklch() value sits outside it.`,
+  )
+}
+
 /** Builds a `(prefix:, tokens:)` map VALUE from a single `ColorTokensMap`. */
 export const colorTokensMapToScssMapValue = (data: ColorTokensMap): string => {
   const tokenEntries = Object.entries(data.tokens).map(([tokenName, token]) =>

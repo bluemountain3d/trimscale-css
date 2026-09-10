@@ -219,7 +219,7 @@ The base color palette, generates `--{prefix}-{name}` custom properties.
 | ------------------------- | ---------------------------- | :------: | -------------------------------------------------------------------------------------- |
 | `prefix`                  | `string`                     |   Yes    | Custom-property prefix, e.g. `'color'` → `--color-*`.                                  |
 | `tokens`                  | `Record<string, ColorToken>` |   Yes    | Token name → `{ light: ColorDefinition, dark: ColorDefinition, opacity?: number }`.    |
-| `tokens[x].light`/`.dark` | `ColorDefinition`            |   Yes    | `{ oklch: string, hex: string }`, `oklch` used directly, `hex` is the static fallback. |
+| `tokens[x].light`/`.dark` | `ColorDefinition`            |   Yes    | `{ oklch: string, hex: string }`, `oklch` used directly, `hex` is the static fallback for browsers without `oklch()`, so it takes any legacy sRGB color: a hex, `rgb()`, `hsl()`, or a named keyword. |
 | `tokens[x].opacity`       | `number`                     |    No    | Shared opacity (0–1) applied to both modes.                                            |
 
 → Full guide: [design-tokens.md#color-tokens](design-tokens.md#color-tokens)

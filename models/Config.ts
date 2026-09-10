@@ -293,7 +293,9 @@ export type DefaultScheme = 'light' | 'dark'
 
 /** A single light-or-dark color value, given as both `oklch` (used directly) and `hex` (static fallback). */
 export type ColorDefinition = {
+  /** Any valid `oklch()`: lightness as a percentage or a 0-1 number, hue as a number or an angle. */
   oklch: string
+  /** The static fallback tier, for browsers without `oklch()`, so any legacy sRGB color works here: a hex, `rgb()`, `hsl()`, or a named keyword. */
   hex: string
 }
 

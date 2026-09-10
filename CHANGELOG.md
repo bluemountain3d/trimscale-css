@@ -65,6 +65,15 @@ All notable changes to this project are documented in this file.
   `output.utilities.typography.trim`/`family` is left on with no
   `appFonts` configured, that combination is coherent (SCSS still compiles)
   but produces zero classes, which reads as a bug otherwise.
+- `generate` warns when a color token's `hex` value is one a browser without
+  `oklch()` support can't parse (`color()`, `lab()`, `lch()`, `oklch()`,
+  `color-mix()`). That tier exists for exactly those browsers, and a base
+  token's value reaches it as written, so the mistake is invisible in any
+  browser new enough to run a dev server: everything else matches one of the
+  `oklch()` tiers below it and never reads the fallback. A hex, `rgb()`,
+  `hsl()`, `hwb()` and the named keywords all pass. Only base tokens are
+  checked; a `semanticColorAliases` entry with a multiplier derives its own
+  fallback, gamut-mapped, and never uses a configured `hex`.
 - `output.css` config option: `generate` compiles the same static SCSS the
   bridge file configures (via a Sass compiler installed in the project at
   generate time, `sass-embedded` or `sass`, there's no separate hand-written

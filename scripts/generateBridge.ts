@@ -3,7 +3,7 @@ import path from 'node:path'
 import type { TrimscaleConfig } from '../models/Config.ts'
 import { buildBridgeSource } from './buildBridgeSource.ts'
 import { rewriteFontFacesForCss, writeCssOutput } from './generateCss.ts'
-import { warnAboutClampedAliases } from './generateColorTokens.ts'
+import { warnAboutClampedAliases, warnAboutFallbackColors } from './generateColorTokens.ts'
 import { computeFontData } from './generateFonts.ts'
 import { buildResetRequirementsMarkdown } from './generateResetRequirementsDoc.ts'
 import { type ResolvedUtilityFlags, resolveUtilityFlags } from './generateUtilities.ts'
@@ -163,6 +163,7 @@ const utilityFlags = resolveUtilityFlags(cfg.output?.utilities)
 
 warnIfFontlessTypographyFlags(cfg, utilityFlags)
 warnAboutClampedAliases(cfg)
+warnAboutFallbackColors(cfg)
 
 const fontData = await computeFontData(cfg)
 
