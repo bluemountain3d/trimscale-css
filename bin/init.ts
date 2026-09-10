@@ -7,6 +7,25 @@ const projectRoot = process.cwd()
 const command = process.argv[2] ?? 'init'
 
 /**
+ * Whether `package.json` declares CommonJS outright, which decides the config
+ * file's extension. Three states behave differently: `"type": "module"` and a
+ * missing `type` both load a `.ts` config as an ES module (the second by
+ * Node's module detection, which costs a MODULE_TYPELESS_PACKAGE_JSON
+ * warning), while an explicit `"type": "commonjs"` settles the format and
+ * skips detection, so `export default` in the config is a syntax error there.
+ * `npm init -y` writes that third state, so it isn't hypothetical.
+ */
+const declaresCommonJs = (pkgPath: string): boolean => {
+  try {
+    return JSON.parse(fs.readFileSync(pkgPath, 'utf8')).type === 'commonjs'
+  } catch {
+    // No package.json, or one that won't parse. Neither declares CommonJS,
+    // and the missing-package.json case is warned about further down anyway.
+    return false
+  }
+}
+
+/**
  * Copies the package's consumer-facing `templates/trimscale.config.ts` into
  * the consumer's project root (unless one already exists there) and wires up
  * a `trimscale:generate` npm script pointing at the `generate` subcommand
@@ -15,18 +34,25 @@ const command = process.argv[2] ?? 'init'
  * of its own so it works unmodified in a fresh project.
  */
 const runInit = () => {
-  const configFileName = 'trimscale.config.ts'
-  const configDest = path.join(projectRoot, configFileName)
-
-  if (fs.existsSync(configDest)) {
-    console.log(`⚠️  ${configFileName} already exists, leaving it untouched.`)
-  } else {
-    const configTemplate = path.join(import.meta.dirname, '..', 'templates', configFileName)
-    fs.copyFileSync(configTemplate, configDest)
-    console.log(`✅ Created ${configFileName}.`)
-  }
-
   const pkgPath = path.join(projectRoot, 'package.json')
+  const configFileName = `trimscale.config.${declaresCommonJs(pkgPath) ? 'mts' : 'ts'}`
+  const existing = ['trimscale.config.ts', 'trimscale.config.mts'].find((name) =>
+    fs.existsSync(path.join(projectRoot, name)),
+  )
+
+  if (existing) {
+    console.log(`⚠️  ${existing} already exists, leaving it untouched.`)
+  } else {
+    const configTemplate = path.join(import.meta.dirname, '..', 'templates', 'trimscale.config.ts')
+    fs.copyFileSync(configTemplate, path.join(projectRoot, configFileName))
+    console.log(`✅ Created ${configFileName}.`)
+
+    if (configFileName.endsWith('.mts')) {
+      console.log(
+        '   (`.mts` because this package.json declares "type": "commonjs". Node would read a `.ts` config as CommonJS, where the config\'s `export default` is a syntax error. `.mts` is an ES module whatever the project\'s type is, and nothing else about your project changes.)',
+      )
+    }
+  }
 
   // The config is the actual deliverable and is written either way: `generate`
   // reads it from the working directory and never touches package.json, so a
@@ -55,7 +81,7 @@ const runInit = () => {
   }
 
   console.log(
-    '📁 `generate` writes to ./trimscale-generated/ by default (set output.dir in trimscale.config.ts to change it). Commit it like any other source file, or gitignore it (along with .trimscale-cache/) and run `generate` in CI, your choice.',
+    `📁 \`generate\` writes to ./trimscale-generated/ by default (set output.dir in ${configFileName} to change it). Commit it like any other source file, or gitignore it (along with .trimscale-cache/) and run \`generate\` in CI, your choice.`,
   )
   const installedDocs = path.join(projectRoot, 'node_modules', 'trimscale-css', 'docs', 'getting-started.md')
 

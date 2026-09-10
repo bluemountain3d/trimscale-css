@@ -46,6 +46,8 @@ This copies `trimscale.config.ts` into your project root (unless one already exi
 }
 ```
 
+In a project whose `package.json` declares `"type": "commonjs"`, which is what `npm init -y` writes, `init` creates `trimscale.config.mts` instead. Node reads a `.ts` config as CommonJS there, where the config's own `export default` is a syntax error, and an explicit `type` skips the module detection that covers a `package.json` with no `type` at all. `.mts` is an ES module whatever the project declares. Nothing else about your project changes, and `generate` accepts either name, so renaming an existing config by hand works too.
+
 Run it (`npm run trimscale:generate`) whenever you change `trimscale.config.ts`. Generated output lives in your own project (see [Generate](#generate) below), so there's no need to wire it into a `prebuild`/`predev` step.
 
 Open `trimscale.config.ts` and edit the fields for your project: fonts, font roles, fluid type scale, breakpoints, spacing, and colors. Each field is commented inline; see the guides linked from the [Customization](../README.md#customization) table for the full reference on any one of them.

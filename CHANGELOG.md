@@ -65,6 +65,16 @@ All notable changes to this project are documented in this file.
   `output.utilities.typography.trim`/`family` is left on with no
   `appFonts` configured, that combination is coherent (SCSS still compiles)
   but produces zero classes, which reads as a bug otherwise.
+- `trimscale.config.mts` is accepted alongside `trimscale.config.ts`, and
+  `init` writes the `.mts` name in a project whose `package.json` declares
+  `"type": "commonjs"` (what `npm init -y` writes). Node reads a `.ts` config
+  as CommonJS there, where the config's `export default` is a syntax error,
+  and an explicit `type` skips the module detection that covers a
+  `package.json` with no `type` at all, so the `.ts` name is a dead end in
+  that one state. `.mts` is an ES module whatever the project declares, and
+  nothing else about the project changes. A `.ts` config already sitting in
+  such a project now fails with that explanation instead of Node's
+  "Unexpected token 'export'".
 - `generate` warns when a color token's `hex` value is one a browser without
   `oklch()` support can't parse (`color()`, `lab()`, `lch()`, `oklch()`,
   `color-mix()`). That tier exists for exactly those browsers, and a base
@@ -159,7 +169,10 @@ All notable changes to this project are documented in this file.
   describes a whole family, not a single file, `path`/`url` already accept
   multiple files to cover a family's full weight/style range, and every
   other property on `AppFonts`/`FontRoles` already talks about "family"
-  rather than "font".
+  rather than "font". `generate` names the rename if a config still uses the
+  old key, the same as it does for the three top-level moves below; without
+  that it surfaced as `Cannot convert undefined or null to object`, which
+  names neither the field nor the release.
 - **Breaking:** `utilities.spacing.tshirt` renamed to
   `output.utilities.spacing.tShirt`, matching `tShirtScale`'s existing
   casing elsewhere in the config.

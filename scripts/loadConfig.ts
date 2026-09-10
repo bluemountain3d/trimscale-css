@@ -27,6 +27,16 @@ const assertNoLegacyFields = (cfg: TrimscaleConfig): void => {
       )
     }
   }
+
+  // Renamed in the same release as the three above, and the only one of the
+  // four that isn't top-level. Left unchecked it surfaces as
+  // `normalizeConfig` reading `Object.keys(undefined)`, which names neither
+  // the field nor the release.
+  if (cfg.appFonts && 'fonts' in cfg.appFonts) {
+    throw new Error(
+      '`appFonts.fonts` has been renamed to `appFonts.families` (as of 1.0.0-beta.5). Update your config and re-run `npx trimscale-css generate`.',
+    )
+  }
 }
 
 /** `output.scss`/`output.css` both `false` is a config mistake, not a valid "generate nothing" state — an explicit no-op would silently produce an empty `generate` run with no indication anything is wrong. */
@@ -53,6 +63,26 @@ const normalizeConfig = (cfg: TrimscaleConfig): TrimscaleConfig => {
 }
 
 /**
+ * Config file names, in the order they're looked for. `.mts` is an ES module
+ * whatever the nearest `package.json` says, which is the way out for a
+ * project that declares `"type": "commonjs"`: there Node reads a `.ts` config
+ * as CommonJS, and the config's `export default` is a syntax error, with no
+ * module detection to fall back on (detection only runs when `type` is
+ * absent). `init` writes whichever fits the project; both are accepted here,
+ * so renaming an existing config by hand works too.
+ */
+const CONFIG_FILE_NAMES = ['trimscale.config.ts', 'trimscale.config.mts'] as const
+
+/** Whether the project's own `package.json` declares CommonJS outright. Mirrors the check in `bin/init.ts`, which is what picks the extension in the first place. */
+const projectDeclaresCommonJs = (): boolean => {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8')).type === 'commonjs'
+  } catch {
+    return false
+  }
+}
+
+/**
  * Loads `trimscale.config.ts` from the current working directory (the
  * consumer's own project root when this package is published and run via
  * `npx trimscale-css generate`), not from this package's own install
@@ -64,11 +94,13 @@ const normalizeConfig = (cfg: TrimscaleConfig): TrimscaleConfig => {
  * @returns The consumer's (or, in dev, this repo's own) config.
  */
 export const loadConfig = async (): Promise<TrimscaleConfig> => {
-  const configPath = path.join(process.cwd(), 'trimscale.config.ts')
+  const configPath = CONFIG_FILE_NAMES.map((name) => path.join(process.cwd(), name)).find((candidate) =>
+    fs.existsSync(candidate),
+  )
 
-  if (!fs.existsSync(configPath)) {
+  if (configPath === undefined) {
     throw new Error(
-      `Could not find trimscale.config.ts in ${process.cwd()}. Run \`npx trimscale-css init\` to create one, or run this from the directory that has it.`,
+      `Could not find ${CONFIG_FILE_NAMES.join(' or ')} in ${process.cwd()}. Run \`npx trimscale-css init\` to create one, or run this from the directory that has it.`,
     )
   }
 
@@ -83,6 +115,18 @@ export const loadConfig = async (): Promise<TrimscaleConfig> => {
     if ((err as NodeJS.ErrnoException).code === 'ERR_UNKNOWN_FILE_EXTENSION') {
       throw new Error(
         `Loading trimscale.config.ts needs Node's built-in TypeScript type stripping, which is only on by default from Node 22.18.0 (23.6.0 on the odd-numbered line). This is Node ${process.version}. Upgrade Node and re-run \`generate\`.`,
+        { cause: err },
+      )
+    }
+
+    // A `.ts` config in a project that declares `"type": "commonjs"` is read
+    // as CommonJS, where the config's own `export default` is a syntax error.
+    // Node only re-parses as an ES module when `type` is absent, so this one
+    // is a dead end for the `.ts` name, and Node's message ("Unexpected token
+    // 'export'") points at the config rather than at the setting.
+    if (err instanceof SyntaxError && configPath.endsWith('.ts') && projectDeclaresCommonJs()) {
+      throw new Error(
+        `${path.basename(configPath)} can't be loaded in a project whose package.json declares \`"type": "commonjs"\`: Node reads it as CommonJS, and the config's \`export default\` is a syntax error there. Rename it to trimscale.config.mts, which is an ES module whatever the project's type is, or set \`"type": "module"\` if the rest of your project is ESM.`,
         { cause: err },
       )
     }
