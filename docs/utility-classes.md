@@ -88,9 +88,16 @@ For the exact classes _your_ config produces, read `<output.dir>/utility-classes
 | `.trim-text-ui`         | UI elements context    | Optional          |
 | `.trim-text-mono`       | Monospace category     | Optional          |
 
-Apply `.trim-text-*` to a `<span>` nested inside the element you are styling,
-not to that element itself, and put the size class on the same span. Two
-separate things sit behind that rule.
+`.trim-text-*` can sit directly on the element you are styling. Two things
+take that option away, and both are about the element the class lands on:
+its own `::before`/`::after`, and its own `display`. Where either is in play,
+move the class to a `<span>` nested inside the element instead.
+
+Neither collision announces itself, and both are easy to introduce months
+later without thinking about the trim, so the nested span is the safer habit
+even where the direct form works today. Treat it as a habit rather than a
+rule: knowing which of the two you are avoiding is what tells you when the
+direct form is fine.
 
 First, pseudo-elements. The fallback path (browsers without native
 `text-box-trim`) uses the element's own `::before`/`::after`. `@layer trim`
@@ -122,12 +129,14 @@ by the same amount. The trim's own `display: flow-root` is what prevents
 that, which is one more reason to keep your `display` on the wrapper and the
 class on the span.
 
-Second, size. `.trim-text-*` carries `font-size: 1em`, so it renders at
-whatever size it inherits. A size class on an ancestor does not reach it,
-which is why `.font-size-*` belongs on the same element as `.trim-text-*`
-rather than on the wrapper. The same holds when authoring components:
-`font-setup`'s `$font-size`, and any `font-size` you write by hand, land in
-your rule's own layer and override the baseline there.
+Size needs no rule of its own. `.trim-text-*` carries `font-size: 1em`, so it
+renders at whatever size it inherits, which means `.font-size-*` gives the
+same result on the trimmed element itself or on the wrapper above it. Putting
+it on the same element is the clearer of the two, since the size is then
+written where the text is, but a wrapper that already carries a size class
+needs no second one on the span. The same inheritance holds when authoring
+components: `font-setup`'s `$font-size`, and any `font-size` you write by
+hand, land in your rule's own layer and override the baseline there.
 
 `%text-geometry` sets `display: flow-root`, so the span stops
 being inline, intentional, but worth knowing if you're expecting inline flow.
@@ -176,10 +185,16 @@ trimmed correctly, use `.trim-text-mono`.
 `.num-{lining|oldstyle|ordinal}-{tabular|proportional}` (six classes total, e.g. `.num-oldstyle-proportional`). Sets `font-variant-numeric`. `lining` figures sit on the baseline at a uniform height, the default in most fonts and generally the better fit for UI/tabular data; `oldstyle` figures vary in height (some descend below the baseline), often preferred in running prose; `ordinal` enables ordinal-indicator glyph variants (1st, 2nd). `tabular`/`proportional` picks whether digits share one fixed width (so they align in columns) or keep their natural proportional widths.
 
 ```html
-<h1 class="font-size-heading-1 font-weight-bold">
-  <span class="trim-text-heading">Page heading</span>
+<!-- Nothing on this paragraph collides with the trim, so no span is needed. -->
+<p class="trim-text-body font-size-text-base">Body copy.</p>
+
+<!-- The heading carries a ::before, so the trim moves to a span. -->
+<h1 class="icon-before font-weight-bold">
+  <span class="trim-text-heading font-size-heading-1">Page heading</span>
 </h1>
-<p class="font-size-text-base">
+
+<!-- The wrapper's size reaches the span, so it needs no size class of its own. -->
+<p class="font-size-text-base card__body">
   <span class="trim-text-body">Body copy.</span>
 </p>
 ```

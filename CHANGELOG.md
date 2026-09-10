@@ -290,9 +290,12 @@ All notable changes to this project are documented in this file.
   wins, so the only symptom is text quietly rendering at the wrong size. The
   baseline is `font-size: 1em` now, which computes to the parent's size.
   **If you followed the old wrapper example**, which put `.font-size-*` on
-  the outer element, your text changes size: move the size class onto the
-  same element as `.trim-text-*`. Nothing changes where the two already sit
-  together, `.font-size-*` in `utilities` wins there either way.
+  the outer element, that text changes size: it rendered at `--text-base`
+  before and renders at the wrapper's size now, which is what the markup
+  reads as meaning. Check the wrapper's size is the one you want, and set an
+  explicit `.font-size-*` on the trimmed element where it isn't. Nothing
+  changes where the two already sit together, `.font-size-*` in `utilities`
+  wins there either way.
 - No `<length>` custom property was registered with `@property`. Each one
   declared a font-relative `initial-value` (`1rem` for the type scale and
   `--fluid-base`, `0.25rem` for the spacing units and every `--space-*`,
