@@ -322,17 +322,6 @@ All notable changes to this project are documented in this file.
   stopped scaling with the viewport, with no signal beyond looking static.
   The fallback is `var(--fluid-base)` now, the system's own base size, which
   is generated whatever the typography config says.
-- `output.css` accepted a Sass compiler your own project can't reach. The
-  lookup ran from the installed package's own file, and under pnpm that file
-  sits inside `node_modules/.pnpm/`, whose lookup chain passes pnpm's hoisted
-  directory. A `sass`/`sass-embedded` that is only a transitive dependency of
-  something else, or a leftover in the virtual store after an uninstall,
-  counted as installed, while the bundler, resolving from the project root,
-  couldn't load it: `generate` wrote CSS and the SCSS build failed. The lookup
-  runs from the project root now, the same address the bundler uses, so a
-  compiler you haven't declared gives the "requires a Sass compiler" error
-  instead of a working `output.css`. **If `output.css` stops working after
-  upgrading**, add `sass-embedded` or `sass` to your own devDependencies.
 - The documented effect of a custom `display` on a trimmed element was wrong.
   Both `docs/utility-classes.md` and the doc comment in
   `styles/utilities/_typography-utilities.scss` said a `display` of your own
