@@ -296,11 +296,17 @@ All notable changes to this project are documented in this file.
   type checking, no failing safe to the initial value, and no interpolation,
   because only registered custom properties can be transitioned. A
   `transition` on a length token therefore changes from a discrete jump to a
-  smooth one. `--avg-char-width-*` goes the other way and is deliberately not
-  registered at all: its value is an em ratio that has to resolve against the
-  consuming element, and a registered `<length>` computes at its declaration
-  site, which would freeze it against the root font-size and throw off
-  character-count line lengths.
+  smooth one. Two sets stay unregistered on purpose. `--avg-char-width-*`
+  carries an em ratio that has to resolve against the consuming element, and
+  a registered `<length>` computes at its declaration site, which would
+  freeze it against the root font-size and throw off character-count line
+  lengths. The four trim metrics (`--_top-trim`, `--_bottom-trim`,
+  `--_lsb-adjust`, `--_rsb-adjust`) are the only ones set per element rather
+  than once on `:root`, so registering them makes every trimmed element
+  recompute all four on every resize frame, which is visible as lag while
+  dragging a window in an engine on the fallback path. They are private,
+  always declared explicitly, and never transitioned, so the registration
+  bought nothing to weigh against that.
 - `body`'s `font-size: var(--text-base, 1rem)` fell back to a static `1rem`
   when `semanticFontSizes.textBase` was left out of the config, which is
   allowed, every `semanticFontSizes` entry is optional. Body text then

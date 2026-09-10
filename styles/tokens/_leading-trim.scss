@@ -108,29 +108,25 @@
   --_rsb-adjust: #{_getFontMetric($font, "rsb-adjust")}em;
 }
  
-@property --_top-trim {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 0px;
-}
-
-@property --_bottom-trim {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 0px;
-}
-
-@property --_lsb-adjust {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 0px;
-}
-
-@property --_rsb-adjust {
-  syntax: '<length>';
-  inherits: true;
-  initial-value: 0px;
-}
+/// The four --_* metrics above are deliberately not registered with
+/// @property, unlike every other `<length>` token in the package.
+///
+/// Registration buys nothing here. %text-geometry declares all four
+/// explicitly, so an initial-value is never reached. They are private, so
+/// nothing transitions them. Their values come from generated font metrics
+/// rather than consumer input, so there is nothing to type-check. And they
+/// resolve identically either way: unregistered, the em is substituted into
+/// the ::before/::after calc() and the margin-left/right below, and resolves
+/// against the same font-size a registered property would compute against.
+///
+/// The cost is real. These are the only registrations set per element rather
+/// than once on :root, and a registered `<length>` computes at its
+/// declaration site, so every trimmed element recomputes all four whenever
+/// its font-size changes, which a fluid scale does on every resize frame.
+/// Measured by dragging a window: visible lag in an engine on the fallback
+/// path, where the values also feed a calc() on two pseudo-elements per
+/// element. Removing these four removes the lag; removing every other
+/// registration in the package changes nothing measurable.
  
 @layer trim-defaults {
   /// Bare typographic baseline, below @layer base on purpose.
