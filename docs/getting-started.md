@@ -70,6 +70,15 @@ Each run also removes files from `<output.dir>` that it no longer produces, so t
 
 Re-run this any time you change `trimscale.config.ts`, and after every trimscale-css version bump, even if your config didn't change, in case a future version changes which config fields exist. The output lives in your own project, so it survives a fresh install. Commit `<output.dir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
 
+Going the gitignore route, two lines cover it:
+
+```gitignore
+trimscale-generated/
+.trimscale-cache/
+```
+
+A git pattern with no leading slash and no slash inside it matches at any depth, so the first line covers the default `./trimscale-generated` and a nested `src/styles/trimscale-generated` alike. It follows the folder name, not the tool, so a custom `output.dir` needs its own name on that line instead.
+
 If your `package.json` has no `"type": "module"`, Node prints a `MODULE_TYPELESS_PACKAGE_JSON` warning on every run, saying the config's module type isn't specified and that it's reparsing the file as an ES module. `generate` works correctly through it and the files it lists are written as normal. The config is ESM whichever way your project is set up, and the reparse costs milliseconds once per run. Add `"type": "module"` to silence it if your project is ESM anyway; if it isn't, ignore the warning rather than flipping a field that governs how your own source is interpreted.
 
 ## Standalone CSS Output
