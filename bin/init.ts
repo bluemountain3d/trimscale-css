@@ -57,7 +57,19 @@ const runInit = () => {
   console.log(
     '📁 `generate` writes to ./trimscale-generated/ by default (set output.dir in trimscale.config.ts to change it). Commit it like any other source file, or gitignore it (along with .trimscale-cache/) and run `generate` in CI, your choice.',
   )
-  console.log('📖 Docs: node_modules/trimscale-css/docs/getting-started.md')
+  const installedDocs = path.join(projectRoot, 'node_modules', 'trimscale-css', 'docs', 'getting-started.md')
+
+  // The short path is the useful one when the package is a dependency, which
+  // is the documented flow. Run straight from npx in a folder with no
+  // package.json, which `init` deliberately supports, there is no
+  // node_modules to point at, so fall back to where this file actually sits.
+  console.log(
+    `📖 Docs: ${
+      fs.existsSync(installedDocs)
+        ? path.relative(projectRoot, installedDocs)
+        : path.join(import.meta.dirname, '..', 'docs', 'getting-started.md')
+    }`,
+  )
 }
 
 /**
