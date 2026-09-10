@@ -272,6 +272,41 @@ All notable changes to this project are documented in this file.
   and chroma are clamped to what the color space holds, and `generate` warns
   which `semanticColorAliases` field overshot and whether it landed on white,
   black, or gray. Derived color channels are rounded to three decimals.
+- `.trim-text-*` and the `%*-text` placeholders pinned an absolute
+  `font-size: var(--text-base)` instead of following the size they inherit. A
+  declared value beats inheritance, so on the `<span>` wrapper the docs
+  recommend it overrode the size set on the parent:
+  `<p class="font-size-text-lg"><span class="trim-text-body">` rendered the
+  span at `--text-base`. The trim itself stays correct at whichever size
+  wins, so the only symptom is text quietly rendering at the wrong size. The
+  baseline is `font-size: 1em` now, which computes to the parent's size.
+  **If you followed the old wrapper example**, which put `.font-size-*` on
+  the outer element, your text changes size: move the size class onto the
+  same element as `.trim-text-*`. Nothing changes where the two already sit
+  together, `.font-size-*` in `utilities` wins there either way.
+- No `<length>` custom property was registered with `@property`. Each one
+  declared a font-relative `initial-value` (`1rem` for the type scale and
+  `--fluid-base`, `0.25rem` for the spacing units and every `--space-*`,
+  `8rem` for `--header-height`, `0em` for the trim metrics), and `@property`
+  requires an initial-value that is computationally independent, so the
+  browser rejected the descriptor and discarded the whole rule. 107 of the
+  108 `<length>` registrations were being dropped. Nothing looked broken,
+  since every token is also declared on `:root` and an initial-value only
+  applies to a token that isn't, but the registrations bought nothing: no
+  type checking, no failing safe to the initial value, and no interpolation,
+  because only registered custom properties can be transitioned. A
+  `transition` on a length token therefore changes from a discrete jump to a
+  smooth one. `--avg-char-width-*` goes the other way and is deliberately not
+  registered at all: its value is an em ratio that has to resolve against the
+  consuming element, and a registered `<length>` computes at its declaration
+  site, which would freeze it against the root font-size and throw off
+  character-count line lengths.
+- `body`'s `font-size: var(--text-base, 1rem)` fell back to a static `1rem`
+  when `semanticFontSizes.textBase` was left out of the config, which is
+  allowed, every `semanticFontSizes` entry is optional. Body text then
+  stopped scaling with the viewport, with no signal beyond looking static.
+  The fallback is `var(--fluid-base)` now, the system's own base size, which
+  is generated whatever the typography config says.
 
 ### Removed
 
