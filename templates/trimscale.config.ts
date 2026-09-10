@@ -43,7 +43,7 @@ const config: TrimscaleConfig = {
   appFonts: {
     nextFontDefault: false,         // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
-    fallbackDefault: 'sans-serif',  // used when a font entry below has no `fallback` of its own
+    fallbackDefault: 'sans-serif',  // used when a families entry below has no `fallback` of its own
     families: {
       // Placeholder so `generate` produces working output before you've set
       // up a real font. Replace it, see docs/adding-a-font.md.
@@ -57,24 +57,32 @@ const config: TrimscaleConfig = {
       //   source: 'local',
       //   path: ['./public/fonts/Roboto-Regular.woff2', './public/fonts/Roboto-Bold.woff2'],
       //   fallback: 'sans-serif',
+      //   fallbackFamily: 'sans-serif', 
       // },
       // CDN example (metrics auto-extracted, no @font-face written by default):
       // 'Open Sans': {
       //   source: 'cdn',
       //   url: ['https://fonts.gstatic.com/s/opensans/v40/....woff2'],
       //   fallback: 'sans-serif',
+      //   fallbackFamily: 'sans-serif',
       // },
       // Manual example, for CDNs that don't expose a downloadable file — get
       // the metrics from precisionspec.dev:
       // 'Proxima Nova': {
       //   source: 'manual',
       //   fallback: 'sans-serif',
+      //   fallbackFamily: 'sans-serif',
       //   metrics: {
-      //     avgCharWidth: 0.545,
-      //     topTrim: 0.107,
-      //     bottomTrim: 0.02,
-      //     lsbAdjust: -0.012,
-      //     rsbAdjust: -0.012,
+      //     // Required for leading-trim fallback compatibility 
+      //     "avgCharWidth": 0.452,
+      //     "topTrim": 0.123, 
+      //     "bottomTrim": 0.21,
+      //     "lsbAdjust": -0.061,
+      //     "rsbAdjust": -0.06,
+      //     // Optional for fallbackFamily
+      //     "ascender": 0.79,
+      //     "descender": 0.21,
+      //     "lineGap": 0,
       //   },
       // },
     },
