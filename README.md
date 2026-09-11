@@ -164,4 +164,4 @@ Adding a component of your own? See [examples.md](https://github.com/bluemountai
 
 ## Changelog
 
-See [CHANGELOG.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/CHANGELOG.md) for release history.
+See [changelog.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/changelog.md) for what changed in each release and what it means when upgrading. It ships with the package, so an installed copy is at `node_modules/trimscale-css/docs/changelog.md`.

@@ -349,6 +349,14 @@ All notable changes to this project are documented in this file.
   explicit `.font-size-*` on the trimmed element where it isn't. Nothing
   changes where the two already sit together, `.font-size-*` in `utilities`
   wins there either way.
+- `--line-height-dynamic`, and the `.line-height-dynamic` class that reads it,
+  collapsed to one ratio for the whole document instead of tightening as text
+  gets larger. It was registered with `@property` `syntax: "<number>"`, and a
+  registered property computes at its declaration site, which forced the
+  `tan(atan2(...))` expression's `1em` to resolve against the root font size
+  rather than against each element that reads it. Every element got the ratio
+  meant for `:root`. The property is left unregistered, which is what lets it
+  substitute into the `var()` call site and resolve there.
 - No `<length>` custom property was registered with `@property`. Each one
   declared a font-relative `initial-value` (`1rem` for the type scale and
   `--fluid-base`, `0.25rem` for the spacing units and every `--space-*`,
