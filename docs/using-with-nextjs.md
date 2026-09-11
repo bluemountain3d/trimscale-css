@@ -83,7 +83,7 @@ After this, `@use 'trimscale'` resolves from anywhere in your SCSS files. Add yo
 
 `implementation` is left unset above (Next.js's own default, `sass`). Both `sass` and `sass-embedded` (an option for faster compiles, set `implementation: 'sass-embedded'`) work fine with this setup.
 
-**Use `loadPaths` here, not the [`pkg:` importer](getting-started.md#configure-your-scss-compiler).** Turbopack, Next.js's default bundler since v15, can't pass `pkg:`'s setup object through `sassOptions`, only plain values like `loadPaths`' string list, so `pkg:` fails to build under Turbopack.
+**Use `loadPaths` here, not the [`pkg:` importer](getting-started.md#configure-your-scss-compiler).** `pkg:` doesn't work in a Next.js project: a `NodePackageImporter` registered through `sassOptions` fails the build under Turbopack and under webpack (`next dev --webpack`) alike, with the same error framed a little differently by each. `loadPaths` works under both, and is what this guide uses throughout.
 
 ## Step 3: Load fonts in `layout.tsx`
 

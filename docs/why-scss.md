@@ -112,7 +112,7 @@ source map.
 Being straight about the trade-off: SCSS is a real dependency for consumers.
 You need Dart Sass 1.95.0+, `loadPaths` configured for your bundler, and the
 `pkg:` importer registered separately if you want it, and `pkg:` doesn't work
-under Turbopack at all, which is why Next.js has
+in Next.js at all, which is why Next.js has
 [its own page](using-with-nextjs.md).
 
 If you only want the tokens and utility classes and none of the authoring API,

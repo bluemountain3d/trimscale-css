@@ -16,12 +16,11 @@ All notable changes to this project are documented in this file.
   from external import, it was never meant to be consumer-facing; if
   anything relied on importing `trimscale-css/scripts/*` directly
   (undocumented, unlikely), that now fails.
-  **The `pkg:` importer does not work with Next.js's Turbopack** (the
-  default bundler since v15): Turbopack only passes plain,
-  JSON-serializable values through `sassOptions`, and a
-  `NodePackageImporter` instance's `canonicalize`/`load` methods don't
-  survive that boundary. Confirmed by reproducing the failure directly.
-  `loadPaths` is unaffected and stays the documented approach for Next.js.
+  **The `pkg:` importer does not work in Next.js**, under Turbopack or
+  webpack: a `NodePackageImporter` instance registered through
+  `sassOptions` fails the build either way, with the same error.
+  Reproduced against both bundlers. `loadPaths` is unaffected and stays
+  the documented approach for Next.js.
 - `FontSource.fallbackFamily` (opt-in): generates a metric-matched `@font-face`
   override (`size-adjust`, `ascent-override`, `descent-override`,
   `line-gap-override`) between the webfont and its generic fallback keyword,
