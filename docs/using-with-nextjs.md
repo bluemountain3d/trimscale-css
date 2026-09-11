@@ -11,7 +11,7 @@ This is the SCSS path (`loadPaths`, not `pkg:`, see [why](getting-started.md#con
 | Step | File                                            | What you do there                                                                                        |
 | ---- | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | 1    | [`trimscale.config.ts`](../templates/trimscale.config.ts) | Set `appFonts.nextFontDefault: true` (and `nextFontPrefix` if you want something other than `next-font`) |
-| 2    | `next.config.ts`                                | Add `sassOptions` with `loadPaths`                                                                       |
+| 2    | `next.config.ts`                                | Install a Sass compiler, add `sassOptions` with `loadPaths`                                              |
 | 3    | `layout.tsx` (or wherever you load fonts)       | Load fonts with `next/font`, variable name must match `--{prefix}-{kebab-family-name}`                   |
 | 4    | Run `npx trimscale-css generate`                | Extracts metrics as usual, builds each family's `family` value around its CSS variable                   |
 | 5    | `layout.tsx` again, only if `generate` asks     | Paste the metric overrides it printed into `localFont()`'s `declarations`                                |
@@ -57,7 +57,14 @@ appFonts: {
 
 ## Step 2: Configure `next.config.ts`
 
-Point `loadPaths` at the installed package's `styles/` folder:
+Next.js has built-in Sass support but doesn't ship a compiler, so install one yourself ([1.95.0 or later](getting-started.md#requirements)):
+
+```bash
+npm install -D sass
+# or: pnpm add -D sass-embedded
+```
+
+Then point `loadPaths` at the installed package's `styles/` folder:
 
 ```ts
 import path from 'path';
@@ -201,6 +208,7 @@ The fallback also means the config key has to be the font's real family name for
 ## Quick checklist
 
 - [ ] `appFonts.nextFontDefault: true` set (globally, with per-family `nextFont: false` overrides for anything not loaded via `next/font`)
+- [ ] `sass` (or `sass-embedded`) installed in the project
 - [ ] `sassOptions` with `loadPaths` added to `next.config.ts`
 - [ ] `next/font/local` families use `source: 'local'`; `next/font/google` families use `source: 'cdn'` pointed at the real gstatic URL, `generateFontFace` left at its default
 - [ ] Each font's `next/font` `variable` matches `--{nextFontPrefix}-{kebab-family-name}` exactly, checked against what `npx trimscale-css generate` prints for it: a typo never errors, and for a Google font it doesn't even look wrong
