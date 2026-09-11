@@ -1,9 +1,11 @@
 import type { TrimscaleConfig } from '../models/Config.ts'
-import { breakpointsTree } from './generateBreakpoints.ts'
-import { colorTokensMapTree, customColorTokensTree, semanticColorAliasDefsTree } from './generateColorTokens.ts'
-import { fluidScaleTree } from './generateFluidScale.ts'
-import { fallbackFontFacesTree, fontFacesTree, metricsTree } from './generateFontMetrics.scss.ts'
+import { breakpointsTree } from './breakpoints.ts'
+import { colorTokensMapTree, customColorTokensTree, semanticColorAliasDefsTree } from './colorTokens.ts'
+import { fluidScaleTree } from './fluidScale.ts'
+import { fallbackFontFacesTree, fontFacesTree, metricsTree } from './fontMetrics.scss.ts'
 import type { FallbackFontFace, FontFace, FontMetricsMap } from './generateFonts.ts'
+import type { ResolvedUtilityFlags } from './generateUtilities.ts'
+import { raw, setWithArg, toKebabCase } from './helpers.ts'
 import {
   dynamicLineHeightTree,
   fontRolesTree,
@@ -11,9 +13,7 @@ import {
   lineHeightsTree,
   modularTypographicScaleTree,
   semanticFontSizesTree,
-} from './generateTypography.ts'
-import type { ResolvedUtilityFlags } from './generateUtilities.ts'
-import { raw, setWithArg, toKebabCase } from './helpers.ts'
+} from './typography.ts'
 
 /** Everything `computeFontData` extracts from a config's fonts, the shape this module needs from it. */
 export type FontData = {

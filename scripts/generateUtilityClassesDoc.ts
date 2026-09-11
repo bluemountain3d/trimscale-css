@@ -43,7 +43,7 @@ are unaffected, see node_modules/trimscale-css/docs/design-tokens.md.
   }
 
   const fontRoleKeys = Object.keys(cfg.appFonts?.fontRoles ?? {})
-  // semanticFontSizes' keys are kebab-cased by generateTypography.ts before
+  // semanticFontSizes' keys are kebab-cased by typography.ts before
   // becoming SCSS map keys (textLg -> text-lg); fontRoles/fontWeights/
   // lineHeights keys are used verbatim there, so they aren't converted here.
   const fontSizeKeys = Object.keys(cfg.semanticFontSizes).map(toKebabCase)

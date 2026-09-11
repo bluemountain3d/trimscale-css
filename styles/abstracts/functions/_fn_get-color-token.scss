@@ -118,7 +118,7 @@ $_color-decimals: 3;
   // serializes it as `color-mix(in oklch, color(xyz ...) 100%, black)`, which
   // no fallback tier can do anything useful with. Clamping is silent by
   // design, `generate` warns about the config that caused it (see
-  // `scripts/generateColorTokens.ts`), which is the layer that can name the
+  // `scripts/colorTokens.ts`), which is the layer that can name the
   // offending field.
   $light-c: if(sass($chroma-multiplier): math.max(0, color.channel($light-oklch, "chroma") * $light-chroma);
             else: color.channel($light-oklch, "chroma"));

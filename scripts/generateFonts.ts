@@ -9,15 +9,15 @@ import type {
   RawFontMetrics,
   TrimscaleConfig,
 } from '../models/Config.ts'
-import { correctedEmMetrics } from './generateFontMetrics.helpers.ts'
+import { correctedEmMetrics } from './fontMetrics.helpers.ts'
 import {
   fetchRemoteFont,
   getFontExtension,
   listLocalFontDir,
   readLocalFont,
   resolveFamilyDirName,
-} from './generateFontMetrics.io.ts'
-import { parseFontBuffer } from './generateFontMetrics.parser.ts'
+} from './fontMetrics.io.ts'
+import { parseFontBuffer } from './fontMetrics.parser.ts'
 import { toKebabCase } from './helpers.ts'
 
 /**

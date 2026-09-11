@@ -3,7 +3,7 @@
 // ============================================================================
 
 // FluidScale & Breakpoints ===================================================
-/** Named modular-scale ratios usable in `FluidScale.minTypeScale`/`maxTypeScale`, resolved to their numeric value via `TypeScaleTable` in generateFluidScale.ts. */
+/** Named modular-scale ratios usable in `FluidScale.minTypeScale`/`maxTypeScale`, resolved to their numeric value via `TypeScaleTable` in fluidScale.ts. */
 export type TypeScaleNames =
   | 'Minor Second'
   | 'Major Second'

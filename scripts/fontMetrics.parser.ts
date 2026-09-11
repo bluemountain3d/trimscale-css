@@ -9,7 +9,7 @@ import {
   getBBoxHeight,
   getCorrectedAscenderDescender,
   getSampleCoverage,
-} from './generateFontMetrics.helpers.ts'
+} from './fontMetrics.helpers.ts'
 
 export type ParsedFont = {
   metrics: RawFontMetrics
