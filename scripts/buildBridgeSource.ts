@@ -1,27 +1,19 @@
 import type { TrimscaleConfig } from '../models/Config.ts'
-import { breakpointsToScssMapValue } from './generateBreakpoints.ts'
-import {
-  colorTokensMapToScssMapValue,
-  customColorTokensToScssMapValue,
-  semanticColorAliasDefsToScssMapValue,
-} from './generateColorTokens.ts'
-import { fluidScaleToScssMapValue } from './generateFluidScale.ts'
-import {
-  fallbackFontFacesToScssListValue,
-  fontFacesToScssListValue,
-  metricsToScssMapValue,
-} from './generateFontMetrics.scss.ts'
+import { breakpointsTree } from './generateBreakpoints.ts'
+import { colorTokensMapTree, customColorTokensTree, semanticColorAliasDefsTree } from './generateColorTokens.ts'
+import { fluidScaleTree } from './generateFluidScale.ts'
+import { fallbackFontFacesTree, fontFacesTree, metricsTree } from './generateFontMetrics.scss.ts'
 import type { FallbackFontFace, FontFace, FontMetricsMap } from './generateFonts.ts'
 import {
-  dynamicLineHeightToScssMapValue,
-  fontRolesToScssMapValue,
-  fontWeightsToScssMapValue,
-  lineHeightsToScssMapValue,
-  modularTypographicScaleToScssMapValue,
-  semanticFontSizesToScssMapValue,
+  dynamicLineHeightTree,
+  fontRolesTree,
+  fontWeightsTree,
+  lineHeightsTree,
+  modularTypographicScaleTree,
+  semanticFontSizesTree,
 } from './generateTypography.ts'
 import type { ResolvedUtilityFlags } from './generateUtilities.ts'
-import { setScssMapEntries, setScssMapValue, setWithArg } from './helpers.ts'
+import { raw, setWithArg, toKebabCase } from './helpers.ts'
 
 /** Everything `computeFontData` extracts from a config's fonts, the shape this module needs from it. */
 export type FontData = {
@@ -34,17 +26,17 @@ export type FontData = {
 const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize: number): string[] =>
   spacing.approach === 'coupled'
     ? [
-        setWithArg('spacing-approach', '"coupled"'),
-        setWithArg('t-shirt-scale', setScssMapValue(setScssMapEntries(spacing.tShirtScale, 2))),
-        setWithArg('numeric-scale-end', `${spacing.numericScaleEnd}`),
+        setWithArg('spacing-approach', 'coupled'),
+        setWithArg('t-shirt-scale', { ...spacing.tShirtScale }),
+        setWithArg('numeric-scale-end', spacing.numericScaleEnd),
       ]
     : [
-        setWithArg('spacing-approach', '"independent"'),
-        setWithArg('macro-range-max', `${baseGridSize * (spacing.macroRangeMultiplier ?? 2)}`),
-        setWithArg('t-shirt-scale-micro', setScssMapValue(setScssMapEntries(spacing.tShirtScaleMicro, 2))),
-        setWithArg('t-shirt-scale-macro', setScssMapValue(setScssMapEntries(spacing.tShirtScaleMacro, 2))),
-        setWithArg('numeric-scale-micro-end', `${spacing.numericScaleMicroEnd}`),
-        setWithArg('numeric-scale-macro-end', `${spacing.numericScaleMacroEnd}`),
+        setWithArg('spacing-approach', 'independent'),
+        setWithArg('macro-range-max', baseGridSize * (spacing.macroRangeMultiplier ?? 2)),
+        setWithArg('t-shirt-scale-micro', { ...spacing.tShirtScaleMicro }),
+        setWithArg('t-shirt-scale-macro', { ...spacing.tShirtScaleMacro }),
+        setWithArg('numeric-scale-micro-end', spacing.numericScaleMicroEnd),
+        setWithArg('numeric-scale-macro-end', spacing.numericScaleMacroEnd),
       ]
 
 /**
@@ -70,38 +62,33 @@ export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFl
   const baseGridSize = spacing.baseGridSize ?? 4
 
   const withArgs = [
-    setWithArg('breakpoints', breakpointsToScssMapValue(cfg.breakpoints)),
-    setWithArg('ultrawide-height-threshold-px', `${cfg.ultrawideHeightThresholdPx ?? 944}px`),
-    setWithArg('fluid-scale', fluidScaleToScssMapValue(cfg.fluidScale)),
-    setWithArg('font-metrics', metricsToScssMapValue(fontData.metrics)),
-    setWithArg('font-faces', fontFacesToScssListValue(fontData.fontFaces)),
-    setWithArg('fallback-font-faces', fallbackFontFacesToScssListValue(fontData.fallbackFontFaces)),
-    setWithArg('font-roles', fontRolesToScssMapValue(cfg.appFonts?.fontRoles ?? {})),
-    setWithArg('modular-typographic-scale', modularTypographicScaleToScssMapValue(cfg.modularTypographicScale)),
-    setWithArg('semantic-font-sizes', semanticFontSizesToScssMapValue(cfg.semanticFontSizes)),
-    setWithArg('font-weights', fontWeightsToScssMapValue(cfg.fontWeights)),
-    setWithArg('line-heights', lineHeightsToScssMapValue(cfg.lineHeights)),
-    setWithArg('dynamic-line-height', dynamicLineHeightToScssMapValue(cfg.dynamicLineHeight)),
-    setWithArg('default-scheme', cfg.defaultScheme),
-    setWithArg('base-color-tokens', colorTokensMapToScssMapValue(cfg.baseColorTokens)),
-    setWithArg('custom-color-tokens', customColorTokensToScssMapValue(cfg.customColorTokens)),
-    setWithArg('semantic-color-alias-defs', semanticColorAliasDefsToScssMapValue(cfg.semanticColorAliases)),
-    setWithArg('base-grid-size', `${baseGridSize}`),
+    setWithArg('breakpoints', breakpointsTree(cfg.breakpoints)),
+    setWithArg('ultrawide-height-threshold-px', raw(`${cfg.ultrawideHeightThresholdPx ?? 944}px`)),
+    setWithArg('fluid-scale', fluidScaleTree(cfg.fluidScale)),
+    setWithArg('font-metrics', metricsTree(fontData.metrics)),
+    setWithArg('font-faces', fontFacesTree(fontData.fontFaces)),
+    setWithArg('fallback-font-faces', fallbackFontFacesTree(fontData.fallbackFontFaces)),
+    setWithArg('font-roles', fontRolesTree(cfg.appFonts?.fontRoles ?? {})),
+    setWithArg('modular-typographic-scale', modularTypographicScaleTree(cfg.modularTypographicScale)),
+    setWithArg('semantic-font-sizes', semanticFontSizesTree(cfg.semanticFontSizes)),
+    setWithArg('font-weights', fontWeightsTree(cfg.fontWeights)),
+    setWithArg('line-heights', lineHeightsTree(cfg.lineHeights)),
+    setWithArg('dynamic-line-height', dynamicLineHeightTree(cfg.dynamicLineHeight)),
+    // Unquoted: `_color-tokens.scss` compares this against the bare idents
+    // `light`/`dark`, and a quoted "light" is not equal to either in Sass.
+    setWithArg('default-scheme', raw(cfg.defaultScheme)),
+    setWithArg('base-color-tokens', colorTokensMapTree(cfg.baseColorTokens)),
+    setWithArg('custom-color-tokens', customColorTokensTree(cfg.customColorTokens)),
+    setWithArg('semantic-color-alias-defs', semanticColorAliasDefsTree(cfg.semanticColorAliases)),
+    setWithArg('base-grid-size', baseGridSize),
     ...buildSpacingArgs(spacing, baseGridSize),
-    setWithArg('utilities-spacing-base', `${flags.spacingBase}`),
-    setWithArg('utilities-spacing-tshirt', `${flags.spacingTshirt}`),
-    setWithArg('utilities-spacing-numeric', `${flags.spacingNumeric}`),
-    setWithArg('utilities-typography-trim', `${flags.typographyTrim}`),
-    setWithArg('utilities-typography-family', `${flags.typographyFamily}`),
-    setWithArg('utilities-typography-size', `${flags.typographySize}`),
-    setWithArg('utilities-typography-line-height', `${flags.typographyLineHeight}`),
-    setWithArg('utilities-typography-weight', `${flags.typographyWeight}`),
-    setWithArg('utilities-typography-style', `${flags.typographyStyle}`),
-    setWithArg('utilities-typography-text-transform', `${flags.typographyTextTransform}`),
-    setWithArg('utilities-typography-text-align', `${flags.typographyTextAlign}`),
-    setWithArg('utilities-typography-numeric-figures', `${flags.typographyNumericFigures}`),
-    setWithArg('utilities-a11y', `${flags.a11y}`),
-    setWithArg('output-reset', `${cfg.output?.reset ?? true}`),
+    // Every flag's SCSS variable is `utilities-` plus the kebab-cased flag
+    // name, so the list is derived rather than repeated. `a11y` is the one
+    // exception: `toKebabCase` would split the digits off as `a-11y`.
+    ...Object.entries(flags).map(([flag, enabled]) =>
+      setWithArg(flag === 'a11y' ? 'utilities-a11y' : `utilities-${toKebabCase(flag)}`, enabled),
+    ),
+    setWithArg('output-reset', cfg.output?.reset ?? true),
   ].join('')
 
   return `@use "trimscale" with (

@@ -9,6 +9,7 @@ import type {
   RawFontMetrics,
   TrimscaleConfig,
 } from '../models/Config.ts'
+import { correctedEmMetrics } from './generateFontMetrics.helpers.ts'
 import {
   fetchRemoteFont,
   getFontExtension,
@@ -16,7 +17,6 @@ import {
   readLocalFont,
   resolveFamilyDirName,
 } from './generateFontMetrics.io.ts'
-import { correctedEmMetrics } from './generateFontMetrics.helpers.ts'
 import { parseFontBuffer } from './generateFontMetrics.parser.ts'
 import { toKebabCase } from './helpers.ts'
 
@@ -179,7 +179,7 @@ export const computeFallbackFontFaces = (
 
 /**
  * A single `@font-face` rule to emit (as one `$font-faces` list entry via
- * `fontFacesToScssListValue`). Written for `local` sources (unless that
+ * `fontFacesTree`). Written for `local` sources (unless that
  * family resolves to `nextFont: true`) and for `cdn` sources with
  * `generateFontFace: true`; never for `manual`.
  */

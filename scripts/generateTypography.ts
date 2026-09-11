@@ -8,44 +8,40 @@ import type {
   SemanticFontSizes,
   SizeStep,
 } from '../models/Config.ts'
-import { setNestedScssMap, setScssMapEntries, setScssMapEntry, setScssMapValue, toKebabCase } from './helpers.ts'
+import { type ScssTree, kebabKeys, toKebabCase } from './helpers.ts'
 
 /**
- * Builds each typography config map's VALUE (no `$name:`/`!default`, see
- * {@link setScssMapValue}), for use as `@use 'trimscale-css' with
+ * Builds each typography config map, for use as `@use 'trimscale-css' with
  * ($font-roles: ..., $modular-typographic-scale: ..., ...)` arguments in
  * the generated bridge file.
  */
 
 // Font Roles ==================================================================
-/** `data` is `Partial<FontRoles>` rather than `FontRoles` so `{}` (no `appFonts` configured) is a valid call, not just a config with `primary`/`body` set. */
-export const fontRolesToScssMapValue = (data: Partial<FontRoles>): string => setScssMapValue(setScssMapEntries(data, 2))
+/** `data` is `Partial<FontRoles>` rather than `FontRoles` so `{}` (no `appFonts` configured) is a valid call, not just a config with `primary`/`body` set. Role keys are used verbatim, matching what `generateUtilityClassesDoc.ts` documents. */
+export const fontRolesTree = (data: Partial<FontRoles>): ScssTree => ({ ...data })
 
 // Modular Typographic Scale ==================================================
-export const modularTypographicScaleToScssMapValue = (data: ModularTypographicScale): string => {
-  const entries = Object.entries(data).map(([key, value]) => {
-    const innerEntries = Object.entries(value as ScaleStep).map(([k, v]) => setScssMapEntry(k, v, 3))
-    return setNestedScssMap(toKebabCase(key), innerEntries, 2)
-  })
-  return setScssMapValue(entries)
-}
+/** Step keys inside a `ScaleStep` are already kebab-free (`min`/`max`/...), so only the step names are converted. */
+export const modularTypographicScaleTree = (data: ModularTypographicScale): ScssTree =>
+  kebabKeys(data, (step) => ({ ...(step as ScaleStep) }))
 
 // Semantic Font Sizes ========================================================
-export const semanticFontSizesToScssMapValue = (data: SemanticFontSizes): string => {
-  const entries = Object.entries(data).map(([key, value]) => {
-    const innerEntries = Object.entries(value as SizeStep).map(([k, v]) =>
-      setScssMapEntry(k, k === 'from' ? toKebabCase(v as string) : v, 3),
-    )
-    return setNestedScssMap(toKebabCase(key), innerEntries, 2)
-  })
-  return setScssMapValue(entries)
-}
+/** A `from` field names another size step, so its VALUE is kebab-cased too: it has to match the key that step was emitted under. */
+export const semanticFontSizesTree = (data: SemanticFontSizes): ScssTree =>
+  kebabKeys(data, (step) =>
+    Object.fromEntries(
+      Object.entries(step as SizeStep).map(([field, value]) => [
+        field,
+        field === 'from' ? toKebabCase(value as string) : value,
+      ]),
+    ),
+  )
 
 // Font Weights ===============================================================
-export const fontWeightsToScssMapValue = (data: FontWeights): string => setScssMapValue(setScssMapEntries(data, 2))
+export const fontWeightsTree = (data: FontWeights): ScssTree => ({ ...data })
 
 // Line-heights ===============================================================
-export const lineHeightsToScssMapValue = (data: LineHeights): string => setScssMapValue(setScssMapEntries(data, 2))
+export const lineHeightsTree = (data: LineHeights): ScssTree => ({ ...data })
 
 // Dynamic Line-height ========================================================
 const DYNAMIC_LINE_HEIGHT_DEFAULTS: Required<DynamicLineHeight> = {
@@ -57,13 +53,10 @@ const DYNAMIC_LINE_HEIGHT_DEFAULTS: Required<DynamicLineHeight> = {
 }
 
 /**
- * Builds the `$dynamic-line-height` map VALUE from a `DynamicLineHeight`
- * config object, backfilling any omitted field with its own default (see
+ * Builds the `$dynamic-line-height` map from a `DynamicLineHeight` config
+ * object, backfilling any omitted field with its own default (see
  * {@link DYNAMIC_LINE_HEIGHT_DEFAULTS}) since the generated map fully
  * replaces the package's own `!default` map rather than merging into it.
  */
-export const dynamicLineHeightToScssMapValue = (data: DynamicLineHeight = {}): string => {
-  const merged = { ...DYNAMIC_LINE_HEIGHT_DEFAULTS, ...data }
-  const entries = Object.entries(merged).map(([key, value]) => `    "${toKebabCase(key)}": ${value},\n`)
-  return setScssMapValue(entries)
-}
+export const dynamicLineHeightTree = (data: DynamicLineHeight = {}): ScssTree =>
+  kebabKeys({ ...DYNAMIC_LINE_HEIGHT_DEFAULTS, ...data }, (value) => value)

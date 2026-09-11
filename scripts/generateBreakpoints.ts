@@ -1,9 +1,8 @@
 import type { Breakpoints } from '../models/Config.ts'
-import { raw, setScssMapEntry, setScssMapValue, toKebabCase } from './helpers.ts'
+import { type ScssTree, kebabKeys, raw } from './helpers.ts'
 
 /**
- * Builds the `$breakpoints` map VALUE (no `$name:`/`!default`, see
- * {@link setScssMapValue}) from `cfg.breakpoints`, converting each px value
+ * Builds the `$breakpoints` map from `cfg.breakpoints`, converting each px value
  * to rem (assuming the standard 1rem == 16px root, same as
  * `abstracts/functions`' `px-to-rem`), for use as a `@use 'trimscale-css'
  * with ($breakpoints: ...)` argument in the generated bridge file. Done here
@@ -19,10 +18,5 @@ import { raw, setScssMapEntry, setScssMapValue, toKebabCase } from './helpers.ts
  * takes arithmetic. The comment is Sass, not CSS: it never reaches the
  * output.
  */
-export const breakpointsToScssMapValue = (data: Breakpoints): string => {
-  const entries = Object.entries(data)
-    .filter((entry): entry is [string, number] => entry[1] !== undefined)
-    .map(([key, px]) => `${setScssMapEntry(toKebabCase(key), raw(`${px / 16}rem`), 2).trimEnd()} // ${px}px\n`)
-
-  return setScssMapValue(entries)
-}
+export const breakpointsTree = (data: Breakpoints): ScssTree =>
+  kebabKeys(data, (px) => (px === undefined ? undefined : raw(`${px / 16}rem`, `${px}px`)))

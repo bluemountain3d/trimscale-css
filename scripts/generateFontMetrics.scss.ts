@@ -1,62 +1,54 @@
-import type { FallbackFontFace, FamilyFontMetrics, FontFace, FontMetricsMap } from './generateFonts.ts'
-import { raw, setNestedScssMap, setScssMapEntry, setScssMapValue, toKebabCase } from './helpers.ts'
+import type { FallbackFontFace, FontFace, FontMetricsMap } from './generateFonts.ts'
+import { type ScssTree, kebabKeys, raw } from './helpers.ts'
 
 /**
- * Builds the `$font-metrics` map VALUE (no `$name:`/`!default`, see
- * {@link setScssMapValue}), for use as a `@use 'trimscale-css' with
- * ($font-metrics: ...)` argument in the generated bridge file.
+ * Builds the `$font-metrics` map, for use as a `@use 'trimscale-css' with
+ * ($font-metrics: ...)` argument in the generated bridge file. Family names
+ * are the config's own keys, so they are NOT kebab-cased; the metric fields
+ * inside each family are. Every field of `FamilyFontMetrics` is carried over
+ * generically, so a metric added there reaches the SCSS without an edit here.
  */
-export const metricsToScssMapValue = (metrics: FontMetricsMap): string => {
-  const entries = Object.entries(metrics).map(([key, value]) => {
-    const innerEntries = Object.entries(value as FamilyFontMetrics).map(([k, v]) =>
-      setScssMapEntry(toKebabCase(k), k === 'family' ? raw(v as string) : v, 3),
-    )
-    return setNestedScssMap(key, innerEntries, 2)
-  })
-  return setScssMapValue(entries)
-}
+export const metricsTree = (metrics: FontMetricsMap): ScssTree =>
+  Object.fromEntries(
+    Object.entries(metrics).map(([familyName, familyMetrics]) => [
+      familyName,
+      // `family` is a ready-made `font-family` value (`'"Roboto", sans-serif'`),
+      // already carrying its own quoting, so it goes out unquoted.
+      kebabKeys(familyMetrics, (value, key) => (key === 'family' ? raw(value as string) : value)),
+    ]),
+  )
 
 /** Formats one `FontFace`'s `weight` field as the SCSS-ready string `base/_fonts.scss` interpolates directly (`"700"` or `"100 900"` for variable fonts). */
 const formatWeight = (weight: FontFace['weight']): string =>
   typeof weight === 'number' ? `${weight}` : `${weight.min} ${weight.max}`
 
 /**
- * Builds the `$font-faces` list VALUE (see `abstracts/variables/_font-metrics.scss`),
+ * Builds the `$font-faces` list (see `abstracts/variables/_font-metrics.scss`),
  * one map per `FontFace`, for use as a `@use 'trimscale-css' with
  * ($font-faces: ...)` argument in the generated bridge file.
  */
-export const fontFacesToScssListValue = (fontFaces: FontFace[]): string => {
-  const entries = fontFaces.map((face) => {
-    const innerEntries = [
-      setScssMapEntry('family', face.family, 3),
-      setScssMapEntry('src', face.src, 3),
-      setScssMapEntry('ext', face.ext, 3),
-      setScssMapEntry('weight', formatWeight(face.weight), 3),
-      setScssMapEntry('style', face.style, 3),
-      setScssMapEntry('ascent-override', face.ascentOverride, 3),
-      setScssMapEntry('descent-override', face.descentOverride, 3),
-    ]
-    return `    (\n${innerEntries.join('')}    ),\n`
-  })
-  return `(\n${entries.join('')}  )`
-}
+export const fontFacesTree = (fontFaces: FontFace[]): ScssTree =>
+  fontFaces.map((face) => ({
+    family: face.family,
+    src: face.src,
+    ext: face.ext,
+    weight: formatWeight(face.weight),
+    style: face.style,
+    'ascent-override': face.ascentOverride,
+    'descent-override': face.descentOverride,
+  }))
 
 /**
- * Builds the `$fallback-font-faces` list VALUE, one map per `FallbackFontFace`,
- * for use as a `@use 'trimscale-css' with ($fallback-font-faces: ...)`
- * argument in the generated bridge file.
+ * Builds the `$fallback-font-faces` list, one map per `FallbackFontFace`, for
+ * use as a `@use 'trimscale-css' with ($fallback-font-faces: ...)` argument
+ * in the generated bridge file.
  */
-export const fallbackFontFacesToScssListValue = (fallbackFontFaces: FallbackFontFace[]): string => {
-  const entries = fallbackFontFaces.map((face) => {
-    const innerEntries = [
-      setScssMapEntry('family', face.family, 3),
-      setScssMapEntry('fallback-family', face.fallbackFamily, 3),
-      setScssMapEntry('size-adjust', face.sizeAdjust, 3),
-      setScssMapEntry('ascent-override', face.ascentOverride, 3),
-      setScssMapEntry('descent-override', face.descentOverride, 3),
-      setScssMapEntry('line-gap-override', face.lineGapOverride, 3),
-    ]
-    return `    (\n${innerEntries.join('')}    ),\n`
-  })
-  return `(\n${entries.join('')}  )`
-}
+export const fallbackFontFacesTree = (fallbackFontFaces: FallbackFontFace[]): ScssTree =>
+  fallbackFontFaces.map((face) => ({
+    family: face.family,
+    'fallback-family': face.fallbackFamily,
+    'size-adjust': face.sizeAdjust,
+    'ascent-override': face.ascentOverride,
+    'descent-override': face.descentOverride,
+    'line-gap-override': face.lineGapOverride,
+  }))

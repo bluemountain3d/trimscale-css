@@ -5,36 +5,23 @@ import type {
   SemanticColorAliases,
   TrimscaleConfig,
 } from '../models/Config.ts'
-import { raw, setNestedScssMap, setScssMapEntry, setScssMapValue, toKebabCase } from './helpers.ts'
+import { type ScssTree, kebabKeys, raw, toKebabCase } from './helpers.ts'
 
 /**
- * Builds each color config map's VALUE (no `$name:`/`!default`, see
- * {@link setScssMapValue}), for use as `@use 'trimscale-css' with
+ * Builds each color config map, for use as `@use 'trimscale-css' with
  * ($base-color-tokens: ..., $custom-color-tokens: ..., ...)` arguments in
  * the generated bridge file.
  */
 
-/**
- * Builds the `light`/`dark` nested maps (plus optional `opacity`) for one ColorToken.
- * @param token - The color token to format.
- * @param nestedLevel - Indentation depth (in 2-space units) for these entries.
- * @returns The formatted entry lines for this token.
- */
-const colorTokenEntries = (token: ColorToken, nestedLevel: number): string[] => {
-  const colorDefinitionEntries = (def: ColorDefinition, level: number): string[] => [
-    setScssMapEntry('oklch', raw(def.oklch), level),
-    setScssMapEntry('hex', raw(def.hex), level),
-  ]
+/** Both channels are raw CSS the config author wrote (`oklch(...)`, `#f5f6f8`), so neither is quoted. */
+const colorDefinitionTree = (def: ColorDefinition): ScssTree => ({ oklch: raw(def.oklch), hex: raw(def.hex) })
 
-  const entries = [
-    setNestedScssMap('light', colorDefinitionEntries(token.light, nestedLevel + 1), nestedLevel),
-    setNestedScssMap('dark', colorDefinitionEntries(token.dark, nestedLevel + 1), nestedLevel),
-  ]
-
-  if (token.opacity !== undefined) entries.push(setScssMapEntry('opacity', token.opacity, nestedLevel))
-
-  return entries
-}
+/** The `light`/`dark` maps (plus optional `opacity`) for one ColorToken. An absent `opacity` is dropped while formatting, so it needs no branch here. */
+const colorTokenTree = (token: ColorToken): ScssTree => ({
+  light: colorDefinitionTree(token.light),
+  dark: colorDefinitionTree(token.dark),
+  opacity: token.opacity,
+})
 
 const MODES = ['light', 'dark'] as const
 type Mode = (typeof MODES)[number]
@@ -154,33 +141,15 @@ export const warnAboutFallbackColors = (cfg: TrimscaleConfig): void => {
   )
 }
 
-/** Builds a `(prefix:, tokens:)` map VALUE from a single `ColorTokensMap`. */
-export const colorTokensMapToScssMapValue = (data: ColorTokensMap): string => {
-  const tokenEntries = Object.entries(data.tokens).map(([tokenName, token]) =>
-    setNestedScssMap(toKebabCase(tokenName), colorTokenEntries(token, 4), 3),
-  )
-  const entries = [setScssMapEntry('prefix', data.prefix, 2), setNestedScssMap('tokens', tokenEntries, 2)]
-  return setScssMapValue(entries)
-}
+/** Builds a `(prefix:, tokens:)` map from a single `ColorTokensMap`. */
+export const colorTokensMapTree = (data: ColorTokensMap): ScssTree => ({
+  prefix: data.prefix,
+  tokens: kebabKeys(data.tokens, colorTokenTree),
+})
 
-/** Builds the `$custom-color-tokens` map-of-maps VALUE from `cfg.customColorTokens`. */
-export const customColorTokensToScssMapValue = (data: Record<string, ColorTokensMap> | undefined): string => {
-  if (!data) return '()'
-  const entries = Object.entries(data).map(([name, tokens]) => {
-    const innerEntries = [
-      setScssMapEntry('prefix', tokens.prefix, 3),
-      setNestedScssMap(
-        'tokens',
-        Object.entries(tokens.tokens).map(([tokenName, token]) =>
-          setNestedScssMap(toKebabCase(tokenName), colorTokenEntries(token, 5), 4),
-        ),
-        3,
-      ),
-    ]
-    return setNestedScssMap(toKebabCase(name), innerEntries, 2)
-  })
-  return setScssMapValue(entries)
-}
+/** Builds the `$custom-color-tokens` map-of-maps from `cfg.customColorTokens`. Nests {@link colorTokensMapTree} one level deeper rather than repeating it, which is what the depth-carrying version had to do. */
+export const customColorTokensTree = (data: Record<string, ColorTokensMap> | undefined): ScssTree =>
+  kebabKeys(data ?? {}, colorTokensMapTree)
 
 /**
  * Builds the `$semantic-color-alias-defs` map VALUE from `cfg.semanticColorAliases` —
@@ -194,31 +163,22 @@ export const customColorTokensToScssMapValue = (data: Record<string, ColorTokens
  * in the same static file, but a generated `with()` argument in the bridge
  * file can't reference another `with()` argument from the same call).
  * @param aliases - `cfg.semanticColorAliases`.
- * @returns The bare map literal string.
  */
-export const semanticColorAliasDefsToScssMapValue = (aliases: SemanticColorAliases | undefined): string => {
-  if (!aliases) return '()'
+export const semanticColorAliasDefsTree = (aliases: SemanticColorAliases | undefined): ScssTree => {
+  // A one-line Sass map with UNQUOTED keys, unlike every other map here, so it
+  // goes out raw rather than through the formatter.
+  const multiplier = (value: number | { light: number; dark: number } | undefined) => {
+    if (value === undefined) return undefined
+    return raw(typeof value === 'number' ? `${value}` : `(light: ${value.light}, dark: ${value.dark})`)
+  }
 
-  const formatMultiplier = (v: number | { light: number; dark: number }) =>
-    typeof v === 'number' ? `${v}` : `(light: ${v.light}, dark: ${v.dark})`
-
-  const entries = Object.entries(aliases).map(([key, value]) => {
-    const defEntries = [
-      setScssMapEntry('token', toKebabCase(value.token), 3),
-      value.tokenMap && value.tokenMap !== 'baseColorTokens'
-        ? setScssMapEntry('token-map', toKebabCase(value.tokenMap), 3)
-        : '',
-      value.opacity !== undefined ? setScssMapEntry('opacity', value.opacity, 3) : '',
-      value.lightnessMultiplier !== undefined
-        ? setScssMapEntry('lightness-multiplier', raw(formatMultiplier(value.lightnessMultiplier)), 3)
-        : '',
-      value.chromaMultiplier !== undefined
-        ? setScssMapEntry('chroma-multiplier', raw(formatMultiplier(value.chromaMultiplier)), 3)
-        : '',
-    ].filter(Boolean)
-
-    return setNestedScssMap(toKebabCase(key), defEntries, 2)
-  })
-
-  return setScssMapValue(entries)
+  return kebabKeys(aliases ?? {}, (alias) => ({
+    token: toKebabCase(alias.token),
+    // `baseColorTokens` is the default map, and naming it explicitly is the
+    // same as omitting it, so it is left out.
+    'token-map': alias.tokenMap && alias.tokenMap !== 'baseColorTokens' ? toKebabCase(alias.tokenMap) : undefined,
+    opacity: alias.opacity,
+    'lightness-multiplier': multiplier(alias.lightnessMultiplier),
+    'chroma-multiplier': multiplier(alias.chromaMultiplier),
+  }))
 }
