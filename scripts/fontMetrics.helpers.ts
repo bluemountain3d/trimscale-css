@@ -1,29 +1,41 @@
 import type { Font } from 'fontkit'
 
 /**
- * Gets the maximum height from a list of character bounding boxes
+ * Measures the SHORTEST of several glyphs' bounding-box tops, used to derive a
+ * cap height from H/I/E/T for a font whose OS/2 table declares none (see
+ * `parseFontBuffer`).
+ *
+ * The smallest wins rather than the largest because the caller wants the flat
+ * cap line, and a font that rounds its letterforms draws the curved ones a
+ * hair above it (overshoot). Taking the tallest would read that overshoot as
+ * the cap height and trim every line slightly too far.
  * @param font - The fontkit Font object
- * @param chars - Array of characters to measure
- * @returns Minimum height from all measured characters, or 0 if none found
+ * @param chars - Characters to measure, expected to be cap-height glyphs
+ * @returns The smallest bbox top among the glyphs the font actually has, in
+ *   font units, or 0 when it has none of them
  */
 export const getBBoxHeight = (font: Font, chars: string[]): number => {
   const heights = chars
-    .map((char) => {
-      const codePoint = char.codePointAt(0) ?? 0;
-      const glyph = font.glyphForCodePoint(codePoint);  
-      return glyph?.bbox?.maxY || 0
-    })
-    .filter((h) => h > 0)
+    .map((char) => font.glyphForCodePoint(char.codePointAt(0) ?? 0)?.bbox?.maxY || 0)
+    .filter((height) => height > 0)
 
   return heights.length > 0 ? Math.min(...heights) : 0
 }
 
 /**
- * Calculates and return trimmed ascender and descender to be used in
- * @param ascender
- * @param descender
- * @param unitsPerEm
- * @returns
+ * Clips a font's ascender and descender so they sum to at most the em.
+ *
+ * A font is free to declare metrics that overflow its own em square, and most
+ * do. The leading-trim fallback can't work with that: it removes
+ * `(1lh - 1em) / 2`, which assumes the content area is exactly 1em, so the
+ * values it trims against have to fit that assumption. The overshoot is split
+ * evenly between the two ends, keeping the text centred in the box.
+ *
+ * Metrics that already fit are returned untouched, only made positive.
+ * @param ascender - Ascender in font units (or em, see `correctedEmMetrics`)
+ * @param descender - Descender, either sign
+ * @param unitsPerEm - The em to fit within (`1` for values already in em)
+ * @returns Both values positive, summing to at most `unitsPerEm`
  */
 export const getCorrectedAscenderDescender = (ascender: number, descender: number, unitsPerEm: number) => {
   const absDescender = Math.abs(descender)
@@ -83,12 +95,24 @@ export const capTopError = (browserAscender: number, browserDescender: number, c
   Math.abs((1 - (browserAscender + browserDescender)) / 2 + (browserAscender - correctedAscender))
 
 /**
- * Calculates trim values for text-box-trim CSS polyfill
+ * The distance from the corrected ascender down to the cap top, and from the
+ * baseline down to the corrected descender: what the leading-trim fallback
+ * removes at each end so the box ends at the cap line and the baseline. Both
+ * in whole font units; `parseFontBuffer` divides them by `unitsPerEm` for the
+ * em values that reach the SCSS.
+ *
+ * The `/ unitsPerEm` and `* unitsPerEm` do NOT cancel, despite looking like
+ * they should. They round-trip through a float, and for a `unitsPerEm` that
+ * isn't a power of two that leaves a value a hair under an exact `.5`, which
+ * `Math.round` then takes down instead of up. Removing the pair changes the
+ * result by one font unit for those fonts, which is 0.001em at
+ * `unitsPerEm: 1000` and survives the `toFixed(3)` downstream. It is a
+ * quarter of a thousandth of an em either way, so this keeps the values
+ * already published rather than trading them for a tidier expression.
  * @param capHeight - Cap height in font units
- * @param upmAscender - Corrected ascender value
- * @param upmDescender - Corrected descender value (positive)
+ * @param upmAscender - Ascender, already clipped by `getCorrectedAscenderDescender`
+ * @param upmDescender - Descender, likewise, positive
  * @param unitsPerEm - Font's units per em
- * @returns Object with top and bottom trim values
  */
 export const calculateTrimValues = (
   capHeight: number,

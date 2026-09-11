@@ -125,17 +125,17 @@ export type FallbackFontFace = {
  */
 const computeOneFallbackFontFace = (
   familyName: string,
-  webMetrics: Required<Pick<RawFontMetrics, 'avgCharWidth' | 'lineGap'>>,
+  web: { avgCharWidth: number; lineGap: number },
   corrected: { ascender: number; descender: number },
   fallbackFamily: MatchableFallbackFamily,
 ): FallbackFontFace => {
   const fb = FALLBACK_FONT_METRICS[fallbackFamily]
   const fallbackAvgCharWidth = fb.avgCharWidth / fb.upm
 
-  const sizeAdjust = webMetrics.avgCharWidth / fallbackAvgCharWidth
+  const sizeAdjust = web.avgCharWidth / fallbackAvgCharWidth
   const ascentOverride = corrected.ascender / sizeAdjust
   const descentOverride = corrected.descender / sizeAdjust
-  const lineGapOverride = webMetrics.lineGap / sizeAdjust
+  const lineGapOverride = web.lineGap / sizeAdjust
 
   return {
     family: `${familyName} Fallback`,
@@ -162,18 +162,23 @@ export const computeFallbackFontFaces = (
   webMetrics: RawFontMetrics,
   matched: MatchableFallbackFamily | MatchableFallbackFamily[] | MatchableFallbackChain,
 ): FallbackFontFace[] => {
-  if (webMetrics.ascender === undefined || webMetrics.descender === undefined || webMetrics.lineGap === undefined) {
+  // Destructured so the guard below narrows all three to `number` for the rest
+  // of the function. Testing `webMetrics.lineGap` in place would not: that
+  // narrows the property access, while the object keeps its optional type.
+  const { ascender, descender, lineGap } = webMetrics
+
+  if (ascender === undefined || descender === undefined || lineGap === undefined) {
     console.warn(
       `⚠ "${familyName}": \`fallback: { matched }\` is set but this family's metrics are missing \`ascender\`/\`descender\`/\`lineGap\` (only extracted automatically for \`local\`/\`cdn\` sources, a \`manual\` entry must supply them explicitly). Skipping its fallback @font-face, and falling back to the generic \`defaultFallback\` instead.`,
     )
     return []
   }
 
-  const resolvedMetrics = { ...webMetrics, lineGap: webMetrics.lineGap }
-  const corrected = correctedEmMetrics(webMetrics.ascender, webMetrics.descender)
+  const corrected = correctedEmMetrics(ascender, descender)
+  const web = { avgCharWidth: webMetrics.avgCharWidth, lineGap }
 
   return resolveFallbackFamilies(matched).map((family) =>
-    computeOneFallbackFontFace(familyName, resolvedMetrics, corrected, family),
+    computeOneFallbackFontFace(familyName, web, corrected, family),
   )
 }
 

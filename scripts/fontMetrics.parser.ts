@@ -174,9 +174,9 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
       descender: +(Math.abs(os2.typoDescender) / upm).toFixed(3),
       lineGap: +(os2.typoLineGap / upm).toFixed(3),
     },
-    isItalic: isItalic,
-    weightClass: weightClass,
-    weightRange: weightRange,
+    isItalic,
+    weightClass,
+    weightRange,
     corrected: {
       ascender: +correctedAscender.toFixed(4),
       descender: +(upmDescender / upm).toFixed(4),
