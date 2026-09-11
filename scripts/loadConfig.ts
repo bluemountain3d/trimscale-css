@@ -124,9 +124,15 @@ export const loadConfig = async (): Promise<TrimscaleConfig> => {
     // Node only re-parses as an ES module when `type` is absent, so this one
     // is a dead end for the `.ts` name, and Node's message ("Unexpected token
     // 'export'") points at the config rather than at the setting.
+    //
+    // Node also emits a process warning of its own for the same failure,
+    // advising `.mjs`. It reaches stderr before this message does and can
+    // only be silenced by dropping every warning the process makes, so the
+    // message answers it instead: `.mts` is the TypeScript spelling of that
+    // advice.
     if (err instanceof SyntaxError && configPath.endsWith('.ts') && projectDeclaresCommonJs()) {
       throw new Error(
-        `${path.basename(configPath)} can't be loaded in a project whose package.json declares \`"type": "commonjs"\`: Node reads it as CommonJS, and the config's \`export default\` is a syntax error there. Rename it to trimscale.config.mts, which is an ES module whatever the project's type is, or set \`"type": "module"\` if the rest of your project is ESM.`,
+        `${path.basename(configPath)} can't be loaded in a project whose package.json declares \`"type": "commonjs"\`: Node reads it as CommonJS, and the config's \`export default\` is a syntax error there. Node's own warning about the same failure points at \`.mjs\`; for a TypeScript config that means trimscale.config.mts, an ES module whatever the project's type is. Rename it, or set \`"type": "module"\` if the rest of your project is ESM.`,
         { cause: err },
       )
     }
