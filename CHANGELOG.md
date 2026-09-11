@@ -48,12 +48,20 @@ All notable changes to this project are documented in this file.
   what your own reset needs to cover (margin resets, `box-sizing`,
   `line-height`), since skipping the package's reset without replacing
   what it does compiles cleanly and fails silently otherwise.
-- `generate` now prints the exact `next/font` `variable` name each
-  `nextFont`-enabled family expects (e.g. `"Inter" expects next/font's
-  \`variable\` to be exactly "--next-font-inter"`). `generate` can't
-  validate this against `layout.tsx` itself (it never reads consumer
-  files beyond `trimscale.config.ts`), a mismatch there fails silently at
-  runtime, so this gives something to check by eye instead of guessing.
+- A `nextFont`-enabled family's `family` value carries the font's own name as
+  the `var()` fallback: `var(--next-font-inter, "Inter"), sans-serif`, was
+  `var(--next-font-inter), sans-serif`. An undefined custom property
+  invalidates the whole `font-family` at computed-value time, generic fallback
+  included, leaving the element on whatever its parent had; the name inside
+  `var()` keeps a missing or misnamed `next/font` `variable` from costing you
+  the declaration. It resolves for a `next/font/google` family (Next.js writes
+  its `@font-face` under the real family name) and not for `next/font/local`
+  (a generated name), so a Google font renders correctly even when the variable
+  never arrives, which also means a mismatch there is invisible in the browser.
+  `generate` prints the exact `variable` name each `nextFont` family expects
+  (e.g. `"Inter" expects next/font's \`variable\` to be exactly
+  "--next-font-inter"`), and since it never reads `layout.tsx`, that printed
+  line is the only check there is.
 - `appFonts` is optional. A config with none of it still gets the full
   fluid type scale, spacing, breakpoints, and color tokens, it just has no
   leading trim and no `--font-family-*` tokens, both need font metrics

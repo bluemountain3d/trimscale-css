@@ -254,15 +254,31 @@ const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cd
  * against their own `layout.tsx` by eye. `generate` only reads
  * `trimscale.config.ts`, it never parses `layout.tsx` or any other
  * consumer file, so nothing here can validate the match automatically, a
- * mismatch fails silently at runtime (falls through to the fallback font,
- * no error) rather than at generate time.
+ * mismatch surfaces at runtime rather than at generate time, and for a
+ * `next/font/google` family it doesn't surface at all: the family name that
+ * `buildFamilyString` puts inside the `var()` matches the `@font-face` Next
+ * writes for it, so the font renders correctly off the fallback. Printing the
+ * name is therefore the only check there is.
  */
 const buildNextFontVariableName = (appFonts: AppFonts, familyName: string): string => {
   const nextPrefix = appFonts.nextFontPrefix ?? 'next-font'
   return `--${nextPrefix}-${toKebabCase(familyName)}`
 }
 
-/** Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a quoted family name, both with the resolved fallback appended. When `fallbackFaceGenerated`, the metric-matched `"${familyName} Fallback"` override is inserted between the family and the generic fallback. */
+/**
+ * Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a
+ * quoted family name, both with the resolved fallback appended. When
+ * `fallbackFaceGenerated`, the metric-matched `"${familyName} Fallback"`
+ * override is inserted between the family and the generic fallback.
+ *
+ * The `next/font` branch repeats the family name inside the `var()` as its
+ * fallback. A `var()` pointing at an undefined property is invalid at
+ * computed-value time, which takes the whole `font-family` down, generic
+ * fallback included, and leaves the element inheriting its parent's font: the
+ * name inside is the only part that still resolves when Next's `variable`
+ * class never reaches the DOM or its name doesn't match. See
+ * `buildNextFontVariableName` for what it resolves to per loader.
+ */
 const buildFamilyString = (
   appFonts: AppFonts,
   familyName: string,
@@ -274,7 +290,7 @@ const buildFamilyString = (
   const fallbackFaceSegment = fallbackFaceGenerated ? `, "${familyName} Fallback"` : ''
 
   return usesNextFont
-    ? `'var(${buildNextFontVariableName(appFonts, familyName)})${fallbackFaceSegment}, ${resolvedFallback}'`
+    ? `'var(${buildNextFontVariableName(appFonts, familyName)}, "${familyName}")${fallbackFaceSegment}, ${resolvedFallback}'`
     : `'"${familyName}"${fallbackFaceSegment}, ${resolvedFallback}'`
 }
 
