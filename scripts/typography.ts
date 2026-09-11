@@ -17,7 +17,7 @@ import { type ScssTree, kebabKeys, toKebabCase } from './helpers.ts'
  */
 
 // Font Roles ==================================================================
-/** `data` is `Partial<FontRoles>` rather than `FontRoles` so `{}` (no `appFonts` configured) is a valid call, not just a config with `primary`/`body` set. Role keys are used verbatim, matching what `generateUtilityClassesDoc.ts` documents. */
+/** `data` is `Partial<FontRoles>` rather than `FontRoles` so `{}` (no `appFonts` configured) is a valid call, not just a config with `primary`/`body` set. Role keys are used verbatim, matching what `utilityClassesDoc.ts` documents. */
 export const fontRolesTree = (data: Partial<FontRoles>): ScssTree => ({ ...data })
 
 // Modular Typographic Scale ==================================================

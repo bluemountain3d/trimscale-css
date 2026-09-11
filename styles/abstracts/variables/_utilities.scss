@@ -3,7 +3,7 @@
 /// @name Utility Class Toggles
 /// @description Which utility-class groups `styles/utilities/` emits.
 /// All default `true`; a project's `trimscale.config.ts` `output.utilities`
-/// field resolves down to these via `scripts/generateUtilities.ts`, then
+/// field resolves down to these via `scripts/utilityFlags.ts`, then
 /// flows in through the generated bridge file's `@use ... with (...)`.
 /// ===========================================================================
 

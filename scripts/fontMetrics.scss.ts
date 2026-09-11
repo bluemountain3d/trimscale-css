@@ -1,4 +1,4 @@
-import type { FallbackFontFace, FontFace, FontMetricsMap } from './generateFonts.ts'
+import type { FallbackFontFace, FontFace, FontMetricsMap } from './fontData.ts'
 import { type ScssTree, kebabKeys, raw } from './helpers.ts'
 
 /**

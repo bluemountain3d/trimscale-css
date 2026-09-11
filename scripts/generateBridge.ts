@@ -3,12 +3,12 @@ import path from 'node:path'
 import type { TrimscaleConfig } from '../models/Config.ts'
 import { buildBridgeSource } from './buildBridgeSource.ts'
 import { warnAboutClampedAliases, warnAboutFallbackColors } from './colorTokens.ts'
+import { computeFontData } from './fontData.ts'
 import { rewriteFontFacesForCss, writeCssOutput } from './generateCss.ts'
-import { computeFontData } from './generateFonts.ts'
-import { buildResetRequirementsMarkdown } from './generateResetRequirementsDoc.ts'
-import { type ResolvedUtilityFlags, resolveUtilityFlags } from './generateUtilities.ts'
-import { buildUtilityClassesMarkdown } from './generateUtilityClassesDoc.ts'
 import { loadConfig, resolveOutDir } from './loadConfig.ts'
+import { buildResetRequirementsMarkdown } from './resetRequirementsDoc.ts'
+import { buildUtilityClassesMarkdown } from './utilityClassesDoc.ts'
+import { type ResolvedUtilityFlags, resolveUtilityFlags } from './utilityFlags.ts'
 
 /**
  * `typography.trim`/`typography.family` being on is coherent whether or not

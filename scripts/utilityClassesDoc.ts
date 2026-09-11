@@ -1,6 +1,6 @@
 import type { TrimscaleConfig } from '../models/Config.ts'
-import type { ResolvedUtilityFlags } from './generateUtilities.ts'
 import { toKebabCase } from './helpers.ts'
+import type { ResolvedUtilityFlags } from './utilityFlags.ts'
 
 const list = (keys: string[], prefix: string): string =>
   keys.length > 0 ? keys.map((key) => `\`.${prefix}${key}\``).join(', ') : '_none configured_'
@@ -24,7 +24,7 @@ const tShirtKeys = (spacing: TrimscaleConfig['spacingSetup']): string[] =>
  * The fixed sections (never vary by config) are summarized with a pointer
  * to the full docs. `flags` mirrors the same `utilities`-derived booleans
  * `generateBridge.ts` passes into the SCSS bridge (see
- * `generateUtilities.ts`), so a group turned off there is left out here
+ * `utilityFlags.ts`), so a group turned off there is left out here
  * too rather than documenting classes that don't exist. Written by
  * `generateBridge.ts` alongside the bridge file, into this project's own
  * `output.dir`, never into node_modules.

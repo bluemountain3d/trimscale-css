@@ -44,8 +44,7 @@
     "build": "node ./devScripts/cleanBuild.ts && tsc -p tsconfig.build.json",
     "prepack": "pnpm run build",
     "pack:dated": "node ./devScripts/pack.ts",
-    "generate-all": "node ./scripts/generateAll.ts",
-    "generate-bridge": "node ./scripts/generateBridge.ts",
+    "generate": "node ./scripts/generateBridge.ts",
     "measure": "node ./devScripts/measureOutput.ts"
   },
   "keywords": [

@@ -141,13 +141,14 @@ const reportFailure = (error: unknown): void => {
 }
 
 /**
- * Runs the package's token generators against the consumer's own
- * `trimscale.config.ts` (read from `process.cwd()` by `scripts/loadConfig.ts`,
- * not this package's own template).
+ * Runs token generation against the consumer's own `trimscale.config.ts`
+ * (read from `process.cwd()` by `scripts/loadConfig.ts`, not this package's
+ * own template). `generateBridge.ts` is a top-level script rather than an
+ * exported function, so importing it for its side effects IS running it.
  */
 const runGenerate = async () => {
   try {
-    await import('../scripts/generateAll.ts')
+    await import('../scripts/generateBridge.ts')
   } catch (error) {
     reportFailure(error)
     process.exit(1)

@@ -2,9 +2,9 @@ import path from 'node:path'
 import zlib from 'node:zlib'
 import type { TrimscaleConfig } from '../models/Config.ts'
 import { buildBridgeSource } from '../scripts/buildBridgeSource.ts'
+import { computeFontData } from '../scripts/fontData.ts'
 import { compileCss, formatBytes, rewriteFontFacesForCss } from '../scripts/generateCss.ts'
-import { computeFontData } from '../scripts/generateFonts.ts'
-import { resolveUtilityFlags } from '../scripts/generateUtilities.ts'
+import { resolveUtilityFlags } from '../scripts/utilityFlags.ts'
 import { type Axis, axes, type Variant, variants } from './measure/configs.ts'
 
 /**

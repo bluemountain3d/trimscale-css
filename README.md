@@ -101,7 +101,7 @@ See [getting-started.md](https://github.com/bluemountain3d/trimscale-css/blob/HE
 trimscale-css/
 ├── bin/                             # CLI entry point (init/generate)
 ├── models/                          # Config.ts, the TrimscaleConfig type
-├── scripts/                         # generateBridge.js/generateFonts.js, read trimscale.config.ts, write <output.dir>/ (your project, not styles/)
+├── scripts/                         # generateBridge.js/fontData.js, read trimscale.config.ts, write <output.dir>/ (your project, not styles/)
 ├── fixtures/                        # Default font files used by the shipped config
 ├── templates/                       # trimscale.config.ts, the consumer-safe template `init` copies into your project
 ├── docs/                            # Guides, see Documentation below

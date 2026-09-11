@@ -1,7 +1,7 @@
 import * as fs from 'node:fs'
 import path from 'node:path'
 import zlib from 'node:zlib'
-import type { FontFace } from './generateFonts.ts'
+import type { FontFace } from './fontData.ts'
 
 /** The subset of Dart Sass's compiler API (shared between `sass` and `sass-embedded`) `writeCssOutput` needs. */
 type SassCompiler = {

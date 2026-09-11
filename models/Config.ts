@@ -57,7 +57,7 @@ export type MatchableFallbackFamily =
   | 'Segoe UI'
   | 'Roboto'
 
-/** Named cross-platform fallback chains, each resolving to an ordered list of `MatchableFallbackFamily` covering Windows/macOS/Android: trimscale emits one `@font-face` per family in the chain (all sharing the same `font-family` name), and the browser uses the first one actually installed. See `FALLBACK_CHAINS` in generateFonts.ts. */
+/** Named cross-platform fallback chains, each resolving to an ordered list of `MatchableFallbackFamily` covering Windows/macOS/Android: trimscale emits one `@font-face` per family in the chain (all sharing the same `font-family` name), and the browser uses the first one actually installed. See `FALLBACK_CHAINS` in fontData.ts. */
 export type MatchableFallbackChain = 'sans-serif' | 'serif' | 'monospace'
 
 /**
