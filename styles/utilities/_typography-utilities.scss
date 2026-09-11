@@ -171,13 +171,13 @@
   }
 
   /// Text color
-  /// Only `.text-color-inherit` ships by default. Unlike font roles, color
-  /// token names aren't a contract enforced anywhere else in the system (see
-  /// font-setup's required $font-roles roles for contrast) — a project is free to
-  /// name its $color-tokens however it likes, so a fixed set of
-  /// `.text-color-*` classes here would risk going silently dead the moment
-  /// a project doesn't use these exact token names. Add your own next to your
-  /// project's palette instead.
+  /// No `.text-color-*` class ships. Unlike font roles, color token names
+  /// aren't a contract enforced anywhere else in the system (see font-setup's
+  /// required $font-roles roles for contrast) — a project is free to name its
+  /// $color-tokens however it likes, so a fixed set of `.text-color-*` classes
+  /// here would risk going silently dead the moment a project doesn't use
+  /// these exact token names. Add your own next to your project's palette
+  /// instead; `.text-color-inherit` is kept below as the shape to copy.
   // .text-color-inherit {
   //   color: inherit;
   // }

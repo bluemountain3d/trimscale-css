@@ -297,6 +297,25 @@ All notable changes to this project are documented in this file.
   `@font-face` and no `--font-family-*` token for it. One unreadable file
   among several is still survivable and now warns; all of them failing is an
   error.
+- A `local` family's generated `@font-face` `src` was a path relative to
+  `output.dir`, which resolves to the wrong place almost everywhere. Sass never
+  rebases a `url()` to the partial it came from, so the literal string is
+  resolved against whichever stylesheet ultimately `@use`s the bridge file, and
+  that sits at a different depth than `output.dir` in the common case. The
+  browser 404s the file and silently falls back. The `src` is root-relative now
+  (leading `/`, resolved from the directory holding `trimscale.config.ts`),
+  which resolves the same regardless of which stylesheet pulls it in.
+  Root-relative on its own still wasn't a URL a bundler serves: Vite and its
+  equivalents copy their static-passthrough folder's *contents* to the site
+  root, so `public/fonts/x.woff2` is served at `/fonts/x.woff2`, not at
+  `/public/fonts/x.woff2`. The new `appFonts.publicDir` (default `'public'`,
+  `'static'` for SvelteKit) names the leading segment to strip when building
+  `src`, and changes nothing about what `path`/`localFontsPath` mean. A font
+  file outside `publicDir` still gets a root-relative path, which works in dev,
+  where the whole project root is servable, and isn't guaranteed after a
+  production build. Distinct from `output.css.fontUrlBase`, which is about what
+  URL a standalone CSS file requests rather than where the SCSS build's `src`
+  is rebased from.
 - A `local` family discovered through `localFontsPath` built its
   `@font-face` `src` from the config key rather than from the folder on
   disk. On a case-insensitive filesystem an `Inter` key opens a folder named
@@ -424,4 +443,11 @@ All notable changes to this project are documented in this file.
 - **Breaking:** gap utility classes (`.gap-*`, `.row-gap-*`,
   `.column-gap-*`). No opt-back-in. Gap utilities without a matching
   flex/grid utility set didn't fit the toolkit's scope.
+- **Breaking:** `.text-color-inherit`, the one `.text-color-*` class that
+  shipped. Color-token names are not a contract the system enforces anywhere
+  else, unlike font roles, so a project is free to name its tokens however it
+  likes and a fixed set of colour classes here would go silently dead the
+  moment one doesn't use these exact names. That reasoning already applied to
+  the rest of the set, which never shipped; this was the inconsistent one.
+  `color: inherit` as a one-line rule of your own replaces it.
 

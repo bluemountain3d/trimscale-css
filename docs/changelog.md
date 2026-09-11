@@ -46,6 +46,10 @@ What it means: if you followed the old wrapper example, which put `.font-size-*`
 
 What it means: `--avg-char-width-*` and the `--text-box-*` widths that build on it move for fonts with an OS/2 version 3 or 4 table. Line lengths set in characters land slightly differently.
 
+**Self-hosted font URLs are built differently, and there is a new field for them.** The `src` in a generated `@font-face` used to be a path relative to `output.dir`, which resolves to the wrong place almost everywhere: Sass never rebases a `url()` to the partial it came from, so the path was resolved against whichever stylesheet pulled the bridge file in, and the browser quietly 404'd the font. It is a root-relative URL now. On top of that, `appFonts.publicDir` (new, default `'public'`, use `'static'` on SvelteKit) names your bundler's static-passthrough folder, whose *contents* get served at the site root: a file at `public/fonts/x.woff2` is served at `/fonts/x.woff2`, so that leading segment is stripped.
+
+What it means: if your fonts live under `public/` (or whatever you set `publicDir` to) this is what makes them load, and there is nothing to do. If they live somewhere else, the URL is still root-relative, which works in dev and isn't guaranteed after a production build. It doesn't change what `path` or `localFontsPath` mean. See [adding-a-font.md](adding-a-font.md).
+
 **`.trim-text-*` belongs on a span inside the sized element, not on the element itself.** In browsers without native `text-box-trim` the fallback occupies that element's `::before` and `::after`, so putting the class on an element that has its own pseudo-elements makes them collide silently. This constraint always existed and was never written down.
 
 A `display` of `flex`, `grid` or `table` on a trimmed element removes the trim in *every* engine, native included, not just on the fallback path. Move the display to a wrapper and keep the class on the span.
@@ -57,6 +61,7 @@ A `display` of `flex`, `grid` or `table` on a trimmed element removes the trim i
 | The eleven `--z-*` tokens (`--z-modal`, `--z-tooltip`, ...) | Copy the values into your own project if you used them. `.skip-link` now reads `var(--z-skip-link, 9999)`. |
 | Gap utilities (`.gap-*`, `.row-gap-*`, `.column-gap-*`)     | No opt-back-in. Use `gap` with a `--space-*` token directly.                   |
 | `styles/components/` and its `.text-box` component          | The recipe is in [examples.md](examples.md), to copy into your own components. |
+| `.text-color-inherit`                                       | Write `color: inherit` yourself. It was the only `.text-color-*` class that shipped; the rest never did, because token names differ from project to project. |
 
 ### New
 
