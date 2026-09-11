@@ -35,13 +35,24 @@ const declaresCommonJs = (pkgPath: string): boolean => {
  */
 const runInit = () => {
   const pkgPath = path.join(projectRoot, 'package.json')
-  const configFileName = `trimscale.config.${declaresCommonJs(pkgPath) ? 'mts' : 'ts'}`
+  const isCommonJs = declaresCommonJs(pkgPath)
+  const configFileName = `trimscale.config.${isCommonJs ? 'mts' : 'ts'}`
   const existing = ['trimscale.config.ts', 'trimscale.config.mts'].find((name) =>
     fs.existsSync(path.join(projectRoot, name)),
   )
 
   if (existing) {
     console.log(`⚠️  ${existing} already exists, leaving it untouched.`)
+
+    // Untouched, but unusable: a `.ts` config predates the `"type"` this
+    // package.json declares (or was copied in from a project without it), and
+    // `generate` is the first thing that will say so. Saying it here costs a
+    // rename instead of a failed run.
+    if (isCommonJs && existing === 'trimscale.config.ts') {
+      console.warn(
+        `⚠️  ...but this package.json declares "type": "commonjs", so \`generate\` can't load it: Node reads a \`.ts\` config as CommonJS, where the config's own \`export default\` is a syntax error. Rename it to trimscale.config.mts, which is an ES module whatever the project's type is. \`generate\` accepts either name.`,
+      )
+    }
   } else {
     const configTemplate = path.join(import.meta.dirname, '..', 'templates', 'trimscale.config.ts')
     fs.copyFileSync(configTemplate, path.join(projectRoot, configFileName))
@@ -80,8 +91,12 @@ const runInit = () => {
     }
   }
 
+  // `existing` first: `configFileName` is the name this run *would* have
+  // picked, which is the file on disk only when nothing was there already. A
+  // config left untouched keeps whichever of the two names it came with, and
+  // that is the file to point at.
   console.log(
-    `📁 \`generate\` writes to ./trimscale-generated/ by default (set output.dir in ${configFileName} to change it). Commit it like any other source file, or gitignore it (along with .trimscale-cache/) and run \`generate\` in CI, your choice.`,
+    `📁 \`generate\` writes to ./trimscale-generated/ by default (set output.dir in ${existing ?? configFileName} to change it). Commit it like any other source file, or gitignore it (along with .trimscale-cache/) and run \`generate\` in CI, your choice.`,
   )
   const installedDocs = path.join(projectRoot, 'node_modules', 'trimscale-css', 'docs', 'getting-started.md')
 
