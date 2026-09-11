@@ -53,6 +53,20 @@ appFonts: {
 },
 ```
 
+**Turning `nextFont` off doesn't make anyone write the `@font-face`.** It only stops the `var()` treatment. A `manual` family is fine, its rule belongs to whatever script loads it, as above. A `cdn` family has no such owner once Next is out of the picture, and `generateFontFace` defaults to `false`, so unless you turn it on nothing declares the font at all and the family renders as its fallback:
+
+```ts
+'Playfair Display': {
+  source: 'cdn',
+  url: ['https://fonts.gstatic.com/s/playfairdisplay/v40/....woff2'],
+  nextFont: false,
+  generateFontFace: true, // nobody else writes it now
+  fallback: { matched: 'serif' },
+},
+```
+
+`generate` warns when no `@font-face` is written for a family (`no @font-face written (source: cdn)`), so this is visible rather than silent, but the warning can't tell an intentional external loader from a forgotten flag.
+
 **Don't combine `fallback: { matched }` with `next/font`'s own automatic fallback.** `next/font/local` already generates its own metric-matched fallback font to reduce CLS (`adjustFontFallback`, defaults to `'Arial'`, `next/font/google` defaults to `true`), independently of trimscale-css. Setting `{ matched }` on a `next/font`-managed family stacks trimscale-css's own metric-matched fallback on top of Next's, e.g. `font-family: var(--next-font-x), "x Fallback", "x-config-key Fallback"`, two different fallback fonts doing the same job. It isn't broken, the browser just never reaches the redundant one, but pick one: leave `{ matched }` off `next/font`-managed families and let Next handle it, or set `adjustFontFallback: false` on the `next/font` side and use trimscale-css's instead.
 
 ## Step 2: Configure `next.config.ts`
