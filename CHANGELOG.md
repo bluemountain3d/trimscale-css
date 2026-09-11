@@ -121,6 +121,26 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Breaking:** every `@font-face` trimscale writes now carries
+  `ascent-override` and `descent-override`, pinning that font's content area
+  to exactly 1em. Leading trim is calculated from a font's typographic
+  metrics, but a font declares its vertical size in three tables that often
+  disagree, and which one the browser reads is decided by the OS/2
+  `USE_TYPO_METRICS` flag and then by the platform: with the flag clear,
+  Windows reads `usWin` and macOS reads `hhea`. On such a font the trim was
+  calculated against metrics the browser never used, and the text sat low
+  inside a correctly sized box, by up to a fifth of an em. Measured across
+  3793 Google Fonts files, roughly one family in nine was affected, Roboto
+  among them; native `text-box-trim` never was, it reads cap height and
+  baseline directly. **Migration:** text in an affected font that isn't
+  leading-trimmed also gets the 1em content area, so `line-height: normal`
+  resolves to `1` and inline boxes are shorter than before. Metric-matched
+  `fallbackFamily` faces are computed on the same basis, so the two stay
+  aligned across a font swap. Where the `@font-face` belongs to someone else
+  (`next/font`, `cdn` without `generateFontFace`, `manual`) trimscale can't
+  write them, and `generate` warns with the two values and how to apply them,
+  staying silent below a hundredth of an em. See
+  [adding-a-font.md](docs/adding-a-font.md#font-metric-overrides).
 - **Breaking:** the cascade layer order gained a layer and `trim` moved. It is
   now `reset, tokens, functions, trim-defaults, base, trim, layouts,
   components, utilities` (was `reset, tokens, functions, trim, base, layouts,

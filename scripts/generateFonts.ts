@@ -14,6 +14,7 @@ import {
   readLocalFont,
   resolveFamilyDirName,
 } from './generateFontMetrics.io.ts'
+import { correctedEmMetrics } from './generateFontMetrics.helpers.ts'
 import { parseFontBuffer } from './generateFontMetrics.parser.ts'
 import { toKebabCase } from './helpers.ts'
 
@@ -103,22 +104,29 @@ export type FallbackFontFace = {
  * single fallback family. `size-adjust` is the only descriptor that reads
  * the fallback's own metrics (`avgCharWidth`, for the width ratio):
  * `ascent-override`/`descent-override`/`line-gap-override` reuse the WEB
- * font's own (uncorrected) ascender/descender/lineGap divided by
- * size-adjust, so the fallback's glyphs occupy the same vertical box the web
- * font would have. Same approach as fontaine and next/font's
- * `adjustFontFallback`. Formula: notes/trimscale-css-forbattringar.md.
+ * font's own metrics divided by size-adjust, so the fallback's glyphs occupy
+ * the same vertical box the web font would have. Same approach as fontaine
+ * and next/font's `adjustFontFallback`. Formula:
+ * notes/trimscale-css-forbattringar.md.
+ *
+ * Ascent and descent come from the CORRECTED metrics, the same ones the web
+ * font's own face declares (see `buildFontFace`), not the raw ones. The point
+ * of this face is that swapping to it changes nothing but the glyphs, and two
+ * faces declaring different heights for the same family would shift the layout
+ * at exactly the moment the swap happens.
  */
 const computeOneFallbackFontFace = (
   familyName: string,
-  webMetrics: Required<Pick<RawFontMetrics, 'avgCharWidth' | 'ascender' | 'descender' | 'lineGap'>>,
+  webMetrics: Required<Pick<RawFontMetrics, 'avgCharWidth' | 'lineGap'>>,
+  corrected: { ascender: number; descender: number },
   fallbackFamily: MatchableFallbackFamily,
 ): FallbackFontFace => {
   const fb = FALLBACK_FONT_METRICS[fallbackFamily]
   const fallbackAvgCharWidth = fb.avgCharWidth / fb.upm
 
   const sizeAdjust = webMetrics.avgCharWidth / fallbackAvgCharWidth
-  const ascentOverride = webMetrics.ascender / sizeAdjust
-  const descentOverride = webMetrics.descender / sizeAdjust
+  const ascentOverride = corrected.ascender / sizeAdjust
+  const descentOverride = corrected.descender / sizeAdjust
   const lineGapOverride = webMetrics.lineGap / sizeAdjust
 
   return {
@@ -153,10 +161,11 @@ export const computeFallbackFontFaces = (
     return []
   }
 
-  const resolvedMetrics = { ...webMetrics, ascender: webMetrics.ascender, descender: webMetrics.descender, lineGap: webMetrics.lineGap }
+  const resolvedMetrics = { ...webMetrics, lineGap: webMetrics.lineGap }
+  const corrected = correctedEmMetrics(webMetrics.ascender, webMetrics.descender)
 
   return resolveFallbackFamilies(fallbackFamily).map((family) =>
-    computeOneFallbackFontFace(familyName, resolvedMetrics, family),
+    computeOneFallbackFontFace(familyName, resolvedMetrics, corrected, family),
   )
 }
 
@@ -176,6 +185,16 @@ export type FontFace = {
   /** A single weight for static fonts, or a `{min, max}` range for variable fonts (`font-weight: min max;`) */
   weight: number | { min: number; max: number }
   style: 'normal' | 'italic'
+  /**
+   * Percentage value for `ascent-override`, e.g. `73.5` for `73.5%`. Together
+   * with `descentOverride` this pins the content area to exactly 1em, which is
+   * what the leading-trim fallback's `(1lh - 1em)` assumes. Without them the
+   * browser is free to measure the font by whichever of its three metric pairs
+   * its platform prefers, and the trim lands off by `capTopError`.
+   */
+  ascentOverride: number
+  /** Percentage value for `descent-override`. See `ascentOverride`. */
+  descentOverride: number
 }
 
 /** One `path`/`url` entry's extracted metrics plus what's needed to build its `@font-face`, kept until the family's best-metrics candidate is picked. */
@@ -186,6 +205,8 @@ type ParsedEntry = {
   weightClass: number
   weightRange: { min: number; max: number } | null
   raw: RawFontMetrics
+  corrected: { ascender: number; descender: number }
+  trimError: number
 }
 
 /** One family's full metrics entry: the raw extracted/manual metrics plus its resolved SCSS-ready `family` string. */
@@ -244,6 +265,44 @@ const resolveLocalFontPaths = async (
 const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cdn'): void => {
   console.warn(
     `⚠ "${familyName}": no @font-face written (source: ${source}). Confirm "${familyName}" matches the font-family actually loaded elsewhere, or metrics apply to nothing.`,
+  )
+}
+
+/**
+ * Trim error small enough to stay quiet about, in em. Most fonts land at
+ * zero and a few land above 0.05, with almost nothing in between, so this
+ * number only has to sit somewhere in the empty middle — it isn't a tuning
+ * knob and isn't worth making configurable.
+ */
+const MIN_REPORTED_TRIM_ERROR = 0.01
+
+/**
+ * Warns that a family's leading trim will be visibly off because its
+ * `@font-face` belongs to someone else, so the metric overrides that would
+ * pin its content area to 1em can't be written (see `FontFace.ascentOverride`).
+ * Silent below `MIN_REPORTED_TRIM_ERROR`, which covers most fonts.
+ *
+ * The message carries the two values and the one edit that applies them,
+ * rather than the reasoning: a `generate` run is the wrong place to explain
+ * OS/2 metric selection, and docs/adding-a-font.md is the right one.
+ */
+const warnIfTrimUncorrectable = (
+  familyName: string,
+  best: ParsedEntry,
+  usesNextFont: boolean,
+  source: 'local' | 'cdn',
+): void => {
+  if (best.trimError < MIN_REPORTED_TRIM_ERROR) return
+
+  const owner = usesNextFont ? 'next/font' : 'whatever loads it'
+  const fix = usesNextFont
+    ? source === 'local'
+      ? 'Pass them through next/font/local\'s `declarations` option.'
+      : "next/font/google has no way to set them. Load the family with `source: 'local'` instead if the trim matters more than the CDN."
+    : 'Set `generateFontFace: true` and trimscale writes the rule, overrides included.'
+
+  console.warn(
+    `⚠ "${familyName}" needs \`ascent-override: ${(best.corrected.ascender * 100).toFixed(1)}%\` and \`descent-override: ${(best.corrected.descender * 100).toFixed(1)}%\` for its leading trim to land right, and its @font-face is written by ${owner}, so trimscale can't add them. Without them the trim sits ${best.trimError.toFixed(3)}em off (${(best.trimError * 16).toFixed(1)}px at 16px) in browsers with no native text-box-trim. ${fix} Why: docs/adding-a-font.md#font-metric-overrides`,
   )
 }
 
@@ -372,9 +431,20 @@ export const computeFontData = async (
           isItalic,
           weightClass,
           weightRange,
+          corrected,
+          trimError,
         } = await parseFontBuffer(buffer, `${familyName} (${entry})`)
 
-        parsedEntries.push({ src, ext: getFontExtension(entry), isItalic, weightClass, weightRange, raw })
+        parsedEntries.push({
+          src,
+          ext: getFontExtension(entry),
+          isItalic,
+          weightClass,
+          weightRange,
+          raw,
+          corrected,
+          trimError,
+        })
       } catch (err: unknown) {
         // Collected rather than reported here: one unreadable file among
         // several is survivable (the family still gets its metrics from
@@ -434,8 +504,12 @@ export const computeFontData = async (
           ext: entry.ext,
           weight: entry.weightRange ?? entry.weightClass,
           style: entry.isItalic ? 'italic' : 'normal',
+          ascentOverride: +(entry.corrected.ascender * 100).toFixed(3),
+          descentOverride: +(entry.corrected.descender * 100).toFixed(3),
         })
       }
+    } else {
+      warnIfTrimUncorrectable(familyName, best, usesNextFont, fontSource.source)
     }
   }
 

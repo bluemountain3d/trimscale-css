@@ -44,6 +44,45 @@ export const getCorrectedAscenderDescender = (ascender: number, descender: numbe
 }
 
 /**
+ * The same correction as `getCorrectedAscenderDescender`, for values already
+ * normalized to em. Shares that function rather than repeating the arithmetic,
+ * so the two can't drift apart.
+ * @param ascender - Ascender in em
+ * @param descender - Descender in em (either sign)
+ * @returns Both in em, summing to exactly 1 whenever the font's own metrics reach or exceed the em
+ */
+export const correctedEmMetrics = (ascender: number, descender: number): { ascender: number; descender: number } => {
+  const { upmAscender, upmDescender } = getCorrectedAscenderDescender(ascender, descender, 1)
+  return { ascender: upmAscender, descender: upmDescender }
+}
+
+/**
+ * How far the leading-trim fallback's cap top lands from where the browser
+ * actually draws it, in em. Zero when the browser reads the same ascender and
+ * descender the trim was calculated from.
+ *
+ * The fallback's `::before` removes `(1lh - 1em) / 2 + topTrim`, which assumes
+ * a content area of exactly 1em. The browser's real distance from the line
+ * box's top to the cap top is `(1lh - (A + D)) / 2 + (A - capHeight)`, for
+ * whichever A and D it picked. Subtracting one from the other cancels `1lh`
+ * and `capHeight` and leaves what this returns. It comes out to zero whenever
+ * A and D are the corrected metrics, at any line-height, which is why the
+ * assumption holds for most fonts and silently fails for the rest.
+ *
+ * Which A and D the browser picks isn't a property of the font: with OS/2
+ * `fsSelection` bit 7 (`USE_TYPO_METRICS`) set it reads the typo metrics
+ * everywhere, and with it clear Windows reads `usWin` while macOS reads
+ * `hhea`. Callers compute both and take the worst, since CSS can't branch on
+ * the platform.
+ * @param browserAscender - Ascender the browser reads, in em
+ * @param browserDescender - Descender the browser reads, in em (positive)
+ * @param correctedAscender - Ascender the trim was calculated against, in em (see `correctedEmMetrics`)
+ * @returns Absolute error in em, independent of font-size and line-height
+ */
+export const capTopError = (browserAscender: number, browserDescender: number, correctedAscender: number): number =>
+  Math.abs((1 - (browserAscender + browserDescender)) / 2 + (browserAscender - correctedAscender))
+
+/**
  * Calculates trim values for text-box-trim CSS polyfill
  * @param capHeight - Cap height in font units
  * @param upmAscender - Corrected ascender value

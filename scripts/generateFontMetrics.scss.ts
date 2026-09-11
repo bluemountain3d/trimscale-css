@@ -33,6 +33,8 @@ export const fontFacesToScssListValue = (fontFaces: FontFace[]): string => {
       setScssMapEntry('ext', face.ext, 3),
       setScssMapEntry('weight', formatWeight(face.weight), 3),
       setScssMapEntry('style', face.style, 3),
+      setScssMapEntry('ascent-override', face.ascentOverride, 3),
+      setScssMapEntry('descent-override', face.descentOverride, 3),
     ]
     return `    (\n${innerEntries.join('')}    ),\n`
   })

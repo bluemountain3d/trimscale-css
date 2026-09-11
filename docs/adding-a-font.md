@@ -153,6 +153,30 @@ No `@font-face` is generated for a `manual` family, load the font however that C
 
 **The config key must match what's actually loaded, not the font file's own name.** `@font-face`'s `font-family` value is arbitrary, matching is a plain string comparison against whichever `@font-face` rule is actually in effect, never the font file's internal name table. Since `manual` writes no `@font-face` at all, that rule comes entirely from the CDN's own script/stylesheet, trimscale has no say in it. If nothing renders despite metrics looking correct, check DevTools' Computed panel (or the CDN's own injected CSS) for the real `font-family` string in use, and match your config key to that, not to whatever the raw font file calls itself internally.
 
+## Font metric overrides
+
+Every `@font-face` trimscale writes carries `ascent-override` and `descent-override`, pinning that font's content area to exactly 1em. This is automatic and has no config option: it's what makes leading trim land where it should.
+
+A font file declares its vertical size three separate times, in three tables, and the values often disagree. Which one a browser reads isn't up to the font: with the OS/2 `USE_TYPO_METRICS` flag set it reads the typographic metrics everywhere, and with the flag clear Windows reads `usWin` while macOS reads `hhea`. Leading trim is calculated from the typographic metrics, so on a font that leaves the flag clear and whose tables disagree, the browser and the trim measure the same font differently and the text sits low inside a correctly sized box. Measured across 3793 Google Fonts files, roughly one family in nine is affected, Roboto among them, by up to a fifth of an em. The overrides settle the question so the platform can't answer it differently.
+
+Two consequences worth knowing:
+
+- Text in that font that isn't leading-trimmed also gets the 1em content area. `line-height: normal` resolves to `1`, and inline boxes are shorter than they would otherwise be.
+- Native `text-box-trim` never needed this. It reads cap height and baseline straight from the font, so it was always correct. The overrides matter for the fallback path, in browsers without native support.
+
+### When trimscale can't write them
+
+The overrides can only go in an `@font-face` rule trimscale writes itself, which means `local` families and `cdn` families with `generateFontFace: true`. For every other family the rule belongs to someone else, and `generate` warns when that costs enough to see, naming the two values and the edit that applies them:
+
+| Family | Way out |
+| ------ | ------- |
+| `cdn`, loaded via your own `<link>` | Set `generateFontFace: true` and let trimscale write the rule |
+| `next/font/local` | Pass the values through `localFont()`'s `declarations` option, see [using-with-nextjs.md](using-with-nextjs.md#step-5-metric-overrides-if-generate-asked-for-them) |
+| `next/font/google` | No hook exists. Load the family's files yourself instead, see [using-with-nextjs.md](using-with-nextjs.md#nextfontgoogle) |
+| `manual` | Not detectable, the file trimscale would have read isn't there. Add the overrides to whatever rule does load the font |
+
+The warning stays silent below a hundredth of an em, which covers the large majority of fonts. It fires on the measured error, not on the flag: two thirds of the fonts that leave `USE_TYPO_METRICS` clear have tables that agree closely enough to cost nothing.
+
 ## Metric-matched fallback fonts (`fallbackFamily`)
 
 When a web font is still loading, the browser renders text in a fallback font first, then swaps once the web font arrives. If the fallback's metrics differ from the web font's, that swap shifts the layout (CLS): lines break in different places, the page jumps.

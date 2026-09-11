@@ -5,6 +5,7 @@ import {
   calculateTrimValues,
   getAverageSideBearings,
   getAvgAdvanceWidth,
+  capTopError,
   getBBoxHeight,
   getCorrectedAscenderDescender,
   getSampleCoverage,
@@ -18,6 +19,10 @@ export type ParsedFont = {
   weightClass: number
   /** `wght` axis min/max from the `fvar` table for a variable font, or `null` for a static font */
   weightRange: { min: number; max: number } | null
+  /** The ascender and descender the trim is calculated against, em. Emitted as `ascent-override`/`descent-override` so the browser measures the font the same way, see `capTopError`. */
+  corrected: { ascender: number; descender: number }
+  /** What the fallback trim would be off by, in em, if nothing overrides this font's metrics. Zero for a font that settles the question itself (see `capTopError`). */
+  trimError: number
 }
 
 // Weight metrics are extracted at. fontkit@2.0.4's getVariation() is
@@ -125,6 +130,21 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
 
   const { topTrim, bottomTrim } = calculateTrimValues(capHeight, upmAscender, upmDescender, upm)
 
+  // What the browser would measure this font by if nothing overrides it. The
+  // typo metrics above are only one of three candidates in the file, and the
+  // file itself doesn't get to pick: `USE_TYPO_METRICS` set means every engine
+  // reads them, clear means Windows reads `usWin` and macOS reads `hhea`. Both
+  // are measured because CSS can't branch per platform, so the override has to
+  // satisfy the worse of the two.
+  const hhea = f.hhea
+  const correctedAscender = upmAscender / upm
+  const trimError = os2.fsSelection.useTypoMetrics
+    ? 0
+    : Math.max(
+        capTopError(os2.winAscent / upm, os2.winDescent / upm, correctedAscender),
+        hhea ? capTopError(hhea.ascent / upm, Math.abs(hhea.descent) / upm, correctedAscender) : 0,
+      )
+
   // Side bearings MUST come from activeFont — glyph widths actually change with weight
   const { lsb, rsb } = getAverageSideBearings(activeFont)
 
@@ -157,5 +177,10 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
     isItalic: isItalic,
     weightClass: weightClass,
     weightRange: weightRange,
+    corrected: {
+      ascender: +correctedAscender.toFixed(4),
+      descender: +(upmDescender / upm).toFixed(4),
+    },
+    trimError: +trimError.toFixed(4),
   }
 }

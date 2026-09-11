@@ -14,6 +14,7 @@ This is the SCSS path (`loadPaths`, not `pkg:`, see [why](getting-started.md#con
 | 2    | `next.config.ts`                                | Add `sassOptions` with `loadPaths`                                                                       |
 | 3    | `layout.tsx` (or wherever you load fonts)       | Load fonts with `next/font`, variable name must match `--{prefix}-{kebab-family-name}`                   |
 | 4    | Run `npx trimscale-css generate`                | Extracts metrics as usual, builds each family's `family` value around its CSS variable                   |
+| 5    | `layout.tsx` again, only if `generate` asks     | Paste the metric overrides it printed into `localFont()`'s `declarations`                                |
 
 ## Step 1: Configure the package
 
@@ -133,6 +134,53 @@ npx trimscale-css generate
 
 For every family resolving to `true` (via `nextFontDefault`, or its own `nextFont` override), this builds that family's `family` value around its CSS variable, e.g. `var(--next-font-inter, "Inter"), sans-serif`, and, for `local` sources, skips its `@font-face` rules (Next.js's own `next/font/local` writes those). `cdn` sources never write `@font-face` unless `generateFontFace: true` is set explicitly, regardless of `nextFont`, that's what leaves `next/font/google` free to write its own. Roles are assigned from `appFonts.fontRoles` exactly as in the standard flow, see [adding-a-font.md](adding-a-font.md) for that part.
 
+Read the output before moving on. Besides the `variable` name per family, `generate` prints a warning for any family that needs the metric overrides in the next step.
+
+## Step 5: Metric overrides, if `generate` asked for them
+
+Trimscale pins each font's content area to 1em with `ascent-override` and `descent-override`, which is what makes leading trim land where it should, see [Font metric overrides](adding-a-font.md#font-metric-overrides) for why. It can only do that in an `@font-face` rule it writes itself, and under `next/font` it writes none.
+
+Most fonts need nothing here, and `generate` stays quiet about those. Inter, Playfair Display, Lora and Open Sans all raise nothing. Roboto does:
+
+```
+⚠ "Roboto" needs `ascent-override: 75.0%` and `descent-override: 25.0%` for its
+  leading trim to land right, and its @font-face is written by next/font, so
+  trimscale can't add them. Without them the trim sits 0.100em off (1.6px at
+  16px) in browsers with no native text-box-trim. ...
+```
+
+### `next/font/local`
+
+`localFont()` takes a `declarations` array, which is passed straight through to the `@font-face` rule it generates. Paste the two values from the warning:
+
+```tsx
+const roboto = localFont({
+  src: [{ path: '../assets/fonts/Roboto-Variable.woff2', style: 'normal', weight: '100 900' }],
+  variable: '--next-font-roboto',
+  declarations: [
+    { prop: 'ascent-override', value: '75%' },
+    { prop: 'descent-override', value: '25%' },
+  ],
+});
+```
+
+These are per font file, not per family, so a family whose weights come from separate files (rather than one variable font) repeats them in each `localFont()` call. The values don't change between weights of the same family.
+
+Re-run `generate` after a font file changes: the numbers come out of that file, and a different subset or version can shift them.
+
+### `next/font/google`
+
+There's no equivalent option. `next/font/google` builds its `@font-face` at build time from Google's own CSS, and nothing in its API reaches that rule.
+
+The way out is to stop loading that family through `next/font/google`. Download the files into your project (`source: 'local'` in the config either way) and pick one of:
+
+- **Keep `next/font`:** load them with `next/font/local` and use the `declarations` block above. The family keeps its `var(--next-font-*)` value and everything else in this guide still applies.
+- **Drop `next/font` for this family:** set `nextFont: false` on it, and trimscale writes the `@font-face` itself, overrides included. Its `family` value becomes a plain quoted name, and you remove it from `layout.tsx` entirely.
+
+`next/font/google` already self-hosts the file, so neither one adds a network request. What they add is the font files in your repo.
+
+Whether it's worth it depends on the font and the size it's used at. The warning states the error in px at 16px; multiply by four for a display heading. If the family raises no warning, which is the common case, there is nothing to do.
+
 ## Why the CSS variable must come first
 
 Next.js exposes a font through the CSS custom property you define in `variable`, not by family name. Putting `var(--next-font-inter)` first is what makes the browser resolve to the face Next.js generated, whatever that face happens to be called internally.
@@ -158,6 +206,7 @@ The fallback also means the config key has to be the font's real family name for
 - [ ] Each font's `next/font` `variable` matches `--{nextFontPrefix}-{kebab-family-name}` exactly, checked against what `npx trimscale-css generate` prints for it: a typo never errors, and for a Google font it doesn't even look wrong
 - [ ] `font.variable` on the `<html>` element for every font, not `font.className`
 - [ ] Ran `npx trimscale-css generate`
+- [ ] Read its output: any family it asked for metric overrides on has them in `localFont()`'s `declarations`
 - [ ] Fonts mapped to roles in `appFonts.fontRoles` (see [adding-a-font.md](adding-a-font.md))
 - [ ] Dev server compiles without errors
 - [ ] Inspect a heading in the browser, the computed `font-family` should show the correct typeface
