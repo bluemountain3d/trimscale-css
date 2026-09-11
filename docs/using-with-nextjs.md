@@ -24,7 +24,7 @@ This is the SCSS path (`loadPaths`, not `pkg:`, see [why](getting-started.md#con
 appFonts: {
   nextFontDefault: true,
   nextFontPrefix: 'next-font', // defaults to 'next-font' if omitted
-  fallbackDefault: 'sans-serif',
+  defaultFallback: 'sans-serif',
   families: {
     'Inter': {
       source: 'local', // loaded with next/font/local
@@ -53,7 +53,7 @@ appFonts: {
 },
 ```
 
-**Don't combine `fallbackFamily` with `next/font`'s own automatic fallback.** `next/font/local` already generates its own metric-matched fallback font to reduce CLS (`adjustFontFallback`, defaults to `'Arial'`, `next/font/google` defaults to `true`), independently of trimscale-css. Setting `fallbackFamily` on a `next/font`-managed family stacks trimscale-css's own metric-matched fallback on top of Next's, e.g. `font-family: var(--next-font-x), "x Fallback", "x-config-key Fallback", serif`, two different fallback fonts doing the same job. It isn't broken, the browser just never reaches the redundant one, but pick one: drop `fallbackFamily` for `next/font`-managed families and let Next handle it, or set `adjustFontFallback: false` on the `next/font` side and use trimscale-css's `fallbackFamily` instead.
+**Don't combine `fallback: { matched }` with `next/font`'s own automatic fallback.** `next/font/local` already generates its own metric-matched fallback font to reduce CLS (`adjustFontFallback`, defaults to `'Arial'`, `next/font/google` defaults to `true`), independently of trimscale-css. Setting `{ matched }` on a `next/font`-managed family stacks trimscale-css's own metric-matched fallback on top of Next's, e.g. `font-family: var(--next-font-x), "x Fallback", "x-config-key Fallback"`, two different fallback fonts doing the same job. It isn't broken, the browser just never reaches the redundant one, but pick one: leave `{ matched }` off `next/font`-managed families and let Next handle it, or set `adjustFontFallback: false` on the `next/font` side and use trimscale-css's instead.
 
 ## Step 2: Configure `next.config.ts`
 

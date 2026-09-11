@@ -39,7 +39,7 @@ const config: TrimscaleConfig = {
     localFontsPath: './fixtures/fonts',
     nextFontDefault: false,         // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
-    fallbackDefault: 'sans-serif',  // used when a font entry below has no `fallback` of its own
+    defaultFallback: 'sans-serif',  // used when a font entry below has no `fallback` of its own
     families: {
       'Roboto': {
         source: 'local',

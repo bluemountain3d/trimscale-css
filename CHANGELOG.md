@@ -21,14 +21,21 @@ All notable changes to this project are documented in this file.
   `sassOptions` fails the build either way, with the same error.
   Reproduced against both bundlers. `loadPaths` is unaffected and stays
   the documented approach for Next.js.
-- `FontSource.fallbackFamily` (opt-in): generates a metric-matched `@font-face`
-  override (`size-adjust`, `ascent-override`, `descent-override`,
-  `line-gap-override`) between the webfont and its generic fallback keyword,
-  to reduce layout shift on font swap. Don't combine it with `next/font`'s
-  own `adjustFontFallback` (on by default for both `next/font/local` and
-  `next/font/google`): both generate a metric-matched fallback
-  independently, stacking two redundant fallback fonts in the same
-  `font-family` list. Not broken, just unnecessary, pick one.
+- `FontSource.fallback` accepts `{ matched: ... }` (opt-in) alongside a
+  generic keyword: generates a metric-matched `@font-face` override
+  (`size-adjust`, `ascent-override`, `descent-override`,
+  `line-gap-override`) that stands in for the webfont until it loads, to
+  reduce layout shift on font swap. Takes a named chain (`'serif'`,
+  recommended), a single system family, or your own list.
+  The two forms are alternatives, not layers: `{ matched }` emits no generic
+  keyword after it, because a generic needs no loading and would therefore
+  win the swap window every time, leaving the override to render in the one
+  moment it exists for. `next/font` builds its own fallbacks the same way.
+  Don't combine `{ matched }` with `next/font`'s own `adjustFontFallback`
+  (on by default for both `next/font/local` and `next/font/google`): both
+  generate a metric-matched fallback independently, stacking two redundant
+  fallback fonts in the same `font-family` list. Not broken, just
+  unnecessary, pick one.
 - `$container` parameter on all five breakpoint mixins (`up-to`, `and-up`,
   `and-down`, `between`, `only`): pass a container name, or `true` for the
   nearest anonymous container, to emit a `@container` query instead of
@@ -120,6 +127,12 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Breaking:** `appFonts.fallbackDefault` is renamed
+  `appFonts.defaultFallback`. It has always been the default *value* of a
+  family's `fallback` field rather than a last resort appended to every
+  stack, and the old name read the other way round. `generate` fails with a
+  message naming the new field if the old one is still there.
+
 - **Breaking:** every `@font-face` trimscale writes now carries
   `ascent-override` and `descent-override`, pinning that font's content area
   to exactly 1em. Leading trim is calculated from a font's typographic
@@ -134,7 +147,7 @@ All notable changes to this project are documented in this file.
   baseline directly. **Migration:** text in an affected font that isn't
   leading-trimmed also gets the 1em content area, so `line-height: normal`
   resolves to `1` and inline boxes are shorter than before. Metric-matched
-  `fallbackFamily` faces are computed on the same basis, so the two stay
+  `{ matched }` fallback faces are computed on the same basis, so the two stay
   aligned across a font swap. Where the `@font-face` belongs to someone else
   (`next/font`, `cdn` without `generateFontFace`, `manual`) trimscale can't
   write them, and `generate` warns with the two values and how to apply them,

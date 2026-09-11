@@ -37,6 +37,24 @@ const assertNoLegacyFields = (cfg: TrimscaleConfig): void => {
       '`appFonts.fonts` has been renamed to `appFonts.families` (as of 1.0.0-beta.5). Update your config and re-run `npx trimscale-css generate`.',
     )
   }
+
+  if (cfg.appFonts && 'fallbackDefault' in cfg.appFonts) {
+    throw new Error(
+      '`appFonts.fallbackDefault` has been renamed to `appFonts.defaultFallback` (as of 1.0.0-beta.5). Update your config and re-run `npx trimscale-css generate`.',
+    )
+  }
+
+  // The one rename that changes shape rather than just spelling, and the one
+  // that fails most quietly: an unread `fallbackFamily` writes no
+  // metric-matched @font-face at all, and the family simply falls back to a
+  // generic without anything saying so.
+  for (const [familyName, fontSource] of Object.entries(cfg.appFonts?.families ?? {})) {
+    if ('fallbackFamily' in fontSource) {
+      throw new Error(
+        `\`fallbackFamily\` on "${familyName}" has moved into \`fallback\` (as of 1.0.0-beta.5): write \`fallback: { matched: ${JSON.stringify((fontSource as { fallbackFamily: unknown }).fallbackFamily)} }\`, and drop that family's generic \`fallback\` if it has one. A metric-matched fallback replaces the generic rather than sitting in front of it. Update your config and re-run \`npx trimscale-css generate\`.`,
+      )
+    }
+  }
 }
 
 /** `output.scss`/`output.css` both `false` is a config mistake, not a valid "generate nothing" state — an explicit no-op would silently produce an empty `generate` run with no indication anything is wrong. */

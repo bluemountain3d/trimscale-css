@@ -40,10 +40,10 @@ export type Breakpoints = {
 }
 
 // AppFonts ===================================================================
-/** Generic CSS font-family fallback keywords usable in a `FontSource.fallback`/`AppFonts.fallbackDefault`. */
+/** Generic CSS font-family fallback keywords usable in a `FontSource.fallback`/`AppFonts.defaultFallback`. */
 export type FontFallbacks = 'sans-serif' | 'serif' | 'monospace' | 'system-ui' | 'cursive'
 
-/** Concrete system fonts trimscale has built-in metrics for, usable as a metric-matched `fallbackFamily`. Distinct from `FontFallbacks` (generic keywords), which can't be metric-matched. */
+/** Concrete system fonts trimscale has built-in metrics for, usable in a `{ matched }` fallback. Distinct from `FontFallbacks` (generic keywords), which can't be metric-matched. */
 export type MatchableFallbackFamily =
   | 'Arial'
   | 'Helvetica'
@@ -60,6 +60,22 @@ export type MatchableFallbackFamily =
 /** Named cross-platform fallback chains, each resolving to an ordered list of `MatchableFallbackFamily` covering Windows/macOS/Android: trimscale emits one `@font-face` per family in the chain (all sharing the same `font-family` name), and the browser uses the first one actually installed. See `FALLBACK_CHAINS` in generateFonts.ts. */
 export type MatchableFallbackChain = 'sans-serif' | 'serif' | 'monospace'
 
+/**
+ * What a family falls back to while its own font loads, and if it never
+ * does. Either a generic keyword, or `{ matched }` for a metric-matched
+ * `@font-face` override built from system fonts.
+ *
+ * The two are alternatives, not layers. A generic keyword needs no loading
+ * and is therefore available the instant the real font isn't, so a generic
+ * sitting behind a metric-matched family wins every time and the metric
+ * matching never renders. `{ matched }` consequently emits no generic at
+ * all; the safety net is the chain itself, which covers Windows, macOS and
+ * Android, so prefer a chain (`{ matched: 'serif' }`) over a single family.
+ */
+export type FontFallback =
+  | FontFallbacks
+  | { matched: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[] }
+
 /** The five trim/spacing metrics a font contributes, normalized to em. Same shape the generator extracts from a real font file — a `manual` `FontSource` supplies these by hand instead (see precisionspec.dev). */
 export type RawFontMetrics = {
   /** Average character width, normalized to em */
@@ -72,11 +88,11 @@ export type RawFontMetrics = {
   lsbAdjust: number
   /** Right side bearing adjustment, normalized to em (negative) */
   rsbAdjust: number
-  /** Raw (uncorrected) OS/2 typo ascender, normalized to em. Only needed when `fallbackFamily` is set (without it, no metric-matched @font-face override is generated). */
+  /** Raw (uncorrected) OS/2 typo ascender, normalized to em. Only needed for a `{ matched }` fallback (without it, no metric-matched @font-face override is generated). */
   ascender?: number
-  /** Raw (uncorrected) OS/2 typo descender, normalized to em (positive). Only needed when `fallbackFamily` is set. */
+  /** Raw (uncorrected) OS/2 typo descender, normalized to em (positive). Only needed for a `{ matched }` fallback. */
   descender?: number
-  /** Raw OS/2 typo line gap, normalized to em. Only needed when `fallbackFamily` is set. */
+  /** Raw OS/2 typo line gap, normalized to em. Only needed for a `{ matched }` fallback. */
   lineGap?: number
 }
 
@@ -93,33 +109,30 @@ export type FontSource =
       source: 'local'
       /** Path(s) to the font file(s) including file extension, relative to `trimscale.config.ts`. If omitted, falls back to every font file found under `AppFonts.localFontsPath`/<this family's config key>. */
       path?: string[]
-      fallback?: FontFallbacks
+      /** A generic keyword, or `{ matched: 'serif' }` for a metric-matched override. Defaults to `AppFonts.defaultFallback`. See `FontFallback`. */
+      fallback?: FontFallback
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `false` here if most of your fonts go through `next/font` but this particular one doesn't. */
       nextFont?: boolean
-      /** Metric-matched fallback `@font-face` override(s): a chain (recommended, e.g. `'sans-serif'`), a single family, or your own array. See docs/adding-a-font.md. */
-      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
   | {
       source: 'cdn'
       /** Direct URL(s) to the actual font file(s) — not a CSS-generating endpoint (e.g. not Google Fonts' `css2?family=...`, which resolves differently per `User-Agent` and isn't a font file itself). Fetched once and cached under `.trimscale-cache/fonts/` (gitignored), not re-fetched while cached. */
       url: string[]
-      fallback?: FontFallbacks
+      /** A generic keyword, or `{ matched: 'serif' }` for a metric-matched override. Defaults to `AppFonts.defaultFallback`. See `FontFallback`. */
+      fallback?: FontFallback
       /** Write `@font-face` rules pointing at `url` (self-hosting via the CDN's file URLs directly). Default `false`: assumes the font is already loaded some other way (a `<link>` tag, a JS loader, `next/font/google`), and only metrics are needed. */
       generateFontFace?: boolean
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `true` here for a `next/font/google` font when most of your other fonts *aren't* going through `next/font`, or `false` if this one isn't even though most are. */
       nextFont?: boolean
-      /** Metric-matched fallback `@font-face` override(s): a chain (recommended, e.g. `'sans-serif'`), a single family, or your own array. See docs/adding-a-font.md. */
-      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
   | {
       source: 'manual'
-      fallback?: FontFallbacks
+      /** A generic keyword, or `{ matched: 'serif' }` for a metric-matched override, which needs `ascender`/`descender`/`lineGap` in `metrics` too. Defaults to `AppFonts.defaultFallback`. See `FontFallback`. */
+      fallback?: FontFallback
       /** Hand-entered metrics for a font whose file trimscale can't read (e.g. a CDN that doesn't expose downloadable files). See precisionspec.dev. No `@font-face` is generated, load the font some other way. */
       metrics: RawFontMetrics
       /** Overrides `AppFonts.nextFontDefault` for this family only. */
       nextFont?: boolean
-      /** Metric-matched fallback `@font-face` override(s), requires `ascender`/`descender`/`lineGap` in `metrics` too. See docs/adding-a-font.md. */
-      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
 
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
@@ -139,7 +152,8 @@ export type AppFonts = {
   /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `families` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
   nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted
-  fallbackDefault: FontFallbacks
+  /** The `fallback` used by families that don't set their own. Generic keywords only: a metric-matched fallback has to suit the font's own category, so it's chosen per family. */
+  defaultFallback: FontFallbacks
 }
 
 // FontRoles ==================================================================

@@ -1,6 +1,8 @@
 import path from 'node:path'
 import type {
   AppFonts,
+  FontFallback,
+  FontFallbacks,
   FontSource,
   MatchableFallbackChain,
   MatchableFallbackFamily,
@@ -41,7 +43,7 @@ const FALLBACK_FONT_METRICS: Record<MatchableFallbackFamily, { upm: number; avgC
 
 /**
  * Named cross-platform fallback chains, resolved by `resolveFallbackFamilies`
- * when a `FontSource.fallbackFamily` is one of these keywords instead of an
+ * when a `{ matched }` fallback is one of these keywords instead of an
  * explicit `MatchableFallbackFamily`/array. `computeFallbackFontFaces` emits
  * one `@font-face` per family in the chain, all sharing the same
  * `font-family` name: the browser tries each in order and uses the first
@@ -78,7 +80,7 @@ const buildLocalFontSrc = (entry: string, publicDir: string): string => {
   return `/${withoutPublicDir}`
 }
 
-/** Resolves a `FontSource.fallbackFamily` value (single family, explicit array, or named chain) to a flat `MatchableFallbackFamily[]`. */
+/** Resolves a `{ matched }` fallback value (single family, explicit array, or named chain) to a flat `MatchableFallbackFamily[]`. */
 const resolveFallbackFamilies = (
   value: MatchableFallbackFamily | MatchableFallbackFamily[] | MatchableFallbackChain,
 ): MatchableFallbackFamily[] => {
@@ -86,9 +88,15 @@ const resolveFallbackFamilies = (
   return value in FALLBACK_CHAINS ? FALLBACK_CHAINS[value as MatchableFallbackChain] : [value as MatchableFallbackFamily]
 }
 
+/** The `{ matched }` half of a `FontFallback`, or `undefined` when it's a plain generic keyword. Narrows on the object form, so a family that asks for metric matching is the only one that reaches `computeFallbackFontFaces`. */
+const matchedFallbackOf = (
+  fallback: FontFallback | undefined,
+): MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[] | undefined =>
+  typeof fallback === 'object' ? fallback.matched : undefined
+
 /** A single metric-matched `@font-face` override to emit, so a fallback system font takes on the web font's vertical/horizontal metrics during font-swap (reduces CLS). */
 export type FallbackFontFace = {
-  /** `font-family` value for the override (`"${familyName} Fallback"`), inserted between the web font and the generic fallback in the `font-family` stack */
+  /** `font-family` value for the override (`"${familyName} Fallback"`), which follows the web font in the `font-family` stack and, per `buildFamilyString`, replaces the generic keyword rather than preceding it */
   family: string
   /** The `MatchableFallbackFamily` to load via `src: local(...)` */
   fallbackFamily: MatchableFallbackFamily
@@ -140,8 +148,8 @@ const computeOneFallbackFontFace = (
 }
 
 /**
- * Computes one metric-matched `@font-face` override per family in
- * `fallbackFamily` (a single family, an explicit array, or a named
+ * Computes one metric-matched `@font-face` override per family in a
+ * `{ matched }` fallback (a single family, an explicit array, or a named
  * `MatchableFallbackChain`, see `resolveFallbackFamilies`). All returned
  * entries share the same `family` name, so multiple `@font-face` rules with
  * identical `font-family` end up in the output: the browser tries each in
@@ -152,11 +160,11 @@ const computeOneFallbackFontFace = (
 export const computeFallbackFontFaces = (
   familyName: string,
   webMetrics: RawFontMetrics,
-  fallbackFamily: MatchableFallbackFamily | MatchableFallbackFamily[] | MatchableFallbackChain,
+  matched: MatchableFallbackFamily | MatchableFallbackFamily[] | MatchableFallbackChain,
 ): FallbackFontFace[] => {
   if (webMetrics.ascender === undefined || webMetrics.descender === undefined || webMetrics.lineGap === undefined) {
     console.warn(
-      `⚠ "${familyName}": \`fallbackFamily\` is set but this family's metrics are missing \`ascender\`/\`descender\`/\`lineGap\` (only extracted automatically for \`local\`/\`cdn\` sources, a \`manual\` entry must supply them explicitly). Skipping its fallback @font-face.`,
+      `⚠ "${familyName}": \`fallback: { matched }\` is set but this family's metrics are missing \`ascender\`/\`descender\`/\`lineGap\` (only extracted automatically for \`local\`/\`cdn\` sources, a \`manual\` entry must supply them explicitly). Skipping its fallback @font-face, and falling back to the generic \`defaultFallback\` instead.`,
     )
     return []
   }
@@ -164,7 +172,7 @@ export const computeFallbackFontFaces = (
   const resolvedMetrics = { ...webMetrics, lineGap: webMetrics.lineGap }
   const corrected = correctedEmMetrics(webMetrics.ascender, webMetrics.descender)
 
-  return resolveFallbackFamilies(fallbackFamily).map((family) =>
+  return resolveFallbackFamilies(matched).map((family) =>
     computeOneFallbackFontFace(familyName, resolvedMetrics, corrected, family),
   )
 }
@@ -326,31 +334,43 @@ const buildNextFontVariableName = (appFonts: AppFonts, familyName: string): stri
 
 /**
  * Builds the SCSS-ready `font-family` value: `next/font`'s CSS variable, or a
- * quoted family name, both with the resolved fallback appended. When
- * `fallbackFaceGenerated`, the metric-matched `"${familyName} Fallback"`
- * override is inserted between the family and the generic fallback.
+ * quoted family name, followed by exactly one fallback.
+ *
+ * The metric-matched `"${familyName} Fallback"` and a generic keyword are
+ * alternatives, never both. A generic needs no loading, so it is available
+ * the instant the real font isn't, and a generic standing behind the
+ * metric-matched name wins the swap window every time: the override renders
+ * in the one moment it exists for, which is to say never. `next/font` emits
+ * its own fallbacks the same way, with no generic behind them. What covers
+ * the platforms instead is the chain, one `@font-face` per system font under
+ * a single name, see `FALLBACK_CHAINS`.
+ *
+ * `fallbackFaceGenerated` is what decides, not the config: a `{ matched }`
+ * whose faces were skipped (a `manual` family missing `ascender`, see
+ * `computeFallbackFontFaces`) falls back to the generic rather than to a
+ * name nothing defines.
  *
  * The `next/font` branch repeats the family name inside the `var()` as its
  * fallback. A `var()` pointing at an undefined property is invalid at
- * computed-value time, which takes the whole `font-family` down, generic
- * fallback included, and leaves the element inheriting its parent's font: the
- * name inside is the only part that still resolves when Next's `variable`
- * class never reaches the DOM or its name doesn't match. See
+ * computed-value time, which takes the whole `font-family` down, fallback
+ * included, and leaves the element inheriting its parent's font: the name
+ * inside is the only part that still resolves when Next's `variable` class
+ * never reaches the DOM or its name doesn't match. See
  * `buildNextFontVariableName` for what it resolves to per loader.
  */
 const buildFamilyString = (
   appFonts: AppFonts,
   familyName: string,
-  fallback: string | undefined,
+  fallback: FontFallback | undefined,
   usesNextFont: boolean,
   fallbackFaceGenerated: boolean,
 ): string => {
-  const resolvedFallback = fallback ?? appFonts.fallbackDefault
-  const fallbackFaceSegment = fallbackFaceGenerated ? `, "${familyName} Fallback"` : ''
+  const generic: FontFallbacks = typeof fallback === 'string' ? fallback : appFonts.defaultFallback
+  const tail = fallbackFaceGenerated ? `, "${familyName} Fallback"` : `, ${generic}`
 
   return usesNextFont
-    ? `'var(${buildNextFontVariableName(appFonts, familyName)}, "${familyName}")${fallbackFaceSegment}, ${resolvedFallback}'`
-    : `'"${familyName}"${fallbackFaceSegment}, ${resolvedFallback}'`
+    ? `'var(${buildNextFontVariableName(appFonts, familyName)}, "${familyName}")${tail}'`
+    : `'"${familyName}"${tail}'`
 }
 
 /**
@@ -402,9 +422,8 @@ export const computeFontData = async (
     if (fontSource.source === 'manual') {
       warnIfFamilyNameUnverifiable(familyName, 'manual')
 
-      const fallbackFaces = fontSource.fallbackFamily
-        ? computeFallbackFontFaces(familyName, fontSource.metrics, fontSource.fallbackFamily)
-        : []
+      const matched = matchedFallbackOf(fontSource.fallback)
+      const fallbackFaces = matched ? computeFallbackFontFaces(familyName, fontSource.metrics, matched) : []
       fallbackFontFaces.push(...fallbackFaces)
 
       const family = buildFamilyString(appFonts, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
@@ -481,9 +500,8 @@ export const computeFontData = async (
       return score < bestScore ? entry : best
     })
 
-    const fallbackFaces = fontSource.fallbackFamily
-      ? computeFallbackFontFaces(familyName, best.raw, fontSource.fallbackFamily)
-      : []
+    const matched = matchedFallbackOf(fontSource.fallback)
+    const fallbackFaces = matched ? computeFallbackFontFaces(familyName, best.raw, matched) : []
     fallbackFontFaces.push(...fallbackFaces)
 
     const family = buildFamilyString(appFonts, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)

@@ -45,11 +45,11 @@ the viewport. trimscale-css goes a step further in a few places:
 
 - **Metric-matched font-swap fallbacks, so leading-trim precision survives font loading.**
   Precise vertical control doesn't count for much if everything still jumps
-  the moment your web font finishes loading. `fallbackFamily` generates a
-  metric-matched `@font-face` override for a real system font (size-adjust,
-  ascent/descent/line-gap overrides computed from your font's own metrics),
-  inserted between your web font and the generic fallback keyword, so the
-  swap doesn't shift the layout.
+  the moment your web font finishes loading. `fallback: { matched: 'serif' }`
+  generates a metric-matched `@font-face` override for a real system font
+  (size-adjust, ascent/descent/line-gap overrides computed from your font's
+  own metrics), which stands in until your font arrives, so the swap doesn't
+  shift the layout.
 
 - **OKLCH colors with a real fallback, not just a "future CSS" gamble.**
   Every color token is set with a static hex fallback for `light-dark()`- or

@@ -55,7 +55,7 @@ Optional. Opt-out toggles for the config-driven utility-class groups in `styles/
 
 ## `appFonts`
 
-Optional. Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name, plus `next/font` integration settings. Omit the whole field to skip fonts entirely, the fluid type scale, spacing, breakpoints, and color tokens all work without it, you only lose leading trim and `--font-family-*` tokens (both need font metrics). When `appFonts` is present, `families`, `fontRoles`, and `fallbackDefault` below are still required.
+Optional. Font sources (local file, CDN URL, or hand-entered metrics) keyed by family name, plus `next/font` integration settings. Omit the whole field to skip fonts entirely, the fluid type scale, spacing, breakpoints, and color tokens all work without it, you only lose leading trim and `--font-family-*` tokens (both need font metrics). When `appFonts` is present, `families`, `fontRoles`, and `defaultFallback` below are still required.
 
 | Property          | Type                         | Required | Description                                                                                                                                                 |
 | ----------------- | ---------------------------- | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -65,7 +65,7 @@ Optional. Font sources (local file, CDN URL, or hand-entered metrics) keyed by f
 | `publicDir`       | `string`                     |    No    | Your bundler's static-passthrough folder (Vite/CRA/Astro: `'public'`, SvelteKit: `'static'`). Stripped as a leading segment from a `local` family's generated `@font-face` `src`. Default `'public'`.  |
 | `nextFontDefault` | `boolean`                    |    No    | Whether `family` values build around a `next/font` CSS variable by default. A family's own `nextFont` overrides this for just that family. Default `false`. |
 | `nextFontPrefix`  | `string`                     |    No    | Prefix half of the `next/font` CSS variable name (`--{prefix}-{family}`). Default `'next-font'`.                                                            |
-| `fallbackDefault` | `FontFallbacks`              |   Yes    | Fallback stack used when a family has no `fallback` of its own. One of `'sans-serif'`, `'serif'`, `'monospace'`, `'system-ui'`, or `'cursive'`.             |
+| `defaultFallback` | `FontFallbacks`              |   Yes    | Fallback stack used when a family has no `fallback` of its own. One of `'sans-serif'`, `'serif'`, `'monospace'`, `'system-ui'`, or `'cursive'`.             |
 
 → Full guide: [adding-a-font.md](adding-a-font.md) (sources, `@font-face` rules) · [using-with-nextjs.md](using-with-nextjs.md) (`next/font` integration)
 
@@ -74,15 +74,14 @@ Optional. Font sources (local file, CDN URL, or hand-entered metrics) keyed by f
 | Property           | Type                                                                            | Required | Applies to | Description                                                                                                        |
 | ------------------ | -------------------------------------------------------------------------------- | :------: | ---------- | ------------------------------------------------------------------------------------------------------------------- |
 | `source`           | `'local'` \| `'cdn'` \| `'manual'`                                              |   Yes    | All        | Picks the shape below.                                                                                             |
-| `fallback`         | `FontFallbacks`                                                                 |    No    | All        | Generic CSS fallback keyword for this family. Falls back to `appFonts.fallbackDefault` if unset.                  |
+| `fallback`         | `FontFallback`                                                                  |    No    | All        | A generic keyword, or `{ matched: ... }` for a metric-matched `@font-face` override that cuts layout shift (CLS) during font-swap. Alternatives, not layers: `{ matched }` emits no generic. Defaults to `appFonts.defaultFallback`. |
 | `nextFont`         | `boolean`                                                                       |    No    | All        | Overrides `appFonts.nextFontDefault` for this family only.                                                        |
-| `fallbackFamily`   | `MatchableFallbackChain` \| `MatchableFallbackFamily` \| `MatchableFallbackFamily[]` |    No    | All        | Metric-matched fallback `@font-face` override(s), reduces layout shift (CLS) while the real font is still loading. |
 | `path`             | `string[]`                                                                      |    No    | `local`    | Font file path(s), relative to this config file. Omit to use the `appFonts.localFontsPath` convention instead.   |
 | `url`              | `string[]`                                                                      |   Yes    | `cdn`      | Direct font file URL(s), not a CSS-generating endpoint (e.g. not Google Fonts' `css2?family=...`).                |
 | `generateFontFace` | `boolean`                                                                       |    No    | `cdn`      | Write `@font-face` rules pointing at `url` directly (self-hosting). Default `false`.                              |
 | `metrics`          | `RawFontMetrics`                                                                |   Yes    | `manual`   | Hand-entered metrics from [precisionspec.dev](https://precisionspec.dev).                                          |
 
-→ Full guide: [adding-a-font.md](adding-a-font.md), `fallbackFamily`: [adding-a-font.md#metric-matched-fallback-fonts-fallbackfamily](adding-a-font.md#metric-matched-fallback-fonts-fallbackfamily)
+→ Full guide: [adding-a-font.md](adding-a-font.md), metric-matched fallbacks: [adding-a-font.md#metric-matched-fallback-fonts-fallback--matched-](adding-a-font.md#metric-matched-fallback-fonts-fallback--matched-)
 
 ### `appFonts.fontRoles`
 

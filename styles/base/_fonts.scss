@@ -31,7 +31,7 @@
 }
 
 // Metric-matched fallback overrides, see var.$fallback-font-faces and
-// FontSource.fallbackFamily in models/Config.ts.
+// FontFallback's `{ matched }` form in models/Config.ts.
 @each $face in var.$fallback-font-faces {
   @font-face {
     font-family: "#{map.get($face, "family")}";

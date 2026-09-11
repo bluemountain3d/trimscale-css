@@ -16,7 +16,7 @@ Font metrics, `@font-face` declarations, and role assignment are generated from 
 
 ```ts
 appFonts: {
-  fallbackDefault: 'sans-serif',
+  defaultFallback: 'sans-serif',
   families: {
     'Roboto': {
       source: 'local',
@@ -25,7 +25,7 @@ appFonts: {
         'path/to/fonts/Roboto-Bold.woff2',
         'path/to/fonts/Roboto-Italic.woff2',
       ], // relative to trimscale.config.ts
-      fallback: 'sans-serif', // optional, falls back to fallbackDefault
+      fallback: 'sans-serif', // optional, falls back to defaultFallback
     },
   },
 },
@@ -61,7 +61,7 @@ appFonts: {
 ```ts
 appFonts: {
   localFontsPath: './fonts',
-  fallbackDefault: 'sans-serif',
+  defaultFallback: 'sans-serif',
   families: {
     'Roboto': { source: 'local', fallback: 'sans-serif' }, // reads every font file in ./fonts/Roboto/
   },
@@ -177,26 +177,27 @@ The overrides can only go in an `@font-face` rule trimscale writes itself, which
 
 The warning stays silent below a hundredth of an em, which covers the large majority of fonts. It fires on the measured error, not on the flag: two thirds of the fonts that leave `USE_TYPO_METRICS` clear have tables that agree closely enough to cost nothing.
 
-## Metric-matched fallback fonts (`fallbackFamily`)
+## Metric-matched fallback fonts (`fallback: { matched }`)
 
 When a web font is still loading, the browser renders text in a fallback font first, then swaps once the web font arrives. If the fallback's metrics differ from the web font's, that swap shifts the layout (CLS): lines break in different places, the page jumps.
 
-`fallbackFamily` fixes this by generating a metric-matched `@font-face` override for a real system font, inserted between your web font and the generic `fallback` in the `font-family` stack:
+The `{ matched }` form of `fallback` fixes this by generating a metric-matched `@font-face` override for a real system font, which stands in for your web font until it loads:
 
 ```ts
 'Roboto': {
   source: 'local',
   path: ['path/to/fonts/Roboto-Regular.woff2'],
-  fallback: 'sans-serif',
-  fallbackFamily: 'sans-serif', // a MatchableFallbackChain
+  fallback: { matched: 'sans-serif' }, // a MatchableFallbackChain
 },
 ```
 
-This writes a `"Roboto Fallback"` `@font-face` (`src: local("Segoe UI")`, with `size-adjust`/`ascent-override`/`descent-override`/`line-gap-override` computed from Roboto's own metrics) and produces `font-family: "Roboto", "Roboto Fallback", sans-serif`. Until Roboto loads, the browser substitutes Segoe UI's actual glyphs but scaled and boxed to occupy the same space Roboto would have.
+This writes a `"Roboto Fallback"` `@font-face` (`src: local("Segoe UI")`, with `size-adjust`/`ascent-override`/`descent-override`/`line-gap-override` computed from Roboto's own metrics) and produces `font-family: "Roboto", "Roboto Fallback"`. Until Roboto loads, the browser substitutes Segoe UI's actual glyphs but scaled and boxed to occupy the same space Roboto would have.
+
+**Note what the stack does not contain: a generic keyword.** A generic needs no loading, so it is available the instant the real font isn't, which means a generic standing behind `"Roboto Fallback"` wins the swap window every time and the metric matching renders in the one moment it exists for, which is to say never. That is why the two forms of `fallback` are alternatives rather than layers, and why `next/font` builds its own fallbacks the same way. What covers the platforms instead is the chain, see below.
 
 ### Single family, chain, or your own array
 
-`fallbackFamily` accepts three shapes:
+`matched` accepts three shapes:
 
 - **A `MatchableFallbackChain`** (`'sans-serif'`, `'serif'`, or `'monospace'`), **the recommended default.** Expands to an ordered list of system fonts covering Windows/macOS/Android; trimscale writes one `@font-face` per family in the chain, all sharing the same `font-family` name, and the browser tries each in order until it finds one actually installed on the user's system. No manual curation needed.
 - **A single `MatchableFallbackFamily`** (e.g. `'Arial'`), when you want precise control over exactly one target, or know your audience is on a single platform.
@@ -210,33 +211,39 @@ The built-in chains:
 | `'serif'` | Times New Roman, Georgia, Noto Serif |
 | `'monospace'` | Consolas, Menlo, Courier New |
 
-All 11 concrete families with built-in metrics: Arial, Helvetica, Helvetica Neue, Times New Roman, Georgia, Noto Serif, Courier New, Consolas, Menlo, Segoe UI, Roboto. Generic keywords (`system-ui`, `cursive`, or a `FontFallbacks` value) can't be used here, only `fallback` accepts those, see below.
+All 11 concrete families with built-in metrics: Arial, Helvetica, Helvetica Neue, Times New Roman, Georgia, Noto Serif, Courier New, Consolas, Menlo, Segoe UI, Roboto. Generic keywords (`system-ui`, `cursive`, or any `FontFallbacks` value) can't be used inside `matched`, they have no metrics to match against; write them as a plain `fallback` instead.
 
-### `fallbackFamily` vs. plain `fallback`: two different things
+### The two forms of `fallback`
 
-Don't confuse the two:
+They solve the same problem at different levels of precision, and you pick one:
 
-- **`fallbackFamily`** targets *concrete* system fonts with real, known metrics, so trimscale can compute a matching override. It's a metric-matching mechanism.
-- **`fallback`** is the plain CSS generic keyword (`sans-serif`, `serif`, etc.) at the very end of the stack. It's just a keyword, the browser resolves it to *whatever* sans-serif font that system has, with **no way to attach a metric override to a generic keyword**, there's no concrete font to point `local()` at.
+| | `fallback: 'sans-serif'` | `fallback: { matched: 'sans-serif' }` |
+| --- | --- | --- |
+| What it names | A CSS generic keyword | Concrete system fonts with known metrics |
+| Generated stack | `"Roboto", sans-serif` | `"Roboto", "Roboto Fallback"` |
+| During font-swap | Whatever sans-serif the system has, unmatched, so the swap shifts the layout | Glyphs scaled and boxed to occupy Roboto's space, so the swap is close to invisible |
 
-`fallback` is always the last resort: if `fallbackFamily` is unset, or if none of its `@font-face` entries resolve (e.g. Linux, where none of the 11 built-in families is typically installed by default), the stack silently falls through to the plain, unmatched `fallback` keyword, same CLS exposure as not using `fallbackFamily` at all. That's an acceptable, expected degradation, not a bug: `fallbackFamily` improves the common case (Windows/macOS/Android) without requiring universal coverage.
+A generic keyword can't carry a metric override, there's no concrete font to point `local()` at, which is the whole reason the two forms exist.
+
+**Where `{ matched }` degrades:** if none of its `@font-face` entries resolve, e.g. Linux, where none of the 11 built-in families is typically installed, the browser falls through to its own default font rather than to the generic category you would otherwise have named. Prefer a chain over a single family for this reason: a chain gives the browser three chances instead of one. If that last-resort category matters more to you than matching the metrics, use the plain form.
+
+**Where the two get confused:** setting `fallback: 'serif'` on a family expecting it to sit behind a metric-matched override is exactly what the union prevents. There is one field, so only one of the two can be expressed at a time.
 
 ### Requirements
 
-Extracted `local`/`cdn` metrics always include what's needed automatically. For `manual`, add three extra fields to `metrics` (on top of the five described above) or `fallbackFamily` is ignored with a console warning:
+Extracted `local`/`cdn` metrics always include what's needed automatically. For `manual`, add three extra fields to `metrics` (on top of the five described above) or `{ matched }` is ignored with a console warning, and the family falls back to `defaultFallback`:
 
 ```ts
 'Proxima Nova': {
   source: 'manual',
-  fallback: 'sans-serif',
-  fallbackFamily: 'sans-serif',
+  fallback: { matched: 'sans-serif' },
   metrics: {
     avgCharWidth: 0.558,
     topTrim: 0.123,
     bottomTrim: 0.21,
     lsbAdjust: -0.061,
     rsbAdjust: -0.06,
-    // Required only for fallbackFamily:
+    // Required only for a { matched } fallback:
     ascender: 0.924,
     descender: 0.287,
     lineGap: 0,
@@ -279,7 +286,7 @@ appFonts: {
 npx trimscale-css generate
 ```
 
-This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width, top-trim, bottom-trim, lsb-adjust, and rsb-adjust, normalized to em units (plus ascender/descender/line-gap for `local`/`cdn`, or if supplied for `manual`), plus one metric-matched fallback `@font-face` per `fallbackFamily` entry, if any, and passes all of it, along with each family's resolved `family` value, `@font-face` rules per the table above, and role assignments from `appFonts.fontRoles`, as SCSS values into the generated bridge file at `<output.dir>/_index.scss`. Nothing is written into the package's own `styles/` folder in `node_modules`.
+This extracts (or, for `manual`, takes as-is) five metric values, avg-char-width, top-trim, bottom-trim, lsb-adjust, and rsb-adjust, normalized to em units (plus ascender/descender/line-gap for `local`/`cdn`, or if supplied for `manual`), plus one metric-matched fallback `@font-face` per `{ matched }` entry, if any, and passes all of it, along with each family's resolved `family` value, `@font-face` rules per the table above, and role assignments from `appFonts.fontRoles`, as SCSS values into the generated bridge file at `<output.dir>/_index.scss`. Nothing is written into the package's own `styles/` folder in `node_modules`.
 
 `lsb-adjust`/`rsb-adjust` (side bearing adjustments) remove the optical whitespace font designers build into a typeface's side bearings, so text sits flush against its container without manual negative margins at every use site.
 
@@ -297,8 +304,8 @@ After generating, check three things:
 - [ ] `local`: font file(s) placed at the configured `path`(s), or under `localFontsPath/<family key>/` if `path` is omitted, and, for a production build, under `appFonts.publicDir` (default `'public'`), not just `src/`
 - [ ] `cdn`: `url`(s) point at real font files, not a CSS-generating endpoint
 - [ ] `manual`: metrics copied from precisionspec.dev's **TrimScale** export
-- [ ] Fallback set (or relying on `fallbackDefault`)
-- [ ] `fallbackFamily` set if you want metric-matched font-swap (optional; `manual` needs `ascender`/`descender`/`lineGap` added to `metrics` for it to take effect)
+- [ ] Fallback set (or relying on `defaultFallback`)
+- [ ] `fallback: { matched }` used if you want metric-matched font-swap (optional; `manual` needs `ascender`/`descender`/`lineGap` added to `metrics` for it to take effect)
 - [ ] Family mapped to at least one role in `appFonts.fontRoles`
 - [ ] Ran `npx trimscale-css generate`
 - [ ] Dev server compiles without errors
