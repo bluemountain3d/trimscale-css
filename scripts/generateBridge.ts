@@ -72,11 +72,20 @@ const warnAboutCssOutputLimitations = (cfg: TrimscaleConfig, flags: ResolvedUtil
 
   for (const [familyName, fontSource] of Object.entries(cfg.appFonts.families)) {
     const usesNextFont = fontSource.nextFont ?? cfg.appFonts.nextFontDefault ?? false
-    if (usesNextFont) {
-      console.warn(
-        `⚠ "${familyName}" has nextFont enabled, its family will fall through to the generic fallback in the CSS build, var(--next-font-*) is only ever set by Next.js's own runtime, which a standalone CSS file never goes through.`,
-      )
-    }
+    if (!usesNextFont) continue
+
+    // Which of the two `fallback` forms the family uses decides how badly
+    // this lands, so the warning names it: a metric-matched face is a real
+    // `@font-face` in the same file and renders with the right metrics, a
+    // generic keyword is whatever the reader's system happens to have.
+    const landsOn =
+      typeof fontSource.fallback === 'object'
+        ? `its metric-matched "${familyName} Fallback" (the right metrics, not the real typeface)`
+        : `the generic \`${fontSource.fallback ?? cfg.appFonts.defaultFallback}\``
+
+    console.warn(
+      `⚠ "${familyName}" has nextFont enabled, so in the CSS build its family falls through to ${landsOn}: var(--next-font-*) is only ever set by Next.js's own runtime, which a standalone CSS file never goes through.`,
+    )
   }
 }
 
