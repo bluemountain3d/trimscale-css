@@ -222,6 +222,9 @@ type ParsedEntry = {
   trimError: number
 }
 
+/** A `local` or `cdn` family: the two whose files trimscale reads itself, as opposed to `manual`, whose metrics arrive already measured. */
+type FileBackedFontSource = Extract<FontSource, { source: 'local' | 'cdn' }>
+
 /** One family's full metrics entry: the raw extracted/manual metrics plus its resolved SCSS-ready `family` string. */
 export type FamilyFontMetrics = RawFontMetrics & { family: string }
 
@@ -379,6 +382,122 @@ const buildFamilyString = (
 }
 
 /**
+ * Reads and parses every file configured for one family, in config order.
+ *
+ * A file that won't parse is collected rather than thrown on the spot: one
+ * bad file among several is survivable, since the family still gets its
+ * metrics and its other `@font-face` rules from the ones that did parse.
+ * Every file failing is not survivable, and the two cases want different
+ * wording, so the messages wait until the count is known. Each one already
+ * names the file it came from.
+ * @throws If not one file parsed. That family is configured, so contributing
+ *   no metrics, no `@font-face` and no `font-family` token while `generate`
+ *   still exits 0 and reports success is the wrong outcome.
+ */
+const parseFamilyFiles = async (
+  appFonts: AppFonts,
+  familyName: string,
+  fontSource: FileBackedFontSource,
+  publicDir: string,
+): Promise<ParsedEntry[]> => {
+  const entries =
+    fontSource.source === 'local' ? await resolveLocalFontPaths(appFonts, familyName, fontSource) : fontSource.url
+
+  const parsed: ParsedEntry[] = []
+  const failures: string[] = []
+
+  for (const entry of entries) {
+    try {
+      const buffer =
+        fontSource.source === 'local'
+          ? await readLocalFont(path.join(process.cwd(), entry))
+          : await fetchRemoteFont(entry)
+
+      const parsedFont = await parseFontBuffer(buffer, `${familyName} (${entry})`)
+
+      parsed.push({
+        src: fontSource.source === 'local' ? buildLocalFontSrc(entry, publicDir) : entry,
+        ext: getFontExtension(entry),
+        isItalic: parsedFont.isItalic,
+        weightClass: parsedFont.weightClass,
+        weightRange: parsedFont.weightRange,
+        raw: parsedFont.metrics,
+        corrected: parsedFont.corrected,
+        trimError: parsedFont.trimError,
+      })
+    } catch (err: unknown) {
+      failures.push(err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  if (parsed.length === 0) {
+    throw new Error(`No usable font file for "${familyName}". ${failures.join(' ')}`)
+  }
+
+  if (failures.length > 0) {
+    console.warn(
+      `⚠ "${familyName}": ${failures.length} of ${entries.length} files were skipped, metrics come from the rest. ${failures.join(' ')}`,
+    )
+  }
+
+  return parsed
+}
+
+/**
+ * Picks the one file a family's metrics are read from: non-italic first, then
+ * whichever weight sits closest to 400.
+ *
+ * Lowest score wins. The italic penalty always dominates the weight distance,
+ * which tops out around 600 since `usWeightClass` runs 1-1000, so any
+ * non-italic file beats any italic one whatever the weights are. A family
+ * with nothing but an Italic file still gets its metrics from that one:
+ * italic is passed over only when there is something else to pick.
+ */
+const pickMetricsSource = (parsed: ParsedEntry[]): ParsedEntry => {
+  const score = (entry: ParsedEntry): number => (entry.isItalic ? 10_000 : 0) + Math.abs(entry.weightClass - 400)
+  return parsed.reduce((best, entry) => (score(entry) < score(best) ? entry : best))
+}
+
+/**
+ * The two things a family's `fallback` decides, resolved together because the
+ * second depends on the first: whether a metric-matched `@font-face` was
+ * actually written, and what the `font-family` value ends up being (see
+ * `buildFamilyString`, which falls back to the generic when it wasn't).
+ *
+ * A `manual` family reaches this with the metrics its config supplied and a
+ * parsed one with the metrics of its best file, and nothing past that point
+ * differs, which is why this is one function rather than the same four lines
+ * in each branch.
+ */
+const resolveFamilyFallback = (
+  appFonts: AppFonts,
+  familyName: string,
+  fontSource: FontSource,
+  rawMetrics: RawFontMetrics,
+  usesNextFont: boolean,
+): { family: string; fallbackFaces: FallbackFontFace[] } => {
+  const matched = matchedFallbackOf(fontSource.fallback)
+  const fallbackFaces = matched ? computeFallbackFontFaces(familyName, rawMetrics, matched) : []
+
+  return {
+    family: buildFamilyString(appFonts, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0),
+    fallbackFaces,
+  }
+}
+
+/** One `@font-face` per parsed file, all under the family's config key, unlike the metrics which come from a single file (see `pickMetricsSource`). */
+const buildFontFaces = (familyName: string, parsed: ParsedEntry[]): FontFace[] =>
+  parsed.map((entry) => ({
+    family: familyName,
+    src: entry.src,
+    ext: entry.ext,
+    weight: entry.weightRange ?? entry.weightClass,
+    style: entry.isItalic ? 'italic' : 'normal',
+    ascentOverride: +(entry.corrected.ascender * 100).toFixed(3),
+    descentOverride: +(entry.corrected.descender * 100).toFixed(3),
+  }))
+
+/**
  * Scans every family in `appFonts.families`, extracts metrics from its
  * `local`/`cdn` file(s) (or takes `manual` metrics as-is), and picks the
  * single best-matching file per family for metrics (preferring non-italic,
@@ -407,8 +526,6 @@ export const computeFontData = async (
     return { metrics: {}, fontFaces: [], fallbackFontFaces: [] }
   }
   const appFonts = cfg.appFonts
-
-  const nextFontDefault = appFonts.nextFontDefault ?? false
   const publicDir = appFonts.publicDir ?? 'public'
 
   const metrics: FontMetricsMap = {}
@@ -416,7 +533,7 @@ export const computeFontData = async (
   const fallbackFontFaces: FallbackFontFace[] = []
 
   for (const [familyName, fontSource] of Object.entries(appFonts.families)) {
-    const usesNextFont = fontSource.nextFont ?? nextFontDefault
+    const usesNextFont = fontSource.nextFont ?? appFonts.nextFontDefault ?? false
 
     if (usesNextFont) {
       console.log(
@@ -424,113 +541,34 @@ export const computeFontData = async (
       )
     }
 
+    // `manual` skips every step below that reads a file, and takes the
+    // config's metrics as its own. Everything after that is shared.
     if (fontSource.source === 'manual') {
       warnIfFamilyNameUnverifiable(familyName, 'manual')
 
-      const matched = matchedFallbackOf(fontSource.fallback)
-      const fallbackFaces = matched ? computeFallbackFontFaces(familyName, fontSource.metrics, matched) : []
-      fallbackFontFaces.push(...fallbackFaces)
-
-      const family = buildFamilyString(appFonts, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
-      metrics[familyName] = { ...fontSource.metrics, family }
+      const resolved = resolveFamilyFallback(appFonts, familyName, fontSource, fontSource.metrics, usesNextFont)
+      fallbackFontFaces.push(...resolved.fallbackFaces)
+      metrics[familyName] = { ...fontSource.metrics, family: resolved.family }
       continue
     }
 
-    const entries =
-      fontSource.source === 'local' ? await resolveLocalFontPaths(appFonts, familyName, fontSource) : fontSource.url
-    const parsedEntries: ParsedEntry[] = []
-    const failures: string[] = []
+    const parsed = await parseFamilyFiles(appFonts, familyName, fontSource, publicDir)
+    const best = pickMetricsSource(parsed)
 
-    for (const entry of entries) {
-      try {
-        const buffer =
-          fontSource.source === 'local'
-            ? await readLocalFont(path.join(process.cwd(), entry))
-            : await fetchRemoteFont(entry)
+    const resolved = resolveFamilyFallback(appFonts, familyName, fontSource, best.raw, usesNextFont)
+    fallbackFontFaces.push(...resolved.fallbackFaces)
+    metrics[familyName] = { ...best.raw, family: resolved.family }
 
-        const src = fontSource.source === 'local' ? buildLocalFontSrc(entry, publicDir) : entry
+    // A `local` family's rule is trimscale's to write unless next/font is
+    // writing it instead; a `cdn` family's is opt-in.
+    const writesFontFace = fontSource.source === 'local' ? !usesNextFont : (fontSource.generateFontFace ?? false)
 
-        const {
-          metrics: raw,
-          isItalic,
-          weightClass,
-          weightRange,
-          corrected,
-          trimError,
-        } = await parseFontBuffer(buffer, `${familyName} (${entry})`)
-
-        parsedEntries.push({
-          src,
-          ext: getFontExtension(entry),
-          isItalic,
-          weightClass,
-          weightRange,
-          raw,
-          corrected,
-          trimError,
-        })
-      } catch (err: unknown) {
-        // Collected rather than reported here: one unreadable file among
-        // several is survivable (the family still gets its metrics from
-        // whichever files did parse), but all of them failing is not, and the
-        // two cases want different wording. Every message already names the
-        // file it came from.
-        failures.push(err instanceof Error ? err.message : String(err))
-      }
-    }
-
-    // Every file for this family failed, so it would contribute no metrics, no
-    // @font-face and no font-family token, while `generate` still exited 0 and
-    // reported success. It's configured, so that's a failure.
-    if (parsedEntries.length === 0) {
-      throw new Error(`No usable font file for "${familyName}". ${failures.join(' ')}`)
-    }
-
-    if (failures.length > 0) {
-      console.warn(
-        `⚠ "${familyName}": ${failures.length} of ${entries.length} files were skipped, metrics come from the rest. ${failures.join(' ')}`,
-      )
-    }
-
-    // Lower score wins. The 10_000 italic penalty always dominates the
-    // weight distance (which maxes out around 600, since usWeightClass
-    // runs 1-1000) — so any non-italic file beats any italic one
-    // regardless of weight. Among files with the same italic-ness, the
-    // one closest to weight 400 wins. A family with only an Italic file
-    // still gets metrics from it — italic is only passed over when a
-    // non-italic alternative exists.
-    const best = parsedEntries.reduce((best, entry) => {
-      const score = (entry.isItalic ? 10_000 : 0) + Math.abs(entry.weightClass - 400)
-      const bestScore = (best.isItalic ? 10_000 : 0) + Math.abs(best.weightClass - 400)
-      return score < bestScore ? entry : best
-    })
-
-    const matched = matchedFallbackOf(fontSource.fallback)
-    const fallbackFaces = matched ? computeFallbackFontFaces(familyName, best.raw, matched) : []
-    fallbackFontFaces.push(...fallbackFaces)
-
-    const family = buildFamilyString(appFonts, familyName, fontSource.fallback, usesNextFont, fallbackFaces.length > 0)
-    metrics[familyName] = { ...best.raw, family }
-
-    const shouldGenerateFontFace =
-      fontSource.source === 'local' ? !usesNextFont : (fontSource.generateFontFace ?? false)
-
-    if (fontSource.source === 'cdn' && !shouldGenerateFontFace) {
+    if (fontSource.source === 'cdn' && !writesFontFace) {
       warnIfFamilyNameUnverifiable(familyName, 'cdn')
     }
 
-    if (shouldGenerateFontFace) {
-      for (const entry of parsedEntries) {
-        fontFaces.push({
-          family: familyName,
-          src: entry.src,
-          ext: entry.ext,
-          weight: entry.weightRange ?? entry.weightClass,
-          style: entry.isItalic ? 'italic' : 'normal',
-          ascentOverride: +(entry.corrected.ascender * 100).toFixed(3),
-          descentOverride: +(entry.corrected.descender * 100).toFixed(3),
-        })
-      }
+    if (writesFontFace) {
+      fontFaces.push(...buildFontFaces(familyName, parsed))
     } else {
       warnIfTrimUncorrectable(familyName, best, usesNextFont, fontSource.source)
     }
