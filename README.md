@@ -165,3 +165,27 @@ Adding a component of your own? See [examples.md](https://github.com/bluemountai
 ## Changelog
 
 See [changelog.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/changelog.md) for what changed in each release and what it means when upgrading. It ships with the package, so an installed copy is at `node_modules/trimscale-css/docs/changelog.md`.
+
+---
+
+## Development
+
+Documentation lives in three places, split by audience:
+
+| Directory  | Written for                              | Ships to npm |
+| ---------- | ---------------------------------------- | ------------ |
+| `docs/`    | People using the package                 | Yes          |
+| `devDocs/` | People working on the package itself     | No           |
+| `notes/`   | Local working notes, gitignored          | No           |
+
+Anything a consumer needs belongs in `docs/`. `devDocs/` is for the parts of the
+work that never reach a consumer: what's planned, what's deliberately not being
+done, and which files need a manual pass when something else changes.
+
+| Doc                                                                                                | Covers                                                                        |
+| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| [roadmap.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/roadmap.md)         | Work that's decided but not shipped                                           |
+| [backlog.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/backlog.md)         | Candidates that aren't decided yet, ranked, plus small fixes (in Swedish)     |
+| [changelog.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/changelog.md)     | The detailed changelog; `docs/changelog.md` is the consumer-facing short form |
+| [maintenance.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/maintenance.md) | Files that don't auto-update and go silently out of sync                      |
+| [styleguide.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/styleguide.md)   | The Vite dev app in `styleguide/`                                             |

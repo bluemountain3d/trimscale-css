@@ -1,6 +1,6 @@
 # Roadmap
 
-Planned or in-progress work that isn't reflected in the shipped package yet. Kept out of `docs/` since none of it is usable by consumers today, see [devDocs vs docs](../README.md#development).
+Planned or in-progress work that isn't reflected in the shipped package yet. Kept out of `docs/` since none of it is usable by consumers today, see [Development](../README.md#development). Candidates that aren't decided yet live in [backlog.md](backlog.md).
 
 ## Native CSS `@function` port
 
