@@ -9,6 +9,20 @@ syns i changeloggen istället.
 Skrivet på svenska, som resten av `devDocs/`. Konsumentvänd dokumentation ligger
 i `docs/` och är på engelska.
 
+## Nästa session
+
+Tre saker, i den ordningen:
+
+1. **Punkt 18, radslutsdriften.** Orsaken är utredd (se punkten), åtgärden är inte
+   gjord. Ta den först: den rör hela arbetsträdet och vill inte ligga ovanpå
+   andra ändringar.
+2. **Punkt 16 helt.** Två meningar i `docs/adding-a-font.md`, ingen kod.
+3. **Punkt 12, bara den additiva halvan.** Se "Två halvor" under punkten. Den
+   halvan ändrar ingen befintlig output och ryms i beta.5, resten gör det inte.
+
+Punkt 12 och 16 är de enda som bedömts höra hemma i beta.5. `colorSetup`
+(punkt 13) är första draget i beta.6, inte det sista i beta.5.
+
 ## Rangordningen
 
 Fyra kriterier, i den ordningen:
@@ -49,14 +63,15 @@ som är kvar av de genomförda.
 
 | #   | Punkt                                             | Motiv                                | Insats | Rang |
 | --- | ------------------------------------------------- | ------------------------------------ | ------ | ---- |
-| 12  | `$type: 'max'` genomgående, plus tyst `null`      | Fel beteende idag, och det syns inte | Låg    | 1    |
-| 16  | Doc-not: metrics antar alfabetiska skript         | Odokumenterad scope-gräns            | Låg    | 2    |
-| 14  | `rootFontSize` i configen                         | Levande inkonsekvens i rem-basen     | Medel  | 3    |
-| 13  | Färg grupperad under `colorSetup`, kunna stänga av | Breaking, billig bara före 1.0      | Medel  | 4    |
-| 15  | Konfigurerbara cascade layers                     | Bekvämlighet, inget som saknas       | Medel  | 5    |
-| 7   | Opt-in kontrastkontroll                           | Ingen känd efterfrågan               | Medel  | 6    |
-| 17  | Separata color-tokens per format                  | Use caset saknas                     | Medel  | 7    |
-| 10  | Tailwind v4 `@theme`-utgång                       | Distributionsfeature utan efterfrågan | Medel | 8    |
+| 18  | Radslutsdriften mot Biome                         | Blockerar `biome format` helt        | Låg    | 1    |
+| 12  | `$type: 'max'` genomgående, plus tyst `null`      | Fel beteende idag, och det syns inte | Låg    | 2    |
+| 16  | Doc-not: metrics antar alfabetiska skript         | Odokumenterad scope-gräns            | Låg    | 3    |
+| 14  | `rootFontSize` i configen                         | Levande inkonsekvens i rem-basen     | Medel  | 4    |
+| 13  | Färg grupperad under `colorSetup`, kunna stänga av | Breaking, billig bara före 1.0      | Medel  | 5    |
+| 15  | Konfigurerbara cascade layers                     | Bekvämlighet, inget som saknas       | Medel  | 6    |
+| 7   | Opt-in kontrastkontroll                           | Ingen känd efterfrågan               | Medel  | 7    |
+| 17  | Separata color-tokens per format                  | Use caset saknas                     | Medel  | 8    |
+| 10  | Tailwind v4 `@theme`-utgång                       | Distributionsfeature utan efterfrågan | Medel | 9    |
 
 ---
 
@@ -140,7 +155,7 @@ specifikt efter sådana bisatser snarare än att läsa dokument för dokument.
 
 ## 12. `$type: 'max'` genomgående i de fluida funktionerna
 
-**Rang 1.** Låg insats, och den enda punkten i listan som stänger ett fel som
+**Rang 2.** Låg insats, och den enda kodpunkten i listan som stänger ett fel som
 inte syns när det inträffar.
 
 ### Problem A, halv utrullning
@@ -171,6 +186,27 @@ Båda funktionerna som har `$type` grenar på `@if $type == 'clamp'` respektive
 returnerar `null`, och `padding: null` gör att deklarationen tyst försvinner ur
 outputen. Ett stavfel (`'Max'`, `'maximum'`) ger alltså ingen kompileringsvarning
 och inget felmeddelande, bara en regel som inte finns.
+
+### Två halvor
+
+Punkten går att dela, och halvorna hör hemma i olika releaser.
+
+**Additiv halva, ryms i beta.5.** Ingenting som kompilerar idag ger annan output:
+de två funktioner som redan har `$type` behåller sina grenar exakt, de två som får
+den defaultar till `'clamp'`, och `@error` utlöses bara på input som idag tyst
+producerar ingenting.
+
+- `@error` vid okänd `$type` i `fluid-font-size` och `fluid-spacing`
+- `$type` på `get-fluid-clamp` och `fluid-space-step`
+- `@param $type` i doc-kommentarerna på alla fyra, och i `docs/abstracts.md`
+- En rad under `### New` och en under `### Fixed` i changeloggens beta.5-avsnitt
+
+**Resten, tidigast beta.6.** Allt här ändrar bytes i befintlig output eller döper
+om publik yta, och ska granskas som en egen ändring:
+
+- `_fluid-value`-unifieringen
+- avrundningen harmoniserad mellan de fyra
+- `$value-key` → `$unit-key` på `get-fluid-clamp`
 
 ### Förslag
 
@@ -214,7 +250,7 @@ implementation.
 
 ## 13. Gruppera färg under `colorSetup`, och kunna stänga av det
 
-**Rang 4.** Två separata idéer som råkar ha samma form. Grupperingen är kosmetisk
+**Rang 5.** Två separata idéer som råkar ha samma form. Grupperingen är kosmetisk
 men bara billig så länge configen får brytas. Avstängningen är en riktig
 funktion.
 
@@ -277,7 +313,7 @@ emitta, så en separat på/av-flagga vore en andra sanning om samma sak.
 
 ## 14. `rootFontSize` i configen
 
-**Rang 3.** Inte bara en ny nyckel: hälften av plumbingen finns redan, och den är
+**Rang 4.** Inte bara en ny nyckel: hälften av plumbingen finns redan, och den är
 frånkopplad på ett sätt som ger fel idag.
 
 ### Problem
@@ -353,7 +389,7 @@ anropsställe röras.
 
 ## 15. Konfigurerbara cascade layers
 
-**Rang 5.** Motivet är starkare än det låter, men det är fortfarande en
+**Rang 6.** Motivet är starkare än det låter, men det är fortfarande en
 bekvämlighet.
 
 ### Problem
@@ -411,7 +447,7 @@ att lagerordningen faktiskt blev den man bad om, inte bara att texten stämmer.
 
 ## 16. Doc-not: metrics antar alfabetiska skript
 
-**Rang 2.** En eller två meningar, men det är en scope-gräns som ingen läsare kan
+**Rang 3.** En eller två meningar, men det är en scope-gräns som ingen läsare kan
 gissa sig till.
 
 Metric-extraktionen och leading trim antar alfabetiska skript. Det finns inget i
@@ -431,7 +467,7 @@ kolla det mot primärkälla först och datera påståendet.
 
 ## 17. Separata color-tokens per format
 
-**Rang 7.** Svagast i listan, inte för att idén är dålig utan för att formen inte
+**Rang 8.** Svagast i listan, inte för att idén är dålig utan för att formen inte
 går att välja innan use caset är känt.
 
 ### Idén
@@ -468,20 +504,88 @@ i varje `ColorDefinition` och är gratis, `oklch` är källvärdet.
 
 ---
 
+## 18. Radslutsdriften mot Biome
+
+**Rang 1.** `pnpm format` är oanvändbart tills det här är löst, och orsaken är
+inte formatteringsregler.
+
+### Symptom
+
+`pnpm exec biome format .` vill skriva om 22 av 37 filer, alltså i praktiken hela
+repot, direkt på en ren HEAD. Det ser ut som en konfigurationsstrid om
+formateringsstil och är det inte.
+
+### Orsak, verifierad 2026-09-12
+
+Varje diffrad slutar på `␍`. Det är radsluten, inget annat:
+
+- `biome.json` sätter `formatter.lineEnding: "lf"`.
+- `core.autocrlf` är `true`, satt **lokalt i repot**, inte globalt.
+- Det finns ingen `.gitattributes`.
+- Blobbarna i git är LF (`git show HEAD:tsconfig.json` ger LF), filerna på disk
+  är CRLF.
+
+Biome läser alltså CRLF-filer, vill ha LF, och flaggar varenda rad i varenda fil.
+Kör man `biome format --write` skrivs filerna som LF, varpå git vill konvertera
+tillbaka till CRLF vid nästa beröring. Det är en loop, inte ett engångsjobb, och
+det är därför driften kommer tillbaka.
+
+Notera vad som **inte** är Biome: Biome formaterar varken Markdown eller SCSS, så
+markdown-omformateringen i `docs/abstracts.md` och citatteckenbytet i
+`_mx_breakpoints.scss` kommer från något annat, sannolikt en editor-extension.
+Det är en separat utredning.
+
+### Förslag
+
+Låt LF vara sanning både i git och på disk, så att Biome och git vill samma sak:
+
+1. Lägg till en `.gitattributes` med `* text=auto eol=lf`, plus `binary` för
+   fontfiler och andra binärer.
+2. Sätt `core.autocrlf` till `false` i repot (`git config core.autocrlf false`).
+3. `git add --renormalize .` och checka ut på nytt.
+
+Blobbarna är redan LF, så steg 3 ändrar bara arbetsträdet, inte innehållet i
+historiken.
+
+### Implementationsnoter
+
+- Renormaliseringen rör varje fil i arbetsträdet. Det är precis den "skriv om
+  hela repot"-operation som skulle undvikas, men nu som ett engångsjobb med känd
+  orsak och utan innehållsändring, istället för som en formatterare som råkar
+  göra det.
+- Gör den när arbetsträdet är rent, och alltid som en egen commit.
+- Efter steg 3 ska `git status` vara tom och `pnpm exec biome format .` rapportera
+  noll filer. Blir det inte tomt är antagandet om LF-blobbar fel någonstans, och
+  då ska ingenting skrivas förrän det är utrett.
+- Alternativet, `lineEnding: "crlf"` i `biome.json`, löser symptomet på fel
+  ställe: det gör repot Windows-bundet och bryter för alla andra.
+- Kolla samtidigt varför `core.autocrlf` är satt lokalt. Om det gjordes
+  avsiktligt för något finns det ett skäl att fånga innan det tas bort.
+
+### Verifiering
+
+- `pnpm exec biome format .` ska gå från 22 filer till noll.
+- `pnpm run generate` och en sandbox-körning efteråt, som kontroll på att inget
+  genererat innehåll bytt radslut på ett sätt som spelar roll.
+
+---
+
 ## Handlingsordning
 
-1. **Punkt 12**, `$type` och den tysta `null`:an. Låg insats, och den enda
-   punkten där dagens beteende är fel snarare än ofullständigt.
-2. **Punkt 16**, doc-noten. Två meningar, tas lämpligen i samma pass som något
+1. **Punkt 18**, radslutsdriften. Först av allt, eftersom den rör hela
+   arbetsträdet och inte vill ligga ovanpå andra ändringar.
+2. **Punkt 12**, den additiva halvan. Låg insats, och den enda kodpunkten där
+   dagens beteende är fel snarare än ofullständigt.
+3. **Punkt 16**, doc-noten. Två meningar, tas lämpligen i samma pass som något
    annat som ändå rör `adding-a-font.md`.
-3. **Punkt 14**, `rootFontSize`. Börja med att verifiera modulcykeln, den avgör
+4. **Punkt 14**, `rootFontSize`. Börja med att verifiera modulcykeln, den avgör
    om det är en enradsändring eller en liten omstrukturering av
    variabelmodulerna.
-4. **Punkt 13**, `colorSetup`. Måste in innan 1.0 om det ska in alls, eftersom
-   det är en breaking configändring.
-5. **Punkt 15**, cascade layers, när ett verkligt behov dyker upp.
-6. Punkt 7, 17 och 10 vid behov, inte på schema. Punkt 17 inte förrän use caset
-   är känt.
+5. **Punkt 13**, `colorSetup`. Första draget i beta.6: det är en breaking
+   configändring och måste in innan 1.0 om den ska in alls.
+6. **Punkt 15**, cascade layers, när ett verkligt behov dyker upp.
+7. Punkt 12:s andra halva, samt punkt 7, 17 och 10 vid behov, inte på schema.
+   Punkt 17 inte förrän use caset är känt.
 
 ---
 
@@ -536,3 +640,4 @@ gick in i en release finns i [changelog.md](changelog.md).
 | 15    | Konfigurerbara cascade layers             | **Öppen**                             |
 | 16    | Doc-not: metrics antar alfabetiska skript | **Öppen**, två meningar               |
 | 17    | Separata color-tokens per format          | **Öppen**, use caset saknas           |
+| 18    | Radslutsdriften mot Biome                 | **Öppen**, orsak utredd, fix kvar     |
