@@ -28,7 +28,11 @@ Returns a `clamp()` value for a type step on the modular scale. Pass `$type: 'ma
 ```scss
 font-size: fn.fluid-font-size(2); // 2 steps up from base, uses vwx unit
 font-size: fn.fluid-font-size(2, 'vw'); // same, using plain vw
-font-size: fn.fluid-font-size(2, 'vwx', 'max'); // max() instead of clamp(), no upper bound
+font-size: fn.fluid-font-size(
+  2,
+  'vwx',
+  'max'
+); // max() instead of clamp(), no upper bound
 ```
 
 ### `fn.fluid-spacing($level, $unit-key, $type)`
@@ -59,14 +63,14 @@ margin: fn.px-to-rem(24); // → 1.5rem
 
 Small utilities the fluid functions above are built on. They're forwarded from `abstracts/functions` like everything else on this page, so they're part of the public surface, but most component work never needs them directly.
 
-| Function                             | Returns                                                                                              |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `fn.rem-to-px($rem, $base)`          | The inverse of `px-to-rem`. `$base` defaults to `16px`; unitless input is treated as rem                |
-| `fn.strip-unit($value)`              | The number without its unit (`16px` → `16`). Already-unitless input passes through                     |
-| `fn.round($number, $decimals)`       | `$number` rounded to `$decimals` places, default `4`. Sass-side rounding, unrelated to CSS `round()`     |
-| `fn.precision($number, $decimals)`   | Alias of `fn.round`, same signature and behavior                                                        |
-| `fn.clamp-number($value, $min, $max)` | `$value` constrained to the range. Named to avoid colliding with the CSS `clamp()` function            |
-| `fn.to-percent($value, $total)`      | `$value / $total` as a percentage (`to-percent(3, 4)` → `75%`). `$total` defaults to `1`                |
+| Function                              | Returns                                                                                              |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `fn.rem-to-px($rem, $base)`           | The inverse of `px-to-rem`. `$base` defaults to `16px`; unitless input is treated as rem             |
+| `fn.strip-unit($value)`               | The number without its unit (`16px` → `16`). Already-unitless input passes through                   |
+| `fn.round($number, $decimals)`        | `$number` rounded to `$decimals` places, default `4`. Sass-side rounding, unrelated to CSS `round()` |
+| `fn.precision($number, $decimals)`    | Alias of `fn.round`, same signature and behavior                                                     |
+| `fn.clamp-number($value, $min, $max)` | `$value` constrained to the range. Named to avoid colliding with the CSS `clamp()` function          |
+| `fn.to-percent($value, $total)`       | `$value / $total` as a percentage (`to-percent(3, 4)` → `75%`). `$total` defaults to `1`             |
 
 **Import these under a namespace, not with `as *`.** `fn.round` is a Sass function named `round`, so `@use 'abstracts/functions' as *` makes it shadow the CSS `round()` function for that whole file. `width: round(calc(100px + 1em), 1px)` then fails to compile (`Undefined operation "calc(100px + 1em) * 10"`) instead of emitting CSS rounding. Under `as fn` the CSS function passes through untouched, which is why every example on this page uses the namespace.
 
@@ -85,7 +89,7 @@ Returns a self-scaling, unitless `clamp()` line-height ratio that re-resolves ag
 }
 ```
 
-Prefer the static `--line-height-*` tokens (or `font-setup`'s `$line-height` param) for most component work; reach for `dynamic-line-height` directly only when one component needs a curve of its own. To change the site-wide default curve, set `dynamicLineHeight` in `trimscale.config.ts` instead, no SCSS required.
+There are three ways to land on a line-height, and only the last one involves calling this function. **Do nothing** and you get the dynamic curve: `body` sets `line-height: var(--line-height-dynamic)`, and every font-role placeholder carries the same value, so component work is on the site-wide curve by default. **Pass a static value** (a `--line-height-*` token, or `font-setup`'s `$line-height` param) when one component needs a fixed ratio that doesn't move with its font-size; the static tokens are the opt-in, see [design-tokens.md](design-tokens.md#typography-tokens). **Call `dynamic-line-height` with explicit arguments** only when a component needs a curve of its own shape. To change the site-wide curve, set `dynamicLineHeight` in `trimscale.config.ts` instead, no SCSS required.
 
 ### `fn.get-color-token($token, $tokens, $opacity, $lightness-multiplier, $chroma-multiplier)`
 
@@ -98,15 +102,15 @@ fn.get-color-token('ink', $tokens: var.$base-color-tokens, $chroma-multiplier: (
 
 Parameters:
 
-| Parameter    | Type                  | Default    | Description                                                                    |
-| ------------ | --------------------- | ---------- | ------------------------------------------------------------------------------ |
-| `$token`     | string                | (required) | Token name to look up, e.g. `'bg-canvas'`                                      |
-| `$tokens`    | map                   | (required) | Source map to look up `$token` in, same shape `mx.generate-color-tokens` takes |
-| `$opacity`   | number or null        | `null`     | Absolute opacity (0–1) applied to all oklch/hex variants                       |
-| `$lightness-multiplier` | number, map, or null | `null`     | Multiplier applied to the token's current lightness (NOT an absolute value): a single number for both modes, or `(light:, dark:)` for per-mode  |
-| `$chroma-multiplier`    | number, map, or null | `null`     | Multiplier applied to the token's current chroma (NOT an absolute value): a single number for both modes, or `(light:, dark:)` for per-mode  |
+| Parameter               | Type                 | Default    | Description                                                                                                                                    |
+| ----------------------- | -------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$token`                | string               | (required) | Token name to look up, e.g. `'bg-canvas'`                                                                                                      |
+| `$tokens`               | map                  | (required) | Source map to look up `$token` in, same shape `mx.generate-color-tokens` takes                                                                 |
+| `$opacity`              | number or null       | `null`     | Absolute opacity (0–1) applied to all oklch/hex variants                                                                                       |
+| `$lightness-multiplier` | number, map, or null | `null`     | Multiplier applied to the token's current lightness (NOT an absolute value): a single number for both modes, or `(light:, dark:)` for per-mode |
+| `$chroma-multiplier`    | number, map, or null | `null`     | Multiplier applied to the token's current chroma (NOT an absolute value): a single number for both modes, or `(light:, dark:)` for per-mode    |
 
-`$lightness-multiplier`/`$chroma-multiplier` multiply the token's *existing* channel value, they don't set an absolute target (unlike `$opacity`), and accept a `(light:, dark:)` map because the light/dark base values aren't perceptual mirrors of each other, a flat multiplier can land differently in each mode. The return value is shaped like a single `$tokens` entry, so it feeds straight into `semanticColorAliases` or your own `mx.generate-color-tokens` call.
+`$lightness-multiplier`/`$chroma-multiplier` multiply the token's _existing_ channel value, they don't set an absolute target (unlike `$opacity`), and accept a `(light:, dark:)` map because the light/dark base values aren't perceptual mirrors of each other, a flat multiplier can land differently in each mode. The return value is shaped like a single `$tokens` entry, so it feeds straight into `semanticColorAliases` or your own `mx.generate-color-tokens` call.
 
 Both multipliers are clamped to what OKLCH can hold: lightness to 0-100%, chroma to 0 and up. A multiplier that overshoots lands on white, black, or gray rather than on an unrepresentable color, and `generate` warns which `semanticColorAliases` field caused it. The returned `hex` entry is the plain-color tier, gamut-mapped into sRGB and rounded to 8-bit channels so it works in browsers with no `oklch()` support; the `oklch` entry keeps the full precision and the wide-gamut value.
 
@@ -139,7 +143,7 @@ Parameters:
 
 | Parameter         | Type   | Default     | Description                                                     |
 | ----------------- | ------ | ----------- | --------------------------------------------------------------- |
-| `$font`           | string | `'primary'` | Font role key, from `appFonts.fontRoles` in the config           |
+| `$font`           | string | `'primary'` | Font role key, from `appFonts.fontRoles` in the config          |
 | `$font-size`      | value  | `null`      | CSS font-size value                                             |
 | `$line-height`    | number | `null`      | Line height multiplier (unitless)                               |
 | `$font-weight`    | number | `null`      | Font weight                                                     |
@@ -153,12 +157,16 @@ The mixin sets font metrics internally and applies leading-trim via `::before`/`
 
 On the fallback path those are `::before` and `::after` on the selector you called the mixin in, so that rule cannot carry pseudo-elements of its own, and a `display` of your own on it breaks the trim the same way. The failure mode, and why it stays invisible in a browser with native support, is described under [Trim text](utility-classes.md#typography). The fix in component SCSS is the one from markup: put the trim on an inner element and keep your decoration on the outer one.
 
-**A note on `@extend` and layers.** `font-setup` reaches the font role through `@extend`, and `@extend` puts the extending selector wherever the placeholder was *defined*, not wherever the `@extend` is written. A rule that calls `font-setup` is therefore split across three layers:
+**A note on `@extend` and layers.** `font-setup` reaches the font role through `@extend`, and `@extend` puts the extending selector wherever the placeholder was _defined_, not wherever the `@extend` is written. A rule that calls `font-setup` is therefore split across three layers:
 
 ```scss
 @layer components {
   .card__title {
-    @include mx.font-setup($font: 'heading', $font-size: var(--heading-1), $font-weight: 700);
+    @include mx.font-setup(
+      $font: 'heading',
+      $font-size: var(--heading-1),
+      $font-weight: 700
+    );
     color: var(--text-strong);
   }
 }

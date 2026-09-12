@@ -48,7 +48,7 @@ This copies `trimscale.config.ts` into your project root (unless one already exi
 
 In a project whose `package.json` declares `"type": "commonjs"`, which is what `npm init -y` writes, `init` creates `trimscale.config.mts` instead. Node reads a `.ts` config as CommonJS there, where the config's own `export default` is a syntax error, and an explicit `type` skips the module detection that covers a `package.json` with no `type` at all. `.mts` is an ES module whatever the project declares. Nothing else about your project changes, and `generate` accepts either name, so renaming an existing config by hand works too.
 
-Run it (`npm run trimscale:generate`) whenever you change `trimscale.config.ts`. Generated output lives in your own project (see [Generate](#generate) below), so there's no need to wire it into a `prebuild`/`predev` step.
+Run it (`npm run trimscale:generate` or `pnpm trimscale:generate` or `yarn trimscale:generate`) whenever you change `trimscale.config.ts`. Generated output lives in your own project (see [Generate](#generate) below), so there's no need to wire it into a `prebuild`/`predev` step.
 
 Open `trimscale.config.ts` and edit the fields for your project: fonts, font roles, fluid type scale, breakpoints, spacing, and colors. Each field is commented inline; see the guides linked from the [Customization](../README.md#customization) table for the full reference on any one of them.
 
@@ -58,7 +58,8 @@ Open `trimscale.config.ts` and edit the fields for your project: fonts, font rol
 
 ```bash
 npx trimscale-css generate
-# or, once init has added the script: npm run trimscale:generate / pnpm trimscale:generate / yarn trimscale:generate
+# or, once init has added the script:  
+# npm run trimscale:generate / pnpm trimscale:generate / yarn trimscale:generate
 ```
 
 Reads your `trimscale.config.ts` and writes into `<output.dir>` (defaults to `./trimscale-generated`, configurable via `output.dir` in `trimscale.config.ts`), into **your own project**, never into `node_modules`:
@@ -114,7 +115,7 @@ Tokens (as CSS custom properties) and utility classes, resolved against your act
 
 ### Utility flags are function flags here, not size flags
 
-In the SCSS build, `output.utilities.typography.trim: false` just means the `.trim-text-*` classes aren't generated, `font-setup` and the underlying placeholders still work if you reach for them from your own SCSS. Linking the compiled file gives you no stylesheet in that pipeline to reach them from: `trim: false` means leading trim doesn't exist in the file at all, and both `@layer trim-defaults` and `@layer trim` are empty (placeholders emit nothing until something extends them, and `.trim-text-*` is the only thing that does). `generate` warns about this rather than forcing the flag on, tokens/spacing/colors without trim in a CSS build is still a legitimate choice. `family: false` gets no warning, because it isn't the same kind of loss: `--font-family-{role}` is emitted for every role either way, so `font-family: var(--font-family-heading)` in your own CSS does what `.font-family-heading` does. Trim has no such fallback. Each role's metrics live inside the placeholder `.trim-text-*` extends, so without the class the values never reach the file at all and there's nothing to reference.
+In the SCSS build, `output.utilities.typography.trim: false` just means the `.trim-text-*` classes aren't generated, `font-setup` and the underlying placeholders still work if you reach for them from your own SCSS. Linking the compiled `trimscale.bundle.css` file gives you no stylesheet in that pipeline to reach them from: `trim: false` means leading trim doesn't exist in the file at all, and both `@layer trim-defaults` and `@layer trim` are empty (placeholders emit nothing until something extends them, and `.trim-text-*` is the only thing that does). `generate` warns about this rather than forcing the flag on, tokens/spacing/colors without trim in a CSS build is still a legitimate choice. `family: false` gets no warning, because it isn't the same kind of loss: `--font-family-{role}` is emitted for every role either way, so `font-family: var(--font-family-heading)` in your own CSS does what `.font-family-heading` does. Trim has no such fallback. Each role's metrics live inside the placeholder `.trim-text-*` extends, so without the class the values never reach the file at all and there's nothing to reference.
 
 A family with `nextFont: true` doesn't work in the CSS build either: its `family` value is built around `var(--next-font-x)`, a CSS variable only ever set by Next.js's own runtime, which a standalone CSS file never goes through. The variable's fallback is the family name, so the declaration stays valid and lands on whichever `@font-face` that name resolves to, which in a build that never wrote one for it is none. `generate` warns per family when this combination is detected.
 

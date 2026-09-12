@@ -96,20 +96,27 @@ source map.
 
 ## What SCSS is *not* used for here
 
+This is about the output of `generate`. Inside the engine, Sass does the things
+a build step exists to do; the list below is what doesn't survive into the CSS
+you ship.
+
 - **Variables.** Every token in the system is a CSS custom property, so it's
   overridable at runtime, inspectable in devtools, and scoped by the cascade.
   Sass variables appear only where a value must be resolved at compile time
   (breakpoints in media queries, font metrics, loop sources).
 - **Nesting.** Used for readability, but native nesting would do the job
   everywhere except selector concatenation, which this codebase avoids anyway.
-- **Color math.** Colors go through OKLCH and `light-dark()` in the output,
-  not through `sass:color`.
+- **Color math.** `sass:color` runs at build time, in
+  [`fn.get-color-token`](abstracts.md#fnget-color-tokentoken-tokens-opacity-lightness-multiplier-chroma-multiplier)
+  and `mx.generate-color-tokens`, to derive one token from another and to apply
+  opacity. It resolves values, it doesn't own them at runtime: what the output
+  carries is OKLCH, and mode switching is `light-dark()`.
 
 ---
 
 ## What this costs you
 
-Being straight about the trade-off: SCSS is a real dependency for consumers.
+Being straight about the trade-off: SCSS is a real dev-dependency for consumers.
 You need Dart Sass 1.95.0+, `loadPaths` configured for your bundler, and the
 `pkg:` importer registered separately if you want it, and `pkg:` doesn't work
 in Next.js at all, which is why Next.js has
