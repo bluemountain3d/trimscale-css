@@ -134,15 +134,18 @@ Same caveat as `manual`: without `generateFontFace: true`, your config key must 
 For a font whose file trimscale can't read at all, most commonly a CDN that only serves it through its own delivery mechanism with no downloadable file (Adobe Fonts/Typekit is the typical case):
 
 ```ts
-'Proxima Nova': {
+'proxima-nova': {
   source: 'manual',
   fallback: 'sans-serif',
   metrics: {
-    avgCharWidth: 0.558,
+    avgCharWidth: 0.452,
     topTrim: 0.123,
     bottomTrim: 0.21,
     lsbAdjust: -0.061,
     rsbAdjust: -0.06,
+    ascender: 0.79,
+    descender: 0.21,
+    lineGap: 0,
   },
 },
 ```
@@ -154,6 +157,34 @@ precisionspec.dev needs an actual font file to read, not just a family name. If 
 No `@font-face` is generated for a `manual` family, load the font however that CDN normally expects, trimscale only needs the numbers to compute leading-trim and side-bearing adjustments.
 
 **The config key must match what's actually loaded, not the font file's own name.** `@font-face`'s `font-family` value is arbitrary, matching is a plain string comparison against whichever `@font-face` rule is actually in effect, never the font file's internal name table. Since `manual` writes no `@font-face` at all, that rule comes entirely from the CDN's own script/stylesheet, trimscale has no say in it. If nothing renders despite metrics looking correct, check DevTools' Computed panel (or the CDN's own injected CSS) for the real `font-family` string in use, and match your config key to that, not to whatever the raw font file calls itself internally.
+
+### When trimmed text sits low in one browser but not another
+
+**A `manual` family can render its trimmed text low inside a box that is nonetheless the right height, in browsers without native `text-box-trim`.** The fallback path removes `(1lh - 1em) / 2` from each end, which assumes the content area is exactly 1em, and the `ascent-override`/`descent-override` pair that guarantees that only exists in an `@font-face` rule trimscale writes. A `manual` family has none, so the browser uses whatever ascender and descender the loaded font declares. Where those overflow the em, the total amount trimmed stays correct, which is why the box height still looks right, and only the split between top and bottom goes wrong.
+
+The check takes a few seconds: open the same page in a browser with native `text-box-trim`. That path reads cap height and baseline straight out of the font and ignores `topTrim`/`bottomTrim` entirely, so text sitting correctly there tells you your metrics describe the loaded font accurately and the difference lies in the fallback's assumption, not in your config.
+
+This is the one case `generate` can't warn about, for the reason in the table below: the ascender and descender a browser reads come from the font's `usWin` and `hhea` tables, and a `manual` family exists precisely because that file isn't there to read them from. Measure it in the browser instead, in the one showing the problem, since the numbers are whatever that engine reads:
+
+```js
+const family = 'proxima-nova' // the font family name
+const configAscender = 0.79 // this family's `ascender`, as precisionspec reported it
+const size = 1000
+
+await document.fonts.load(`400 ${size}px "${family}"`, 'H')
+const ctx = document.createElement('canvas').getContext('2d')
+ctx.font = `400 ${size}px "${family}"`
+
+const { fontBoundingBoxAscent, fontBoundingBoxDescent } = ctx.measureText('H')
+const A = fontBoundingBoxAscent / size
+const D = fontBoundingBoxDescent / size
+
+;(1 - (A + D)) / 2 + (A - configAscender) // the offset, in em
+```
+
+Adding that offset to `topTrim` and subtracting it from `bottomTrim` puts the split back where it belongs. The sum is unchanged, so the box height is too, and the native path never reads either value, so browsers that have it are unaffected. Keep both results positive: a negative trim value is silently flipped rather than rejected.
+
+Whether that edit is worth making depends on your traffic. The two tables it corrects for are read per platform, Windows engines taking one and macOS the other, so one pair of numbers can only ever be right for one of them, and the edit that squares a font on Windows can introduce the same offset on macOS. Weigh it against how much of your audience is still on the fallback path at all.
 
 ## Font metric overrides
 
@@ -175,7 +206,7 @@ The overrides can only go in an `@font-face` rule trimscale writes itself, which
 | `cdn`, loaded via your own `<link>` | Set `generateFontFace: true` and let trimscale write the rule |
 | `next/font/local` | Pass the values through `localFont()`'s `declarations` option, see [using-with-nextjs.md](using-with-nextjs.md#step-5-metric-overrides-if-generate-asked-for-them) |
 | `next/font/google` | No hook exists. Load the family's files yourself instead, see [using-with-nextjs.md](using-with-nextjs.md#nextfontgoogle) |
-| `manual` | Not detectable, the file trimscale would have read isn't there. Add the overrides to whatever rule does load the font |
+| `manual` | Not detectable, the file trimscale would have read isn't there. Add the overrides to whatever rule does load the font, or see [when trimmed text sits low in one browser but not another](#when-trimmed-text-sits-low-in-one-browser-but-not-another) if that rule isn't yours to edit |
 
 The warning stays silent below a hundredth of an em, which covers the large majority of fonts. It fires on the measured error, not on the flag: two thirds of the fonts that leave `USE_TYPO_METRICS` clear have tables that agree closely enough to cost nothing.
 
