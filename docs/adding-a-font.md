@@ -4,6 +4,8 @@
 
 Font metrics, `@font-face` declarations, and role assignment are generated from `appFonts.families` in [`trimscale.config.ts`](../templates/trimscale.config.ts). Each entry is a family name mapped to a `source`, which decides where its metrics (and, if applicable, its `@font-face` rules) come from.
 
+**Scope: metric extraction and leading trim assume alphabetic scripts.** The metrics are read from Latin glyphs. `avgCharWidth` is a frequency-weighted average over lowercase a-z and space, the side-bearing adjustments sample `aehilmnors` (`BDEHILNORS` on an all-caps font), and the trim values come from cap height against the typographic ascender and descender. A file without enough of those characters is refused with an error, but a family that bundles a Latin subset alongside another script, as many CJK families do, passes and gets metrics describing only that subset. Use [`source: 'manual'`](#source-manual) for a script these measurements don't fit.
+
 ## Choose a source
 
 | `source` | Metrics come from                                                 | Writes `@font-face`?                               | Use when...                                                                                                                    |
