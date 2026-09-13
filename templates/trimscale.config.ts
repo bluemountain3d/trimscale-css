@@ -41,9 +41,9 @@ const config: TrimscaleConfig = {
    * → docs/adding-a-font.md · docs/full-config-reference.md#appfonts
    */
   appFonts: {
-    nextFontDefault: false,         // if using Next.js `next/font` (local or google)
-    nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
-    defaultFallback: 'sans-serif',  // used when a families entry below has no `fallback` of its own
+    nextFontDefault: false, // if using Next.js `next/font` (local or google)
+    nextFontPrefix: 'next-font', // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
+    defaultFallback: 'sans-serif', // used when a families entry below has no `fallback` of its own
     families: {
       // Placeholder so `generate` produces working output before you've set
       // up a real font. Replace it, see docs/adding-a-font.md.
@@ -70,9 +70,9 @@ const config: TrimscaleConfig = {
       //   source: 'manual',
       //   fallback: { matched: 'sans-serif' },
       //   metrics: {
-      //     // Required for leading-trim fallback compatibility 
+      //     // Required for leading-trim fallback compatibility
       //     "avgCharWidth": 0.452,
-      //     "topTrim": 0.123, 
+      //     "topTrim": 0.123,
       //     "bottomTrim": 0.21,
       //     "lsbAdjust": -0.061,
       //     "rsbAdjust": -0.06,
@@ -152,9 +152,9 @@ const config: TrimscaleConfig = {
     maxWidth: 1440,
     minFontSize: 16,
     maxFontSize: 20,
-    minTypeScale: 1.2,   // scale name (e.g "Minor Third") or scale value (e.g 1.2)
+    minTypeScale: 1.2, // scale name (e.g "Minor Third") or scale value (e.g 1.2)
     maxTypeScale: 1.333, // scale name (e.g "Perfect Fourth") or scale value (e.g 1.333)
-    precision: 4,        // integer 1-6
+    precision: 4, // integer 1-6
   },
 
   /**
@@ -165,8 +165,8 @@ const config: TrimscaleConfig = {
    */
   modularTypographicScale: {
     // System Default (optional)
-    fs900: { step: 6, unit: 'vwx', uncapped: true},
-    fs800: { step: 5, unit: 'vwx', uncapped: true},
+    fs900: { step: 6, unit: 'vwx', uncapped: true },
+    fs800: { step: 5, unit: 'vwx', uncapped: true },
     fs700: { step: 4, unit: 'vwx' },
     fs600: { step: 3, unit: 'vwx' },
     fs500: { step: 2, unit: 'vwx' },
@@ -278,13 +278,13 @@ const config: TrimscaleConfig = {
     tShirtScaleMicro: {
       '3xs': 1,
       '2xs': 2,
-      'xs': 3,
-      'sm': 4,
-      'md': 5,
-      'lg': 6,
+      xs: 3,
+      sm: 4,
+      md: 5,
+      lg: 6,
     },
     tShirtScaleMacro: {
-      'xl': 6,
+      xl: 6,
       '2xl': 8,
       '3xl': 10,
       '4xl': 12,

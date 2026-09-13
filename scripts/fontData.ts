@@ -66,7 +66,10 @@ const FALLBACK_CHAINS: Record<MatchableFallbackChain, MatchableFallbackFamily[]>
  * guaranteed after a production build, see `AppFonts.publicDir`).
  */
 const buildLocalFontSrc = (entry: string, publicDir: string): string => {
-  const normalizedEntry = entry.replace(/^\.[\\/]/, '').split(path.sep).join('/')
+  const normalizedEntry = entry
+    .replace(/^\.[\\/]/, '')
+    .split(path.sep)
+    .join('/')
   const normalizedPublicDir = publicDir
     .replace(/^\.[\\/]/, '')
     .replace(/[\\/]+$/, '')
@@ -85,7 +88,9 @@ const resolveFallbackFamilies = (
   value: MatchableFallbackFamily | MatchableFallbackFamily[] | MatchableFallbackChain,
 ): MatchableFallbackFamily[] => {
   if (Array.isArray(value)) return value
-  return value in FALLBACK_CHAINS ? FALLBACK_CHAINS[value as MatchableFallbackChain] : [value as MatchableFallbackFamily]
+  return value in FALLBACK_CHAINS
+    ? FALLBACK_CHAINS[value as MatchableFallbackChain]
+    : [value as MatchableFallbackFamily]
 }
 
 /** The `{ matched }` half of a `FontFallback`, or `undefined` when it's a plain generic keyword. Narrows on the object form, so a family that asks for metric matching is the only one that reaches `computeFallbackFontFaces`. */
@@ -313,7 +318,7 @@ const warnIfTrimUncorrectable = (
   const owner = usesNextFont ? 'next/font' : 'whatever loads it'
   const fix = usesNextFont
     ? source === 'local'
-      ? 'Pass them through next/font/local\'s `declarations` option.'
+      ? "Pass them through next/font/local's `declarations` option."
       : "next/font/google has no way to set them. Load the family with `source: 'local'` instead if the trim matters more than the CDN."
     : 'Set `generateFontFace: true` and trimscale writes the rule, overrides included.'
 

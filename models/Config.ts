@@ -343,7 +343,6 @@ export type SemanticAlias = {
 /** Map of semantic alias name to its `SemanticAlias` definition. */
 export type SemanticColorAliases = Record<string, SemanticAlias>
 
-
 /** Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. A `false` at the top level of a section also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops. */
 export type UtilitiesConfig = {
   spacing?:
@@ -456,5 +455,3 @@ export type TrimscaleConfig = {
   /** Where and what `generate` writes — output directory, SCSS/CSS targets, utility-class groups, and the reset block. */
   output?: OutputConfig
 }
-
-

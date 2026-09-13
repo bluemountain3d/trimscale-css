@@ -43,6 +43,12 @@
       "trimscale-css/*": ["./*"]
     }
   },
-  "include": ["scripts/**/*", "models/**/*", "templates/**/*", "devScripts/**/*", "*.ts"],
+  "include": [
+    "scripts/**/*",
+    "models/**/*",
+    "templates/**/*",
+    "devScripts/**/*",
+    "*.ts"
+  ],
   "exclude": ["styleguide/**/*"]
 }

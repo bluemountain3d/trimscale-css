@@ -5,7 +5,10 @@ import type { FontFace } from './fontData.ts'
 
 /** The subset of Dart Sass's compiler API (shared between `sass` and `sass-embedded`) `writeCssOutput` needs. */
 type SassCompiler = {
-  compileString: (source: string, options: { loadPaths: string[]; style: 'expanded' | 'compressed' }) => {
+  compileString: (
+    source: string,
+    options: { loadPaths: string[]; style: 'expanded' | 'compressed' },
+  ) => {
     css: string
   }
 }
@@ -50,7 +53,9 @@ const loadSassCompiler = async (): Promise<SassCompiler> => {
  * unchanged, they're never local files to begin with.
  */
 export const rewriteFontFacesForCss = (fontFaces: FontFace[], fontUrlBase: string): FontFace[] =>
-  fontFaces.map((face) => (face.src.startsWith('/') ? { ...face, src: `${fontUrlBase}/${path.basename(face.src)}` } : face))
+  fontFaces.map((face) =>
+    face.src.startsWith('/') ? { ...face, src: `${fontUrlBase}/${path.basename(face.src)}` } : face,
+  )
 
 const STYLES_LOAD_PATH = path.join(import.meta.dirname, '..', 'styles')
 

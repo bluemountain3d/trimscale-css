@@ -12,12 +12,12 @@ import type { TrimscaleConfig } from './models/Config.ts'
  *   → docs/customizing-breakpoints.md
  * - ultrawideHeightThresholdPx
  *   → docs/design-tokens.md#base-tokens
- * - fluidScale, modularTypographicScale, semanticFontSizes                                               
+ * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
- * 
+ *
  * - fontWeights, lineHeights, dynamicLineHeight
  *   → docs/design-tokens.md#typography-tokens
- * - spacingSetup                                         
+ * - spacingSetup
  *   → docs/customizing-spacing.md
  * - defaultScheme, baseColorTokens, campaignColorTokens, semanticColorAliases
  *   → docs/design-tokens.md#color-tokens
@@ -37,11 +37,11 @@ const config: TrimscaleConfig = {
    */
   appFonts: {
     localFontsPath: './fixtures/fonts',
-    nextFontDefault: false,         // if using Next.js `next/font` (local or google)
-    nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
-    defaultFallback: 'sans-serif',  // used when a font entry below has no `fallback` of its own
+    nextFontDefault: false, // if using Next.js `next/font` (local or google)
+    nextFontPrefix: 'next-font', // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
+    defaultFallback: 'sans-serif', // used when a font entry below has no `fallback` of its own
     families: {
-      'Roboto': {
+      Roboto: {
         source: 'local',
         path: [
           './fixtures/fonts/Roboto-VariableFont_wght-100-900_subset.woff2',
@@ -144,9 +144,9 @@ const config: TrimscaleConfig = {
     maxWidth: 1440,
     minFontSize: 16,
     maxFontSize: 20,
-    minTypeScale: 1.2,   // scale name (e.g "Minor Third") or scale value (e.g 1.2)
+    minTypeScale: 1.2, // scale name (e.g "Minor Third") or scale value (e.g 1.2)
     maxTypeScale: 1.333, // scale name (e.g "Perfect Fourth") or scale value (e.g 1.333)
-    precision: 4,        // integer 1-6
+    precision: 4, // integer 1-6
   },
 
   /**
@@ -157,8 +157,8 @@ const config: TrimscaleConfig = {
    */
   modularTypographicScale: {
     // System Default (optional)
-    fs900: { step: 6, unit: 'vwx', uncapped: true},
-    fs800: { step: 5, unit: 'vwx', uncapped: true},
+    fs900: { step: 6, unit: 'vwx', uncapped: true },
+    fs800: { step: 5, unit: 'vwx', uncapped: true },
     fs700: { step: 4, unit: 'vwx' },
     fs600: { step: 3, unit: 'vwx' },
     fs500: { step: 2, unit: 'vwx' },
@@ -167,7 +167,7 @@ const config: TrimscaleConfig = {
     fs300: { step: 0, unit: 'vwx' },
     fs200: { step: -1, unit: 'vwx' },
     fs100: { step: -2, unit: 'vwx' },
-    // Custom 
+    // Custom
     // E.g: stepName: {step: 2.5, unit: 'cqw'}
   },
 
@@ -270,13 +270,13 @@ const config: TrimscaleConfig = {
     tShirtScaleMicro: {
       '3xs': 1,
       '2xs': 2,
-      'xs': 3,
-      'sm': 4,
-      'md': 5,
-      'lg': 6,
+      xs: 3,
+      sm: 4,
+      md: 5,
+      lg: 6,
     },
     tShirtScaleMacro: {
-      'xl': 6,
+      xl: 6,
       '2xl': 8,
       '3xl': 10,
       '4xl': 12,
@@ -343,8 +343,8 @@ const config: TrimscaleConfig = {
         // opacity: 0.8,
       },
       accent: {
-        light: {oklch: 'oklch(0.543 0.102 272)', hex: '#5B6BAB'},
-        dark: {oklch: 'oklch(0.733 0.045 74)', hex: '#baa58a'},
+        light: { oklch: 'oklch(0.543 0.102 272)', hex: '#5B6BAB' },
+        dark: { oklch: 'oklch(0.733 0.045 74)', hex: '#baa58a' },
       },
       action: {
         light: { oklch: 'oklch(0.485 0.105 271)', hex: '#495a9a' },
@@ -362,20 +362,20 @@ const config: TrimscaleConfig = {
         // opacity: 0.8,
       },
       textPrimary: {
-        light: {oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23'},
-        dark: {oklch: 'oklch(0.943 0 0)', hex: '#ececec'},
+        light: { oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23' },
+        dark: { oklch: 'oklch(0.943 0 0)', hex: '#ececec' },
       },
       textMuted: {
-        light: {oklch: 'oklch(0.39 0 0)', hex: '#454545'},
-        dark: {oklch: 'oklch(0.783 0 0)', hex: '#b8b8b8'},
+        light: { oklch: 'oklch(0.39 0 0)', hex: '#454545' },
+        dark: { oklch: 'oklch(0.783 0 0)', hex: '#b8b8b8' },
       },
       textContrast: {
-        light: {oklch: 'oklch(0 0 0)', hex: '#000000'},
-        dark: {oklch: 'oklch(1 0 0)', hex: '#ffffff'},
+        light: { oklch: 'oklch(0 0 0)', hex: '#000000' },
+        dark: { oklch: 'oklch(1 0 0)', hex: '#ffffff' },
       },
       a11yFocus: {
-        light: {oklch: 'oklch(0.526 0.135 251)', hex: '#1f6db5'},
-        dark: {oklch: 'oklch(0.68 0.106 246)', hex: '#5e9ed6'},
+        light: { oklch: 'oklch(0.526 0.135 251)', hex: '#1f6db5' },
+        dark: { oklch: 'oklch(0.68 0.106 246)', hex: '#5e9ed6' },
       },
     },
   },

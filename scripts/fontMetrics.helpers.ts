@@ -187,18 +187,38 @@ export const getAverageSideBearings = (font: Font): { lsb: number; rsb: number }
   }
 }
 
-
 // English letter-frequency weights (space + a-z sum to 1), used to weight
 // advance-width by how often each character actually appears in running
 // text. Space dominates (~18%) because average word length + gap is what
 // determines where text wraps — see notes/trimscale-css-avgcharwidth.md.
 const CHAR_WEIGHTS: Record<string, number> = {
   ' ': 0.1801,
-  e: 0.1025, t: 0.0761, a: 0.0659, o: 0.0627, i: 0.0621,
-  n: 0.0593, s: 0.0534, r: 0.0515, h: 0.0414, l: 0.0334,
-  d: 0.0313, c: 0.0274, u: 0.0224, m: 0.0206, f: 0.0197,
-  p: 0.0176, g: 0.0153, w: 0.0138, y: 0.0136, b: 0.0121,
-  v: 0.0086, k: 0.0044, x: 0.0019, j: 0.0013, q: 0.0010, z: 0.0007,
+  e: 0.1025,
+  t: 0.0761,
+  a: 0.0659,
+  o: 0.0627,
+  i: 0.0621,
+  n: 0.0593,
+  s: 0.0534,
+  r: 0.0515,
+  h: 0.0414,
+  l: 0.0334,
+  d: 0.0313,
+  c: 0.0274,
+  u: 0.0224,
+  m: 0.0206,
+  f: 0.0197,
+  p: 0.0176,
+  g: 0.0153,
+  w: 0.0138,
+  y: 0.0136,
+  b: 0.0121,
+  v: 0.0086,
+  k: 0.0044,
+  x: 0.0019,
+  j: 0.0013,
+  q: 0.001,
+  z: 0.0007,
 }
 
 /**

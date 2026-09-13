@@ -155,9 +155,7 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
   // the getVariation() crash risk for no loss of accuracy.
   const isItalic = os2.fsSelection.italic
   const weightClass = os2.usWeightClass
-  const weightRange = isVariable
-    ? { min: f.variationAxes.wght.min, max: f.variationAxes.wght.max }
-    : null
+  const weightRange = isVariable ? { min: f.variationAxes.wght.min, max: f.variationAxes.wght.max } : null
 
   return {
     metrics: {
