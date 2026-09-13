@@ -124,6 +124,23 @@ All notable changes to this project are documented in this file.
   configs, and what a spacing step, font role, color token and
   `@font-face` rule each cost, are in
   [getting-started.md](docs/getting-started.md#output-size).
+- `$type` on `get-fluid-clamp` and `fluid-space-step`, the two fluid
+  functions that lacked it. `$type` arrived with the `uncapped` option in
+  `modularTypographicScale` and was added to `fluid-font-size` and
+  `fluid-spacing` only, which left `max()` reachable for type-scale tokens
+  and nothing else: `get-fluid-clamp` is the sole entry point for an
+  arbitrary min/max pair, so a consumer's own `--custom-size` could not be
+  given the same treatment. Defaults to `'clamp'` on both, and the
+  `clamp()` branches are byte-identical to what they emitted before, so no
+  existing output moves. Documented in
+  [abstracts.md](docs/abstracts.md) for all four now; `@param $type` was
+  missing from every one of them.
+  Three related items are deliberately **not** in this release, because each
+  one changes bytes in existing output or renames public surface: the shared
+  math still lives in four copies rather than one private `_fluid-value`,
+  `get-fluid-clamp` still rounds only the slope while the other three round
+  all three values, and its unit argument is still named `$value-key` where
+  the others say `$unit-key`.
 
 ### Changed
 
@@ -417,6 +434,22 @@ All notable changes to this project are documented in this file.
   `grid` or `table` on an element carrying `.trim-text-*`**, that element is
   not trimmed anywhere; move the display to a wrapper and keep the class on
   the span.
+- An unrecognized `$type` on a fluid function produced nothing at all, with
+  no warning. `fluid-font-size` and `fluid-spacing` branched on
+  `@if $type == 'clamp'` / `@else if $type == 'max'` with no `@else`; a Sass
+  function that falls through every branch returns `null`, and a declaration
+  whose value is `null` is omitted from the output, so `'Max'` or
+  `'maximum'` cost you the rule rather than the build. All four functions
+  validate through one private `_validate-fluid-type` and `@error` on
+  anything but `'clamp'` or `'max'`. `@error` rather than `@warn` because an
+  unknown `$type` has no sensible fallback: silently emitting `clamp()` when
+  someone asked for `max()` is the same class of bug, only harder to see.
+  The validation runs before the redundancy check that returns a static
+  `rem` when `$min-size == $max-size` or `minWidth == maxWidth`, so the typo
+  is caught in those configs too. That is the one input whose behavior
+  changes rather than being repaired: a bogus `$type` in a config where the
+  clamp is redundant used to return a usable static value and is an error
+  now.
 
 ### Removed
 

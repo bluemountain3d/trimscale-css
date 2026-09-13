@@ -73,6 +73,7 @@ A `display` of `flex`, `grid` or `table` on a trimmed element removes the trim i
 - **A `package.json` `exports` field**, which also enables Sass's `pkg:` importer as an alternative to configuring `loadPaths`. `loadPaths` keeps working and stays the documented approach. The `pkg:` importer does **not** work in Next.js, under either Turbopack or webpack. See [using-with-nextjs.md](using-with-nextjs.md).
 - **`trimscale.config.mts` is accepted**, and `init` writes that name in a project whose `package.json` declares `"type": "commonjs"`, where Node cannot load a `.ts` config at all.
 - **Node 22.18.0 is enough**, lowered from 23.6.0. That is where flagless TypeScript type stripping, which `generate` needs to read your config, reached the 22.x LTS line.
+- **`$type: 'max'` on every fluid function.** `fn.get-fluid-clamp` and `fn.fluid-space-step` take the `$type` argument that `fn.fluid-font-size` and `fn.fluid-spacing` already had, so a value can drop its upper bound and keep growing past `fluidScale.maxWidth`, which is what `uncapped` does for the type scale. `get-fluid-clamp` is the only entry point for arbitrary min/max pairs, so this was previously reachable for type-scale tokens and nothing else. Default `'clamp'`, existing calls are unaffected. See [abstracts.md](abstracts.md).
 
 ### Fixed
 
@@ -88,6 +89,7 @@ A `display` of `flex`, `grid` or `table` on a trimmed element removes the trim i
 - `output.utilities: false` was documented but didn't type-check, and the generated `utility-classes.md` listed the accessibility classes whatever their flag said.
 - `generate` reported every failure as a Node stack trace under an unhandled-rejection banner. Failures are one line now, with the stack behind `TRIMSCALE_DEBUG=1`. A config that exists but won't parse no longer tells you to run `init`, which refuses to overwrite it anyway.
 - `generate` left behind output it had stopped producing, so turning `output.css` off left linkable CSS frozen at whatever the config last said. Each run removes the files in its own known set that it didn't write this time, and nothing else in the folder.
+- A misspelled `$type` on a fluid function (`'Max'`, `'maximum'`) produced no value and no warning. A Sass function that falls through every branch returns `null`, and a declaration with a `null` value is dropped, so the rule was simply missing from the output. An unrecognized `$type` is an error now.
 
 ---
 
