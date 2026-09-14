@@ -2,10 +2,13 @@ import type { TrimscaleConfig } from './models/Config.ts'
 
 /**
  * Trimscale design-system configuration. Edit values here to customize the
- * generated tokens — see node_modules/trimscale-css/docs/ for the full reference,
- * or docs/full-config-reference.md for a single-page property-by-property index.
+ * generated tokens. This is the package's own config, so every docs/ path
+ * below is relative to the repository root; docs/full-config-reference.md is
+ * the single-page property-by-property index.
  *
  * Where to find the docs for each section below:
+ * - output
+ *   → docs/getting-started.md#generate
  * - appFonts (incl. fontRoles)
  *   → docs/adding-a-font.md
  * - breakpoints
@@ -14,12 +17,11 @@ import type { TrimscaleConfig } from './models/Config.ts'
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
- *
  * - fontWeights, lineHeights, dynamicLineHeight
  *   → docs/design-tokens.md#typography-tokens
  * - spacingSetup
  *   → docs/customizing-spacing.md
- * - defaultScheme, baseColorTokens, campaignColorTokens, semanticColorAliases
+ * - defaultScheme, baseColorTokens, customColorTokens, semanticColorAliases
  *   → docs/design-tokens.md#color-tokens
  *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
@@ -71,17 +73,22 @@ const config: TrimscaleConfig = {
       //   url: ['https://fonts.gstatic.com/s/opensans/v40/....woff2'],
       //   fallback: 'sans-serif',
       // },
-      // Manual example, for CDNs that don't expose a downloadable file — get
+      // Manual example, for CDNs that don't expose a downloadable file. Get
       // the metrics from precisionspec.dev:
-      // 'Proxima Nova': {
+      // 'proxima-nova': {
       //   source: 'manual',
       //   fallback: 'sans-serif',
       //   metrics: {
-      //     avgCharWidth: 0.545,
-      //     topTrim: 0.107,
-      //     bottomTrim: 0.02,
-      //     lsbAdjust: -0.012,
-      //     rsbAdjust: -0.012,
+      //     // Required: what leading trim and side-bearing correction read
+      //     avgCharWidth: 0.452,
+      //     topTrim: 0.123,
+      //     bottomTrim: 0.21,
+      //     lsbAdjust: -0.061,
+      //     rsbAdjust: -0.06,
+      //     // Required for a { matched } fallback, optional otherwise:
+      //     ascender: 0.79,
+      //     descender: 0.21,
+      //     lineGap: 0,
       //   },
       // },
     },
@@ -288,7 +295,7 @@ const config: TrimscaleConfig = {
     },
     numericScaleMicroEnd: 6,
     numericScaleMacroEnd: 48,
-    // Coupled example — remove/comment the independent-only fields above
+    // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',

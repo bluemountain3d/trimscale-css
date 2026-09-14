@@ -2,10 +2,13 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
 
 /**
  * Trimscale design-system configuration. Edit values here to customize the
- * generated tokens — see node_modules/trimscale-css/docs/ for the full reference,
- * or docs/full-config-reference.md for a single-page property-by-property index.
+ * generated tokens. Every docs/ path in this file is relative to
+ * node_modules/trimscale-css/, so docs/full-config-reference.md is the
+ * single-page property-by-property index.
  *
  * Where to find the docs for each section below:
+ * - output
+ *   → docs/getting-started.md#generate
  * - appFonts (incl. fontRoles)
  *   → docs/adding-a-font.md
  * - breakpoints
@@ -14,12 +17,11 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
- *
  * - fontWeights, lineHeights, dynamicLineHeight
  *   → docs/design-tokens.md#typography-tokens
  * - spacingSetup
  *   → docs/customizing-spacing.md
- * - defaultScheme, baseColorTokens, campaignColorTokens, semanticColorAliases
+ * - defaultScheme, baseColorTokens, customColorTokens, semanticColorAliases
  *   → docs/design-tokens.md#color-tokens
  *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
@@ -64,7 +66,7 @@ const config: TrimscaleConfig = {
       //   url: ['https://fonts.gstatic.com/s/opensans/v40/....woff2'],
       //   fallback: { matched: 'sans-serif' },
       // },
-      // Manual example, for CDNs that don't expose a downloadable file — get
+      // Manual example, for CDNs that don't expose a downloadable file. Get
       // the metrics from precisionspec.dev:
       // 'Proxima Nova': {
       //   source: 'manual',
@@ -296,7 +298,7 @@ const config: TrimscaleConfig = {
     },
     numericScaleMicroEnd: 6,
     numericScaleMacroEnd: 48,
-    // Coupled example — remove/comment the independent-only fields above
+    // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',
