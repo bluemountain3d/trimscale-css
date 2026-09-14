@@ -282,10 +282,23 @@ const resolveLocalFontPaths = async (
  * though trimscale writes no `@font-face` for it (`manual`, or `cdn` without
  * `generateFontFace`), so nothing here confirms it matches whatever
  * `font-family` the font is actually loaded under elsewhere.
+ *
+ * A `manual` family gets a second clause, about its leading trim. A `cdn`
+ * one doesn't need it: its file is readable, so `warnIfTrimUncorrectable`
+ * reports that family's actual error in em. `manual` has no file to measure
+ * and no way to acquire one: config fields carrying `usWin`/`hhea` would
+ * describe whichever file the consumer measured, not the one the CDN serves,
+ * and those differ in practice (see devDocs/font-vertical-metrics.md). So the
+ * most that can honestly be said is where to look if the symptom appears.
  */
 const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cdn'): void => {
+  const trimNote =
+    source === 'manual'
+      ? ' Its leading trim is unverified for the same reason: no @font-face means no `ascent-override` pinning the content area to 1em. If trimmed text sits low in one browser but not another, see docs/adding-a-font.md#when-trimmed-text-sits-low-in-one-browser-but-not-another'
+      : ''
+
   console.warn(
-    `⚠ "${familyName}": no @font-face written (source: ${source}). Confirm "${familyName}" matches the font-family actually loaded elsewhere, or metrics apply to nothing.`,
+    `⚠ "${familyName}": no @font-face written (source: ${source}). Confirm "${familyName}" matches the font-family actually loaded elsewhere, or metrics apply to nothing.${trimNote}`,
   )
 }
 

@@ -56,7 +56,9 @@ Of the badly affected fonts, 287 of 412 have a typo sum of exactly 1.000. That i
 
 Every `@font-face` the package writes carries `ascent-override` and `descent-override` computed from the corrected pair, which forces the content area to exactly 1em regardless of which table the engine would have read. This is not a per-platform patch, it removes the branch entirely, and it is why `local` and `cdn`-with-`generateFontFace` families are correct everywhere.
 
-The overrides can only sit in a rule the package writes. For the rest, `generate` warns above the threshold and names the two values (`next/font/local` takes them through `declarations`; `next/font/google` has no hook). `manual` gets neither the fix nor the warning: the file the values would be read from is absent by definition, which is the whole meaning of the source.
+The overrides can only sit in a rule the package writes. For the rest, `generate` warns above the threshold and names the two values (`next/font/local` takes them through `declarations`; `next/font/google` has no hook).
+
+`manual` gets the fix from neither side, and no measured warning either: the file the values would be read from is absent by definition, which is the whole meaning of the source. Config fields carrying `usWin` and `hhea` don't recover it. They would describe whichever file the consumer measured, and for a family delivered through a CDN's own mechanism that is frequently not the file being served: Proxima Nova below reads 1.079 / 0.325 in the browser against a desktop file offering 0.920 / 0.210 and 0.920 / 0.298. A computed error from those fields would be confidently wrong for exactly the population `manual` exists to serve, which is worse than saying nothing. What `generate` does carry for a `manual` family is a pointer to the symptom and the browser measurement, since that measurement reads what actually renders.
 
 ## Case study: Adobe Fonts, September 2026
 
