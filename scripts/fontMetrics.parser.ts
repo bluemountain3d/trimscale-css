@@ -90,7 +90,7 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
         activeFont = instance
       } catch (e) {
         console.warn(
-          `Could not instance wght ${TARGET_WEIGHT} for ${label} (fontkit's getVariation() is unreliable for WOFF2). Metrics may be inaccurate — falling back to default weight (${defaultWeight}).`,
+          `Could not instance wght ${TARGET_WEIGHT} for ${label} (fontkit's getVariation() is unreliable for WOFF2). Metrics may be inaccurate, falling back to default weight (${defaultWeight}).`,
         )
         activeFont = font
       }

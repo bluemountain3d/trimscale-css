@@ -61,7 +61,7 @@ const assertNoLegacyFields = (cfg: TrimscaleConfig): void => {
 const assertHasOutputTarget = (cfg: TrimscaleConfig): void => {
   if (cfg.output?.scss === false && cfg.output?.css === false) {
     throw new Error(
-      '`output.scss` and `output.css` are both `false` in trimscale.config.ts — there would be nothing to generate. Enable at least one.',
+      '`output.scss` and `output.css` are both `false` in trimscale.config.ts, so there would be nothing to generate. Enable at least one.',
     )
   }
 }
