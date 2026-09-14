@@ -138,11 +138,13 @@ For a font whose file trimscale can't read at all, most commonly a CDN that only
   source: 'manual',
   fallback: 'sans-serif',
   metrics: {
+    // Required: what leading trim and side-bearing correction read
     avgCharWidth: 0.452,
     topTrim: 0.123,
     bottomTrim: 0.21,
     lsbAdjust: -0.061,
     rsbAdjust: -0.06,
+    // Required for a { matched } fallback, optional otherwise:
     ascender: 0.79,
     descender: 0.21,
     lineGap: 0,
@@ -150,7 +152,7 @@ For a font whose file trimscale can't read at all, most commonly a CDN that only
 },
 ```
 
-Get these five values from [precisionspec.dev](https://precisionspec.dev): drop the font file in there (even if you can't use that file directly in your project, e.g. a Typekit sync font downloaded just for measurement), open **Export Metrics**, and use the **TrimScale** tab, it outputs exactly this shape, ready to paste into `metrics`.
+Get these values from [precisionspec.dev](https://precisionspec.dev): drop the font file in there (even if you can't use that file directly in your project, e.g. a Typekit sync font downloaded just for measurement), open **Export Metrics**, and use the **TrimScale** tab, it outputs exactly this shape, ready to paste into `metrics`.
 
 precisionspec.dev needs an actual font file to read, not just a family name. If you don't have direct download access (e.g. a locked CDN font), check whether the foundry offers a free trial/demo version, that's usually enough for measurement purposes since only the metrics tables matter, not the full character set or license.
 
@@ -267,18 +269,18 @@ A generic keyword can't carry a metric override, there's no concrete font to poi
 Extracted `local`/`cdn` metrics always include what's needed automatically. For `manual`, add three extra fields to `metrics` (on top of the five described above) or `{ matched }` is ignored with a console warning, and the family falls back to `defaultFallback`:
 
 ```ts
-'Proxima Nova': {
+'proxima-nova': {
   source: 'manual',
   fallback: { matched: 'sans-serif' },
   metrics: {
-    avgCharWidth: 0.558,
+    avgCharWidth: 0.452,
     topTrim: 0.123,
     bottomTrim: 0.21,
     lsbAdjust: -0.061,
     rsbAdjust: -0.06,
     // Required only for a { matched } fallback:
-    ascender: 0.924,
-    descender: 0.287,
+    ascender: 0.79,
+    descender: 0.21,
     lineGap: 0,
   },
 },

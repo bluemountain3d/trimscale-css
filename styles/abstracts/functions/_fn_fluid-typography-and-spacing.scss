@@ -2,7 +2,8 @@
 /// @name Fluid Typography & Spacing
 /// @description Calculate fluid values using clamp() for responsive typography and spacing.
 /// Uses linear interpolation (y = mx + b) between min/max viewport widths.
-/// All public functions support multiple viewport unit types via $unit-key.
+/// All public functions take a viewport unit type ($unit-key, or $value-key on
+/// get-fluid-clamp).
 /// @link https://www.smashingmagazine.com/2022/01/modern-fluid-typography-css-clamp/
 /// ===========================================================================
 

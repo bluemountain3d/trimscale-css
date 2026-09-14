@@ -70,13 +70,13 @@ const config: TrimscaleConfig = {
       //   source: 'manual',
       //   fallback: { matched: 'sans-serif' },
       //   metrics: {
-      //     // Required for leading-trim fallback compatibility
+      //     // Required: what leading trim and side-bearing correction read
       //     "avgCharWidth": 0.452,
       //     "topTrim": 0.123,
       //     "bottomTrim": 0.21,
       //     "lsbAdjust": -0.061,
       //     "rsbAdjust": -0.06,
-      //     // Optional for a { matched } fallback
+      //     // Required for a { matched } fallback, optional otherwise:
       //     "ascender": 0.79,
       //     "descender": 0.21,
       //     "lineGap": 0,

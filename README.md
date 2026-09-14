@@ -87,7 +87,7 @@ npx trimscale-css generate
 
 trimscale-css is a build-time dependency: SCSS sources plus a `generate` CLI, nothing ships to the browser from the package itself, so it belongs in `devDependencies`.
 
-`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes into your own project (`output.dir`, `./trimscale-generated` by default, never `node_modules`): the SCSS bridge file and a `utility-classes.md` reference, plus `trimscale.css`/`trimscale.min.css` if you set `output.css`, and `reset-requirements.md` if you set `output.reset: false`. Point your SCSS compiler's `loadPaths` at the package's `styles/` folder for trimscale-css's own static files, and `@use` the generated bridge file for your project's actual config values.
+`init` copies `trimscale.config.ts` into your project; edit it for your fonts, type scale, breakpoints, spacing, and colors. `generate` reads it and writes into your own project (`output.dir`, `./trimscale-generated` by default, never `node_modules`): the SCSS bridge file and a `utility-classes.md` reference, plus `trimscale.bundle.css`/`trimscale.bundle.min.css` if you set `output.css`, and `reset-requirements.md` if you set `output.reset: false`. Point your SCSS compiler's `loadPaths` at the package's `styles/` folder for trimscale-css's own static files, and `@use` the generated bridge file for your project's actual config values.
 
 **Don't want to configure Sass at all?** Set `output.css: true` and `generate` compiles a standalone stylesheet you can link directly, tokens and utility classes resolved against your config. You still run `install` → `generate`, just without touching `loadPaths`. See [getting-started.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#standalone-css-output) for what that build can and can't do.
 
@@ -176,16 +176,16 @@ Documentation lives in three places, split by audience:
 | ---------- | ---------------------------------------- | ------------ |
 | `docs/`    | People using the package                 | Yes          |
 | `devDocs/` | People working on the package itself     | No           |
-| `notes/`   | Local working notes, gitignored          | No           |
+| `notes/`   | Local working notes and planning, gitignored | No       |
 
 Anything a consumer needs belongs in `docs/`. `devDocs/` is for the parts of the
-work that never reach a consumer: what's planned, what's deliberately not being
-done, and which files need a manual pass when something else changes.
+work that never reach a consumer: the detailed changelog, which files need a
+manual pass when something else changes, and the font-metric background. Roadmap
+and backlog are kept outside this repository.
 
 | Doc                                                                                                | Covers                                                                        |
 | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| [roadmap.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/roadmap.md)         | Work that's decided but not shipped                                           |
-| [backlog.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/backlog.md)         | Candidates that aren't decided yet, ranked, plus small fixes (in Swedish)     |
-| [changelog.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/changelog.md)     | The detailed changelog; `docs/changelog.md` is the consumer-facing short form |
-| [maintenance.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/maintenance.md) | Files that don't auto-update and go silently out of sync                      |
-| [styleguide.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/styleguide.md)   | The Vite dev app in `styleguide/`                                             |
+| [changelog.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/changelog.md)                     | The detailed changelog; `docs/changelog.md` is the consumer-facing short form |
+| [font-vertical-metrics.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/font-vertical-metrics.md) | Which vertical metric tables a browser reads, and what that costs the trim    |
+| [maintenance.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/maintenance.md)                 | Files that don't auto-update and go silently out of sync                      |
+| [styleguide.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/devDocs/styleguide.md)                   | The Vite dev app in `styleguide/`                                             |

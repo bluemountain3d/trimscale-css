@@ -115,7 +115,7 @@ All notable changes to this project are documented in this file.
   way and your own CSS can use it. `generate` also warns per
   `nextFont`-enabled family, whose `var(--next-font-x)` value is never set
   outside Next.js's own runtime. Default `false`, opt-in.
-  See [why-scss.md](docs/why-scss.md) for why the file still needs
+  See [why-scss.md](../docs/why-scss.md) for why the file still needs
   `generate` and can't ship pre-built.
 - `generate` prints the size of each CSS file it writes, including the
   gzipped size of the one you'd actually ship (`zlib.gzipSync`, no new
@@ -123,7 +123,7 @@ All notable changes to this project are documented in this file.
   when you change it rather than after a build. Reference figures for four
   configs, and what a spacing step, font role, color token and
   `@font-face` rule each cost, are in
-  [getting-started.md](docs/getting-started.md#output-size).
+  [getting-started.md](../docs/getting-started.md#output-size).
 - `$type` on `get-fluid-clamp` and `fluid-space-step`, the two fluid
   functions that lacked it. `$type` arrived with the `uncapped` option in
   `modularTypographicScale` and was added to `fluid-font-size` and
@@ -133,7 +133,7 @@ All notable changes to this project are documented in this file.
   given the same treatment. Defaults to `'clamp'` on both, and the
   `clamp()` branches are byte-identical to what they emitted before, so no
   existing output moves. Documented in
-  [abstracts.md](docs/abstracts.md) for all four now; `@param $type` was
+  [abstracts.md](../docs/abstracts.md) for all four now; `@param $type` was
   missing from every one of them.
   Three related items are deliberately **not** in this release, because each
   one changes bytes in existing output or renames public surface: the shared
@@ -169,7 +169,7 @@ All notable changes to this project are documented in this file.
   (`next/font`, `cdn` without `generateFontFace`, `manual`) trimscale can't
   write them, and `generate` warns with the two values and how to apply them,
   staying silent below a hundredth of an em. See
-  [adding-a-font.md](docs/adding-a-font.md#font-metric-overrides).
+  [adding-a-font.md](../docs/adding-a-font.md#font-metric-overrides).
 - **Breaking:** the cascade layer order gained a layer and `trim` moved. It is
   now `reset, tokens, functions, trim-defaults, base, trim, layouts,
   components, utilities` (was `reset, tokens, functions, trim, base, layouts,
@@ -450,6 +450,32 @@ All notable changes to this project are documented in this file.
   changes rather than being repaired: a bogus `$type` in a config where the
   clamp is redundant used to return a usable static value and is an error
   now.
+- `templates/trimscale.config.ts` marked `ascender`/`descender`/`lineGap` as
+  optional for a `{ matched }` fallback, in an example that sets
+  `fallback: { matched: 'sans-serif' }` itself. They are required there:
+  without all three, `computeFallbackFontFaces` emits no faces, warns, and
+  the family falls through to `defaultFallback`, which is the opposite of
+  what the reader asked for. The wording is a leftover from
+  `fallbackFamily`, where the three were genuinely optional.
+  `docs/adding-a-font.md` had it right, so a reader comparing the two got
+  two answers.
+- The `{ matched }` requirements example in `docs/adding-a-font.md` carried
+  invented Proxima Nova metrics (`avgCharWidth: 0.558`, `ascender: 0.924`,
+  `descender: 0.287`) that disagree with the measured set in the same file's
+  `source: 'manual'` example, and keyed the family `'Proxima Nova'` where
+  Typekit loads it as `proxima-nova`, against the rule stated two sections
+  above it.
+- `README.md` named the standalone CSS output `trimscale.css` /
+  `trimscale.min.css`. The files are `trimscale.bundle.css` /
+  `trimscale.bundle.min.css`, and `trimscale.css` is specifically the name
+  `generateBridge.ts` warns about, since a file by that name in `output.dir`
+  shadows the package for the bridge file beside it.
+- `README.md` linked to `devDocs/roadmap.md` and `devDocs/backlog.md`, both
+  gitignored since planning moved out of this repository, so both links 404
+  for anyone but the author.
+- `docs/getting-started.md` claimed that anything absent from the `pkg:`
+  subpath list was unreachable via `pkg:`. The `exports` field also carries
+  `.` and `./models/Config.ts`, which `README.md` listed correctly.
 
 ### Removed
 
@@ -458,7 +484,7 @@ All notable changes to this project are documented in this file.
   `_layer.scss` and left empty by design. `_index.scss` never forwarded the
   component, so it emitted no CSS, but the partial was in the published
   tarball and reachable via a `loadPaths` deep import. The recipe stays in
-  [examples.md](docs/examples.md) to copy into your own `components/` folder.
+  [examples.md](../docs/examples.md) to copy into your own `components/` folder.
 - The internal SCSS scaffolding partials (`_fn_[NAME].scss`,
   `_mx_[NAME].scss`, `_[NAME].scss`) no longer ship. They were copy-me
   starting points for this repo's own authoring, never forwarded from any

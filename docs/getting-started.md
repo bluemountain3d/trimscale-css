@@ -105,7 +105,9 @@ output: {
 
 ### What's in the file
 
-Tokens (as CSS custom properties) and utility classes, resolved against your actual config, same as the SCSS build produces. That's the complete list, not a subset with gaps:
+Tokens (as CSS custom properties) and utility classes, resolved against your actual config, same as the SCSS build produces. That's the complete list, not a subset with gaps.
+
+What the file can't carry is the SCSS authoring surface, since nothing is left to call it from:
 
 - `mx.font-setup` — the component-authoring API doesn't exist, there's no SCSS left to call it from
 - The breakpoint mixins (`mx.and-up` etc.) — write your own `@media`/`@container` queries instead
@@ -214,7 +216,7 @@ import { NodePackageImporter } from 'sass-embedded'; // or 'sass'
 sass.compile('input.scss', { importers: [new NodePackageImporter()] });
 ```
 
-`pkg:` and `loadPaths` compile to identical output for the subpaths `pkg:` exposes, but **keep `loadPaths` configured either way**: the bridge file `generate` writes into your `<output.dir>` uses a bare (non-`pkg:`) import for trimscale-css's main entry point, so it only resolves via `loadPaths`, same as it always has, `pkg:` doesn't change that. `pkg:` is additive for your own component-scoped `@use` statements, not a way to drop the `loadPaths` requirement. The available subpaths (`tokens`, `abstracts/variables`, `abstracts/functions`, `abstracts/mixins`, `base`, `utilities`) mirror the ones already used under `loadPaths` in the example above. Anything not listed there is an implementation detail, not part of the package's public surface, and isn't reachable via `pkg:` either.
+`pkg:` and `loadPaths` compile to identical output for the subpaths `pkg:` exposes, but **keep `loadPaths` configured either way**: the bridge file `generate` writes into your `<output.dir>` uses a bare (non-`pkg:`) import for trimscale-css's main entry point, so it only resolves via `loadPaths`, same as it always has, `pkg:` doesn't change that. `pkg:` is additive for your own component-scoped `@use` statements, not a way to drop the `loadPaths` requirement. The available subpaths (`tokens`, `abstracts/variables`, `abstracts/functions`, `abstracts/mixins`, `base`, `utilities`) mirror the ones already used under `loadPaths` in the example above. `pkg:trimscale-css` itself resolves to the main entry point, and `pkg:trimscale-css/models/Config.ts` to the config type. Anything else under `styles/` is an implementation detail, not part of the package's public surface, and isn't reachable via `pkg:` either.
 
 **Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration. Use `loadPaths` there, not `pkg:`, which fails to build in a Next.js project whichever bundler it runs, Turbopack or webpack.
 
