@@ -15,7 +15,7 @@
 ///
 /// @requires abstracts/variables For CSS custom properties and font configuration
 /// @requires abstracts/mixins For font-setup mixin (primary API)
-/// @requires tokens/leading-trim For %text-properties and font-specific placeholders
+/// @requires tokens/leading-trim For %text-baseline, %text-geometry and the font-specific placeholders
 /// @see abstracts/variables/font-metrics For raw font data
 /// @see abstracts/mixins/mx_font-setup For mixin documentation
 /// ===========================================================================
@@ -25,9 +25,9 @@
   // ============================================================================
 
   body {
-    font-family: var(--font-family-body);
+    font-family: var(--font-family-body, sans-serif);
     line-height: var(--line-height-dynamic);
-    font-size: var(--text-base, 1rem);
+    font-size: var(--text-base, var(--fluid-base));
   }
 
   // ============================================================================

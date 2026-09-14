@@ -28,14 +28,14 @@
   @property --#{$key} {
     syntax: "<length>";
     inherits: true;
-    initial-value: 1rem;
+    initial-value: 16px;
   }
 
   @if map.get($value, "uncapped") {
     @property --#{$key}-uncapped {
       syntax: "<length>";
       inherits: true;
-      initial-value: 1rem;
+      initial-value: 16px;
     }
   }
 }
@@ -44,7 +44,7 @@
   @property --#{$key} {
     syntax: "<length>";
     inherits: true;
-    initial-value: 1rem;
+    initial-value: 16px;
   }
 }
 
@@ -64,13 +64,14 @@
   }
 }
 
-@each $key, $value in var.$font-roles {
-  @property --avg-char-width-#{$key} {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 0.5em;
-  }
-}
+// --avg-char-width-* has no @property declaration either, for the same reason
+// as --line-height-dynamic. Its value is an em ratio measured from the font,
+// and it has to reach the var() call site unresolved so the em resolves
+// against the consuming element's own font-size. A registered <length>
+// computes at its declaration site instead: declared on :root, every element
+// would inherit one frozen pixel value measured against the root font-size.
+// Character-count line lengths (see docs/examples.md's text-box) would then be
+// wrong by the ratio between the root size and the element's own size.
 
 @layer tokens {
   :root {

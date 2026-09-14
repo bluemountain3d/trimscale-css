@@ -7,7 +7,7 @@
 /// @description Utility classes for font family, size, weight, style, and alignment.
 /// `.trim-text-{role}` applies a font-family, leading-trim metrics (margins +
 /// pseudo-element formulas), and a bare font-size/line-height baseline
-/// (--text-base / --line-height-dynamic) for the given role. Font-weight,
+/// (1em, the inherited size, / --line-height-dynamic) for the given role. Font-weight,
 /// font-style, letter-spacing, and text-transform are left unset — pair it
 /// with the plain `.{property}-*` utility classes below (or with font-setup,
 /// for component authoring) for role-specific sizing or anything beyond the
@@ -15,21 +15,42 @@
 /// directly and work anywhere, trim system or not. Roles are defined in
 /// abstracts/variables/typography.
 ///
-/// The pseudo-element fallback path occupies ::before/::after on whatever
-/// element carries `.trim-text-*`. Put it on a <span> nested inside the
-/// sized element rather than on the element itself, so your own ::before/
-/// ::after on that element can't silently collide with it. Note
-/// %text-properties sets display: flow-root, so the span stops being
-/// inline — intentional (the fallback margins need a box), but worth
-/// knowing if you're expecting inline flow.
+/// `.trim-text-*` can go straight on the element you are styling. Two
+/// things take that option away, both about the element the class lands on:
+/// its own ::before/::after, which the fallback path needs for itself, and
+/// its own display, which replaces the flow-root box the fallback margins
+/// need. Where either is in play, move the class to a nested <span>.
+///
+/// A ::before/::after collision is invisible in a browser with native
+/// text-box-trim, which uses neither, so verify in an engine without it. A
+/// display collision is not: text-box-trim neither applies to nor propagates
+/// through flex, grid or table formatting contexts, so those three remove
+/// the trim in every engine, while block/inline-block/list-item keep the
+/// native path and cost the fallback only its margin containment. Neither
+/// announces itself, and both are easy to add later, so the span is the
+/// safer habit even where the direct form works today.
+///
+/// Size follows inheritance and needs no rule of its own. `.trim-text-*`
+/// carries font-size: 1em, so a size class gives the same result on the
+/// trimmed element or on a wrapper above it. Note %text-geometry sets
+/// display: flow-root, so a trimmed span stops being inline: intentional,
+/// the fallback margins need a box, but worth knowing if you're expecting
+/// inline flow.
 /// @example html
-///   <h1 class="font-size-heading-1">
-///     <span class="trim-text-heading">Sized heading</span>
+///   <h1>
+///     <span class="trim-text-heading font-size-heading-1">Sized heading</span>
 ///   </h1>
 ///   <span class="font-family-mono">inline code-style snippet</span>
 ///   <span class="font-size-text-sm">plain, no trim system involved</span>
 /// ===========================================================================
-@layer utilities {
+/// Written in @layer trim, not @layer utilities, because that is where it
+/// ends up either way: `@extend` emits into the placeholder's own position,
+/// so a `.trim-text-*` rule written under `@layer utilities` would still be
+/// hoisted into the trim layers and leave an empty utilities block behind.
+/// Declaring the real layer here keeps the source honest about the cascade.
+/// The role placeholders straddle @layer base, so the baseline half lands in
+/// trim-defaults and the geometry half in trim, see tokens/leading-trim.
+@layer trim {
   /// =========================================================================
   /// Trim Text — font-family, leading-trim metrics, and a bare font-size/
   /// line-height baseline per font role. Weight, style, letter-spacing, and
@@ -43,7 +64,9 @@
       }
     }
   }
+}
 
+@layer utilities {
   /// =========================================================================
   /// Non "trim" specific utility classes
   /// =========================================================================
@@ -148,13 +171,13 @@
   }
 
   /// Text color
-  /// Only `.text-color-inherit` ships by default. Unlike font roles, color
-  /// token names aren't a contract enforced anywhere else in the system (see
-  /// font-setup's required $font-roles roles for contrast) — a project is free to
-  /// name its $color-tokens however it likes, so a fixed set of
-  /// `.text-color-*` classes here would risk going silently dead the moment
-  /// a project doesn't use these exact token names. Add your own next to your
-  /// project's palette instead.
+  /// No `.text-color-*` class ships. Unlike font roles, color token names
+  /// aren't a contract enforced anywhere else in the system (see font-setup's
+  /// required $font-roles roles for contrast) — a project is free to name its
+  /// $color-tokens however it likes, so a fixed set of `.text-color-*` classes
+  /// here would risk going silently dead the moment a project doesn't use
+  /// these exact token names. Add your own next to your project's palette
+  /// instead; `.text-color-inherit` is kept below as the shape to copy.
   // .text-color-inherit {
   //   color: inherit;
   // }

@@ -29,7 +29,7 @@ $_space-macro: () !default;
   @property --space-#{$size} {
     syntax: "<length>";
     inherits: true;
-    initial-value: 0.25rem;
+    initial-value: 4px;
   }
 }
 
@@ -38,7 +38,7 @@ $_space-macro: () !default;
     @property --space-#{$i} {
       syntax: "<length>";
       inherits: true;
-      initial-value: 0.25rem;
+      initial-value: 4px;
     }
   }
 } @else {
@@ -46,7 +46,7 @@ $_space-macro: () !default;
     @property --space-#{$i} {
       syntax: "<length>";
       inherits: true;
-      initial-value: 0.25rem;
+      initial-value: 4px;
     }
   }
 }

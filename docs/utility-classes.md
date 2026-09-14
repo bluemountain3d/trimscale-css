@@ -1,28 +1,45 @@
 # Utility Classes
 
-This page documents the *shape* of each utility class using the example config's names. For the exact classes **your own** `trimscale.config.ts` produces, generate writes a resolved reference to `<outDir>/utility-classes.md`, see [getting-started.md](getting-started.md#generate).
+This page documents the *shape* of each utility class using the example config's names. For the exact classes **your own** `trimscale.config.ts` produces, generate writes a resolved reference to `<output.dir>/utility-classes.md`, see [getting-started.md](getting-started.md#generate).
 
 ## Opting out of utility classes
 
 Every group documented below is on by default. If you write component SCSS
-and never reach for `.p-md`/`.trim-text-body`/etc. in markup, turn a group
-off in `trimscale.config.ts`'s `utilities` field so `generate` stops
+and never reach for `.p-md`/`.trim-text-body`/etc. in markup, or you
+already have your own a11y classes, turn a group off in
+`trimscale.config.ts`'s `output.utilities` field so `generate` stops
 emitting it:
 
 ```ts
-utilities: {
-  spacing: { numeric: false }, // keep t-shirt sizes, drop the 1-48 numeric scale
-  typography: false,           // drop every typography utility class
+output: {
+  utilities: {
+    spacing: { numeric: false }, // keep t-shirt sizes, drop the 1-48 numeric scale
+    typography: false,           // drop every typography utility class
+    a11y: false,                 // you have your own sr-only/skip-link/etc.
+  },
 }
 ```
 
+`utilities: false` is the shorthand for wanting none of them at all, the
+same result as turning all three sections off by hand. Tokens, the reset and
+the base element styles are unaffected.
+
 `spacing`/`typography` each accept `true`/`false` for the whole section, or
-an object turning off individual groups (`base`, `tshirt`, `numeric` for
+an object turning off individual groups (`base`, `tShirt`, `numeric` for
 spacing; `trim`, `family`, `size`, `lineHeight`, `weight`, `style`,
 `textTransform`, `textAlign`, `numericFigures` for typography). Turning off
 a section's top level also drops its small fixed classes, e.g.
 `spacing: false` removes `.m-none`/`.mx-auto`/etc. too, not just the scale
-loops. See `models/Config.ts`'s `UtilitiesConfig` for the exact shape.
+loops. `a11y` is `true`/`false` only, not nestable, see
+[Accessibility](#accessibility) below for why. See `models/Config.ts`'s
+`UtilitiesConfig` for the exact shape.
+
+These flags are about what you want in the file, not primarily about
+size: at typical gzip ratios the utility classes are a small fraction of
+the total, the real reasons are that component SCSS using the custom
+properties directly never touches the classes at all (dead weight
+regardless of size), and that a project with its own reset or a11y
+classes doesn't want two competing sets in the cascade.
 
 ## Spacing
 
@@ -44,38 +61,108 @@ All directional sides map to **logical properties**, not physical ones: `t`/`b` 
 
 Typography utility classes from `_typography-utilities.scss`. They form the **HTML-level API** for the typography system, compose them in markup to apply font roles, sizes, weights, and alignment without writing any SCSS.
 
-**Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`--text-base` / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `font-setup` when authoring components) for role-specific sizing or anything beyond the baseline:
+`.trim-text-*` and `.font-family-*` both require `appFonts` to be configured, they're generated per font role, so a config with none produces neither class, regardless of the `output.utilities.typography.trim`/`family` flags (see [adding-a-font.md](adding-a-font.md)). Everything else on this page works with or without fonts.
 
-| Class                   | Role                   |
-| ----------------------- | ---------------------- |
-| `.trim-text-primary`    | Primary brand typeface |
-| `.trim-text-secondary`  | Secondary typeface     |
-| `.trim-text-tertiary`   | Tertiary typeface      |
-| `.trim-text-display`    | Display / hero context |
-| `.trim-text-heading`    | Heading context        |
-| `.trim-text-subheading` | Subheading context     |
-| `.trim-text-body`       | Body text context      |
-| `.trim-text-decorative` | Decorative context     |
-| `.trim-text-quote`      | Blockquote context     |
-| `.trim-text-code`       | Code / pre context     |
-| `.trim-text-ui`         | UI elements context    |
-| `.trim-text-mono`       | Monospace category     |
+### One class per role you define
 
-Apply `.trim-text-*` to a `<span>` nested inside the sized element, not the
-element itself. The fallback path (browsers without native `text-box-trim`)
-uses that element's own `::before`/`::after`, so applying the class directly
-risks it silently colliding with your own pseudo-elements on the same
-element. `%text-properties` sets `display: flow-root`, so the span stops
+**These classes exist per key in `appFonts.fontRoles`, not as a fixed set.** The table below lists the roles `FontRoles` in [`models/Config.ts`](../models/Config.ts) knows by name, but you only get a class for a role you actually assign a family to. `primary` and `body` are required, the other ten are optional, and the config `init` copies into your project starts with `primary` and `body` filled in and the rest commented out. So a fresh install produces two `.trim-text-*` classes, not twelve, until you uncomment the roles you want.
+
+Custom role names work too: any key you add beyond this list gets the same treatment, so `brand: 'Some Family'` produces `.trim-text-brand` and `--font-family-brand`.
+
+For the exact classes _your_ config produces, read `<output.dir>/utility-classes.md` rather than this table, `generate` writes it against your real config.
+
+**Trim text**, applies a font-family, leading-trim metrics (margins + pseudo-element formulas), and a bare `font-size`/`line-height` baseline (`1em`, the inherited size, / `--line-height-dynamic`) for a font role. Weight, style, letter-spacing, and text-transform are left unset, pair it with the plain `.{property}-*` classes below (or use `font-setup` when authoring components) for role-specific sizing or anything beyond the baseline:
+
+| Class                   | Role                   | In the config     |
+| ----------------------- | ---------------------- | ----------------- |
+| `.trim-text-primary`    | Primary brand typeface | Required          |
+| `.trim-text-body`       | Body text context      | Required          |
+| `.trim-text-secondary`  | Secondary typeface     | Optional          |
+| `.trim-text-tertiary`   | Tertiary typeface      | Optional          |
+| `.trim-text-display`    | Display / hero context | Optional          |
+| `.trim-text-heading`    | Heading context        | Optional          |
+| `.trim-text-subheading` | Subheading context     | Optional          |
+| `.trim-text-decorative` | Decorative context     | Optional          |
+| `.trim-text-quote`      | Blockquote context     | Optional          |
+| `.trim-text-code`       | Code / pre context     | Optional          |
+| `.trim-text-ui`         | UI elements context    | Optional          |
+| `.trim-text-mono`       | Monospace category     | Optional          |
+
+`.trim-text-*` can sit directly on the element you are styling. Two things
+take that option away, and both are about the element the class lands on:
+its own `::before`/`::after`, and its own `display`. Where either is in play,
+move the class to a `<span>` nested inside the element instead.
+
+Neither collision announces itself, and both are easy to introduce months
+later without thinking about the trim, so the nested span is the safer habit
+even where the direct form works today. Treat it as a habit rather than a
+rule: knowing which of the two you are avoiding is what tells you when the
+direct form is fine.
+
+First, pseudo-elements. The fallback path (browsers without native
+`text-box-trim`) uses the element's own `::before`/`::after`. `@layer trim`
+sits before `layouts`, `components` and `utilities` in the layer order, so
+anything you write in those layers, or outside layers entirely, wins over the
+trim's declarations. That ordering is deliberate, your CSS is supposed to beat
+the design system's, and the trim's pseudo-elements are not an exception to
+it. Your declarations replace the trim's on every property you set, while the
+trim's remaining declarations (`display: table`, the negative margin) still
+apply to your content, so neither your pseudo-element nor the trim survives
+intact.
+
+That collision is invisible in a browser with native `text-box-trim`. There
+the trim uses no pseudo-elements at all, yours behave exactly as they would if
+the trim system were absent, and the page looks right. Check the trim in an
+engine without native support before shipping.
+
+`display` is the other half of the same rule, and it does not split along the
+same line. `text-box-trim` applies to block containers, multi-column
+containers and inline boxes, and the spec is explicit that it neither applies
+to nor propagates through flex, grid or table formatting contexts. A
+`display: flex`, `grid` or `table` of your own on the trimmed element removes
+the trim in every engine, native path included. A `display: block`,
+`inline-block` or `list-item` leaves the native path intact but costs the
+fallback its block formatting context: `::after`'s negative `margin-bottom`
+adjoins the element's bottom edge and collapses out of it, so the box renders
+too tall by the bottom-trim amount while the gap to the next sibling shrinks
+by the same amount. The trim's own `display: flow-root` is what prevents
+that, which is one more reason to keep your `display` on the wrapper and the
+class on the span.
+
+Size needs no rule of its own. `.trim-text-*` carries `font-size: 1em`, so it
+renders at whatever size it inherits, which means `.font-size-*` gives the
+same result on the trimmed element itself or on the wrapper above it. Putting
+it on the same element is the clearer of the two, since the size is then
+written where the text is, but a wrapper that already carries a size class
+needs no second one on the span. The same inheritance holds when authoring
+components: `font-setup`'s `$font-size`, and any `font-size` you write by
+hand, land in your rule's own layer and override the baseline there.
+
+`%text-geometry` sets `display: flow-root`, so the span stops
 being inline, intentional, but worth knowing if you're expecting inline flow.
 
+`.trim-text-*` is emitted into `@layer trim`, not `@layer utilities`, so its
+font-size baseline loses to `.font-size-*` and to element defaults like
+`small { font-size: 0.875em }`, while its font-family and trim metrics beat
+element defaults and stay paired with each other. See
+[cascade-layers.md](cascade-layers.md#why-the-trim-system-straddles-base).
+
+Combining `.trim-text-*` with `.font-family-*` is the one case where the two
+come apart: `.font-family-*` sets only `font-family` and sits in `utilities`,
+above both trim layers, so `class="trim-text-body font-family-mono"` renders
+in the mono typeface while still trimmed by the body typeface's metrics. That
+is the documented purpose of `.font-family-*`, but it means the pair is worth
+reaching for deliberately rather than by habit. If you want the mono face
+trimmed correctly, use `.trim-text-mono`.
+
 ```html
-<h1 class="font-size-heading-1">
-  <span class="trim-text-heading">Sized heading</span>
+<h1>
+  <span class="trim-text-heading font-size-heading-1">Sized heading</span>
 </h1>
 ```
 
-**Font family**, sets only `font-family`, nothing else; use this to swap typeface without touching size/line-height/trim:
-`.font-family-primary`, `.font-family-secondary`, `.font-family-tertiary`, `.font-family-display`, `.font-family-heading`, `.font-family-subheading`, `.font-family-body`, `.font-family-decorative`, `.font-family-quote`, `.font-family-code`, `.font-family-ui`, `.font-family-mono`
+**Font family**, sets only `font-family`, nothing else; use this to swap typeface without touching size/line-height/trim. Same one-per-defined-role rule as `.trim-text-*` above:
+`.font-family-primary`, `.font-family-body`, `.font-family-secondary`, `.font-family-tertiary`, `.font-family-display`, `.font-family-heading`, `.font-family-subheading`, `.font-family-decorative`, `.font-family-quote`, `.font-family-code`, `.font-family-ui`, `.font-family-mono`
 
 **Font size:**
 `.font-size-*`, `display-1`, `display-2`, `heading-1` through `heading-4`, `text-lg`, `text-md`, `text-base`, `text-sm`, `text-xs`
@@ -98,17 +185,23 @@ being inline, intentional, but worth knowing if you're expecting inline flow.
 `.num-{lining|oldstyle|ordinal}-{tabular|proportional}` (six classes total, e.g. `.num-oldstyle-proportional`). Sets `font-variant-numeric`. `lining` figures sit on the baseline at a uniform height, the default in most fonts and generally the better fit for UI/tabular data; `oldstyle` figures vary in height (some descend below the baseline), often preferred in running prose; `ordinal` enables ordinal-indicator glyph variants (1st, 2nd). `tabular`/`proportional` picks whether digits share one fixed width (so they align in columns) or keep their natural proportional widths.
 
 ```html
-<h1 class="font-size-heading-1 font-weight-bold">
-  <span class="trim-text-heading">Page heading</span>
+<!-- Nothing on this paragraph collides with the trim, so no span is needed. -->
+<p class="trim-text-body font-size-text-base">Body copy.</p>
+
+<!-- The heading carries a ::before, so the trim moves to a span. -->
+<h1 class="icon-before font-weight-bold">
+  <span class="trim-text-heading font-size-heading-1">Page heading</span>
 </h1>
-<p class="font-size-text-base">
+
+<!-- The wrapper's size reaches the span, so it needs no size class of its own. -->
+<p class="font-size-text-base card__body">
   <span class="trim-text-body">Body copy.</span>
 </p>
 ```
 
 ## Accessibility
 
-Screen-reader and focus utilities from `_a11y-utilities.scss`. Unlike everything else on this page, this group has no `utilities` opt-out flag, it's always emitted.
+Screen-reader and focus utilities from `_a11y-utilities.scss`. Toggled as a whole via `output.utilities.a11y`, `true`/`false` only, not nestable like `spacing`/`typography`: `.sr-only-focusable` and `.aria-live-*` both `@extend .sr-only`, so turning off just `.sr-only` while keeping the others would leave an `@extend` pointing at a class the compile never emitted, a hard Sass error rather than a missing utility. Turning it off is for a project that already has its own screen-reader/focus/live-region classes and doesn't want two competing sets in the cascade, not primarily a size decision.
 
 | Class                                        | Effect                                                                                                                                      |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -123,3 +216,5 @@ Screen-reader and focus utilities from `_a11y-utilities.scss`. Unlike everything
 <a href="#main" class="skip-link">Skip to main content</a>
 <div class="aria-live-polite" aria-live="polite">Saved.</div>
 ```
+
+`.skip-link` uses `z-index: var(--z-skip-link, 9999)`, no z-index scale is shipped for anything else, layering is a design-system decision outside this package's scope. Set `--z-skip-link` yourself if `9999` ever collides with something in your own stacking context.

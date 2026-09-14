@@ -17,8 +17,9 @@ A typographic prose container: it handles flow spacing between block elements, c
 ```
 
 Headings inside a text box would typically carry `.trim-text-heading` too,
-see [Typography](utility-classes.md#typography) for the `<span>`-wrapper
-pattern that requires.
+directly on the `<h2>` here since nothing on it collides with the trim. See
+[Typography](utility-classes.md#typography) for the two things that do, and
+for the nested-`<span>` pattern they call for.
 
 ```scss
 @layer components {

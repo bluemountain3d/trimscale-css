@@ -3,7 +3,7 @@
 // ============================================================================
 
 // FluidScale & Breakpoints ===================================================
-/** Named modular-scale ratios usable in `FluidScale.minTypeScale`/`maxTypeScale`, resolved to their numeric value via `TypeScaleTable` in generateFluidScale.ts. */
+/** Named modular-scale ratios usable in `FluidScale.minTypeScale`/`maxTypeScale`, resolved to their numeric value via `TypeScaleTable` in fluidScale.ts. */
 export type TypeScaleNames =
   | 'Minor Second'
   | 'Major Second'
@@ -40,10 +40,10 @@ export type Breakpoints = {
 }
 
 // AppFonts ===================================================================
-/** Generic CSS font-family fallback keywords usable in a `FontSource.fallback`/`AppFonts.fallbackDefault`. */
+/** Generic CSS font-family fallback keywords usable in a `FontSource.fallback`/`AppFonts.defaultFallback`. */
 export type FontFallbacks = 'sans-serif' | 'serif' | 'monospace' | 'system-ui' | 'cursive'
 
-/** Concrete system fonts trimscale has built-in metrics for, usable as a metric-matched `fallbackFamily`. Distinct from `FontFallbacks` (generic keywords), which can't be metric-matched. */
+/** Concrete system fonts trimscale has built-in metrics for, usable in a `{ matched }` fallback. Distinct from `FontFallbacks` (generic keywords), which can't be metric-matched. */
 export type MatchableFallbackFamily =
   | 'Arial'
   | 'Helvetica'
@@ -57,8 +57,24 @@ export type MatchableFallbackFamily =
   | 'Segoe UI'
   | 'Roboto'
 
-/** Named cross-platform fallback chains, each resolving to an ordered list of `MatchableFallbackFamily` covering Windows/macOS/Android: trimscale emits one `@font-face` per family in the chain (all sharing the same `font-family` name), and the browser uses the first one actually installed. See `FALLBACK_CHAINS` in generateFonts.ts. */
+/** Named cross-platform fallback chains, each resolving to an ordered list of `MatchableFallbackFamily` covering Windows/macOS/Android: trimscale emits one `@font-face` per family in the chain (all sharing the same `font-family` name), and the browser uses the first one actually installed. See `FALLBACK_CHAINS` in fontData.ts. */
 export type MatchableFallbackChain = 'sans-serif' | 'serif' | 'monospace'
+
+/**
+ * What a family falls back to while its own font loads, and if it never
+ * does. Either a generic keyword, or `{ matched }` for a metric-matched
+ * `@font-face` override built from system fonts.
+ *
+ * The two are alternatives, not layers. A generic keyword needs no loading
+ * and is therefore available the instant the real font isn't, so a generic
+ * sitting behind a metric-matched family wins every time and the metric
+ * matching never renders. `{ matched }` consequently emits no generic at
+ * all; the safety net is the chain itself, which covers Windows, macOS and
+ * Android, so prefer a chain (`{ matched: 'serif' }`) over a single family.
+ */
+export type FontFallback =
+  | FontFallbacks
+  | { matched: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[] }
 
 /** The five trim/spacing metrics a font contributes, normalized to em. Same shape the generator extracts from a real font file — a `manual` `FontSource` supplies these by hand instead (see precisionspec.dev). */
 export type RawFontMetrics = {
@@ -72,11 +88,11 @@ export type RawFontMetrics = {
   lsbAdjust: number
   /** Right side bearing adjustment, normalized to em (negative) */
   rsbAdjust: number
-  /** Raw (uncorrected) OS/2 typo ascender, normalized to em. Only needed when `fallbackFamily` is set (without it, no metric-matched @font-face override is generated). */
+  /** Raw (uncorrected) OS/2 typo ascender, normalized to em. Only needed for a `{ matched }` fallback (without it, no metric-matched @font-face override is generated). */
   ascender?: number
-  /** Raw (uncorrected) OS/2 typo descender, normalized to em (positive). Only needed when `fallbackFamily` is set. */
+  /** Raw (uncorrected) OS/2 typo descender, normalized to em (positive). Only needed for a `{ matched }` fallback. */
   descender?: number
-  /** Raw OS/2 typo line gap, normalized to em. Only needed when `fallbackFamily` is set. */
+  /** Raw OS/2 typo line gap, normalized to em. Only needed for a `{ matched }` fallback. */
   lineGap?: number
 }
 
@@ -93,38 +109,35 @@ export type FontSource =
       source: 'local'
       /** Path(s) to the font file(s) including file extension, relative to `trimscale.config.ts`. If omitted, falls back to every font file found under `AppFonts.localFontsPath`/<this family's config key>. */
       path?: string[]
-      fallback?: FontFallbacks
+      /** A generic keyword, or `{ matched: 'serif' }` for a metric-matched override. Defaults to `AppFonts.defaultFallback`. See `FontFallback`. */
+      fallback?: FontFallback
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `false` here if most of your fonts go through `next/font` but this particular one doesn't. */
       nextFont?: boolean
-      /** Metric-matched fallback `@font-face` override(s): a chain (recommended, e.g. `'sans-serif'`), a single family, or your own array. See docs/adding-a-font.md. */
-      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
   | {
       source: 'cdn'
       /** Direct URL(s) to the actual font file(s) — not a CSS-generating endpoint (e.g. not Google Fonts' `css2?family=...`, which resolves differently per `User-Agent` and isn't a font file itself). Fetched once and cached under `.trimscale-cache/fonts/` (gitignored), not re-fetched while cached. */
       url: string[]
-      fallback?: FontFallbacks
+      /** A generic keyword, or `{ matched: 'serif' }` for a metric-matched override. Defaults to `AppFonts.defaultFallback`. See `FontFallback`. */
+      fallback?: FontFallback
       /** Write `@font-face` rules pointing at `url` (self-hosting via the CDN's file URLs directly). Default `false`: assumes the font is already loaded some other way (a `<link>` tag, a JS loader, `next/font/google`), and only metrics are needed. */
       generateFontFace?: boolean
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `true` here for a `next/font/google` font when most of your other fonts *aren't* going through `next/font`, or `false` if this one isn't even though most are. */
       nextFont?: boolean
-      /** Metric-matched fallback `@font-face` override(s): a chain (recommended, e.g. `'sans-serif'`), a single family, or your own array. See docs/adding-a-font.md. */
-      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
   | {
       source: 'manual'
-      fallback?: FontFallbacks
+      /** A generic keyword, or `{ matched: 'serif' }` for a metric-matched override, which needs `ascender`/`descender`/`lineGap` in `metrics` too. Defaults to `AppFonts.defaultFallback`. See `FontFallback`. */
+      fallback?: FontFallback
       /** Hand-entered metrics for a font whose file trimscale can't read (e.g. a CDN that doesn't expose downloadable files). See precisionspec.dev. No `@font-face` is generated, load the font some other way. */
       metrics: RawFontMetrics
       /** Overrides `AppFonts.nextFontDefault` for this family only. */
       nextFont?: boolean
-      /** Metric-matched fallback `@font-face` override(s), requires `ascender`/`descender`/`lineGap` in `metrics` too. See docs/adding-a-font.md. */
-      fallbackFamily?: MatchableFallbackChain | MatchableFallbackFamily | MatchableFallbackFamily[]
     }
 
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
 export type AppFonts = {
-  fonts: Record<string, FontSource>
+  families: Record<string, FontSource>
   fontRoles: FontRoles
   /** Base folder, relative to `trimscale.config.ts`, for `local` families that omit `path`: looked up as `localFontsPath/<family's config key>/`, non-recursive, every font file found there is used. */
   localFontsPath?: string
@@ -136,14 +149,15 @@ export type AppFonts = {
    * @default 'public'
    */
   publicDir?: string
-  /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `fonts` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
+  /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `families` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
   nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted
-  fallbackDefault: FontFallbacks
+  /** The `fallback` used by families that don't set their own. Generic keywords only: a metric-matched fallback has to suit the font's own category, so it's chosen per family. */
+  defaultFallback: FontFallbacks
 }
 
 // FontRoles ==================================================================
-/** Maps semantic font roles (primary, heading, body, etc.) to font family names defined in appFonts/font-metrics. `primary` and `body` are required; all others, including arbitrary custom roles via the index signature, are optional. */
+/** Maps semantic font roles (primary, heading, body, etc.) to font family names defined in `appFonts.families`. `primary` and `body` are required; all others, including arbitrary custom roles via the index signature, are optional. */
 export type FontRoles = {
   primary: string
   secondary?: string
@@ -293,7 +307,9 @@ export type DefaultScheme = 'light' | 'dark'
 
 /** A single light-or-dark color value, given as both `oklch` (used directly) and `hex` (static fallback). */
 export type ColorDefinition = {
+  /** Any valid `oklch()`: lightness as a percentage or a 0-1 number, hue as a number or an angle. */
   oklch: string
+  /** The static fallback tier, for browsers without `oklch()`, so any legacy sRGB color works here: a hex, `rgb()`, `hsl()`, or a named keyword. */
   hex: string
 }
 
@@ -327,7 +343,6 @@ export type SemanticAlias = {
 /** Map of semantic alias name to its `SemanticAlias` definition. */
 export type SemanticColorAliases = Record<string, SemanticAlias>
 
-
 /** Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. A `false` at the top level of a section also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops. */
 export type UtilitiesConfig = {
   spacing?:
@@ -336,7 +351,7 @@ export type UtilitiesConfig = {
         /** `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`. */
         base?: boolean
         /** `.{m|p}{side?}-{3xs..9xl}`. */
-        tshirt?: boolean
+        tShirt?: boolean
         /** `.{m|p}{side?}-{1..numericScaleEnd}`. */
         numeric?: boolean
       }
@@ -362,6 +377,42 @@ export type UtilitiesConfig = {
         /** `.num-*` (figure variants). */
         numericFigures?: boolean
       }
+  /** `.sr-only`, `.sr-only-focusable`, `.focus-none`, `.focus-visible`, `.skip-link`, `.aria-live-polite`, `.aria-live-assertive`. Boolean only, not granular: `.sr-only-focusable`/`.aria-live-*` `@extend .sr-only`, so a partial opt-out would break the Sass compile. @default true */
+  a11y?: boolean
+}
+
+// ============================================================================
+// Output
+// ============================================================================
+
+/** Where and what `generate` writes: the output directory, the SCSS bridge file, an optional standalone CSS file, which utility-class groups to include (shared by both targets), and whether to emit the package's own reset. */
+export type OutputConfig = {
+  /**
+   * Where `trimscale-css generate` writes this project's generated output
+   * (the bridge file plus a `utility-classes.md` reference), relative to
+   * the directory containing this config file. Font metrics and, if any
+   * font sources need them, `@font-face` rules are passed into the bridge
+   * file as SCSS values, not written as a separate file. The static parts
+   * of the package (functions, mixins, and the rest of `styles/`) are
+   * never written here — they stay in `node_modules` as normal package
+   * internals. @default 'trimscale-generated'
+   */
+  dir?: string
+  /** Emit the SCSS bridge file. @default true */
+  scss?: boolean
+  /** Emit a standalone, pre-compiled `.css` file, for consumers who don't want to configure Sass. @default false */
+  css?:
+    | boolean
+    | {
+        /** Also write a minified copy alongside the readable one. @default true */
+        minify?: boolean
+        /** URL prefix for `@font-face src`, as the browser requests it — not the filesystem path fonts are written to (see `AppFonts.publicDir`). @default '/fonts' */
+        fontUrlBase?: string
+      }
+  /** Which utility-class groups to generate. Shared by both `scss` and `css` targets — every group defaults `true`, so omitting this field changes nothing. Set a group to `false` (or a sub-flag within it) to stop generating those classes entirely, or `false` here for no utility classes at all. Tokens, reset and base styles are unaffected either way. */
+  utilities?: boolean | UtilitiesConfig
+  /** Emit the package's own `@layer reset` block. @default true */
+  reset?: boolean
 }
 
 // ============================================================================
@@ -371,18 +422,12 @@ export type UtilitiesConfig = {
 /** The full trimscale-css configuration shape — see `trimscale.config.ts` for the actual values and field-by-field documentation. */
 export type TrimscaleConfig = {
   /**
-   * Where `trimscale-css generate` writes this project's generated output
-   * (the bridge file plus a `utility-classes.md` reference), relative to
-   * the directory containing this config file. Font metrics and, if any
-   * font sources need them, `@font-face` rules are passed into the bridge
-   * file as SCSS values, not written as a separate file. The static parts
-   * of the package (functions, mixins, and the rest of `styles/`) are
-   * never written here — they stay in `node_modules` as normal package
-   * internals. @default './trimscale-generated'
+   * Font sources, fallbacks, and role assignment. Optional: a config with no
+   * `appFonts` at all still gets the full fluid type scale, spacing,
+   * breakpoints, and color tokens, it just has no leading trim and no
+   * `--font-family-*` tokens, since both need font metrics to exist.
    */
-  outDir?: string
-  /* Typography */
-  appFonts: AppFonts
+  appFonts?: AppFonts
   fluidScale: FluidScale
   breakpoints: Breakpoints
   /**
@@ -407,8 +452,6 @@ export type TrimscaleConfig = {
   /** Additional named palettes beyond `baseColorTokens` (e.g. a `campaign` palette), keyed by whatever name you like. Each gets its own `@include mx.generate-color-tokens(...)` alongside the base tokens. */
   customColorTokens?: Record<string, ColorTokensMap>
   semanticColorAliases?: SemanticColorAliases
-  /** Which utility-class groups `generate` emits. Every group defaults `true`, so omitting this field changes nothing. Set a group to `false` (or a sub-flag within it) to stop generating those classes entirely. */
-  utilities?: UtilitiesConfig
+  /** Where and what `generate` writes — output directory, SCSS/CSS targets, utility-class groups, and the reset block. */
+  output?: OutputConfig
 }
-
-

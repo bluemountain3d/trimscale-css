@@ -2,10 +2,13 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
 
 /**
  * Trimscale design-system configuration. Edit values here to customize the
- * generated tokens — see node_modules/trimscale-css/docs/ for the full reference,
- * or docs/full-config-reference.md for a single-page property-by-property index.
+ * generated tokens. Every docs/ path in this file is relative to
+ * node_modules/trimscale-css/, so docs/full-config-reference.md is the
+ * single-page property-by-property index.
  *
  * Where to find the docs for each section below:
+ * - output
+ *   → docs/getting-started.md#generate
  * - appFonts (incl. fontRoles)
  *   → docs/adding-a-font.md
  * - breakpoints
@@ -14,34 +17,36 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
- *
  * - fontWeights, lineHeights, dynamicLineHeight
  *   → docs/design-tokens.md#typography-tokens
  * - spacingSetup
  *   → docs/customizing-spacing.md
- * - defaultScheme, baseColorTokens, campaignColorTokens, semanticColorAliases
+ * - defaultScheme, baseColorTokens, customColorTokens, semanticColorAliases
  *   → docs/design-tokens.md#color-tokens
  *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
 const config: TrimscaleConfig = {
   /**
-   * Where `trimscale-css generate` writes this project's generated output
-   * (the bridge file + any @font-face rules), relative to this file.
-   * Optional, defaults to './trimscale-generated'.
+   * Where and what `trimscale-css generate` writes. Optional, every field
+   * falls back to its own default (output directory defaults to
+   * './trimscale-generated').
    * → docs/getting-started.md
    */
-  // outDir: './trimscale-generated',
+  // output: { dir: './trimscale-generated' },
 
   /**
    * Font sources (local file, CDN URL, or hand-entered metrics), keyed by
-   * family name, and their fallback stacks.
+   * family name, and their fallback stacks. Optional: remove this whole
+   * field to skip fonts entirely, the type scale, spacing, breakpoints, and
+   * color tokens below all work without it, you only lose leading trim and
+   * `--font-family-*` tokens.
    * → docs/adding-a-font.md · docs/full-config-reference.md#appfonts
    */
   appFonts: {
-    nextFontDefault: false,         // if using Next.js `next/font` (local or google)
-    nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
-    fallbackDefault: 'sans-serif',  // used when a font entry below has no `fallback` of its own
-    fonts: {
+    nextFontDefault: false, // if using Next.js `next/font` (local or google)
+    nextFontPrefix: 'next-font', // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
+    defaultFallback: 'sans-serif', // used when a families entry below has no `fallback` of its own
+    families: {
       // Placeholder so `generate` produces working output before you've set
       // up a real font. Replace it, see docs/adding-a-font.md.
       'System Sans': {
@@ -53,31 +58,36 @@ const config: TrimscaleConfig = {
       // 'Roboto': {
       //   source: 'local',
       //   path: ['./public/fonts/Roboto-Regular.woff2', './public/fonts/Roboto-Bold.woff2'],
-      //   fallback: 'sans-serif',
+      //   fallback: { matched: 'sans-serif' },
       // },
       // CDN example (metrics auto-extracted, no @font-face written by default):
       // 'Open Sans': {
       //   source: 'cdn',
       //   url: ['https://fonts.gstatic.com/s/opensans/v40/....woff2'],
-      //   fallback: 'sans-serif',
+      //   fallback: { matched: 'sans-serif' },
       // },
-      // Manual example, for CDNs that don't expose a downloadable file — get
+      // Manual example, for CDNs that don't expose a downloadable file. Get
       // the metrics from precisionspec.dev:
       // 'Proxima Nova': {
       //   source: 'manual',
-      //   fallback: 'sans-serif',
+      //   fallback: { matched: 'sans-serif' },
       //   metrics: {
-      //     avgCharWidth: 0.545,
-      //     topTrim: 0.107,
-      //     bottomTrim: 0.02,
-      //     lsbAdjust: -0.012,
-      //     rsbAdjust: -0.012,
+      //     // Required: what leading trim and side-bearing correction read
+      //     "avgCharWidth": 0.452,
+      //     "topTrim": 0.123,
+      //     "bottomTrim": 0.21,
+      //     "lsbAdjust": -0.061,
+      //     "rsbAdjust": -0.06,
+      //     // Required for a { matched } fallback, optional otherwise:
+      //     "ascender": 0.79,
+      //     "descender": 0.21,
+      //     "lineGap": 0,
       //   },
       // },
     },
 
     /**
-     * Maps semantic font roles to keys in `fonts` above.
+     * Maps semantic font roles to keys in `families` above.
      *
      * `primary` and `body` are required. Everything else is optional, and the
      * role names are yours to choose, the commented lines below are only
@@ -92,12 +102,16 @@ const config: TrimscaleConfig = {
       // The role body text uses
       body: 'System Sans',
 
-      // Common conventions, uncomment and point at a family in `fonts`:
+      // Common conventions, uncomment and point at a family in `families`.
+      // Each one you define adds a --font-family-{role} token plus
+      // .trim-text-{role} and .font-family-{role} classes. Custom names
+      // beyond this list work the same way.
       // secondary: '',
       // tertiary: '',
       // heading: '',
       // subheading: '',
       // display: '',
+      // decorative: '',
       // quote: '',
       // code: '',
       // mono: '',
@@ -140,9 +154,9 @@ const config: TrimscaleConfig = {
     maxWidth: 1440,
     minFontSize: 16,
     maxFontSize: 20,
-    minTypeScale: 1.2,   // scale name (e.g "Minor Third") or scale value (e.g 1.2)
+    minTypeScale: 1.2, // scale name (e.g "Minor Third") or scale value (e.g 1.2)
     maxTypeScale: 1.333, // scale name (e.g "Perfect Fourth") or scale value (e.g 1.333)
-    precision: 4,        // integer 1-6
+    precision: 4, // integer 1-6
   },
 
   /**
@@ -153,8 +167,8 @@ const config: TrimscaleConfig = {
    */
   modularTypographicScale: {
     // System Default (optional)
-    fs900: { step: 6, unit: 'vwx', uncapped: true},
-    fs800: { step: 5, unit: 'vwx', uncapped: true},
+    fs900: { step: 6, unit: 'vwx', uncapped: true },
+    fs800: { step: 5, unit: 'vwx', uncapped: true },
     fs700: { step: 4, unit: 'vwx' },
     fs600: { step: 3, unit: 'vwx' },
     fs500: { step: 2, unit: 'vwx' },
@@ -266,13 +280,13 @@ const config: TrimscaleConfig = {
     tShirtScaleMicro: {
       '3xs': 1,
       '2xs': 2,
-      'xs': 3,
-      'sm': 4,
-      'md': 5,
-      'lg': 6,
+      xs: 3,
+      sm: 4,
+      md: 5,
+      lg: 6,
     },
     tShirtScaleMacro: {
-      'xl': 6,
+      xl: 6,
       '2xl': 8,
       '3xl': 10,
       '4xl': 12,
@@ -284,7 +298,7 @@ const config: TrimscaleConfig = {
     },
     numericScaleMicroEnd: 6,
     numericScaleMacroEnd: 48,
-    // Coupled example — remove/comment the independent-only fields above
+    // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',

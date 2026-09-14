@@ -5,16 +5,29 @@
 /// API LAYER - Developer-friendly interface to the typography system
 ///
 /// This mixin combines:
-/// 1. Base text properties (%text-properties from leading-trim.scss)
+/// 1. Base text properties (%text-baseline + %text-geometry from
+///    leading-trim.scss)
 /// 2. Font-specific metrics (via placeholder selectors)
 /// 3. Custom typography values (via parameters)
+///
+/// CASCADE NOTE: this mixin reaches the placeholders through @extend, and
+/// @extend emits into the placeholder's own position, not the caller's. A rule
+/// that calls font-setup is therefore split across layers: the baseline lands
+/// in @layer trim-defaults, the trim geometry and font-family in @layer trim,
+/// and only the properties you pass as parameters stay in whatever layer you
+/// wrote the rule in. That is intended, it makes the font role a default your
+/// own declarations win over, but it means a component rule does not sit
+/// wholly in @layer components. Extending %{role}-text by hand behaves
+/// identically; font-setup is recommended over it for the role validation and
+/// the typography parameters, not for any difference in layering.
 ///
 /// Font Role Options:
 /// - All keys in $font-roles that is set in _typography.scss are valid.
 ///
 /// @requires abstracts/variables
 /// @requires abstracts/functions
-/// @requires tokens/leading-trim For %text-properties and font placeholders
+/// @requires tokens/leading-trim For %text-baseline, %text-geometry and the
+///   font placeholders
 /// @see tokens/leading-trim For direct placeholder usage (not recommended)
 ///
 /// @example scss - Basic usage
@@ -77,14 +90,19 @@ $_valid-font-roles: map.keys(var.$font-roles);
   $text-transform: null
 ) {
   // Validate and extend font-specific placeholder
-  @if list.index($_valid-font-roles, $font) {
+  @if list.length($_valid-font-roles) == 0 {
+    @error 'font-setup requires fonts. No `appFonts` is configured in '
+         + 'trimscale.config.ts, so no font roles exist. Add `appFonts` with '
+         + 'at least one family and its `fontRoles`, then re-run '
+         + '`npx trimscale-css generate`.';
+  } @else if list.index($_valid-font-roles, $font) {
     @extend %#{$font}-text;
   } @else {
     @error 'Invalid font role: "#{$font}". Valid roles are: #{$_valid-font-roles}';
   }
   
   // Apply typography properties directly (no --_* indirection — these
-  // have no calc() dependents, unlike the trim metrics on %text-properties)
+  // have no calc() dependents, unlike the trim metrics on %text-geometry)
   @if $font-size != null {
     font-size: #{$font-size};
   }
