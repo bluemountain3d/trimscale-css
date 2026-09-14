@@ -1,10 +1,10 @@
 {
   "name": "trimscale-css",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "bin": {
     "trimscale-css": "./bin/init.js"
   },
-  "description": "",
+  "description": "A framework-agnostic SCSS toolkit for fluid typography, leading-trim, and OKLCH tokens.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bluemountain3d/trimscale-css.git"
@@ -17,28 +17,52 @@
     "bin/*.js",
     "styles",
     "!styles/generated",
+    "!styles/**/_*template.scss",
     "scripts/*.js",
     "models",
+    "!models/*.js",
     "docs",
     "fixtures",
     "templates"
   ],
+  "exports": {
+    ".": "./styles/trimscale.scss",
+    "./tokens": "./styles/tokens/_index.scss",
+    "./abstracts/variables": "./styles/abstracts/variables/_index.scss",
+    "./abstracts/functions": "./styles/abstracts/functions/_index.scss",
+    "./abstracts/mixins": "./styles/abstracts/mixins/_index.scss",
+    "./base": "./styles/base/_index.scss",
+    "./utilities": "./styles/utilities/_index.scss",
+    "./models/Config.ts": "./models/Config.ts"
+  },
   "scripts": {
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write .",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "node ./devScripts/cleanBuild.ts && tsc -p tsconfig.build.json",
     "prepack": "pnpm run build",
-    "generate-all": "node ./scripts/generateAll.ts",
-    "generate-bridge": "node ./scripts/generateBridge.ts"
+    "pack:dated": "node ./devScripts/pack.ts",
+    "generate": "node ./scripts/generateBridge.ts",
+    "measure": "node ./devScripts/measureOutput.ts"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "scss",
+    "sass",
+    "css",
+    "design-tokens",
+    "design-system",
+    "fluid-typography",
+    "leading-trim",
+    "oklch",
+    "css-utilities",
+    "responsive-design"
+  ],
+  "author": "Egil Eskilsson <egil@egileskilsson.se>",
   "license": "MIT",
   "engines": {
-    "node": ">=23.6.0"
+    "node": ">=22.18.0"
   },
   "devEngines": {
     "packageManager": {
@@ -54,6 +78,7 @@
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/html-vite": "^10.4.2",
     "@types/node": "^26.2.0",
+    "sass-embedded": "^1.104.0",
     "storybook": "^10.4.2",
     "typescript": "^7.0.2"
   },

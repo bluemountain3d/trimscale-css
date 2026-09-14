@@ -4,9 +4,12 @@ import type { RawFontMetrics } from '../models/Config.ts'
 import {
   calculateTrimValues,
   getAverageSideBearings,
+  getAvgAdvanceWidth,
+  capTopError,
   getBBoxHeight,
   getCorrectedAscenderDescender,
-} from './generateFontMetrics.helpers.ts'
+  getSampleCoverage,
+} from './fontMetrics.helpers.ts'
 
 export type ParsedFont = {
   metrics: RawFontMetrics
@@ -16,6 +19,10 @@ export type ParsedFont = {
   weightClass: number
   /** `wght` axis min/max from the `fvar` table for a variable font, or `null` for a static font */
   weightRange: { min: number; max: number } | null
+  /** The ascender and descender the trim is calculated against, em. Emitted as `ascent-override`/`descent-override` so the browser measures the font the same way, see `capTopError`. */
+  corrected: { ascender: number; descender: number }
+  /** What the fallback trim would be off by, in em, if nothing overrides this font's metrics. Zero for a font that settles the question itself (see `capTopError`). */
+  trimError: number
 }
 
 // Weight metrics are extracted at. fontkit@2.0.4's getVariation() is
@@ -24,6 +31,14 @@ export type ParsedFont = {
 // otherwise the font's un-varied outline already represents the target
 // weight (guaranteed by the OpenType spec).
 const TARGET_WEIGHT = 400
+
+/**
+ * Share of the character sample (see `getSampleCoverage`) a font has to cover
+ * for its measured metrics to mean anything. Half is deliberately generous:
+ * every real Latin font covers all of it, and the failure this guards against
+ * lands at 18% (the space glyph alone).
+ */
+const MIN_SAMPLE_COVERAGE = 0.5
 
 /**
  * Extracts leading-trim and side-bearing metrics from a single font file's
@@ -75,7 +90,7 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
         activeFont = instance
       } catch (e) {
         console.warn(
-          `Could not instance wght ${TARGET_WEIGHT} for ${label} (fontkit's getVariation() is unreliable for WOFF2). Metrics may be inaccurate — falling back to default weight (${defaultWeight}).`,
+          `Could not instance wght ${TARGET_WEIGHT} for ${label} (fontkit's getVariation() is unreliable for WOFF2). Metrics may be inaccurate, falling back to default weight (${defaultWeight}).`,
         )
         activeFont = font
       }
@@ -83,6 +98,14 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
   }
 
   const upm: number = font.unitsPerEm
+
+  const coverage = getSampleCoverage(activeFont)
+
+  if (coverage < MIN_SAMPLE_COVERAGE) {
+    throw new Error(
+      `${label} has glyphs for only ${Math.round(coverage * 100)}% of the basic Latin characters the metrics are measured from, so its average character width and side bearings can't be read out of it. The usual cause is a Google Fonts URL for a subset other than \`latin\`: \`latin-ext\` holds Ā-ž and no basic lowercase at all. Take the \`src\` from the \`/* latin */\` block, see docs/adding-a-font.md. For a font that genuinely isn't Latin, supply the metrics yourself with \`source: 'manual'\`.`,
+    )
+  }
 
   // Read capHeight from the ORIGINAL font to avoid a "reading 'ascent'" crash
   // if activeFont is a broken instance. Measure H/I/E/T on activeFont instead
@@ -92,11 +115,35 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
     capHeight = getBBoxHeight(activeFont, ['H', 'I', 'E', 'T'])
   }
 
-  const avgCharWidth: number = os2.xAvgCharWidth // Read directly from the original's OS/2
+  // Both sources can come up empty: no `sCapHeight` in OS/2 and no H/I/E/T to
+  // measure. A zero here doesn't fail, it silently becomes a top trim of a
+  // full ascender, so it's caught rather than carried.
+  if (capHeight <= 0) {
+    throw new Error(
+      `${label} declares no cap height in its OS/2 table and has no H, I, E or T glyph to measure one from, so its leading-trim values can't be derived. Supply the metrics yourself with \`source: 'manual'\`.`,
+    )
+  }
+
+  const avgCharWidth: number = getAvgAdvanceWidth(activeFont)
 
   const { upmAscender, upmDescender } = getCorrectedAscenderDescender(os2.typoAscender, os2.typoDescender, upm)
 
   const { topTrim, bottomTrim } = calculateTrimValues(capHeight, upmAscender, upmDescender, upm)
+
+  // What the browser would measure this font by if nothing overrides it. The
+  // typo metrics above are only one of three candidates in the file, and the
+  // file itself doesn't get to pick: `USE_TYPO_METRICS` set means every engine
+  // reads them, clear means Windows reads `usWin` and macOS reads `hhea`. Both
+  // are measured because CSS can't branch per platform, so the override has to
+  // satisfy the worse of the two.
+  const hhea = f.hhea
+  const correctedAscender = upmAscender / upm
+  const trimError = os2.fsSelection.useTypoMetrics
+    ? 0
+    : Math.max(
+        capTopError(os2.winAscent / upm, os2.winDescent / upm, correctedAscender),
+        hhea ? capTopError(hhea.ascent / upm, Math.abs(hhea.descent) / upm, correctedAscender) : 0,
+      )
 
   // Side bearings MUST come from activeFont — glyph widths actually change with weight
   const { lsb, rsb } = getAverageSideBearings(activeFont)
@@ -108,9 +155,7 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
   // the getVariation() crash risk for no loss of accuracy.
   const isItalic = os2.fsSelection.italic
   const weightClass = os2.usWeightClass
-  const weightRange = isVariable
-    ? { min: f.variationAxes.wght.min, max: f.variationAxes.wght.max }
-    : null
+  const weightRange = isVariable ? { min: f.variationAxes.wght.min, max: f.variationAxes.wght.max } : null
 
   return {
     metrics: {
@@ -119,9 +164,21 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
       bottomTrim: +(bottomTrim / upm).toFixed(3),
       lsbAdjust: +((lsb / upm) * -1).toFixed(4),
       rsbAdjust: +((rsb / upm) * -1).toFixed(4),
+      // Raw (uncorrected) OS/2 typo metrics, not upmAscender/upmDescender:
+      // those are clipped to fit unitsPerEm for leading-trim's cap-height
+      // math, but ascent-override/descent-override/line-gap-override need
+      // the font's true declared metrics, overshoot and all.
+      ascender: +(os2.typoAscender / upm).toFixed(3),
+      descender: +(Math.abs(os2.typoDescender) / upm).toFixed(3),
+      lineGap: +(os2.typoLineGap / upm).toFixed(3),
     },
-    isItalic: isItalic,
-    weightClass: weightClass,
-    weightRange: weightRange,
+    isItalic,
+    weightClass,
+    weightRange,
+    corrected: {
+      ascender: +correctedAscender.toFixed(4),
+      descender: +(upmDescender / upm).toFixed(4),
+    },
+    trimError: +trimError.toFixed(4),
   }
 }

@@ -2,34 +2,35 @@ import type { TrimscaleConfig } from './models/Config.ts'
 
 /**
  * Trimscale design-system configuration. Edit values here to customize the
- * generated tokens — see node_modules/trimscale-css/docs/ for the full reference,
- * or docs/full-config-reference.md for a single-page property-by-property index.
+ * generated tokens. This is the package's own config, so every docs/ path
+ * below is relative to the repository root; docs/full-config-reference.md is
+ * the single-page property-by-property index.
  *
  * Where to find the docs for each section below:
- * - appFonts, fontRoles                                  
+ * - output
+ *   → docs/getting-started.md#generate
+ * - appFonts (incl. fontRoles)
  *   → docs/adding-a-font.md
  * - breakpoints
  *   → docs/customizing-breakpoints.md
  * - ultrawideHeightThresholdPx
  *   → docs/design-tokens.md#base-tokens
- * - fluidScale, modularTypographicScale, semanticFontSizes                                               
+ * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
- * 
  * - fontWeights, lineHeights, dynamicLineHeight
  *   → docs/design-tokens.md#typography-tokens
- * - spacingSetup                                         
+ * - spacingSetup
  *   → docs/customizing-spacing.md
- * - defaultScheme, baseColorTokens, campaignColorTokens, semanticColorAliases
+ * - defaultScheme, baseColorTokens, customColorTokens, semanticColorAliases
  *   → docs/design-tokens.md#color-tokens
  *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
 const config: TrimscaleConfig = {
   /**
-   * Where `trimscale-css generate` writes this project's generated output
-   * (the bridge file + any @font-face rules), relative to this file.
+   * Where and what `trimscale-css generate` writes.
    * → docs/getting-started.md
    */
-  outDir: './styles/generated',
+  output: { dir: './styles/generated' },
 
   /**
    * Font sources (local file, CDN URL, or hand-entered metrics), keyed by
@@ -38,11 +39,11 @@ const config: TrimscaleConfig = {
    */
   appFonts: {
     localFontsPath: './fixtures/fonts',
-    nextFontDefault: false,         // if using Next.js `next/font` (local or google)
-    nextFontPrefix: 'next-font',    // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
-    fallbackDefault: 'sans-serif',  // used when a font entry below has no `fallback` of its own
-    fonts: {
-      'Roboto': {
+    nextFontDefault: false, // if using Next.js `next/font` (local or google)
+    nextFontPrefix: 'next-font', // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
+    defaultFallback: 'sans-serif', // used when a font entry below has no `fallback` of its own
+    families: {
+      Roboto: {
         source: 'local',
         path: [
           './fixtures/fonts/Roboto-VariableFont_wght-100-900_subset.woff2',
@@ -72,47 +73,48 @@ const config: TrimscaleConfig = {
       //   url: ['https://fonts.gstatic.com/s/opensans/v40/....woff2'],
       //   fallback: 'sans-serif',
       // },
-      // Manual example, for CDNs that don't expose a downloadable file — get
+      // Manual example, for CDNs that don't expose a downloadable file. Get
       // the metrics from precisionspec.dev:
-      // 'Proxima Nova': {
+      // 'proxima-nova': {
       //   source: 'manual',
       //   fallback: 'sans-serif',
       //   metrics: {
-      //     avgCharWidth: 0.545,
-      //     topTrim: 0.107,
-      //     bottomTrim: 0.02,
-      //     lsbAdjust: -0.012,
-      //     rsbAdjust: -0.012,
+      //     // Required: what leading trim and side-bearing correction read
+      //     avgCharWidth: 0.452,
+      //     topTrim: 0.123,
+      //     bottomTrim: 0.21,
+      //     lsbAdjust: -0.061,
+      //     rsbAdjust: -0.06,
+      //     // Required for a { matched } fallback, optional otherwise:
+      //     ascender: 0.79,
+      //     descender: 0.21,
+      //     lineGap: 0,
       //   },
       // },
     },
-  },
-
-  /**
-   * Maps semantic font roles (primary, heading, body, etc.) to font family
-   * names defined in appFonts.fonts. primary and body are required, the rest optional.
-   * → docs/full-config-reference.md#fontroles
-   */
-  fontRoles: {
-    // System Default
-    // Hierarchical
-    primary: 'Roboto',
-    secondary: 'Roboto Serif',
-    tertiary: 'Roboto Mono',
-    // Category
-    sans: 'Roboto',
-    serif: 'Roboto Serif',
-    mono: 'Roboto Mono',
-    // Contextual
-    display: 'Roboto Serif',
-    heading: 'Roboto Serif',
-    subheading: 'Roboto',
-    body: 'Roboto',
-    quote: 'Roboto Serif',
-    code: 'Roboto Mono',
-    ui: 'Roboto',
-    // Custom
-    // E.g. ink: 'Some Font Name',
+    /**
+     * Maps semantic font roles (primary, heading, body, etc.) to font family
+     * names defined in appFonts.families. primary and body are required, the rest optional.
+     * → docs/full-config-reference.md#appfontsfontroles
+     */
+    fontRoles: {
+      // System Default
+      // Hierarchical
+      primary: 'Roboto',
+      secondary: 'Roboto Serif',
+      tertiary: 'Roboto Mono',
+      // Contextual
+      display: 'Roboto Serif',
+      heading: 'Roboto Serif',
+      subheading: 'Roboto',
+      body: 'Roboto',
+      quote: 'Roboto Serif',
+      code: 'Roboto Mono',
+      ui: 'Roboto',
+      mono: 'Roboto Mono',
+      // Custom
+      // E.g. ink: 'Some Font Name',
+    },
   },
 
   /**
@@ -149,9 +151,9 @@ const config: TrimscaleConfig = {
     maxWidth: 1440,
     minFontSize: 16,
     maxFontSize: 20,
-    minTypeScale: 1.2,   // scale name (e.g "Minor Third") or scale value (e.g 1.2)
+    minTypeScale: 1.2, // scale name (e.g "Minor Third") or scale value (e.g 1.2)
     maxTypeScale: 1.333, // scale name (e.g "Perfect Fourth") or scale value (e.g 1.333)
-    precision: 4,        // integer 1-6
+    precision: 4, // integer 1-6
   },
 
   /**
@@ -162,8 +164,8 @@ const config: TrimscaleConfig = {
    */
   modularTypographicScale: {
     // System Default (optional)
-    fs900: { step: 6, unit: 'vwx', uncapped: true},
-    fs800: { step: 5, unit: 'vwx', uncapped: true},
+    fs900: { step: 6, unit: 'vwx', uncapped: true },
+    fs800: { step: 5, unit: 'vwx', uncapped: true },
     fs700: { step: 4, unit: 'vwx' },
     fs600: { step: 3, unit: 'vwx' },
     fs500: { step: 2, unit: 'vwx' },
@@ -172,7 +174,7 @@ const config: TrimscaleConfig = {
     fs300: { step: 0, unit: 'vwx' },
     fs200: { step: -1, unit: 'vwx' },
     fs100: { step: -2, unit: 'vwx' },
-    // Custom 
+    // Custom
     // E.g: stepName: {step: 2.5, unit: 'cqw'}
   },
 
@@ -275,13 +277,13 @@ const config: TrimscaleConfig = {
     tShirtScaleMicro: {
       '3xs': 1,
       '2xs': 2,
-      'xs': 3,
-      'sm': 4,
-      'md': 5,
-      'lg': 6,
+      xs: 3,
+      sm: 4,
+      md: 5,
+      lg: 6,
     },
     tShirtScaleMacro: {
-      'xl': 6,
+      xl: 6,
       '2xl': 8,
       '3xl': 10,
       '4xl': 12,
@@ -293,7 +295,7 @@ const config: TrimscaleConfig = {
     },
     numericScaleMicroEnd: 6,
     numericScaleMacroEnd: 48,
-    // Coupled example — remove/comment the independent-only fields above
+    // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',
@@ -348,8 +350,8 @@ const config: TrimscaleConfig = {
         // opacity: 0.8,
       },
       accent: {
-        light: {oklch: 'oklch(0.543 0.102 272)', hex: '#5B6BAB'},
-        dark: {oklch: 'oklch(0.733 0.045 74)', hex: '#baa58a'},
+        light: { oklch: 'oklch(0.543 0.102 272)', hex: '#5B6BAB' },
+        dark: { oklch: 'oklch(0.733 0.045 74)', hex: '#baa58a' },
       },
       action: {
         light: { oklch: 'oklch(0.485 0.105 271)', hex: '#495a9a' },
@@ -367,20 +369,20 @@ const config: TrimscaleConfig = {
         // opacity: 0.8,
       },
       textPrimary: {
-        light: {oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23'},
-        dark: {oklch: 'oklch(0.943 0 0)', hex: '#ececec'},
+        light: { oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23' },
+        dark: { oklch: 'oklch(0.943 0 0)', hex: '#ececec' },
       },
       textMuted: {
-        light: {oklch: 'oklch(0.39 0 0)', hex: '#454545'},
-        dark: {oklch: 'oklch(0.783 0 0)', hex: '#b8b8b8'},
+        light: { oklch: 'oklch(0.39 0 0)', hex: '#454545' },
+        dark: { oklch: 'oklch(0.783 0 0)', hex: '#b8b8b8' },
       },
       textContrast: {
-        light: {oklch: 'oklch(0 0 0)', hex: '#000000'},
-        dark: {oklch: 'oklch(1 0 0)', hex: '#ffffff'},
+        light: { oklch: 'oklch(0 0 0)', hex: '#000000' },
+        dark: { oklch: 'oklch(1 0 0)', hex: '#ffffff' },
       },
       a11yFocus: {
-        light: {oklch: 'oklch(0.526 0.135 251)', hex: '#1f6db5'},
-        dark: {oklch: 'oklch(0.68 0.106 246)', hex: '#5e9ed6'},
+        light: { oklch: 'oklch(0.526 0.135 251)', hex: '#1f6db5' },
+        dark: { oklch: 'oklch(0.68 0.106 246)', hex: '#5e9ed6' },
       },
     },
   },

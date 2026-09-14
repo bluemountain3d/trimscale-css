@@ -8,7 +8,7 @@ Spacing is config-driven, not hand-edited SCSS, but `styles/tokens/_base-tokens.
 
 | File | What you do there |
 |------|-------------------|
-| [`trimscale.config.ts`](../trimscale.config.ts) | Edit the `spacingSetup` field |
+| [`trimscale.config.ts`](../templates/trimscale.config.ts) | Edit the `spacingSetup` field |
 | `styles/tokens/_base-tokens.scss` / `_spacing-tokens.scss` | Static — never edit by hand, they read `var.$spacing-approach`/`$t-shirt-scale-*`/etc. |
 
 After changing `spacingSetup`, run:
@@ -99,4 +99,4 @@ Both approaches share the same shape for their scale maps:
 - [ ] Picked `approach` deliberately, `'coupled'` and `'independent'` aren't interchangeable field-for-field
 - [ ] Ran `npx trimscale-css generate` after any change
 - [ ] Dev server compiles without errors
-- [ ] Verify spacing still feels proportional at both ends of the viewport range in the styleguide
+- [ ] Verify spacing still feels proportional at both ends of the viewport range in the browser

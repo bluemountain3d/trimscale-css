@@ -1,5 +1,5 @@
 node_modules
-notes/
+notes
 .trimscale-cache/
 styles/generated/
 .claude/worktrees/
@@ -10,3 +10,7 @@ bin/*.js
 scripts/*.js
 models/*.js
 *.tgz
+
+# dev-docs
+devDocs/roadmap.md
+devDocs/backlog.md

@@ -4,7 +4,9 @@ A lean, opinionated SCSS toolkit, published as an npm package (see [package.json
 
 ## Layer order
 
-`styles/_layer.scss` fixes the cascade: `reset, tokens, functions, trim, base, layouts, components, utilities`. Don't reorder without a deliberate reason — later layers are meant to win regardless of source order or specificity.
+`styles/_layer.scss` fixes the cascade: `reset, tokens, functions, trim-defaults, base, trim, layouts, components, utilities`. Don't reorder without a deliberate reason — later layers are meant to win regardless of source order or specificity.
+
+The trim system straddles `base` on purpose. `trim-defaults` holds the bare font-size/line-height baseline and must lose to element defaults like `small { font-size: 0.875em }`. `trim` holds the trim mechanism, the `--_*` metrics and the role's `font-family`, and must beat element defaults like `code { font-family: ... }` so the metrics stay paired with the typeface they were measured from. Anything added to `styles/tokens/_leading-trim.scss` has to go in whichever half matches that rule.
 
 ## Scope discipline
 
@@ -12,7 +14,7 @@ Keep `base/` lean. This is a _base_ system, not a utility framework — resist a
 
 ## Config-driven generation
 
-Most token/scale files under `styles/tokens/` and `styles/abstracts/variables/` are static SCSS shipped in the package (never regenerated), reading `!default` variables that a consumer configures via `@use 'trimscale' with (...)` in a generated bridge file. `scripts/generateBridge.ts` (see `pnpm generate-all` / `pnpm generate-bridge`) reads `trimscale.config.ts` and writes that bridge file into `<outDir>` (the consumer's own project, never `node_modules`), reusing per-domain map-builder functions exported from the other `scripts/generate*.ts` files. `scripts/generateFonts.ts` additionally computes font metrics and `@font-face` data (folded into the same bridge `with()` call). Prefer changing the config, a `!default` var, or a builder function in `scripts/` over hand-editing generated output — but "generated output" here is almost always just the bridge file itself, not the static `styles/` files it configures.
+Most token/scale files under `styles/tokens/` and `styles/abstracts/variables/` are static SCSS shipped in the package (never regenerated), reading `!default` variables that a consumer configures via `@use 'trimscale' with (...)` in a generated bridge file. `scripts/generateBridge.ts` (see `pnpm generate-all` / `pnpm generate-bridge`) reads `trimscale.config.ts` and writes that bridge file into `<output.dir>` (the consumer's own project, never `node_modules`), reusing per-domain map-builder functions exported from the other `scripts/generate*.ts` files. `scripts/generateFonts.ts` additionally computes font metrics and `@font-face` data (folded into the same bridge `with()` call). Prefer changing the config, a `!default` var, or a builder function in `scripts/` over hand-editing generated output — but "generated output" here is almost always just the bridge file itself, not the static `styles/` files it configures.
 
 ## Design conventions
 

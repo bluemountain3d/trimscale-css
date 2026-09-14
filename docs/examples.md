@@ -16,6 +16,11 @@ A typographic prose container: it handles flow spacing between block elements, c
 </div>
 ```
 
+Headings inside a text box would typically carry `.trim-text-heading` too,
+directly on the `<h2>` here since nothing on it collides with the trim. See
+[Typography](utility-classes.md#typography) for the two things that do, and
+for the nested-`<span>` pattern they call for.
+
 ```scss
 @layer components {
   .text-box {
@@ -104,12 +109,10 @@ A typographic prose container: it handles flow spacing between block elements, c
 | `.text-box-45` … `-75`      | Caps line length by character count (steps of 5: `45, 50, 55, 60, 65, 70, 75`), computed as `max-width: calc(avg-char-width * N)`                                                                                            |
 | `.text-box--center-content` | `margin-inline: auto`, typically paired with a character-count modifier                                                                                                                                                      |
 
-To add this (or any other component) to your own project, create a `components/` folder alongside your SCSS entry point, paste this in, and load it in the `components` layer somewhere after `@use 'trimscale'`:
+To add this (or any other component) to your own project, create a `components/` folder alongside your SCSS entry point, paste this in as `components/text-box.scss` (the `@layer components { ... }` wrapper shown above already lives inside that file). Then `@use` it from your SCSS entry point, anywhere after `@use 'trimscale'`: `@use` must sit at the top of a file, before any other rules, so it can't be nested inside a `@layer` block itself, the layering happens inside the partial, not at the `@use` site.
 
 ```scss
-@layer components {
-  @use 'components/text-box';
-}
+@use 'components/text-box';
 ```
 
 ## Container
@@ -122,7 +125,14 @@ A fluid-width layout wrapper with `max-width` and padding variants. The base cla
 </div>
 ```
 
+Depends on the package's own `abstracts/functions`/`abstracts/variables` (already resolvable via the `loadPaths` entry from [getting-started.md](getting-started.md)), `@use` those before the `.container` rule itself:
+
 ```scss
+@use 'abstracts/variables' as var;
+@use 'abstracts/functions' as fn;
+@use 'sass:math';
+@use 'sass:map';
+
 @layer components {
   .container {
     $_max-width: #{math.div(map.get(var.$fluid-scale, "max-width"), 16)}rem;
@@ -152,8 +162,8 @@ A fluid-width layout wrapper with `max-width` and padding variants. The base cla
     // Mutually exclusive with --boxed/--narrow (all three set max-width).
     &--overshoot {
       padding-inline: round(#{fn.get-fluid-clamp(
-        #{math.round(math.max(map.get(var.$fluid-scale, "min-width") * 0.03125, 12))},
-        #{math.round(map.get(var.$fluid-scale, "max-width") * 0.03125)}
+        math.round(math.max(map.get(var.$fluid-scale, "min-width") * 0.03125, 12)),
+        math.round(map.get(var.$fluid-scale, "max-width") * 0.03125)
       )}, 1px);
       max-width: $_max-width;
     }
@@ -162,8 +172,8 @@ A fluid-width layout wrapper with `max-width` and padding variants. The base cla
     // Mutually exclusive with --overshoot/--narrow.
     &--boxed {
       padding-inline: round(#{fn.get-fluid-clamp(
-        #{math.round(math.max(map.get(var.$fluid-scale, "min-width") * 0.05555, 20))},
-        #{math.round(map.get(var.$fluid-scale, "max-width") * 0.08333)}
+        math.round(math.max(map.get(var.$fluid-scale, "min-width") * 0.05555, 20)),
+        math.round(map.get(var.$fluid-scale, "max-width") * 0.08333)
       )}, 1px);
       max-width: $_max-width;
     }
@@ -172,8 +182,8 @@ A fluid-width layout wrapper with `max-width` and padding variants. The base cla
     // Mutually exclusive with --overshoot/--boxed.
     &--narrow {
       max-width: round(#{fn.get-fluid-clamp(
-        #{math.round(map.get(var.$fluid-scale, "min-width") * 0.77778)},
-        #{math.round(map.get(var.$fluid-scale, "max-width") * 0.66667)}
+        math.round(map.get(var.$fluid-scale, "min-width") * 0.77778),
+        math.round(map.get(var.$fluid-scale, "max-width") * 0.66667)
       )}, 1px);
     }
   }
@@ -189,19 +199,8 @@ A fluid-width layout wrapper with `max-width` and padding variants. The base cla
 | `.container--boxed`        | Narrower `max-width`, more generous fluid padding than `--overshoot`. Mutually exclusive with `--overshoot`/`--narrow`.     |
 | `.container--narrow`       | Caps `max-width` well below the viewport, no padding of its own. Mutually exclusive with `--overshoot`/`--boxed`.           |
 
-Depends on the package's own `abstracts/functions`/`abstracts/variables` (already resolvable via the `loadPaths` entry from [getting-started.md](getting-started.md)):
+To add this to your own project, paste the snippet above into `components/container.scss`. Then `@use` it from your SCSS entry point, anywhere after `@use 'trimscale'`:
 
 ```scss
-@use 'abstracts/variables' as var;
-@use 'abstracts/functions' as fn;
-@use 'sass:math';
-@use 'sass:map';
-```
-
-To add this to your own project, paste the snippet above plus the `.container` block into `components/container.scss`, and load it in the `components` layer somewhere after `@use 'trimscale'`:
-
-```scss
-@layer components {
-  @use 'components/container';
-}
+@use 'components/container';
 ```

@@ -1,7 +1,16 @@
 /// @group Abstracts/Mixins
 /// @name Responsive Breakpoints
 /// @description Generic responsive breakpoint mixins, driven by the $breakpoints map
-/// Provides consistent media query patterns across the design system
+/// Provides consistent media query patterns across the design system.
+/// $container (all mixins): pass true to query the nearest ancestor with
+/// container-type set (anonymous container), or a string to query a named
+/// container. Defaults to null (plain @media). You're responsible for
+/// setting container-type on the right ancestor yourself — an @container
+/// query against an element with no such ancestor simply never matches, it
+/// doesn't fall back to the viewport. That's different from the cqi/cqw
+/// `units` used elsewhere (e.g. modularTypographicScale's unit: 'cqi'),
+/// which DO fall back silently, resolving against the small viewport
+/// instead, wrong size either way, but no visible error in either case.
 /// @example
 ///   @use 'abstracts/mixins/mx_breakpoints' as bp;
 ///
@@ -68,6 +77,24 @@
   @error "$breakpoint must be a number or a valid string. You passed in a #{meta.type-of($breakpoint)}.";
 }
 
+/// Emit either a @media or @container query for the given CSS condition
+/// @access private
+/// @param {string} $condition - The feature condition, e.g. "width >= 45rem"
+/// @param {boolean | string | null} $container [null] - null: @media (default).
+///   true: @container with no name (nearest ancestor with container-type set).
+///   string: @container against that named container.
+@mixin _bp-query($condition, $container: null) {
+  @if $container {
+    @container #{if(sass($container == true): '' ; else: $container)} (#{$condition}) {
+      @content;
+    }
+  } @else {
+    @media (#{$condition}) {
+      @content;
+    }
+  }
+}
+
 /// @group Abstracts/Mixins
 /// @name Up To Breakpoint
 ///
@@ -84,9 +111,9 @@
 ///   @include bp.up-to(684px) {...}
 ///   Render: @media (width < 42.75rem) {...}
 /// 
-@mixin up-to($breakpoint) {
+@mixin up-to($breakpoint, $container: null) {
   $value: _get-bp-value($breakpoint);
-  @media (width < #{$value}) {
+  @include _bp-query('width < #{$value}', $container) {
     @content;
   }
 }
@@ -106,10 +133,13 @@
 /// 
 ///   @include bp.and-up(684) {...}
 ///   Render: @media (width >= 42.75rem) {...} // 684px -->
+/// 
+///   @include bp.and-up('tablet', $container: true) {...}
+///   Render: @container (width >= 45rem) {...}
 ///
-@mixin and-up($breakpoint) {
+@mixin and-up($breakpoint, $container: null) {
   $value: _get-bp-value($breakpoint);
-  @media (width >= #{$value}) {
+  @include _bp-query('width >= #{$value}', $container) {
     @content;
   }
 }
@@ -130,9 +160,9 @@
 /// 
 ///   // Number input is not possible, use `up-to` instead if a custom number is needed.
 ///
-@mixin and-down($breakpoint) {
+@mixin and-down($breakpoint, $container: null) {
   $value: _get-bp-value($breakpoint, $next: true);
-  @media (width < #{$value}) {
+  @include _bp-query('width < #{$value}', $container) {
     @content;
   }
 }
@@ -155,10 +185,10 @@
 ///   @include bp.between(512px, 636px) {...}
 ///   Render: @media (32rem <= width < 39.75rem) {...} // 512px <--> 635.98px
 /// 
-@mixin between($min, $max) {
+@mixin between($min, $max, $container: null) {
   $min-value: _get-bp-value($min);
   $max-value: _get-bp-value($max);
-  @media (#{$min-value} <=width < #{$max-value}) {
+  @include _bp-query('#{$min-value} <= width < #{$max-value}', $container) {
     @content;
   }
 }
@@ -179,14 +209,14 @@
 /// 
 ///   // Number input is not possible, use `between` instead if a span between two custom numbers is needed.
 ///
-@mixin only($breakpoint) {
+@mixin only($breakpoint, $container: null) {
   @if meta.type-of($breakpoint)==number {
     @error "You cannot use 'only' with just a single number (#{$breakpoint}). Use @include between(#{$breakpoint}, YOUR_MAX_VALUE) instead";
   }
 
   $min-value: _get-bp-value($breakpoint);
   $max-value: _get-bp-value($breakpoint, $next: true);
-  @media (#{$min-value} <=width < #{$max-value}) {
+  @include _bp-query('#{$min-value} <= width < #{$max-value}', $container) {
     @content;
   }
 }

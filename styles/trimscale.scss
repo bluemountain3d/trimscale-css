@@ -9,7 +9,12 @@
 /// 2. Tokens — CSS custom properties must be available before base styles
 /// 3. Utilities — utility classes available globally
 /// 4. Base — HTML element defaults, reset, and typography
-/// 5. Components — global component styles (uncomment when folder exists)
+///
+/// The package ships nothing into the `layouts` and `components` layers.
+/// Both are declared in _layer.scss and left empty by design: grids, page
+/// structure and component classes are design decisions that belong in the
+/// consumer's project, not in a typography and spacing base. See
+/// docs/examples.md for recipes to copy.
 /// ===========================================================================
 
 // Configuration surface — see trimscale.config.ts / docs/getting-started.md.
@@ -19,6 +24,7 @@
   $fluid-scale,
   $font-metrics,
   $font-faces,
+  $fallback-font-faces,
   $font-roles,
   $modular-typographic-scale,
   $semantic-font-sizes,
@@ -38,7 +44,21 @@
   $numeric-scale-micro-end,
   $numeric-scale-macro-end,
   $base-grid-size,
-  $ultrawide-height-threshold-px;
+  $ultrawide-height-threshold-px,
+  $utilities-spacing-base,
+  $utilities-spacing-tshirt,
+  $utilities-spacing-numeric,
+  $utilities-typography-trim,
+  $utilities-typography-family,
+  $utilities-typography-size,
+  $utilities-typography-line-height,
+  $utilities-typography-weight,
+  $utilities-typography-style,
+  $utilities-typography-text-transform,
+  $utilities-typography-text-align,
+  $utilities-typography-numeric-figures,
+  $utilities-a11y,
+  $output-reset;
 
 // Layer — Define CSS Layers specificity order
 @forward './layer';
@@ -52,8 +72,4 @@
 // Base - Global HTML element styling
 @forward 'base/';
 
-// Layouts - Global layouts styling (add when ready)
-// @forward 'layouts/';
-
-// Components - Global components styling (add when ready)
-// @forward 'components/';
+// Layouts and Components - none shipped, both layers are the consumer's own

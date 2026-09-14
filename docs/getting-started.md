@@ -4,17 +4,29 @@ trimscale-css is consumed as SCSS source plus a small CLI that generates your to
 
 ## Requirements
 
-- Node >=23.6.0. The CLI's `generate` command dynamically imports your `trimscale.config.ts` and relies on Node's built in TypeScript type stripping to run it directly, no build step, no `ts-node`. That support only became flagless default at 23.6.0, so it's a hard floor, not a suggestion.
+- Node >=22.18.0. The CLI's `generate` command dynamically imports your `trimscale.config.ts` and relies on Node's built in TypeScript type stripping to run it directly, no build step, no `ts-node`. That support only became flagless default at 22.18.0 (and 23.6.0 on the odd-numbered line), so it's a hard floor, not a suggestion.
 - Your own SCSS compiler (`sass-embedded` or `sass`) at **1.95.0 or later**, configured with a `loadPaths` entry pointing at the package's `styles/` folder. Vite and Next.js setups are shown below.
 - If your project has a `tsconfig.json` and you want editor type checking on `trimscale.config.ts`, set `moduleResolution` to `"nodenext"` or `"bundler"` so the config's `import type ... from 'trimscale-css/models/Config.ts'` subpath import resolves. This is purely for editor DX, the config runs fine at runtime either way.
+- A config in the project root also tends to fall outside every tsconfig's `include`. Vite's `tsconfig.app.json` covers only `src`, so the file belongs in the Node-side project alongside `vite.config.ts`. Your editor checks it either way, through an inferred project with default compiler options, but a `tsc --noEmit` in CI skips a file no tsconfig includes, so a mistyped field passes CI while showing a red squiggly on your own screen.
+
+  ```jsonc
+  // tsconfig.node.json, in a Vite project
+  {
+    "include": ["vite.config.ts", "trimscale.config.ts"]
+  }
+  ```
+
+  Next.js needs nothing here, its generated root `tsconfig.json` already includes `**/*.ts`. To check where a given editor puts the file, run `TypeScript: Go to Project Configuration` from the command palette with the config open: "File is not part of a TypeScript project" means no tsconfig includes it.
 
 ## Install
 
 ```bash
-npm install trimscale-css
-# or: pnpm add trimscale-css
-# or: yarn add trimscale-css
+npm install -D trimscale-css
+# or: pnpm add -D trimscale-css
+# or: yarn add -D trimscale-css
 ```
+
+A dev dependency, not a runtime one. The package is SCSS sources plus the `generate` CLI, both of which do their work at build time; nothing from it ends up in your JavaScript bundle.
 
 ## Initialize
 
@@ -34,23 +46,106 @@ This copies `trimscale.config.ts` into your project root (unless one already exi
 }
 ```
 
-Run it (`npm run trimscale:generate`) whenever you change `trimscale.config.ts`. Generated output lives in your own project (see [Generate](#generate) below), so there's no need to wire it into a `prebuild`/`predev` step.
+In a project whose `package.json` declares `"type": "commonjs"`, which is what `npm init -y` writes, `init` creates `trimscale.config.mts` instead. Node reads a `.ts` config as CommonJS there, where the config's own `export default` is a syntax error, and an explicit `type` skips the module detection that covers a `package.json` with no `type` at all. `.mts` is an ES module whatever the project declares. Nothing else about your project changes, and `generate` accepts either name, so renaming an existing config by hand works too.
+
+Run it (`npm run trimscale:generate` or `pnpm trimscale:generate` or `yarn trimscale:generate`) whenever you change `trimscale.config.ts`. Generated output lives in your own project (see [Generate](#generate) below), so there's no need to wire it into a `prebuild`/`predev` step.
 
 Open `trimscale.config.ts` and edit the fields for your project: fonts, font roles, fluid type scale, breakpoints, spacing, and colors. Each field is commented inline; see the guides linked from the [Customization](../README.md#customization) table for the full reference on any one of them.
+
+`appFonts` is the one section you can skip entirely (remove it, don't leave it commented out with no families). Without it, you still get the full fluid type scale, spacing system, breakpoints, and color tokens, working exactly as they do with fonts configured. What you don't get is leading trim and `--font-family-*` tokens, both need font metrics that only exist once a font is configured. See [adding-a-font.md](adding-a-font.md) when you're ready to add one.
 
 ## Generate
 
 ```bash
 npx trimscale-css generate
-# or, once init has added the script: npm run trimscale:generate / pnpm trimscale:generate / yarn trimscale:generate
+# or, once init has added the script:  
+# npm run trimscale:generate / pnpm trimscale:generate / yarn trimscale:generate
 ```
 
-Reads your `trimscale.config.ts` and writes two files into `<outDir>` (`outDir` defaults to `./trimscale-generated`, configurable via `outDir` in `trimscale.config.ts`), into **your own project**, never into `node_modules`:
+Reads your `trimscale.config.ts` and writes into `<output.dir>` (defaults to `./trimscale-generated`, configurable via `output.dir` in `trimscale.config.ts`), into **your own project**, never into `node_modules`:
 
-- `_index.scss`, the bridge file. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, and (if any of your fonts need `@font-face` rules) sits alongside the generated font faces.
+- `_index.scss`, the bridge file, unless `output.scss: false`. Configures trimscale-css's static internals with your actual config values via Sass's `@use ... with (...)`, passing in your font metrics and (if any of your fonts need them) `@font-face` rules as part of the same call, not as a separate file.
 - `utility-classes.md`, a reference listing the exact utility classes _your_ config produces (font roles, sizes, weights, spacing tiers), not a generic example, see [utility-classes.md](utility-classes.md).
+- `trimscale.bundle.css` and (unless `output.css.minify: false`) `trimscale.bundle.min.css`, if `output.css` is set, see [Standalone CSS Output](#standalone-css-output) below.
+- `reset-requirements.md`, if `output.reset: false`, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset).
 
-Re-run this any time you change `trimscale.config.ts`. The output lives in your own project, so it survives a fresh install. Commit `<outDir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
+Each run also removes files from `<output.dir>` that it no longer produces, so turning `output.css` off takes the CSS with it instead of leaving a stale copy for someone to keep linking. Only the files in the list above are ever removed, never anything else in the folder, so your own files are safe there. The one thing this can't clean up is a change to `output.dir` itself: the old folder is left where it is, since nothing in the new run knows it existed.
+
+Re-run this any time you change `trimscale.config.ts`, and after every trimscale-css version bump, even if your config didn't change, in case a future version changes which config fields exist. The output lives in your own project, so it survives a fresh install. Commit `<output.dir>` like any other source file, or gitignore it (along with `.trimscale-cache/`, the font-download cache) and run `generate` as a build step, your choice.
+
+Going the gitignore route, two lines cover it:
+
+```gitignore
+trimscale-generated/
+.trimscale-cache/
+```
+
+A git pattern with no leading slash and no slash inside it matches at any depth, so the first line covers the default `./trimscale-generated` and a nested `src/styles/trimscale-generated` alike. It follows the folder name, not the tool, so a custom `output.dir` needs its own name on that line instead.
+
+If your `package.json` has no `"type": "module"`, Node prints a `MODULE_TYPELESS_PACKAGE_JSON` warning on every run, saying the config's module type isn't specified and that it's reparsing the file as an ES module. `generate` works correctly through it and the files it lists are written as normal. The config is ESM whichever way your project is set up, and the reparse costs milliseconds once per run. Add `"type": "module"` to silence it if your project is ESM anyway; if it isn't, ignore the warning rather than flipping a field that governs how your own source is interpreted.
+
+## Standalone CSS Output
+
+For consumers who want the tokens and utility classes without configuring Sass at all. Set `output.css: true` in `trimscale.config.ts` and `generate` writes `trimscale.bundle.css` (and, unless you set `output.css: { minify: false }`, a minified `trimscale.bundle.min.css` alongside it) into `<output.dir>`:
+
+```ts
+output: {
+  css: true,
+  // or: css: { minify: false, fontUrlBase: '/assets/fonts' },
+}
+```
+
+```html
+<link rel="stylesheet" href="/trimscale-generated/trimscale.bundle.min.css">
+```
+
+**This isn't "no setup," it's "no Sass setup."** The file still has to come from `generate`, font metrics, color tokens, spacing, and breakpoints are all config-driven and can't ship pre-built in the package, see [why-scss.md](why-scss.md) for why none of this can be plain CSS at the source level. The flow is still `npm install` → `npx trimscale-css generate` → link the file, just without touching `loadPaths` or the `pkg:` importer.
+
+**Generating CSS requires a Sass compiler** (`sass-embedded` or `sass`) installed in your project at generate time, compiling the same static SCSS the bridge file configures, there's no separate hand-written CSS emitter to keep in sync with it. If you're only ever using the CSS output and never `@use` this package's SCSS yourself, that Sass compiler is still a one-time `generate`-time dependency, not something your bundler needs.
+
+### What's in the file
+
+Tokens (as CSS custom properties) and utility classes, resolved against your actual config, same as the SCSS build produces. That's the complete list, not a subset with gaps.
+
+What the file can't carry is the SCSS authoring surface, since nothing is left to call it from:
+
+- `mx.font-setup` — the component-authoring API doesn't exist, there's no SCSS left to call it from
+- The breakpoint mixins (`mx.and-up` etc.) — write your own `@media`/`@container` queries instead
+- `@extend %{role}-text` from your own SCSS — same reason
+- `mx.generate-color-tokens` with your own palette — the file has the palette from your config baked in already, but no way to generate a new one at your own build time
+- `fn.px-to-rem` and the rest of `abstracts/functions` — nothing left to call them from
+
+### Utility flags are function flags here, not size flags
+
+In the SCSS build, `output.utilities.typography.trim: false` just means the `.trim-text-*` classes aren't generated, `font-setup` and the underlying placeholders still work if you reach for them from your own SCSS. Linking the compiled `trimscale.bundle.css` file gives you no stylesheet in that pipeline to reach them from: `trim: false` means leading trim doesn't exist in the file at all, and both `@layer trim-defaults` and `@layer trim` are empty (placeholders emit nothing until something extends them, and `.trim-text-*` is the only thing that does). `generate` warns about this rather than forcing the flag on, tokens/spacing/colors without trim in a CSS build is still a legitimate choice. `family: false` gets no warning, because it isn't the same kind of loss: `--font-family-{role}` is emitted for every role either way, so `font-family: var(--font-family-heading)` in your own CSS does what `.font-family-heading` does. Trim has no such fallback. Each role's metrics live inside the placeholder `.trim-text-*` extends, so without the class the values never reach the file at all and there's nothing to reference.
+
+A family with `nextFont: true` doesn't work in the CSS build either: its `family` value is built around `var(--next-font-x)`, a CSS variable only ever set by Next.js's own runtime, which a standalone CSS file never goes through. The variable's fallback is the family name, so the declaration stays valid and lands on whichever `@font-face` that name resolves to, which in a build that never wrote one for it is none. `generate` warns per family when this combination is detected.
+
+### Output size
+
+Every time `generate` writes CSS it prints the size of each file, including the gzipped size of the one you'd ship. That figure is for your config. The ones below are reference points, measured against four configs by compiling each one the same way `generate` does:
+
+| config | | raw | minified | min + gzip | min + brotli |
+| --- | --- | --- | --- | --- | --- |
+| `init` default | `trimscale.config.ts` as `init` writes it | 73.7 kB | 56.3 kB | 8.8 kB | 4.7 kB |
+| full | every group on, 3 families, 11 roles, numeric spacing to 48 | 85.7 kB | 66.5 kB | 10.2 kB | 6.1 kB |
+| trim only | fonts and `.trim-text-*`, no other utility group | 33.3 kB | 27.7 kB | 4.2 kB | 3.5 kB |
+| floor | no `appFonts`, no utility classes: tokens, reset and base only | 26.0 kB | 21.5 kB | 3.4 kB | 2.8 kB |
+
+Everything compresses to roughly an eighth of its raw size, so the raw figure is the one that misleads. The utility classes compress a little better than the tokens do, being the same few declarations repeated with one value changed, but only a little: turning off every group but trim saves 52 kB raw and 6 kB gzipped.
+
+What moves the number is easier to read per unit:
+
+| one more… | raw | minified | min + gzip |
+| --- | --- | --- | --- |
+| numeric spacing step (14 classes) | 876 B | 658 B | 89 B |
+| font role (`.trim-text-*`, `.font-family-*`, tokens) | 558 B | 478 B | 52 B |
+| color token (light + dark, oklch + hex) | 298 B | 253 B | 43 B |
+| `@font-face` rule (one file, one weight or style) | 206 B | 182 B | 10 B |
+
+The numeric spacing scale is the single largest item at its default end of 48, on the order of 4 of the full config's 10.2 kB, and it's one number in the config rather than a flag anyone thinks about. Fonts are the cheapest axis by a wide margin: two or three families with a few static weights each is a rounding error, whether they're static or variable. Colors are the axis without a ceiling. Twenty tokens is under a kilobyte, but a tonal palette of ten steps across a dozen hues passes the spacing scale on its own.
+
+**There's no purge step, by design.** Tailwind and friends scan your markup to know which classes survive. trimscale-css generates from your config and never reads your source files, so it has no way to know which classes you use. Run [PurgeCSS](https://purgecss.com) against the generated file if you want one, it works fine.
 
 ## Configure your SCSS compiler
 
@@ -74,9 +169,56 @@ export default {
 
 `loadPaths` accepts multiple entries, add your own project's SCSS root alongside trimscale-css's so your own `@use 'styles/whatever'`-style imports keep working too. Pointing trimscale-css's own entry directly at its `styles/` folder means it never claims the bare `styles/` name for itself, so it can't collide with a `styles/` folder of your own on another loadPath.
 
-This `loadPaths` entry is only for trimscale-css's own static files (functions, mixins, base styles), it's separate from wherever `generate` writes your bridge file (`outDir`, see [Generate](#generate) above) — that one you `@use` by its actual location in your project (relative path, or add its parent directory to `loadPaths` too if you'd rather use a bare specifier).
+This `loadPaths` entry is only for trimscale-css's own static files (functions, mixins, base styles), it's separate from wherever `generate` writes your bridge file (`output.dir`, see [Generate](#generate) above) — that one you `@use` by its actual location in your project (relative path, or add its parent directory to `loadPaths` too if you'd rather use a bare specifier).
 
-**Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration.
+**`pkg:` importer (additional to `loadPaths`, not a replacement):**
+
+Sass's built-in [package importer](https://sass-lang.com/documentation/at-rules/use/#pkg-importer) resolves `pkg:` URLs against a package's `exports` field, for your own component-scoped `@use` statements:
+
+```scss
+@use 'pkg:trimscale-css/tokens';
+@use 'pkg:trimscale-css/abstracts/mixins' as mx;
+```
+
+Requires Dart Sass 1.71.0 or later, already covered by the 1.95.0-or-later requirement above. It's not enabled automatically anywhere, every tool needs it registered explicitly.
+
+**Vite:** this has changed across Vite's own major versions, check what your installed version actually expects (Vite's `preprocessorOptions.scss` type, or [vite.dev/config](https://vite.dev/config/shared-options.html#css-preprocessoroptions)) rather than trusting a single snippet:
+
+```ts
+// vite.config.ts
+import { NodePackageImporter } from 'sass-embedded';
+
+export default {
+  css: {
+    preprocessorOptions: {
+      scss: {
+        importers: [new NodePackageImporter()],
+      },
+    },
+  },
+};
+```
+
+- **Vite 7+**: Sass's legacy API was dropped, there's only one mode left, no `api` field at all, `importers` goes directly under `scss` as shown above.
+- **Vite 5.4–6.x**: needs `api: 'modern-compiler'` alongside `importers` (plain `'modern'` doesn't support `importers`).
+- **Below Vite 5.4**: no modern Sass API support at all, the option is named `pkgImporter` instead of `importers` under the legacy API.
+
+**A bare `sass` CLI:**
+
+```bash
+sass --pkg-importer=node input.scss output.css
+```
+
+**JS/Dart Sass API directly:**
+
+```js
+import { NodePackageImporter } from 'sass-embedded'; // or 'sass'
+sass.compile('input.scss', { importers: [new NodePackageImporter()] });
+```
+
+`pkg:` and `loadPaths` compile to identical output for the subpaths `pkg:` exposes, but **keep `loadPaths` configured either way**: the bridge file `generate` writes into your `<output.dir>` uses a bare (non-`pkg:`) import for trimscale-css's main entry point, so it only resolves via `loadPaths`, same as it always has, `pkg:` doesn't change that. `pkg:` is additive for your own component-scoped `@use` statements, not a way to drop the `loadPaths` requirement. The available subpaths (`tokens`, `abstracts/variables`, `abstracts/functions`, `abstracts/mixins`, `base`, `utilities`) mirror the ones already used under `loadPaths` in the example above. `pkg:trimscale-css` itself resolves to the main entry point, and `pkg:trimscale-css/models/Config.ts` to the config type. Anything else under `styles/` is an implementation detail, not part of the package's public surface, and isn't reachable via `pkg:` either.
+
+**Next.js:** see [using-with-nextjs.md](using-with-nextjs.md) for the full setup, including `next/font` integration. Use `loadPaths` there, not `pkg:`, which fails to build in a Next.js project whichever bundler it runs, Turbopack or webpack.
 
 ## Usage
 
@@ -85,14 +227,16 @@ This `loadPaths` entry is only for trimscale-css's own static files (functions, 
 Import once at your app's entry point to load all tokens (configured with your actual `trimscale.config.ts` values), base styles, and utility classes:
 
 ```scss
-@use './trimscale-generated'; // wherever `generate` wrote your outDir
+@use './trimscale-generated'; // wherever `generate` wrote your output.dir
 ```
 
 This single import includes:
 
 - All CSS custom property tokens, configured from your `trimscale.config.ts`
 - HTML element defaults and reset
-- Utility classes (spacing, gap, typography)
+- Utility classes (spacing, typography, accessibility)
+
+The reset (`output.reset`) and the accessibility utilities (`output.utilities.a11y`) can both be turned off, for a project that already has its own, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset) and [utility-classes.md](utility-classes.md#accessibility).
 
 Haven't run `generate` yet, or don't want to? `@use 'trimscale';` (via `loadPaths`) works too, it's the same static package, just with the shipped example config's default values instead of yours.
 
@@ -108,10 +252,7 @@ import '../trimscale-generated/_index.scss'; // relative to your entry file
 For component styles that need mixins, functions, or token variables without re-emitting global CSS:
 
 ```scss
-@use 'abstracts/variables' as var;
-@use 'abstracts/functions' as fn;
 @use 'abstracts/mixins' as mx;
-@use 'tokens/leading-trim' as *;
 
 .card {
   @include mx.font-setup($font: 'body', $font-size: var(--text-md));

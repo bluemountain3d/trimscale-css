@@ -7,127 +7,178 @@
 /// @description Utility classes for font family, size, weight, style, and alignment.
 /// `.trim-text-{role}` applies a font-family, leading-trim metrics (margins +
 /// pseudo-element formulas), and a bare font-size/line-height baseline
-/// (--text-base / --line-height-dynamic) for the given role. Font-weight,
+/// (1em, the inherited size, / --line-height-dynamic) for the given role. Font-weight,
 /// font-style, letter-spacing, and text-transform are left unset — pair it
 /// with the plain `.{property}-*` utility classes below (or with font-setup,
 /// for component authoring) for role-specific sizing or anything beyond the
 /// baseline. Plain `.{property}-*` classes set the real CSS property
 /// directly and work anywhere, trim system or not. Roles are defined in
 /// abstracts/variables/typography.
+///
+/// `.trim-text-*` can go straight on the element you are styling. Two
+/// things take that option away, both about the element the class lands on:
+/// its own ::before/::after, which the fallback path needs for itself, and
+/// its own display, which replaces the flow-root box the fallback margins
+/// need. Where either is in play, move the class to a nested <span>.
+///
+/// A ::before/::after collision is invisible in a browser with native
+/// text-box-trim, which uses neither, so verify in an engine without it. A
+/// display collision is not: text-box-trim neither applies to nor propagates
+/// through flex, grid or table formatting contexts, so those three remove
+/// the trim in every engine, while block/inline-block/list-item keep the
+/// native path and cost the fallback only its margin containment. Neither
+/// announces itself, and both are easy to add later, so the span is the
+/// safer habit even where the direct form works today.
+///
+/// Size follows inheritance and needs no rule of its own. `.trim-text-*`
+/// carries font-size: 1em, so a size class gives the same result on the
+/// trimmed element or on a wrapper above it. Note %text-geometry sets
+/// display: flow-root, so a trimmed span stops being inline: intentional,
+/// the fallback margins need a box, but worth knowing if you're expecting
+/// inline flow.
 /// @example html
-///   <h1 class="trim-text-heading font-size-heading-1">Sized heading</h1>
+///   <h1>
+///     <span class="trim-text-heading font-size-heading-1">Sized heading</span>
+///   </h1>
 ///   <span class="font-family-mono">inline code-style snippet</span>
 ///   <span class="font-size-text-sm">plain, no trim system involved</span>
 /// ===========================================================================
-@layer utilities {
+/// Written in @layer trim, not @layer utilities, because that is where it
+/// ends up either way: `@extend` emits into the placeholder's own position,
+/// so a `.trim-text-*` rule written under `@layer utilities` would still be
+/// hoisted into the trim layers and leave an empty utilities block behind.
+/// Declaring the real layer here keeps the source honest about the cascade.
+/// The role placeholders straddle @layer base, so the baseline half lands in
+/// trim-defaults and the geometry half in trim, see tokens/leading-trim.
+@layer trim {
   /// =========================================================================
   /// Trim Text — font-family, leading-trim metrics, and a bare font-size/
   /// line-height baseline per font role. Weight, style, letter-spacing, and
   /// text-transform are left unset — pair with a plain utility class below,
   /// or use font-setup, for those.
   /// =========================================================================
-  @each $key, $family in var.$font-roles {
-    .trim-text-#{$key} {
-      @extend %#{$key}-text;
+  @if var.$utilities-typography-trim {
+    @each $key, $family in var.$font-roles {
+      .trim-text-#{$key} {
+        @extend %#{$key}-text;
+      }
     }
   }
+}
 
+@layer utilities {
   /// =========================================================================
   /// Non "trim" specific utility classes
   /// =========================================================================
 
   /// Font Family — sets only font-family, nothing else
-  @each $key, $value in var.$font-roles {
-    .font-family-#{$key} {
-      font-family: var(--font-family-#{$key});
+  @if var.$utilities-typography-family {
+    @each $key, $value in var.$font-roles {
+      .font-family-#{$key} {
+        font-family: var(--font-family-#{$key});
+      }
     }
   }
 
   /// Font Size — sets font-size directly, no trim system dependency
-  @each $key, $value in var.$semantic-font-sizes {
-    .font-size-#{$key} {
-      font-size: var(--#{$key});
+  @if var.$utilities-typography-size {
+    @each $key, $value in var.$semantic-font-sizes {
+      .font-size-#{$key} {
+        font-size: var(--#{$key});
+      }
     }
   }
 
   /// Line Height — sets line-height directly, no trim system dependency
-  @each $key, $value in var.$line-heights {
-    .line-height-#{$key} {
-      line-height: var(--line-height-#{$key});
+  @if var.$utilities-typography-line-height {
+    @each $key, $value in var.$line-heights {
+      .line-height-#{$key} {
+        line-height: var(--line-height-#{$key});
+      }
     }
-  }
-  .line-height-dynamic {
-    line-height: var(--line-height-dynamic);
+    .line-height-dynamic {
+      line-height: var(--line-height-dynamic);
+    }
   }
 
   /// Font Weight — sets font-weight directly, no trim system dependency
-  @each $key, $value in var.$font-weights {
-    .font-weight-#{$key} {
-      font-weight: var(--font-weight-#{$key});
+  @if var.$utilities-typography-weight {
+    @each $key, $value in var.$font-weights {
+      .font-weight-#{$key} {
+        font-weight: var(--font-weight-#{$key});
+      }
     }
   }
 
   /// Font Style — sets font-style directly, no trim system dependency
-  @each $item in (normal, italic, oblique) {
-    .font-style-#{$item} {
-      font-style: #{$item};
+  @if var.$utilities-typography-style {
+    @each $item in (normal, italic, oblique) {
+      .font-style-#{$item} {
+        font-style: #{$item};
+      }
     }
   }
 
   /// Text Transform — sets text-transform directly, no trim system dependency
-  @each $item in (capitalize, uppercase, lowercase) {
-    .text-transform-#{$item} {
-      text-transform: #{$item};
+  @if var.$utilities-typography-text-transform {
+    @each $item in (capitalize, uppercase, lowercase) {
+      .text-transform-#{$item} {
+        text-transform: #{$item};
+      }
     }
   }
 
   /// Text Align
-  .text-align-left {
-    text-align: left;
-  }
-  .text-align-center {
-    text-align: center;
-  }
-  .text-align-right {
-    text-align: right;
-  }
-
-  /// Lining figures (default) — baseline-aligned, for UI/values
-  .num-lining-tabular {
-    font-variant-numeric: lining-nums tabular-nums;
+  @if var.$utilities-typography-text-align {
+    .text-align-left {
+      text-align: left;
+    }
+    .text-align-center {
+      text-align: center;
+    }
+    .text-align-right {
+      text-align: right;
+    }
   }
 
-  .num-lining-proportional {
-    font-variant-numeric: lining-nums proportional-nums;
-  }
+  @if var.$utilities-typography-numeric-figures {
+    /// Lining figures (default) — baseline-aligned, for UI/values
+    .num-lining-tabular {
+      font-variant-numeric: lining-nums tabular-nums;
+    }
 
-  /// Oldstyle figures — varying baseline, for running text/editorial contexts
-  .num-oldstyle-tabular {
-    font-variant-numeric: oldstyle-nums tabular-nums;
-  }
+    .num-lining-proportional {
+      font-variant-numeric: lining-nums proportional-nums;
+    }
 
-  .num-oldstyle-proportional {
-    font-variant-numeric: oldstyle-nums proportional-nums;
-  }
+    /// Oldstyle figures — varying baseline, for running text/editorial contexts
+    .num-oldstyle-tabular {
+      font-variant-numeric: oldstyle-nums tabular-nums;
+    }
 
-  /// Ordinal
-  .num-ordinal-tabular {
-    font-variant-numeric: ordinal-nums tabular-nums;
-  }
+    .num-oldstyle-proportional {
+      font-variant-numeric: oldstyle-nums proportional-nums;
+    }
 
-  .num-ordinal-proportional {
-    font-variant-numeric: ordinal-nums proportional-nums;
+    /// Ordinal
+    .num-ordinal-tabular {
+      font-variant-numeric: ordinal-nums tabular-nums;
+    }
+
+    .num-ordinal-proportional {
+      font-variant-numeric: ordinal-nums proportional-nums;
+    }
   }
 
   /// Text color
-  /// Only `.text-color-inherit` ships by default. Unlike font roles, color
-  /// token names aren't a contract enforced anywhere else in the system (see
-  /// font-setup's required $font-roles roles for contrast) — a project is free to
-  /// name its $color-tokens however it likes, so a fixed set of
-  /// `.text-color-*` classes here would risk going silently dead the moment
-  /// a project doesn't use these exact token names. Add your own next to your
-  /// project's palette instead.
-  .text-color-inherit {
-    color: inherit;
-  }
+  /// No `.text-color-*` class ships. Unlike font roles, color token names
+  /// aren't a contract enforced anywhere else in the system (see font-setup's
+  /// required $font-roles roles for contrast) — a project is free to name its
+  /// $color-tokens however it likes, so a fixed set of `.text-color-*` classes
+  /// here would risk going silently dead the moment a project doesn't use
+  /// these exact token names. Add your own next to your project's palette
+  /// instead; `.text-color-inherit` is kept below as the shape to copy.
+  // .text-color-inherit {
+  //   color: inherit;
+  // }
 }

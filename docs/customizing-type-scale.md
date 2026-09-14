@@ -6,7 +6,7 @@ The fluid type scale is config-driven, not hand-edited SCSS:
 
 | File                                                      | What you do there                                                     |
 | --------------------------------------------------------- | --------------------------------------------------------------------- |
-| [`trimscale.config.ts`](../trimscale.config.ts)           | Edit `fluidScale`, `modularTypographicScale`, and `semanticFontSizes` |
+| [`trimscale.config.ts`](../templates/trimscale.config.ts)           | Edit `fluidScale`, `modularTypographicScale`, and `semanticFontSizes` |
 | `styles/abstracts/variables/_fluid-scale.scss` / `_typography.scss` | Static — never edit by hand, read `var.$fluid-scale`/`$modular-typographic-scale`/`$semantic-font-sizes` |
 
 After changing any of these fields, run:
@@ -70,6 +70,8 @@ modularTypographicScale: {
 
 `step` is the exponent in the modular-scale formula (fractional steps like `0.5` are valid, that's how `fs350` sits halfway between `fs300` and `fs400`). `unit` picks which viewport unit drives the interpolation, `'vwx'` (the adaptive custom viewport unit, see [design-tokens.md](design-tokens.md#base-tokens)) is the default; `'vw'`, `'cqw'`, and `'cqi'` are also valid for container-relative or plain-viewport variants. Add or remove keys freely, `fs900`..`fs100` is just the default naming.
 
+`cqw`/`cqi` require `container-type` set on an ancestor, or they silently resolve against the small viewport instead, same requirement as the breakpoint mixins' `$container` option, see [abstracts.md](abstracts.md#breakpoints).
+
 ### Uncapped steps: `uncapped`
 
 Every scale step normally resolves to a `clamp()`, so growth stops at `fluidScale.maxWidth`. Setting `uncapped: true` on a step additionally generates a second token, `--fs-*-uncapped`, built with `max()` instead: it keeps growing past `maxWidth` rather than being capped there. Use it for display/hero text that should keep scaling up on very large viewports; leave it off (the default) for anything where you want the size to settle at a fixed maximum, which is most of the scale.
@@ -101,4 +103,4 @@ Two entry shapes:
 - [ ] Every `from` in `modularTypographicScale`/`semanticFontSizes` points at a key that actually exists
 - [ ] Ran `npx trimscale-css generate` after any change
 - [ ] Dev server compiles without errors
-- [ ] Checked the scale at both ends of the viewport range in the styleguide, a ratio that looks right at 1440px can look cramped or excessive at 360px
+- [ ] Checked the scale at both ends of the viewport range in the browser, a ratio that looks right at 1440px can look cramped or excessive at 360px
