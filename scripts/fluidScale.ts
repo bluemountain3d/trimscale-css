@@ -1,5 +1,5 @@
 import type { FluidScale } from '../models/Config.ts'
-import { type ScssTree, kebabKeys } from './helpers.ts'
+import { kebabKeys, type ScssTree } from './helpers.ts'
 
 const TypeScaleTable = {
   'Minor Second': 1.067,
@@ -7,6 +7,7 @@ const TypeScaleTable = {
   'Minor Third': 1.2,
   'Major Third': 1.25,
   'Perfect Fourth': 1.333,
+  // biome-ignore lint/suspicious/noApproximativeNumericConstant: a published typographic ratio, not an approximation of Math.SQRT2. The three-decimal value is what a config author types and what every generated size is computed from; Math.SQRT2 raises the sixth step from 159.86px to 160.00px at a 20px base.
   'Augmented Fourth': 1.414,
   'Perfect Fifth': 1.5,
   'Golden Ratio': 1.618,

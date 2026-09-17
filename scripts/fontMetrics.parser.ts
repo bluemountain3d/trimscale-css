@@ -3,9 +3,9 @@ import * as fontkit from 'fontkit'
 import type { RawFontMetrics } from '../models/Config.ts'
 import {
   calculateTrimValues,
+  capTopError,
   getAverageSideBearings,
   getAvgAdvanceWidth,
-  capTopError,
   getBBoxHeight,
   getCorrectedAscenderDescender,
   getSampleCoverage,
@@ -65,30 +65,34 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
     font = fontOrCollection
   }
 
-  // Cache the original font's OS/2 table up front — works around an internal fontkit crash otherwise
-  const f = font as any
-  const os2 = f['OS/2']
+  // Cache the original font's OS/2 table up front, which works around an
+  // internal fontkit crash otherwise. The table is typed as always present,
+  // but a file that lacks it reaches here as undefined, so it is checked.
+  const os2 = font['OS/2']
 
   if (!os2) {
     throw new Error(`Could not find the OS/2 table in font: ${label}`)
   }
 
-  const isVariable = !!f.variationAxes?.wght
+  // Captured once rather than re-read at each use: `variationAxes` is a
+  // partial record, so a single binding is what narrows the axis from
+  // "possibly absent" to "present" for the branches below.
+  const wghtAxis = font.variationAxes.wght
   let activeFont = font
 
-  if (isVariable) {
-    const defaultWeight = f.variationAxes.wght.default
+  if (wghtAxis) {
+    const defaultWeight = wghtAxis.default
 
     if (defaultWeight !== TARGET_WEIGHT) {
       try {
-        const instance = f.getVariation({ wght: TARGET_WEIGHT })
+        const instance = font.getVariation({ wght: TARGET_WEIGHT })
 
         // Instancing is lazy, so force a glyph read to trigger any crash here,
         // where we can catch it cleanly
         instance.glyphForCodePoint(65) // 'A'
 
         activeFont = instance
-      } catch (e) {
+      } catch {
         console.warn(
           `Could not instance wght ${TARGET_WEIGHT} for ${label} (fontkit's getVariation() is unreliable for WOFF2). Metrics may be inaccurate, falling back to default weight (${defaultWeight}).`,
         )
@@ -136,7 +140,7 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
   // reads them, clear means Windows reads `usWin` and macOS reads `hhea`. Both
   // are measured because CSS can't branch per platform, so the override has to
   // satisfy the worse of the two.
-  const hhea = f.hhea
+  const hhea = font.hhea
   const correctedAscender = upmAscender / upm
   const trimError = os2.fsSelection.useTypoMetrics
     ? 0
@@ -155,7 +159,7 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
   // the getVariation() crash risk for no loss of accuracy.
   const isItalic = os2.fsSelection.italic
   const weightClass = os2.usWeightClass
-  const weightRange = isVariable ? { min: f.variationAxes.wght.min, max: f.variationAxes.wght.max } : null
+  const weightRange = wghtAxis ? { min: wghtAxis.min, max: wghtAxis.max } : null
 
   return {
     metrics: {

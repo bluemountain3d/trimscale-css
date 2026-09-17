@@ -177,7 +177,7 @@ export const getAverageSideBearings = (font: Font): { lsb: number; rsb: number }
       const rsb = glyph.advanceWidth - glyph.bbox.maxX
       rsbValues.push(rsb)
     } catch {
-      continue
+      // A glyph fontkit can't read contributes nothing to the average.
     }
   }
 
