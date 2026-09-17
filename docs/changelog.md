@@ -2,6 +2,14 @@
 
 Written for upgrading: what changed, and what it means for a project already on the previous version. Entries that need nothing from you are still listed, so you can tell the difference between "my output changed because of this" and "something is wrong".
 
+## 1.0.0-beta.6
+
+Re-run `generate` after upgrading, as after any version bump: a release can change which config fields exist, and this is what tells you.
+
+```bash
+npx trimscale-css generate
+```
+
 ## 1.0.0-beta.5
 
 Most of the breaking changes are config fields that moved, and `generate` stops with the new name for every one of them. Start by running it.
