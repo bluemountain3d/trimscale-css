@@ -5,7 +5,7 @@ import type {
   SemanticColorAliases,
   TrimscaleConfig,
 } from '../models/Config.ts'
-import { type ScssTree, kebabKeys, raw, toKebabCase } from './helpers.ts'
+import { kebabKeys, raw, type ScssTree, toKebabCase } from './helpers.ts'
 
 /**
  * Builds each color config map, for use as `@use 'trimscale-css' with

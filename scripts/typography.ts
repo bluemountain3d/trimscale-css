@@ -8,7 +8,7 @@ import type {
   SemanticFontSizes,
   SizeStep,
 } from '../models/Config.ts'
-import { type ScssTree, kebabKeys, toKebabCase } from './helpers.ts'
+import { kebabKeys, type ScssTree, toKebabCase } from './helpers.ts'
 
 /**
  * Builds each typography config map, for use as `@use 'trimscale-css' with

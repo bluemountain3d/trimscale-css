@@ -66,6 +66,24 @@ const assertHasOutputTarget = (cfg: TrimscaleConfig): void => {
   }
 }
 
+/** A `rootFontSize` that isn't a positive number scales every rem value in the output at once, so the result reads as a layout bug rather than as a config one. */
+const assertRootFontSize = (cfg: TrimscaleConfig): void => {
+  const value = cfg.rootFontSize
+  if (value === undefined) return
+
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(
+      `\`rootFontSize\` in trimscale.config.ts is \`${value}\`. It must be a positive number of pixels, for example 16.`,
+    )
+  }
+
+  if (value < 8 || value > 32) {
+    console.warn(
+      `⚠ \`rootFontSize\` is ${value}px, outside the range a browser root realistically has. Every rem value in the output scales against it, so check that this is deliberate.`,
+    )
+  }
+}
+
 /**
  * `undefined` and `{ families: {}, ... }` both mean "no fonts configured",
  * but only one of them short-circuits `computeFontData` and every other
@@ -165,6 +183,7 @@ export const loadConfig = async (): Promise<TrimscaleConfig> => {
   const cfg = mod.default
   assertNoLegacyFields(cfg)
   assertHasOutputTarget(cfg)
+  assertRootFontSize(cfg)
   return normalizeConfig(cfg)
 }
 

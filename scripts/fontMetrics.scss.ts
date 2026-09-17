@@ -1,5 +1,5 @@
 import type { FallbackFontFace, FontFace, FontMetricsMap } from './fontData.ts'
-import { type ScssTree, kebabKeys, raw } from './helpers.ts'
+import { kebabKeys, raw, type ScssTree } from './helpers.ts'
 
 /**
  * Builds the `$font-metrics` map, for use as a `@use 'trimscale-css' with

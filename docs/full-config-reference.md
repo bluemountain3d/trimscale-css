@@ -95,6 +95,37 @@ Maps semantic roles to a family name from `appFonts.families`. A family not mapp
 
 → Full guide: [adding-a-font.md](adding-a-font.md#map-to-roles)
 
+## `rootFontSize`
+
+Root font size (px) that this project's rem values are calculated against. Both conversion paths read it: the px to rem conversion `generate` performs when it writes the `$breakpoints` map, and `fn.px-to-rem` / `fn.rem-to-px` inside the SCSS.
+
+| Property       | Type     | Required | Description                         |
+| -------------- | -------- | :------: | ----------------------------------- |
+| `rootFontSize` | `number` |    No    | Root font size in px. Default `16`. |
+
+Set it only when the host application gives `html` a font size other than the browser's 16px, so that trimscale-css's rem values resolve to the sizes the config asks for. A CMS, an embedded widget, or a design system layered on top of another one are the realistic cases.
+
+It is not the `html { font-size: 62.5% }` trick. That trick exists to make rem arithmetic easier to do by hand, and this config takes px in and emits rem, so there is nothing left for it to simplify.
+
+**Setting it also applies it.** A value other than `16` emits `html { font-size }` in `@layer base`, as the percentage that produces the size you asked for:
+
+```css
+/* rootFontSize: 10 */
+@layer base {
+  html {
+    font-size: 62.5%;
+  }
+}
+```
+
+A percentage rather than a px value, so the root still scales with the reader's own browser text-size setting: at a reader's default of 20px, `62.5%` gives a 12.5px root and everything stays proportional. A px value on `html` would override that setting outright.
+
+The default `16` emits no declaration at all, so a project that leaves this key alone gets exactly the CSS it got before the key existed.
+
+**If the host application already sets the root**, which is the common reason to reach for this key, its own rule wins: `@layer base` loses to unlayered CSS and to every layer above it, so you do not need to remove anything. Keep the two values in agreement, since `rootFontSize` is what the px to rem conversion reads.
+
+The reset separately writes `html { font-size: 100% }`, which states the browser default rather than imposing a size. It sits in `@layer reset`, below `base`, so it does not compete with the value above.
+
 ## `breakpoints`
 
 Named viewport breakpoints (px), converted to rem for the `$breakpoints` SCSS map. Must be added smallest to largest.

@@ -429,6 +429,13 @@ export type TrimscaleConfig = {
    */
   appFonts?: AppFonts
   fluidScale: FluidScale
+  /**
+   * Root font size (px) that this project's rem values are calculated
+   * against. Anything other than 16 also emits `html { font-size }` in
+   * `@layer base` as the matching percentage, which the host application's
+   * own rule still overrides. @default 16
+   */
+  rootFontSize?: number
   breakpoints: Breakpoints
   /**
    * Viewport height (px) threshold for the `--vwx` ultrawide switch-over:

@@ -20,6 +20,7 @@
 // Configuration surface — see trimscale.config.ts / docs/getting-started.md.
 // Every var shown here can be overridden via `@use 'trimscale-css' with (...)`.
 @forward './abstracts/variables' show
+  $root-font-size,
   $breakpoints,
   $fluid-scale,
   $font-metrics,

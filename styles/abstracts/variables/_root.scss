@@ -1,0 +1,14 @@
+/// @group Abstracts/Variables
+/// @name Root
+/// @description The rem base every unit conversion in the package resolves
+/// against. It lives in its own leaf module because
+/// `abstracts/functions/_fn_unit-utils.scss` reads it while
+/// `abstracts/variables/_breakpoints.scss` reads that file back, which is a
+/// module cycle Sass rejects outright.
+///
+/// This file must never gain a `@use`. Adding one recreates the cycle.
+/// ===========================================================================
+
+/// Root font size (px) that the project's rem values are calculated against.
+/// @type Number
+$root-font-size: 16px !default;

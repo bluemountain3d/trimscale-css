@@ -4,6 +4,7 @@
 /// Forwards breakpoints, fluid scale, font metrics, colors and typography configuration.
 /// ===========================================================================
 
+@forward './root';
 @forward "./breakpoints";
 @forward "./fluid-scale";
 @forward "./font-metrics";
