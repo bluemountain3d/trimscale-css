@@ -60,9 +60,11 @@ const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize
 export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFlags, fontData: FontData): string => {
   const spacing = cfg.spacingSetup
   const baseGridSize = spacing.baseGridSize ?? 4
+  const rootFontSize = cfg.rootFontSize ?? 16
 
   const withArgs = [
-    setWithArg('breakpoints', breakpointsTree(cfg.breakpoints)),
+    setWithArg('root-font-size', raw(`${rootFontSize}px`)),
+    setWithArg('breakpoints', breakpointsTree(cfg.breakpoints, rootFontSize)),
     setWithArg('ultrawide-height-threshold-px', raw(`${cfg.ultrawideHeightThresholdPx ?? 944}px`)),
     setWithArg('fluid-scale', fluidScaleTree(cfg.fluidScale)),
     setWithArg('font-metrics', metricsTree(fontData.metrics)),

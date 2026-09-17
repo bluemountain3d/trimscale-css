@@ -13,6 +13,8 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  *   → docs/adding-a-font.md
  * - breakpoints
  *   → docs/customizing-breakpoints.md
+ * - rootFontSize
+ *   → docs/full-config-reference.md#rootfontsize
  * - ultrawideHeightThresholdPx
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
@@ -136,6 +138,14 @@ const config: TrimscaleConfig = {
     // Custom:
     // E.g. xSmall: 360 or mobileLarge: 480
   },
+
+  /**
+   * Root font size (px) that this project's rem values are calculated against.
+   * Optional, defaults to 16. Anything else also emits html { font-size } as
+   * the matching percentage, which your own rule still overrides.
+   * → docs/full-config-reference.md#rootfontsize
+   */
+  // rootFontSize: 16,
 
   /**
    * Viewport height (px) threshold for the --vwx ultrawide switch-over

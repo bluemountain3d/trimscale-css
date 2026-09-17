@@ -10,11 +10,6 @@
 // Grid System
 // ============================================================================
 
-/// Base font size — matches min-font-size in $fluid-scale
-/// Used as the rem base for unit conversion functions
-/// @type Number
-$base-font-size: 16px !default;
-
 /// Base grid unit (px). 4 or 8.
 /// @type Number
 $base-grid-size: 4 !default;
