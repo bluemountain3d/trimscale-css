@@ -56,7 +56,7 @@ gap: fn.fluid-space-step(4, 8); // between grid level 4 and grid level 8
 
 ### `fn.px-to-rem($px, $base)`
 
-Converts a pixel value to rem. `$base` defaults to `16px`. Unitless input is treated as px.
+Converts a pixel value to rem. `$base` defaults to the project's [`rootFontSize`](full-config-reference.md#rootfontsize), which is `16px` unless the config sets it. Unitless input is treated as px.
 
 ```scss
 margin: fn.px-to-rem(24); // → 1.5rem
@@ -68,7 +68,7 @@ Small utilities the fluid functions above are built on. They're forwarded from `
 
 | Function                              | Returns                                                                                              |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `fn.rem-to-px($rem, $base)`           | The inverse of `px-to-rem`. `$base` defaults to `16px`; unitless input is treated as rem             |
+| `fn.rem-to-px($rem, $base)`           | The inverse of `px-to-rem`. `$base` defaults to the project's `rootFontSize`; unitless input is treated as rem |
 | `fn.strip-unit($value)`               | The number without its unit (`16px` → `16`). Already-unitless input passes through                   |
 | `fn.round($number, $decimals)`        | `$number` rounded to `$decimals` places, default `4`. Sass-side rounding, unrelated to CSS `round()` |
 | `fn.precision($number, $decimals)`    | Alias of `fn.round`, same signature and behavior                                                     |

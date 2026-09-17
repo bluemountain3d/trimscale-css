@@ -10,6 +10,27 @@ Re-run `generate` after upgrading, as after any version bump: a release can chan
 npx trimscale-css generate
 ```
 
+### Changes worth a look
+
+**`rootFontSize`, for projects whose root font size isn't the browser's 16px.** Every px value in the config is converted to rem against this number: the breakpoint map, `fluidScale`'s font sizes, the spacing grid, and `fn.px-to-rem` / `fn.rem-to-px` when you call them yourself.
+
+What it means: nothing at all unless you set it. The default is `16`, and a config that leaves it alone gets exactly the CSS it got before.
+
+Setting anything else also emits `html { font-size }` in `@layer base`, as the percentage that produces the root you asked for:
+
+```css
+/* rootFontSize: 10 */
+@layer base {
+  html {
+    font-size: 62.5%;
+  }
+}
+```
+
+A percentage rather than px, so the root still scales with the reader's own browser text-size setting. If your application already sets the root itself, its rule wins, since `@layer base` loses to unlayered CSS and to every layer above it. Keep the two in agreement: `rootFontSize` is what the px to rem conversion reads.
+
+→ [full-config-reference.md#rootfontsize](full-config-reference.md#rootfontsize)
+
 ## 1.0.0-beta.5
 
 Most of the breaking changes are config fields that moved, and `generate` stops with the new name for every one of them. Start by running it.

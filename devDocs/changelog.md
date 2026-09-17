@@ -6,6 +6,51 @@ All notable changes to this project are documented in this file.
 
 ## [1.0.0-beta.6]
 
+### Added
+
+- `rootFontSize` (optional, `number`, default `16`): the root font size in px
+  the project's rem values are calculated against. Reaches the bridge as
+  `$root-font-size` and is read by `px-to-rem`/`rem-to-px` as their `$base`
+  default, and by `breakpoints.ts` when it converts the breakpoint map at
+  generate time. A value other than 16 also emits `html { font-size }` in
+  `@layer base` as the matching percentage; 16 emits nothing, so a default
+  config's output is unchanged. `loadConfig` throws on a non-positive value
+  and warns outside 8-32px.
+
+### Changed
+
+- `$base-font-size` is renamed `$root-font-size` and moves from
+  `abstracts/variables/_breakpoints.scss` to a new leaf module,
+  `abstracts/variables/_root.scss`, which must never gain a `@use`:
+  `_breakpoints.scss` reads `fn_unit-utils`, so letting `fn_unit-utils` read
+  `abstracts/variables` back is a module loop Sass rejects
+  (`Module loop: this module is already being loaded`, verified). The old
+  name was absent from `trimscale.scss`'s `show` list, so it was unreachable
+  from a config and this renames nothing a consumer could have set.
+  `$base-grid-size` stays in `_breakpoints.scss`: its only function-side
+  reader, `_fn_fluid-typography-and-spacing.scss`, already depends on the
+  whole variables index and is not on the cycle.
+- `breakpointsTree` takes the root size as a second argument and cuts its
+  quotient to 10 decimals, matching where Sass cuts its own, so a breakpoint
+  written as a map key and the same value passed bare to a breakpoint mixin
+  print the same rem string under any root size.
+- `_mx_breakpoints.scss` drops the explicit second argument to `px-to-rem`,
+  which is now the same value as the default.
+
+### Internal
+
+- `biome check` is clean across all 40 files; `check` and `format` had
+  disagreed on nine. Import sorting, `biome.json` glob normalisation and
+  `'path'` → `'node:path'` are mechanical. Two are not:
+  `noApproximativeNumericConstant` on `'Augmented Fourth': 1.414` is
+  suppressed, since `Math.SQRT2` would move the sixth scale step from
+  159.86px to 160.00px at a 20px base, and `noExplicitAny` is resolved by
+  deleting `const f = font as any` from `fontMetrics.parser.ts` entirely:
+  `@types/fontkit` declares `"OS/2"`, `hhea`, `variationAxes` and
+  `getVariation()`, which covers all six uses. `variationAxes` being a
+  partial record, the axis is captured once as `wghtAxis`, and `isVariable`
+  folds into it.
+
 ## [1.0.0-beta.5]
 
 ### Added

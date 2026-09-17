@@ -35,7 +35,7 @@ breakpoints: {
 },
 ```
 
-Keys become kebab-case in the generated map (`tabletLg` → `tablet-lg`), and values are converted from px to rem by `generate` itself (assuming the standard `1rem == 16px` root) before they're written into the bridge file. Add, remove, or rename keys freely, there's no fixed list you must match, the six defaults above are just a starting point.
+Keys become kebab-case in the generated map (`tabletLg` → `tablet-lg`), and values are converted from px to rem by `generate` itself, against the project's [`rootFontSize`](full-config-reference.md#rootfontsize) (`16` unless the config sets it), before they're written into the bridge file. Add, remove, or rename keys freely, there's no fixed list you must match, the six defaults above are just a starting point.
 
 Order matters for `mx.and-down()` and `mx.only()`: both look up the *next* key after the one you pass, based on the map's insertion order. Keep `breakpoints` sorted smallest to largest, or those two mixins will resolve against the wrong neighbor.
 
