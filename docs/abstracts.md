@@ -38,14 +38,6 @@ font-size: fn.fluid-font-size(
 ); // max() instead of clamp(), no upper bound
 ```
 
-### `fn.fluid-spacing($level, $unit-key, $type)`
-
-Returns a `clamp()` value for a spacing multiplier on the base grid (independent of the `--unit-micro`/`--unit-macro` split, it computes its own clamp directly from `min-font-size`/`max-font-size`, not from the CSS custom properties). Same `$type: 'max'` option as `fluid-font-size` above.
-
-```scss
-padding: fn.fluid-spacing(6); // grid level × 6
-```
-
 ### `fn.fluid-space-step($min-level, $max-level, $unit-key, $type)`
 
 Returns a `clamp()` value that spans between two grid levels. Same `$type: 'max'` option as `fluid-font-size` above.
@@ -53,6 +45,10 @@ Returns a `clamp()` value that spans between two grid levels. Same `$type: 'max'
 ```scss
 gap: fn.fluid-space-step(4, 8); // between grid level 4 and grid level 8
 ```
+
+It resolves both levels the way `spacingSetup`'s `'coupled'` approach does, as multiples of `fluidScale`'s base font-size. Under `'independent'`, which is the default, the `--space-*` tokens are built from `--unit-micro` (static) and `--unit-macro` (its own clamp) instead, so the value this returns does not correspond to any `--space-*` token. `fn.fluid-value` with explicit pixel endpoints is the one to reach for meanwhile.
+
+For a plain multiple of the fluid base, no function is needed: `--fluid-base` is a token, so `calc(var(--fluid-base) * 3)` works anywhere, including in a project consuming the compiled CSS.
 
 ### `fn.px-to-rem($px, $base)`
 

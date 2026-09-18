@@ -2,8 +2,8 @@
 /// @name Fluid Typography & Spacing
 /// @description Calculate fluid values for responsive typography and spacing.
 /// Uses linear interpolation (y = mx + b) between the min and max viewport
-/// widths in `$fluid-scale`. The three scale-aware functions are wrappers
-/// around `fluid-value`, so all four share one implementation, take the same
+/// widths in `$fluid-scale`. The two scale-aware functions are wrappers
+/// around `fluid-value`, so all three share one implementation, take the same
 /// `$unit-key` and `$type`, and round to `$fluid-scale`'s `precision`.
 /// @link https://www.smashingmagazine.com/2022/01/modern-fluid-typography-css-clamp/
 /// ===========================================================================
@@ -69,7 +69,8 @@
 /// Interpolate linearly between two raw pixel sizes across the $fluid-scale
 /// viewport range. The primitive the three functions below are built on, and
 /// the one to call for a one-off value that sits on neither the type scale nor
-/// the spacing grid.
+/// the spacing grid. A plain multiple of the fluid base needs no function:
+/// `--fluid-base` is a token, so `calc(var(--fluid-base) * 3)` works in CSS.
 /// @access public
 /// @param {Number} $min-size - Size in pixels at $fluid-scale's min-width
 /// @param {Number} $max-size - Size in pixels at $fluid-scale's max-width
@@ -127,27 +128,6 @@
   @return fluid-value(
     map.get(var.$fluid-scale, "min-font-size") * math.pow($min-ratio, $level),
     map.get(var.$fluid-scale, "max-font-size") * math.pow($max-ratio, $level),
-    $unit-key,
-    $type
-  );
-}
-
-/// Generate fluid spacing based on grid system
-/// @access public
-/// @param {Number} $level [4] - Grid level (multiples of base grid size)
-/// @param {String} $unit-key ['vwx'] - Unit type: 'vwx', 'cqw', 'cqi', 'vw'
-/// @param {String} $type ['clamp'] - 'clamp' for an upper-bounded value, 'max' for one that keeps growing past max-width
-/// @return {String} CSS clamp() expression
-/// @example
-///   .card { padding: fluid-spacing(4); }  // 16px-20px (1 × base grid)
-///   .section { gap: fluid-spacing(8); }   // 32px-40px (2 × base grid)
-@function fluid-spacing($level: 4, $unit-key: "vwx", $type: "clamp") {
-  // Multiply base by (level / baseGridSize) to match grid scale
-  $multiplier: math.div($level, var.$base-grid-size);
-
-  @return fluid-value(
-    map.get(var.$fluid-scale, "min-font-size") * $multiplier,
-    map.get(var.$fluid-scale, "max-font-size") * $multiplier,
     $unit-key,
     $type
   );

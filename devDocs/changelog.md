@@ -69,24 +69,42 @@ All notable changes to this project are documented in this file.
 - `_mx_breakpoints.scss` drops the explicit second argument to `px-to-rem`,
   which is now the same value as the default.
 - **Breaking:** `get-fluid-clamp` is renamed `fluid-value`, and its
-  `$value-key` argument `$unit-key`, matching the other three. The four share
-  one implementation: `fluid-value` holds the interpolation, the redundancy
-  check, the px-to-rem conversion and the rounding, and `fluid-font-size`,
-  `fluid-spacing` and `fluid-space-step` compute their own min/max pixel pair
-  and delegate. `_fn_fluid-typography-and-spacing.scss` goes from 128 to 73
-  lines of code. The three wrappers are byte-identical across eleven call
-  shapes (levels 2/0/-1, `vw`/`cqw` units, `'max'`, and the degenerate
-  `fluid-spacing(0)`); the only diff in the package's own output is
-  `--unit-macro`'s intercept, `0.1666666667rem` → `0.1667rem`, absorbed by the
-  token's `round(nearest, …, 1px)`.
+  `$value-key` argument `$unit-key`, matching the others. They share one
+  implementation: `fluid-value` holds the interpolation, the redundancy check,
+  the px-to-rem conversion and the rounding, and the scale-aware wrappers
+  compute their own min/max pixel pair and delegate.
+  `_fn_fluid-typography-and-spacing.scss` goes from 128 to 73 lines of code.
+  The wrappers are byte-identical across eleven call shapes (levels 2/0/-1,
+  `vw`/`cqw` units, `'max'`, and a degenerate pair that returns a flat value);
+  the only diff in the package's own output is `--unit-macro`'s intercept,
+  `0.1666666667rem` → `0.1667rem`, absorbed by the token's
+  `round(nearest, …, 1px)`.
 - `_validate-fluid-type` drops its `$fn` parameter. It existed to name the
   calling function in the message, which Sass's stack trace already does: an
   invalid `$type` on `fluid-space-step` prints a `fluid-value()` frame and a
   `fluid-space-step()` frame above the root stylesheet. With validation in one
-  place a fifth fluid function cannot forget it.
+  place a new fluid function cannot forget it.
 - `fluid-value`'s redundant-input branch returns a Sass number instead of an
-  interpolated string, which is what `get-fluid-clamp` did and the other three
-  did not. It prints identically and survives arithmetic.
+  interpolated string, which is what `get-fluid-clamp` did and the wrappers did
+  not. It prints identically and survives arithmetic.
+- `abstracts.md` states what `fluid-space-step` resolves against. It reads its
+  two levels as multiples of `fluidScale`'s base font-size, which is what
+  `spacingSetup`'s `'coupled'` approach does, so under the default
+  `'independent'` its result corresponds to no `--space-*` token. The function
+  is meant to be rewritten against the active token model rather than removed,
+  since a config-side named range needs exactly that resolver, but the gap is
+  real until then and now says so.
+
+### Removed
+
+- **Breaking:** `fluid-spacing`. It carried the same coupled-model assumption
+  as `fluid-space-step`, one grid level at a time: `fluid-spacing(4)` runs 16px
+  to 20px while `--space-4` is a static 16px, and `fluid-spacing(12)` runs 48px
+  to 60px while `--space-12` runs 48px to 96px. Unlike `fluid-space-step` it
+  has no capability worth keeping, because it is by definition
+  `--fluid-base × level / baseGridSize` and `--fluid-base` is a token: any
+  project, Sass or not, writes `calc(var(--fluid-base) * 3)` instead. Zero call
+  sites in the package, and the output is byte-identical without it.
 
 ### Fixed
 
