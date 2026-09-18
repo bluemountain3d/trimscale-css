@@ -4,26 +4,30 @@ import { pathToFileURL } from 'node:url'
 import type { TrimscaleConfig } from '../models/Config.ts'
 
 /**
- * Fields that moved to a new location for `1.0.0-beta.5`. A config that
- * still sets one at its old top-level spot has already been type-checked
- * against an older `TrimscaleConfig`, or was never type-checked at all (a
- * plain `.js` config, or one that casts through `any`) — either way, the
- * old field is silently ignored by everything downstream, and the failure
- * shows up much later as a confusing, unrelated error (missing font roles,
- * output written to the wrong place). Catching it here instead gives a
- * direct fix.
+ * Fields that moved to a new location, with the release that moved them. A
+ * config that still sets one at its old top-level spot has already been
+ * type-checked against an older `TrimscaleConfig`, or was never type-checked
+ * at all (a plain `.js` config, or one that casts through `any`): either
+ * way, the old field is silently ignored by everything downstream, and the
+ * failure shows up much later as a confusing, unrelated error (missing font
+ * roles, output written to the wrong place, a palette that generates
+ * nothing). Catching it here instead gives a direct fix.
  */
-const LEGACY_TOP_LEVEL_FIELDS: Record<string, string> = {
-  outDir: 'output.dir',
-  utilities: 'output.utilities',
-  fontRoles: 'appFonts.fontRoles',
+const LEGACY_TOP_LEVEL_FIELDS: Record<string, { to: string; since: string }> = {
+  outDir: { to: 'output.dir', since: '1.0.0-beta.5' },
+  utilities: { to: 'output.utilities', since: '1.0.0-beta.5' },
+  fontRoles: { to: 'appFonts.fontRoles', since: '1.0.0-beta.5' },
+  defaultScheme: { to: 'colorSetup.defaultScheme', since: '1.0.0-beta.6' },
+  baseColorTokens: { to: 'colorSetup.baseColorTokens', since: '1.0.0-beta.6' },
+  customColorTokens: { to: 'colorSetup.customColorTokens', since: '1.0.0-beta.6' },
+  semanticColorAliases: { to: 'colorSetup.semanticColorAliases', since: '1.0.0-beta.6' },
 }
 
 const assertNoLegacyFields = (cfg: TrimscaleConfig): void => {
-  for (const [oldField, newPath] of Object.entries(LEGACY_TOP_LEVEL_FIELDS)) {
+  for (const [oldField, { to, since }] of Object.entries(LEGACY_TOP_LEVEL_FIELDS)) {
     if (oldField in cfg) {
       throw new Error(
-        `\`${oldField}\` at the top level of trimscale.config.ts has moved to \`${newPath}\` (as of 1.0.0-beta.5). Update your config and re-run \`npx trimscale-css generate\`.`,
+        `\`${oldField}\` at the top level of trimscale.config.ts has moved to \`${to}\` (as of ${since}). Update your config and re-run \`npx trimscale-css generate\`.`,
       )
     }
   }
@@ -84,18 +88,32 @@ const assertRootFontSize = (cfg: TrimscaleConfig): void => {
   }
 }
 
+/** Whether a `colorSetup` holds any token at all, across the base palette and the custom ones. Aliases are not counted: an alias resolves against a token, so it can't be the only thing a palette consists of. */
+const hasAnyColorToken = (colors: NonNullable<TrimscaleConfig['colorSetup']>): boolean =>
+  Object.keys(colors.baseColorTokens?.tokens ?? {}).length > 0 ||
+  Object.values(colors.customColorTokens ?? {}).some((map) => Object.keys(map.tokens ?? {}).length > 0)
+
 /**
- * `undefined` and `{ families: {}, ... }` both mean "no fonts configured",
- * but only one of them short-circuits `computeFontData` and every other
- * `cfg.appFonts` reader downstream. Collapsing the second into the first
- * here means nothing past this point has to check both.
+ * `undefined` and an empty axis both mean "not configured", but only one of
+ * them short-circuits the readers downstream. Collapsing the second into the
+ * first here means nothing past this point has to check both:
+ * `computeFontData` and every other `cfg.appFonts` reader for fonts, the two
+ * color warnings and the bridge's color arguments for colors.
  */
 const normalizeConfig = (cfg: TrimscaleConfig): TrimscaleConfig => {
-  if (cfg.appFonts && Object.keys(cfg.appFonts.families).length === 0) {
-    const { appFonts, ...rest } = cfg
-    return rest
+  let normalized = cfg
+
+  if (normalized.appFonts && Object.keys(normalized.appFonts.families).length === 0) {
+    const { appFonts, ...rest } = normalized
+    normalized = rest
   }
-  return cfg
+
+  if (normalized.colorSetup && !hasAnyColorToken(normalized.colorSetup)) {
+    const { colorSetup, ...rest } = normalized
+    normalized = rest
+  }
+
+  return normalized
 }
 
 /**

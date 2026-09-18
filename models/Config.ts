@@ -343,6 +343,20 @@ export type SemanticAlias = {
 /** Map of semantic alias name to its `SemanticAlias` definition. */
 export type SemanticColorAliases = Record<string, SemanticAlias>
 
+/**
+ * The whole color axis: which scheme backs the static fallback tier, the
+ * base palette, any extra palettes, and the semantic aliases derived from
+ * them. See `TrimscaleConfig.colorSetup` for what omitting it means.
+ */
+export type ColorSetup = {
+  defaultScheme: DefaultScheme
+  // colorUtilityClasses?: ColorUtilityProperty[]
+  baseColorTokens: ColorTokensMap
+  /** Additional named palettes beyond `baseColorTokens` (e.g. a `campaign` palette), keyed by whatever name you like. Each gets its own `@include mx.generate-color-tokens(...)` alongside the base tokens. */
+  customColorTokens?: Record<string, ColorTokensMap>
+  semanticColorAliases?: SemanticColorAliases
+}
+
 /** Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. A `false` at the top level of a section also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops. */
 export type UtilitiesConfig = {
   spacing?:
@@ -452,13 +466,15 @@ export type TrimscaleConfig = {
   dynamicLineHeight?: DynamicLineHeight
   /* Spacing */
   spacingSetup: SpacingSetup
-  /* Color */
-  defaultScheme: DefaultScheme
-  // colorUtilityClasses?: ColorUtilityProperty[]
-  baseColorTokens: ColorTokensMap
-  /** Additional named palettes beyond `baseColorTokens` (e.g. a `campaign` palette), keyed by whatever name you like. Each gets its own `@include mx.generate-color-tokens(...)` alongside the base tokens. */
-  customColorTokens?: Record<string, ColorTokensMap>
-  semanticColorAliases?: SemanticColorAliases
+  /**
+   * The color palette and everything derived from it. Optional: a config
+   * with no `colorSetup` gets nothing color-related in its output at all,
+   * no `--{prefix}-*` custom properties, no `color-scheme` declaration and
+   * no `.theme-light`/`.theme-dark` switch, while the rest of the system is
+   * unchanged. Declare `color-scheme` yourself in that case, to match
+   * whichever palette the project uses instead.
+   */
+  colorSetup?: ColorSetup
   /** Where and what `generate` writes — output directory, SCSS/CSS targets, utility-class groups, and the reset block. */
   output?: OutputConfig
 }

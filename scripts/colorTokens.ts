@@ -55,14 +55,17 @@ const parseOklchLightness = (oklch: string): number | null => {
  *
  * This belongs here rather than in the SCSS because only `generate` can name
  * the offending field. By the time Sass sees it, it's a map of values, not
- * `semanticColorAliases.textMuted.lightnessMultiplier`.
+ * `colorSetup.semanticColorAliases.textMuted.lightnessMultiplier`.
  */
 export const warnAboutClampedAliases = (cfg: TrimscaleConfig): void => {
-  for (const [aliasName, alias] of Object.entries(cfg.semanticColorAliases ?? {})) {
+  const colors = cfg.colorSetup
+  if (!colors) return
+
+  for (const [aliasName, alias] of Object.entries(colors.semanticColorAliases ?? {})) {
     const tokens =
       !alias.tokenMap || alias.tokenMap === 'baseColorTokens'
-        ? cfg.baseColorTokens.tokens
-        : cfg.customColorTokens?.[alias.tokenMap]?.tokens
+        ? colors.baseColorTokens.tokens
+        : colors.customColorTokens?.[alias.tokenMap]?.tokens
     const token = tokens?.[alias.token]
 
     if (!token) continue
@@ -73,7 +76,7 @@ export const warnAboutClampedAliases = (cfg: TrimscaleConfig): void => {
     const negativeChroma = MODES.filter((mode) => multiplierFor(alias.chromaMultiplier, mode) < 0)
     if (negativeChroma.length > 0) {
       console.warn(
-        `⚠ semanticColorAliases.${aliasName}.chromaMultiplier is negative for ${negativeChroma.join(' and ')}, which clamps to 0 and leaves the color gray.`,
+        `⚠ colorSetup.semanticColorAliases.${aliasName}.chromaMultiplier is negative for ${negativeChroma.join(' and ')}, which clamps to 0 and leaves the color gray.`,
       )
     }
 
@@ -90,7 +93,7 @@ export const warnAboutClampedAliases = (cfg: TrimscaleConfig): void => {
 
     if (overshoots.length > 0) {
       console.warn(
-        `⚠ semanticColorAliases.${aliasName}.lightnessMultiplier takes "${alias.token}" outside OKLCH's 0-100% lightness: ${overshoots.join(', ')}. Lower the multiplier, or start from a different token.`,
+        `⚠ colorSetup.semanticColorAliases.${aliasName}.lightnessMultiplier takes "${alias.token}" outside OKLCH's 0-100% lightness: ${overshoots.join(', ')}. Lower the multiplier, or start from a different token.`,
       )
     }
   }
@@ -119,10 +122,13 @@ const LEGACY_SRGB_COLOR = /^(#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|(rgba?|hsl
  * it came from is gone.
  */
 export const warnAboutFallbackColors = (cfg: TrimscaleConfig): void => {
+  const colors = cfg.colorSetup
+  if (!colors) return
+
   const maps: [string, ColorTokensMap][] = [
-    ['baseColorTokens', cfg.baseColorTokens],
-    ...Object.entries(cfg.customColorTokens ?? {}).map(
-      ([name, map]) => [`customColorTokens.${name}`, map] as [string, ColorTokensMap],
+    ['colorSetup.baseColorTokens', colors.baseColorTokens],
+    ...Object.entries(colors.customColorTokens ?? {}).map(
+      ([name, map]) => [`colorSetup.customColorTokens.${name}`, map] as [string, ColorTokensMap],
     ),
   ]
 
@@ -141,10 +147,10 @@ export const warnAboutFallbackColors = (cfg: TrimscaleConfig): void => {
   )
 }
 
-/** Builds a `(prefix:, tokens:)` map from a single `ColorTokensMap`. */
-export const colorTokensMapTree = (data: ColorTokensMap): ScssTree => ({
-  prefix: data.prefix,
-  tokens: kebabKeys(data.tokens, colorTokenTree),
+/** Builds a `(prefix:, tokens:)` map from a single `ColorTokensMap`. An absent map (a config without `colorSetup`) still gets the shape, with no tokens in it: `tokens/_color-tokens.scss` reads `prefix` before it looks at anything else. */
+export const colorTokensMapTree = (data: ColorTokensMap | undefined): ScssTree => ({
+  prefix: data?.prefix ?? 'color',
+  tokens: kebabKeys(data?.tokens ?? {}, colorTokenTree),
 })
 
 /** Builds the `$custom-color-tokens` map-of-maps from `cfg.customColorTokens`. Nests {@link colorTokensMapTree} one level deeper rather than repeating it, which is what the depth-carrying version had to do. */
