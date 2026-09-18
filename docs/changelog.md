@@ -68,6 +68,23 @@ A percentage rather than px, so the root still scales with the reader's own brow
 
 → [full-config-reference.md#rootfontsize](full-config-reference.md#rootfontsize)
 
+**The one-off fluid function is called `fn.fluid-value`.**
+
+| Was                           | Now              |
+| ----------------------------- | ---------------- |
+| `fn.get-fluid-clamp`          | `fn.fluid-value` |
+| `$value-key` (third argument) | `$unit-key`      |
+
+Neither half of the old name describes it. `get-` reads as a lookup in Sass, and `fn.get-fluid-clamp(8, 16, 'vwx', 'max')` emits `max()`, not `clamp()`. The new name matches the other three fluid functions, which carry no prefix and take `$unit-key`.
+
+What it means: rename the calls. The arguments, their order and the output are unchanged, so a call that passed the unit positionally needs nothing else. The three scale-aware functions are wrappers around it, which is what makes all four round identically: `fn.fluid-value` rounds its rem values where `fn.get-fluid-clamp` left them at full precision. In trimscale's own output that moves one number, `--unit-macro`'s `0.1666666667rem` to `0.1667rem`, which the token's `round(…, 1px)` absorbs. In your own code it shortens the result by a few characters and shifts nothing visible.
+
+→ [abstracts.md](abstracts.md)
+
+### Fixed
+
+- `fluidScale.precision` had no effect on anything. It is required in the config, documented as the decimal places in generated `clamp()` values and written into the bridge file, but nothing read it: every fluid function rounded to a hardcoded 4. It governs all four now, so a config that set anything other than `4` gets different decimals after upgrading, and `--fs-*`, `--space-*` and `--unit-macro` move with it. `4` stays the default and the value to keep: rem at four decimals is already 0.0016px, and fewer decimals round the clamp endpoints rather than just the slope.
+
 ## 1.0.0-beta.5
 
 Most of the breaking changes are config fields that moved, and `generate` stops with the new name for every one of them. Start by running it.

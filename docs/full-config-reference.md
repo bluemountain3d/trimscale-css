@@ -156,7 +156,7 @@ The fluid `clamp()` boundaries every fluid font-size and `--unit-macro` interpol
 | `minWidth`, `maxWidth`         | `number`                              |   Yes    | Viewport width range (px) the clamp interpolates across.                                |
 | `minFontSize`, `maxFontSize`   | `number`                              |   Yes    | Base font-size range (px) at those widths.                                              |
 | `minTypeScale`, `maxTypeScale` | `TypeScaleNames` or `TypeScaleValues` |   Yes    | Modular-scale ratio at each end, a name (`'Minor Third'`) or its numeric value (`1.2`). |
-| `precision`                    | integer `1`–`6`                       |   Yes    | Decimal places in generated clamp() values.                                             |
+| `precision`                    | integer `1`–`6`                       |   Yes    | Decimal places in every generated `clamp()`, `max()` and flat rem value. `4` is the setting to keep: rem at four decimals is already 0.0016px, and fewer decimals round the clamp endpoints, not just the slope. |
 
 → Full guide: [customizing-type-scale.md](customizing-type-scale.md)
 

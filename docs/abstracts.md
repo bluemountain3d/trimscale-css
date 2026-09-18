@@ -10,23 +10,23 @@ Import via:
 @use 'abstracts/functions' as fn;
 ```
 
-### `fn.get-fluid-clamp($min-size, $max-size, $value-key, $type)`
+### `fn.fluid-value($min-size, $max-size, $unit-key, $type)`
 
-Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range, the general-purpose building block the other fluid functions below are built on. Unlike `fluid-spacing`/`fluid-space-step`, it isn't pinned to the spacing grid, so it's useful for one-off fluid values (e.g. a component's own min/max size). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`.
+Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range. The three functions below are wrappers around it, so this is the one to call for a one-off value that sits on neither the type scale nor the spacing grid (a component's own min/max size, say). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`.
 
-Takes the same `$type` as `fn.fluid-font-size` below: `'max'` drops the upper bound, so a one-off value can keep growing past `fluidScale.maxWidth` the way an uncapped type step does.
+`$type: 'max'` drops the upper bound, so the value keeps growing past `fluidScale.maxWidth` the way an uncapped type step does. `'clamp'` and `'max'` are the only accepted values, and all four fluid functions stop the build on anything else rather than returning an empty value. All four round their output to [`fluidScale.precision`](full-config-reference.md#fluidscale) decimal places.
 
 ```scss
---custom-size: #{fn.get-fluid-clamp(4, 8)}; // clamp() between 4px and 8px
---icon-size: #{fn.get-fluid-clamp(24, 32, 'vw')}; // same, using plain vw
---gutter: #{fn.get-fluid-clamp(8, 16, 'vwx', 'max')}; // max(), no upper bound
+--custom-size: #{fn.fluid-value(4, 8)}; // clamp() between 4px and 8px
+--icon-size: #{fn.fluid-value(24, 32, 'vw')}; // same, using plain vw
+--gutter: #{fn.fluid-value(8, 16, 'vwx', 'max')}; // max(), no upper bound
 ```
 
 This is also what the `--unit-macro` spacing token is built from, see [design-tokens.md](design-tokens.md).
 
 ### `fn.fluid-font-size($level, $unit-key, $type)`
 
-Returns a `clamp()` value for a type step on the modular scale. Pass `$type: 'max'` to drop the upper bound instead, so the value keeps growing linearly past `fluidScale.maxWidth` rather than capping there (used for the `uncapped` option in `modularTypographicScale`, see [customizing-type-scale.md](customizing-type-scale.md)). `'clamp'` and `'max'` are the only accepted values, and all four fluid functions stop the build on anything else rather than returning an empty value.
+Returns a `clamp()` value for a type step on the modular scale. Pass `$type: 'max'` to drop the upper bound instead, so the value keeps growing linearly past `fluidScale.maxWidth` rather than capping there (used for the `uncapped` option in `modularTypographicScale`, see [customizing-type-scale.md](customizing-type-scale.md)).
 
 ```scss
 font-size: fn.fluid-font-size(2); // 2 steps up from base, uses vwx unit

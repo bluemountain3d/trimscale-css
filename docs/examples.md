@@ -161,7 +161,7 @@ Depends on the package's own `abstracts/functions`/`abstracts/variables` (alread
     // keeping --overshoot the wider of the two at any viewport width.
     // Mutually exclusive with --boxed/--narrow (all three set max-width).
     &--overshoot {
-      padding-inline: round(#{fn.get-fluid-clamp(
+      padding-inline: round(#{fn.fluid-value(
         math.round(math.max(map.get(var.$fluid-scale, "min-width") * 0.03125, 12)),
         math.round(map.get(var.$fluid-scale, "max-width") * 0.03125)
       )}, 1px);
@@ -171,7 +171,7 @@ Depends on the package's own `abstracts/functions`/`abstracts/variables` (alread
     // Narrower max-width with more generous padding than --overshoot.
     // Mutually exclusive with --overshoot/--narrow.
     &--boxed {
-      padding-inline: round(#{fn.get-fluid-clamp(
+      padding-inline: round(#{fn.fluid-value(
         math.round(math.max(map.get(var.$fluid-scale, "min-width") * 0.05555, 20)),
         math.round(map.get(var.$fluid-scale, "max-width") * 0.08333)
       )}, 1px);
@@ -181,7 +181,7 @@ Depends on the package's own `abstracts/functions`/`abstracts/variables` (alread
     // Caps max-width well below the viewport, no padding of its own.
     // Mutually exclusive with --overshoot/--boxed.
     &--narrow {
-      max-width: round(#{fn.get-fluid-clamp(
+      max-width: round(#{fn.fluid-value(
         math.round(map.get(var.$fluid-scale, "min-width") * 0.77778),
         math.round(map.get(var.$fluid-scale, "max-width") * 0.66667)
       )}, 1px);

@@ -68,6 +68,36 @@ All notable changes to this project are documented in this file.
   print the same rem string under any root size.
 - `_mx_breakpoints.scss` drops the explicit second argument to `px-to-rem`,
   which is now the same value as the default.
+- **Breaking:** `get-fluid-clamp` is renamed `fluid-value`, and its
+  `$value-key` argument `$unit-key`, matching the other three. The four share
+  one implementation: `fluid-value` holds the interpolation, the redundancy
+  check, the px-to-rem conversion and the rounding, and `fluid-font-size`,
+  `fluid-spacing` and `fluid-space-step` compute their own min/max pixel pair
+  and delegate. `_fn_fluid-typography-and-spacing.scss` goes from 128 to 73
+  lines of code. The three wrappers are byte-identical across eleven call
+  shapes (levels 2/0/-1, `vw`/`cqw` units, `'max'`, and the degenerate
+  `fluid-spacing(0)`); the only diff in the package's own output is
+  `--unit-macro`'s intercept, `0.1666666667rem` → `0.1667rem`, absorbed by the
+  token's `round(nearest, …, 1px)`.
+- `_validate-fluid-type` drops its `$fn` parameter. It existed to name the
+  calling function in the message, which Sass's stack trace already does: an
+  invalid `$type` on `fluid-space-step` prints a `fluid-value()` frame and a
+  `fluid-space-step()` frame above the root stylesheet. With validation in one
+  place a fifth fluid function cannot forget it.
+- `fluid-value`'s redundant-input branch returns a Sass number instead of an
+  interpolated string, which is what `get-fluid-clamp` did and the other three
+  did not. It prints identically and survives arithmetic.
+
+### Fixed
+
+- `fluidScale.precision` was read by nothing. `fluidScaleTree` is
+  `kebabKeys(data)`, so the key rode into `$fluid-scale` with the rest of the
+  map and looked wired, while all four functions used `round()`'s hardcoded
+  default of 4. `fluid-value` reads it once per call. Confirmed by compiling
+  `tokens` through an entry that configures `abstracts/variables/fluid-scale`:
+  byte-identical at precision 4 and 2 before, 19356 vs 19264 bytes after.
+  Compiling `@use "tokens"` on its own tests the `!default` map and not the
+  bridge, since nothing inside `styles/` loads `styles/generated/_index.scss`.
 
 ### Internal
 
