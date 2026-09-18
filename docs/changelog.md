@@ -68,6 +68,36 @@ A percentage rather than px, so the root still scales with the reader's own brow
 
 → [full-config-reference.md#rootfontsize](full-config-reference.md#rootfontsize)
 
+**The one-off fluid function is called `fn.fluid-value`.**
+
+| Was                           | Now              |
+| ----------------------------- | ---------------- |
+| `fn.get-fluid-clamp`          | `fn.fluid-value` |
+| `$value-key` (third argument) | `$unit-key`      |
+
+Neither half of the old name describes it. `get-` reads as a lookup in Sass, and `fn.get-fluid-clamp(8, 16, 'vwx', 'max')` emits `max()`, not `clamp()`. The new name matches the other three fluid functions, which carry no prefix and take `$unit-key`.
+
+What it means: rename the calls. The arguments, their order and the output are unchanged, so a call that passed the unit positionally needs nothing else. The three scale-aware functions are wrappers around it, which is what makes all four round identically: `fn.fluid-value` rounds its rem values where `fn.get-fluid-clamp` left them at full precision. In trimscale's own output that moves one number, `--unit-macro`'s `0.1666666667rem` to `0.1667rem`, which the token's `round(…, 1px)` absorbs. In your own code it shortens the result by a few characters and shifts nothing visible.
+
+→ [abstracts.md](abstracts.md)
+
+**`fn.fluid-spacing` is gone, and a token replaces it.** It returned a fluid multiple of `fluidScale`'s base font-size, which is what `spacingSetup`'s `'coupled'` approach builds `--space-*` from. Under `'independent'`, the default, the tokens come from `--unit-micro` and `--unit-macro` instead, so the function's result matched no token in your output: `fn.fluid-spacing(4)` ran 16px to 20px where `--space-4` is a static 16px.
+
+What it means: write the multiple in CSS instead. `--fluid-base` is a token, so this needs no Sass and works the same in a project consuming the compiled CSS:
+
+```css
+/* was: padding: fn.fluid-spacing(12); */
+padding: calc(var(--fluid-base) * 3);
+```
+
+The divisor is `spacingSetup.baseGridSize`, so a level of 12 on the default grid of 4 is three times the base. For a value that isn't a multiple of the base, use `fn.fluid-value` with the two pixel sizes you want.
+
+`fn.fluid-space-step` stays. It reads its levels the same way, so under `'independent'` its result matches no `--space-*` token either, and [abstracts.md](abstracts.md) now says so. It is kept because a named, scale-anchored range is coming to the config and needs exactly that function, rewritten against the token model your config actually uses.
+
+### Fixed
+
+- `fluidScale.precision` had no effect on anything. It is required in the config, documented as the decimal places in generated `clamp()` values and written into the bridge file, but nothing read it: every fluid function rounded to a hardcoded 4. It governs all four now, so a config that set anything other than `4` gets different decimals after upgrading, and `--fs-*`, `--space-*` and `--unit-macro` move with it. `4` stays the default and the value to keep: rem at four decimals is already 0.0016px, and fewer decimals round the clamp endpoints rather than just the slope.
+
 ## 1.0.0-beta.5
 
 Most of the breaking changes are config fields that moved, and `generate` stops with the new name for every one of them. Start by running it.

@@ -88,7 +88,7 @@
       /// Base spacing unit for large steps, an independent $base-grid-size → $macro-range-max fluid clamp
       --unit-macro: round(
                       nearest,
-                      #{fn.get-fluid-clamp(var.$base-grid-size, var.$macro-range-max, "vwx")},
+                      #{fn.fluid-value(var.$base-grid-size, var.$macro-range-max, "vwx")},
                       1px
                     );
     }
