@@ -140,6 +140,7 @@ The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`,
 | [adding-a-font.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/adding-a-font.md)                     | Adding a font and assigning roles              |
 | [using-with-nextjs.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/using-with-nextjs.md)             | `next/font` integration                        |
 | [why-scss.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/why-scss.md)                               | What SCSS buys you, and the standalone CSS alternative |
+| [dependencies.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/dependencies.md)                       | What installs, why, and what supply-chain scanners flag |
 
 ---
 
