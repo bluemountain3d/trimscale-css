@@ -233,15 +233,22 @@ How `--space-*` tokens grow across viewport widths. A discriminated union on `ap
 
 → Full guide: [customizing-spacing.md](customizing-spacing.md)
 
-## `defaultScheme`
+## `colorSetup`
 
-| Property        | Type                  | Required | Description                                                                                            |
-| --------------- | --------------------- | :------: | ------------------------------------------------------------------------------------------------------ |
-| `defaultScheme` | `'light'` or `'dark'` |   Yes    | Which scheme backs the static hex fallback tier for browsers without `oklch()`/`light-dark()` support. |
+Optional. The color palette and everything derived from it. Omit the whole field and the output holds nothing color-related: no `--{prefix}-*` custom properties, no `color-scheme` declaration, and no `.theme-light`/`.theme-dark` switch. Everything else (type scale, spacing, breakpoints, leading trim, utility classes) is unaffected. Declare `color-scheme` yourself in that case, matching the palette you use instead: the declaration tells the browser how to render form controls, scrollbars and the canvas, so it has to agree with the colors actually on the page, and `.theme-light`/`.theme-dark` are the switch for trimscale's own tokens and mean nothing without them.
+
+When `colorSetup` is present, `defaultScheme` and `baseColorTokens` are both required.
+
+| Property                     | Type                             | Required | Description                                                                                            |
+| ---------------------------- | -------------------------------- | :------: | ------------------------------------------------------------------------------------------------------ |
+| `colorSetup.defaultScheme`   | `'light'` or `'dark'`            |   Yes    | Which scheme backs the static hex fallback tier for browsers without `oklch()`/`light-dark()` support. |
+| `colorSetup.baseColorTokens` | `ColorTokensMap`                 |   Yes    | The base palette, see below.                                                                          |
+| `colorSetup.customColorTokens` | `Record<string, ColorTokensMap>` |    No    | Extra palettes, see below.                                                                            |
+| `colorSetup.semanticColorAliases` | `SemanticColorAliases`      |    No    | Names derived from existing tokens, see below.                                                        |
 
 → Full guide: [design-tokens.md#color-tokens](design-tokens.md#color-tokens)
 
-## `baseColorTokens`
+### `colorSetup.baseColorTokens`
 
 The base color palette, generates `--{prefix}-{name}` custom properties.
 
@@ -254,7 +261,7 @@ The base color palette, generates `--{prefix}-{name}` custom properties.
 
 → Full guide: [design-tokens.md#color-tokens](design-tokens.md#color-tokens)
 
-## `customColorTokens`
+### `colorSetup.customColorTokens`
 
 Optional. Any number of extra palettes alongside `baseColorTokens`, keyed by whatever name you like (e.g. `campaign`). Not present in the starter template, add it yourself if you need extra palettes.
 
@@ -266,7 +273,7 @@ Referenced in `semanticColorAliases` via `tokenMap`, using the same name.
 
 → Full guide: [design-tokens.md#color-tokens](design-tokens.md#color-tokens)
 
-## `semanticColorAliases`
+### `colorSetup.semanticColorAliases`
 
 Optional. Semantic names (e.g. `'text-muted'`) aliasing a token from `baseColorTokens` or a `customColorTokens` palette.
 
