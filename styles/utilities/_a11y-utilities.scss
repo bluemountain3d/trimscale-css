@@ -74,14 +74,21 @@
     // ============================================================================
 
     /// Common skip link styling
+    /// Black on white, as literal values rather than color tokens: token
+    /// names come from the project's own `colorSetup`, so `--color-surface-base`
+    /// and `--color-text-primary` are a guess at someone else's naming, the
+    /// same guess the absent `.text-color-*` classes exist to avoid (see
+    /// _typography-utilities.scss). The pair keeps its contrast in both
+    /// schemes, and a project that wants the link themed restyles the class
+    /// in its own CSS.
     .skip-link {
       position: absolute;
       top: 0;
       left: 0;
       z-index: var(--z-skip-link, 9999);
       padding: 1rem 2rem;
-      background: var(--color-surface-base, #fff);
-      color: var(--color-text-primary, #000);
+      background: #fff;
+      color: #000;
       text-decoration: none;
       transform: translateY(-100%);
       transition: transform 0.2s;
