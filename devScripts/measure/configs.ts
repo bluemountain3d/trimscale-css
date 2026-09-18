@@ -44,6 +44,7 @@ const ONLY_TRIM = {
 } as const
 
 const { appFonts: _appFonts, ...repoConfigWithoutFonts } = repoConfig
+const { colorSetup: _colorSetup, ...repoConfigWithoutColors } = repoConfig
 
 export const variants: Variant[] = [
   {
@@ -60,6 +61,11 @@ export const variants: Variant[] = [
     name: 'trim only',
     note: 'fonts and .trim-text-*, no other utility group',
     config: { ...repoConfig, output: { ...repoConfig.output, utilities: ONLY_TRIM } },
+  },
+  {
+    name: 'no colors',
+    note: 'everything else on, no colorSetup: no color tokens, no color-scheme',
+    config: repoConfigWithoutColors,
   },
   {
     name: 'floor',
@@ -104,13 +110,17 @@ const withTwoRoles = (): TrimscaleConfig => {
  * actually costs.
  */
 const withFewerCustomColors = (keep: number): TrimscaleConfig => {
-  const campaign = repoConfig.customColorTokens?.campaign
-  if (!campaign) return repoConfig
+  const colors = repoConfig.colorSetup
+  const campaign = colors?.customColorTokens?.campaign
+  if (!colors || !campaign) return repoConfig
   return {
     ...repoConfig,
-    customColorTokens: {
-      ...repoConfig.customColorTokens,
-      campaign: { ...campaign, tokens: Object.fromEntries(Object.entries(campaign.tokens).slice(0, keep)) },
+    colorSetup: {
+      ...colors,
+      customColorTokens: {
+        ...colors.customColorTokens,
+        campaign: { ...campaign, tokens: Object.fromEntries(Object.entries(campaign.tokens).slice(0, keep)) },
+      },
     },
   }
 }
