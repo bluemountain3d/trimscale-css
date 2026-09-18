@@ -19,6 +19,38 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Breaking:** `defaultScheme`, `baseColorTokens`, `customColorTokens` and
+  `semanticColorAliases` move from the top level of `TrimscaleConfig` into a
+  new `colorSetup` group, the last axis that was still spread across the top
+  level. `colorSetup` is optional in full, on the `appFonts` model: a config
+  that omits it gets no color output at all rather than fewer tokens. The
+  four old paths are in `LEGACY_TOP_LEVEL_FIELDS`, which now carries a
+  release per field instead of hardcoding beta.5 in the message.
+  `loadConfig`'s `normalizeConfig` also collapses a `colorSetup` holding no
+  token in any palette to `undefined`, so nothing downstream has to check
+  both spellings of "no colors". SCSS-side names (`$base-color-tokens`,
+  `mx.generate-color-tokens`) are untouched, they have nothing to do with
+  how the config groups its keys.
+- The bridge emits the four color `with()` arguments unconditionally, with
+  empty maps when `colorSetup` is absent, because
+  `abstracts/variables/_colors.scss` declares a placeholder palette as its
+  `!default`: omitting the arguments would emit that palette rather than
+  nothing. Those empty maps are also the off switch itself. A new derived
+  `$color-tokens-enabled` in `_colors.scss` (no `!default`, absent from
+  `trimscale.scss`'s `show` list, so internal) is true as soon as one palette
+  holds a token, and `tokens/_color-tokens.scss` is skipped in full when it
+  is false. That takes `color-scheme` and the `.theme-light`/`.theme-dark`
+  block with it, which is the point: the declaration has to match the palette
+  in use, and a project supplying its own declares it itself. Deriving it
+  rather than passing a flag keeps it from ever disagreeing with the maps it
+  describes.
+- **Breaking:** `.skip-link` sets `background: #fff` and `color: #000` as
+  literals instead of `var(--color-surface-base, #fff)` /
+  `var(--color-text-primary, #000)`. Token names come from the project's own
+  `colorSetup`, so the old values resolved only for a config that happened to
+  use those two names, the same guess the absent `.text-color-*` classes
+  exist to avoid. It was also the one place left that put `--color-` in the
+  output of a config with no colors at all.
 - `$base-font-size` is renamed `$root-font-size` and moves from
   `abstracts/variables/_breakpoints.scss` to a new leaf module,
   `abstracts/variables/_root.scss`, which must never gain a `@use`:
@@ -39,6 +71,10 @@ All notable changes to this project are documented in this file.
 
 ### Internal
 
+- `devScripts/measure/configs.ts` gains a `no colors` variant (the repo
+  config minus `colorSetup`), so the on/off difference is measurable with
+  `pnpm measure` rather than argued about. Compiled expanded, the repo's own
+  palette accounts for 6851 B.
 - `biome check` is clean across all 40 files; `check` and `format` had
   disagreed on nine. Import sorting, `biome.json` glob normalisation and
   `'path'` → `'node:path'` are mechanical. Two are not:

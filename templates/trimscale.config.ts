@@ -23,7 +23,8 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  *   → docs/design-tokens.md#typography-tokens
  * - spacingSetup
  *   → docs/customizing-spacing.md
- * - defaultScheme, baseColorTokens, customColorTokens, semanticColorAliases
+ * - colorSetup (defaultScheme, baseColorTokens, customColorTokens,
+ *   semanticColorAliases)
  *   → docs/design-tokens.md#color-tokens
  *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
@@ -321,47 +322,56 @@ const config: TrimscaleConfig = {
   },
 
   /**
-   * Which scheme (light/dark) backs the static fallback tier for browsers
-   * without oklch()/light-dark() support.
-   * → docs/full-config-reference.md#defaultscheme
+   * The color palette and everything derived from it. Optional as a whole:
+   * remove colorSetup and the output holds nothing color-related, not even
+   * color-scheme, which you then declare yourself to match whichever palette
+   * you use instead.
+   * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#colorsetup
    */
-  defaultScheme: 'light',
+  colorSetup: {
+    /**
+     * Which scheme (light/dark) backs the static fallback tier for browsers
+     * without oklch()/light-dark() support.
+     * → docs/full-config-reference.md#colorsetup
+     */
+    defaultScheme: 'light',
 
-  /**
-   * Base color palette. Each token generates a CSS custom property
-   * (--{prefix}-{name}) with light/dark oklch/hex values and an optional
-   * shared opacity. Referenced by name in semanticColorAliases.
-   * → docs/full-config-reference.md#basecolortokens
-   */
-  baseColorTokens: {
-    prefix: 'color',
-    tokens: {
-      // Placeholder palette, replace with your own.
-      surfaceBase: {
-        light: { oklch: 'oklch(0.973 0.003 264)', hex: '#f5f6f8' },
-        dark: { oklch: 'oklch(0.214 0.008 274)', hex: '#18191d' },
-      },
-      textPrimary: {
-        light: { oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23' },
-        dark: { oklch: 'oklch(0.943 0 0)', hex: '#ececec' },
+    /**
+     * Base color palette. Each token generates a CSS custom property
+     * (--{prefix}-{name}) with light/dark oklch/hex values and an optional
+     * shared opacity. Referenced by name in semanticColorAliases.
+     * → docs/full-config-reference.md#colorsetupbasecolortokens
+     */
+    baseColorTokens: {
+      prefix: 'color',
+      tokens: {
+        // Placeholder palette, replace with your own.
+        surfaceBase: {
+          light: { oklch: 'oklch(0.973 0.003 264)', hex: '#f5f6f8' },
+          dark: { oklch: 'oklch(0.214 0.008 274)', hex: '#18191d' },
+        },
+        textPrimary: {
+          light: { oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23' },
+          dark: { oklch: 'oklch(0.943 0 0)', hex: '#ececec' },
+        },
       },
     },
-  },
 
-  /**
-   * Optional. Semantic names (e.g. "text-muted") that alias a token from
-   * baseColorTokens or a tokenMap, with an optional absolute opacity plus
-   * optional lightness/chroma MULTIPLIERS (not absolute values) applied to
-   * the aliased token's existing channels (single value, or per light/dark).
-   * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#semanticcoloraliases
-   */
-  // semanticColorAliases: {
-  //   textMuted: {
-  //     token: 'textPrimary',
-  //     tokenMap: 'baseColorTokens',
-  //     opacity: 0.7,
-  //   },
-  // },
+    /**
+     * Optional. Semantic names (e.g. "text-muted") that alias a token from
+     * baseColorTokens or a tokenMap, with an optional absolute opacity plus
+     * optional lightness/chroma MULTIPLIERS (not absolute values) applied to
+     * the aliased token's existing channels (single value, or per light/dark).
+     * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#colorsetupsemanticcoloraliases
+     */
+    // semanticColorAliases: {
+    //   textMuted: {
+    //     token: 'textPrimary',
+    //     tokenMap: 'baseColorTokens',
+    //     opacity: 0.7,
+    //   },
+    // },
+  },
 }
 
 export default config

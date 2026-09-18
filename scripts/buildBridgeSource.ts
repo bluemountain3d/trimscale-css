@@ -76,12 +76,19 @@ export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFl
     setWithArg('font-weights', fontWeightsTree(cfg.fontWeights)),
     setWithArg('line-heights', lineHeightsTree(cfg.lineHeights)),
     setWithArg('dynamic-line-height', dynamicLineHeightTree(cfg.dynamicLineHeight)),
-    // Unquoted: `_color-tokens.scss` compares this against the bare idents
-    // `light`/`dark`, and a quoted "light" is not equal to either in Sass.
-    setWithArg('default-scheme', raw(cfg.defaultScheme)),
-    setWithArg('base-color-tokens', colorTokensMapTree(cfg.baseColorTokens)),
-    setWithArg('custom-color-tokens', customColorTokensTree(cfg.customColorTokens)),
-    setWithArg('semantic-color-alias-defs', semanticColorAliasDefsTree(cfg.semanticColorAliases)),
+    // Always emitted, empty palette and all: `abstracts/variables/_colors.scss`
+    // declares a placeholder palette as its `!default`, so leaving these out
+    // for a config without `colorSetup` would emit that palette instead of
+    // nothing. Empty maps are also what `$color-tokens-enabled` reads to
+    // decide that color is off, so this is the whole off switch.
+    //
+    // Unquoted scheme: `_color-tokens.scss` compares it against the bare
+    // idents `light`/`dark`, and a quoted "light" is not equal to either in
+    // Sass.
+    setWithArg('default-scheme', raw(cfg.colorSetup?.defaultScheme ?? 'light')),
+    setWithArg('base-color-tokens', colorTokensMapTree(cfg.colorSetup?.baseColorTokens)),
+    setWithArg('custom-color-tokens', customColorTokensTree(cfg.colorSetup?.customColorTokens)),
+    setWithArg('semantic-color-alias-defs', semanticColorAliasDefsTree(cfg.colorSetup?.semanticColorAliases)),
     setWithArg('base-grid-size', baseGridSize),
     ...buildSpacingArgs(spacing, baseGridSize),
     // Every flag's SCSS variable is `utilities-` plus the kebab-cased flag

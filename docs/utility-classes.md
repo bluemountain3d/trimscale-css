@@ -218,3 +218,5 @@ Screen-reader and focus utilities from `_a11y-utilities.scss`. Toggled as a whol
 ```
 
 `.skip-link` uses `z-index: var(--z-skip-link, 9999)`, no z-index scale is shipped for anything else, layering is a design-system decision outside this package's scope. Set `--z-skip-link` yourself if `9999` ever collides with something in your own stacking context.
+
+Its colors are literal, black on white, rather than color tokens. Token names come from your own `colorSetup`, so a class in the package can't reference one without guessing what you called it, which is the same reason no `.text-color-*` classes ship. The pair holds its contrast in both schemes; restyle the class in your own CSS if you want it themed.

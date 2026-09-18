@@ -96,7 +96,7 @@ There are three ways to land on a line-height, and only the last one involves ca
 
 ### `fn.get-color-token($token, $tokens, $opacity, $lightness-multiplier, $chroma-multiplier)`
 
-Looks up a color token by name and returns its `(light: (oklch:, hex:), dark: (oklch:, hex:))` structure, optionally adjusted via `color.change()` without mutating the original entry in `$tokens`. This is what `semanticColorAliases` in `trimscale.config.ts` uses under the hood: deriving a near-duplicate color (e.g. a muted text variant) from an existing token instead of hand-picking a whole new OKLCH value (see [Color Tokens](design-tokens.md#color-tokens)).
+Looks up a color token by name and returns its `(light: (oklch:, hex:), dark: (oklch:, hex:))` structure, optionally adjusted via `color.change()` without mutating the original entry in `$tokens`. This is what `colorSetup.semanticColorAliases` in `trimscale.config.ts` uses under the hood: deriving a near-duplicate color (e.g. a muted text variant) from an existing token instead of hand-picking a whole new OKLCH value (see [Color Tokens](design-tokens.md#color-tokens)).
 
 ```scss
 fn.get-color-token('bg-canvas', $tokens: var.$base-color-tokens, $opacity: 0.5);
@@ -115,7 +115,7 @@ Parameters:
 
 `$lightness-multiplier`/`$chroma-multiplier` multiply the token's _existing_ channel value, they don't set an absolute target (unlike `$opacity`), and accept a `(light:, dark:)` map because the light/dark base values aren't perceptual mirrors of each other, a flat multiplier can land differently in each mode. The return value is shaped like a single `$tokens` entry, so it feeds straight into `semanticColorAliases` or your own `mx.generate-color-tokens` call.
 
-Both multipliers are clamped to what OKLCH can hold: lightness to 0-100%, chroma to 0 and up. A multiplier that overshoots lands on white, black, or gray rather than on an unrepresentable color, and `generate` warns which `semanticColorAliases` field caused it. The returned `hex` entry is the plain-color tier, gamut-mapped into sRGB and rounded to 8-bit channels so it works in browsers with no `oklch()` support; the `oklch` entry keeps the full precision and the wide-gamut value.
+Both multipliers are clamped to what OKLCH can hold: lightness to 0-100%, chroma to 0 and up. A multiplier that overshoots lands on white, black, or gray rather than on an unrepresentable color, and `generate` warns which `colorSetup.semanticColorAliases` field caused it. The returned `hex` entry is the plain-color tier, gamut-mapped into sRGB and rounded to 8-bit channels so it works in browsers with no `oklch()` support; the `oklch` entry keeps the full precision and the wide-gamut value.
 
 ## Mixins
 

@@ -10,7 +10,44 @@ Re-run `generate` after upgrading, as after any version bump: a release can chan
 npx trimscale-css generate
 ```
 
+### Fields that moved
+
+| Was                    | Now                               |
+| ---------------------- | --------------------------------- |
+| `defaultScheme`        | `colorSetup.defaultScheme`        |
+| `baseColorTokens`      | `colorSetup.baseColorTokens`      |
+| `customColorTokens`    | `colorSetup.customColorTokens`    |
+| `semanticColorAliases` | `colorSetup.semanticColorAliases` |
+
+Four keys moving one level in, nothing else about them changes. Color was the last axis still spread across the top level while every other one (`appFonts`, `fluidScale`, `spacingSetup`, `output`) was grouped. `generate` stops and names the new path for each, one at a time, so you can work through it without this table:
+
+```ts
+colorSetup: {
+  defaultScheme: 'light',
+  baseColorTokens: {
+    /* unchanged */
+  },
+},
+```
+
 ### Changes worth a look
+
+**Colors are optional now.** Omit `colorSetup` entirely and the output holds nothing color-related: no `--{prefix}-*` custom properties, no `color-scheme` declaration, and no `.theme-light`/`.theme-dark` rules. For a project whose colors come from somewhere else, that was previously a palette you had to fill in to get `generate` to run at all, and then had to ignore.
+
+Two things become yours when you leave it out. Declare `color-scheme` on `:root` yourself, matching the palette you do ship: it governs how the browser renders form controls, scrollbars and the canvas, so a `light dark` left behind over a light-only palette renders dark controls on light surfaces. And the theme switch goes with it, since `.theme-light`/`.theme-dark` only ever forced `color-scheme` for trimscale's own `light-dark()` tokens.
+
+The rest of the system is unchanged either way: type scale, spacing, breakpoints, leading trim and every utility class work without a single color token.
+
+→ [design-tokens.md#turning-colors-off](design-tokens.md#turning-colors-off)
+
+**`.skip-link` is black on white, in literal values.** It read `var(--color-surface-base, #fff)` and `var(--color-text-primary, #000)`, which only ever resolved for a config that happened to use those two token names, and a project is free to name its tokens anything. If your palette does use them and you want the link themed, restyle the class in your own CSS:
+
+```css
+.skip-link {
+  background: var(--color-surface-base);
+  color: var(--color-text-primary);
+}
+```
 
 **`rootFontSize`, for projects whose root font size isn't the browser's 16px.** Every px value in the config is converted to rem against this number: the breakpoint map, `fluidScale`'s font sizes, the spacing grid, and `fn.px-to-rem` / `fn.rem-to-px` when you call them yourself.
 
