@@ -1,0 +1,52 @@
+@use "abstracts/mixins" as mx;
+
+.leading-trim-demo {
+  margin-block: max(1.5em, var(--grid-gap));
+  
+  display: grid;
+  gap: var(--grid-gap);
+
+  @include mx.and-up("tablet") {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  &__trim, &__no-trim {
+    overflow: clip;
+    padding-block: 0.5em;
+    display: grid;
+    align-content: center;
+    
+    background-color: oklch(from var(--color-details) l c h / 0.25);
+    background-image: linear-gradient(-45deg,
+      oklch(from var(--color-details) l c h / 0.25) 0 5%,
+      transparent 0 50%,
+      oklch(from var(--color-details) l c h / 0.25) 0 55%,
+      transparent 0
+    );
+    background-size: 10px 10px;
+
+    > h3, > p {
+      background-color: var(--color-surface-elevated);
+      padding-inline: var(--space-3);
+      text-wrap: pretty;
+    }
+
+    > h3 {
+      font-family: var(--font-family-heading);
+      font-size: var(--heading-3);
+      font-weight: var(--font-weight-medium);
+    }
+    > p {
+      font-size: var(--text-base);
+    }
+  }
+
+  &__trim {
+    gap: 1.5em;
+  }
+
+  &__no-trim {
+    gap: 1em;
+  }
+
+}

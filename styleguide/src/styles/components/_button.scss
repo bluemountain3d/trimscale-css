@@ -1,0 +1,79 @@
+@use "abstracts/mixins" as mx;
+
+@property --_highlight {
+  syntax: "<number>";
+  initial-value: 0;
+  inherits: true;
+}
+
+@layer components {
+
+  .button {
+    font-size: var(--text-sm);
+    padding: 1em 2em;
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    text-align: center;
+
+    transition:
+      color 0.2s,
+      border-color 0.2s,
+      box-shadow 0.2s,
+      background-color 0.2s
+    ;
+
+    &__text {
+      @include mx.font-setup(
+        $font: "ui",
+        $font-size: 1em,
+        $font-weight: var(--font-weight-medium)
+      );
+      letter-spacing: 0.05em;
+    }
+
+    &--primary {
+      user-select: none;
+      --_highlight: 0.1;
+      border: 1px solid var(--color-details);
+      background-color: transparent;
+      // box-shadow: 
+      //   inset 0 0.15em 0.3em oklch(1 0 0 / var(--_highlight)),
+      //   inset 0 -0.1em 0.1em oklch(1 0 0 / var(--_highlight)),
+      // ;
+
+      &:hover {
+        border-color: var(--color-accent);
+        background-color: var(--color-surface-elevated);
+        --_highlight: 0.25;
+      }
+    }
+
+    &--secondary {
+      user-select: none;
+
+    }
+
+    &--link {
+      padding-inline: 0;
+      text-decoration: underline;
+      color: var(--color-link);
+      text-underline-offset: 0.3em;
+      text-decoration-color: transparent;
+
+      transition:
+        color 0.2s,
+        text-underline-offset 0.3s,
+        text-decoration-color 0.5s;
+
+      &:hover {
+        color: var(--color-link-hover);
+        text-underline-offset: 0.15em;
+        text-decoration-color: var(--color-accent);
+      }
+    }
+
+  }
+
+}

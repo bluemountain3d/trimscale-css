@@ -1,0 +1,71 @@
+@use "abstracts/functions" as fn;
+
+@property --header-height {
+  syntax: "<length>";
+  initial-value: 0px;
+  inherits: true;
+}
+
+@property --_header-padding {
+  syntax: "<length>";
+  initial-value: 0px;
+  inherits: true;
+}
+
+:root {
+  timeline-scope: --header-trigger;
+  --header-height-max: #{fn.fluid-value(48, 80)};
+  --header-height: var(--header-height-max);
+
+  animation: shrink-header linear both;
+  animation-timeline: --header-trigger;
+  animation-range: exit 0% exit 100%;
+}
+
+@layer layouts {
+
+  .header-trigger {
+    height: var(--header-height-max);
+    view-timeline-name: --header-trigger;
+  }
+
+  .header {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    inset-inline: 0;
+    height: var(--header-height);
+    padding-block: var(--_header-padding);
+    
+    gap: var(--space-7);
+    background-color: var(--color-header-background);
+    backdrop-filter: blur(8px);
+
+    &__inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &__brand {
+
+      > svg {
+        height: calc(var(--header-height) - 2 * var(--_header-padding));
+        width: auto;
+      }
+    }
+  }
+
+  @keyframes shrink-header {
+    0% {
+      --header-height: var(--header-height-max);
+      --_header-padding: var(--space-4);
+    }
+  
+    100% {
+      --header-height: #{fn.fluid-value(40, 64)};
+      --_header-padding: var(--space-2);
+    }
+  }
+
+}

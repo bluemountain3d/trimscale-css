@@ -1,0 +1,8 @@
+@use "abstracts/functions" as fn;
+
+@layer layouts {
+  :root {
+    --grid-columns: 8;
+    --grid-gap: #{fn.fluid-value(20, 40)};
+  }
+}

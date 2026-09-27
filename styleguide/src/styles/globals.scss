@@ -1,8 +1,13 @@
 // Design system styling — generated bridge file, configures trimscale-css
 // with trimscale.config.ts's actual values (run `npm run generate-all` to
 // regenerate after editing trimscale.config.ts)
-@use 'generated';
+@use './trimscale';
 
 // Style-guide styling
 @forward './layouts';
 @forward './components';
+
+
+body {
+  background-color: var(--color-surface-base);
+}

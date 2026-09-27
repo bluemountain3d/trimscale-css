@@ -1,0 +1,123 @@
+@use "abstracts/mixins" as mx;
+@use "abstracts/functions" as fn;
+
+@layer layouts {
+  .hero {
+    margin-block-end: var(--space-8);
+    padding-block: var(--space-12) var(--space-8);
+    border-radius: var(--space-12) 0 var(--space-12) 0;
+
+    &__title-wrapper {
+      z-index: 10;
+      position: relative;
+      font-size: var(--display-2);
+
+      @include mx.and-up("phablet") {
+        font-size: var(--display-1);
+      }
+    }
+
+    &__title {
+      position: relative;
+      width: fit-content;
+    }
+
+    &__title-text {
+      @include mx.font-setup(
+        $font: "heading",
+        $font-size: 1em
+      );
+    }
+
+    &__title-lines {
+      z-index: -1;
+      position: absolute;
+      inset-block: 0;
+      inset-inline: calc(#{fn.fluid-value(10, 60)} * -1);
+      border: solid var(--color-details);
+      border-width: 1px 0;
+
+      @include mx.and-up("tablet") { 
+        &::before {
+          content: "cap height";
+          position: absolute;
+          top: -1.4em;
+          right: #{fn.fluid-value(10, 60)};
+          font-size: calc(var(--text-base) * 0.625);
+          line-height: 1;
+          font-family: var(--font-family-body);
+          text-transform: uppercase;
+          color: var(--color-details);
+        }
+
+        &::after {
+          content: "baseline";
+          position: absolute;
+          bottom: -1.7em;
+          right: #{fn.fluid-value(10, 60)};
+          font-size: calc(var(--text-base) * 0.625);
+          line-height: 1;
+          font-family: var(--font-family-body);
+          text-transform: uppercase;
+          color: var(--color-details);
+        }
+      }
+    }
+
+    @include mx.and-up("tablet") {
+      &__title-corners {
+        --_line-width: 2px;
+        &::before,
+        &::after {
+          content: "";
+          position: absolute;
+          width: max(0.25em, 1rem);
+          height: max(0.25em, 1rem);
+          background:
+            linear-gradient(var(--color-accent) 0 0) no-repeat,
+            linear-gradient(var(--color-accent) 0 0) no-repeat;
+          background-size:
+            var(--_line-width) calc(100% - max(0.08em, 5px)),
+            calc(100% - max(0.08em, 5px)) var(--_line-width);
+        }
+
+        &::before {
+          right: 100%;
+          bottom: 100%;
+          background-position: right top, left bottom;
+        }
+
+        &::after {
+          left: 100%;
+          top: 100%;
+          background-position: left bottom, right top;
+        }
+      }
+    }
+
+    &__subtitle {
+      margin-top: 1.5em;
+      @include mx.font-setup($font: "heading",
+        $font-size: var(--heading-2),
+        $font-weight: var(--font-weight-light),
+        $font-style: italic);
+    }
+
+    &__byline {
+      margin-block: 1.5em 2em;
+      max-width: 47rem;
+      @include mx.font-setup(
+        $font: "body",
+        $font-size: var(--text-md)
+      );
+    }
+
+    &__cta-row {
+      display: flex;
+      flex-flow: row wrap;
+      align-items: center;
+      gap: var(--grid-gap);
+
+    }
+  }
+}

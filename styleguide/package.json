@@ -6,11 +6,13 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "trimscale:generate": "trimscale-css generate"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
     "sass-embedded": "^1.100.0",
+    "trimscale-css": "workspace:*",
     "typescript": "~6.0.2",
     "vite": "^8.0.12"
   }

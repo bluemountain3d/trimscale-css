@@ -2,16 +2,234 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>styleguide</title>
+    <title>TrimScale CSS</title>
   </head>
-  <body>
-    <div class="page-wrapper">
-      <header class="header"></header>
-      <main class="main"></main>
-      <footer class="footer"></footer>
-    </div>
+  <body class="body">
+    <!-- HEADER START -->
+    <header class="header">
+      <div class="header__inner wrapper wrapper--overshoot">
+        <div class="header__brand" />
+        <nav class="nav">
+          <ul class="nav__menu">
+            <li class="nav__item">
+              <a href="/" class="nav__link">Get NPM package</a>
+            </li>
+            <li class="nav__item">
+              <a href="/" class="nav__link">GitHub repo</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="header-trigger"></div>
+    <!-- HEADER END -->
+
+    <!-- PAGE CONTENT START -->
+    <main class="main wrapper">
+      <!-- HERO SECTION START -->
+      <section class="hero wrapper wrapper--boxed">
+        <div class="hero__title-wrapper">
+          <h1 class="hero__title">
+            <span class="hero__title-text">TrimScale CSS</span>
+            <span class="hero__title-corners" aria-hidden="true"></span>
+          </h1>
+          <span class="hero__title-lines" aria-hidden="true"></span>
+        </div>
+        <p class="hero__subtitle">You're looking at it.</p>
+
+        <p class="hero__byline">
+          Every heading, paragraph and gap on this page is set with TrimScale
+          CSS. Resize the window, inspect the spacing, and see how the type
+          lines up.
+        </p>
+
+        <div class="hero__cta-row">
+          <a href="/" class="button button--primary">
+            <span class="button__text">GitHub repo</span>
+          </a>
+          <a href="/" class="button button--link"
+            ><span class="button__text"
+              ><code>npm install -D trimscale-css</code></span
+            ></a
+          >
+        </div>
+      </section>
+      <!-- HERO SECTION END -->
+
+      <div class="content-row wrapper wrapper--overshoot">
+        <!-- CONTENT MENU START -->
+        <aside class="sidebar">
+          <p class="sidebar__title">On this page</p>
+          <ul class="sidebar__list">
+            <li class="sidebar__item">
+              <a href="#why-trimscale-css" class="sidebar__link"
+                >Why TrimScale CSS?</a
+              >
+            </li>
+            <li class="sidebar__item">
+              <a href="#leading-trim" class="sidebar__link">Leading Trim</a>
+            </li>
+            <li class="sidebar__item">
+              <a href="#getting-started" class="sidebar__link"
+                >Getting started</a
+              >
+            </li>
+            <li class="sidebar__item">
+              <a href="#design-tokens" class="sidebar__link">Design tokens</a>
+            </li>
+            <li class="sidebar__item">
+              <a href="#fluid-functions" class="sidebar__link"
+                >Fluid functions</a
+              >
+            </li>
+            <li class="sidebar__item">
+              <a href="#utility-classes" class="sidebar__link"
+                >Utility classes</a
+              >
+            </li>
+          </ul>
+        </aside>
+        <!-- CONTENT MENU END -->
+
+        <!-- CONTENT START -->
+        <article class="content">
+          <section id="why-trimscale-css" class="content__section">
+            <h2 class="content__title">Why TrimScale CSS?</h2>
+            <p class="content__paragraph">
+              In print, leading is the space between lines, and nothing else.
+              CSS sees it differently. Every line box splits its extra
+              line-height above and below the text, and adds whatever room the
+              font designer left above the capitals and below the baseline. The
+              result is a heading that never quite sits flush with the image
+              next to it, and a 24px gap that is really 24px plus whatever the
+              font felt like that day.
+            </p>
+            <p class="content__paragraph">
+              The project started with a photography website, built by hand
+              rather than in a drag-and-drop editor, from a background in design
+              and 3D visualization where a two-pixel misalignment counts as a
+              bug. Tutorials showed how to space text, rarely why it behaved the
+              way it did. The usual answer was a magic number per font, which
+              holds up right until someone changes the font.
+            </p>
+            <!-- <aside class="content__note">
+              <h3 class="content__note-title">Lorem ipsum</h3>
+              <p class="content__note-paragraph">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Nesciunt expedita consectetur, mollitia, nemo distinctio dolore
+                eum quod, ipsum adipisci <code>inventore</code> iure repellendus
+                quas? Amet rerum <a href="/">voluptatibus</a> optio nemo. Nulla,
+                illo!
+              </p>
+            </aside> -->
+            <p class="content__paragraph">
+              Chasing the why turned into a degree project, Precision Typography
+              Toolkit: a polyfill for <code>text-box-trim</code> and an
+              interactive tool for extracting the font metrics it needs. A few
+              months later that work became TrimScale CSS, and then a
+              config-driven npm package that works with the fonts a project
+              actually uses, not just the ones it was tested on.
+            </p>
+            <p class="content__paragraph">
+              It reads your font files at build time and handles three things
+              magic numbers can't: leading-trim that removes the space above
+              caps and below the baseline, side-bearing adjustment that aligns
+              text with its edges horizontally too, and a line height that
+              recalculates itself for any font size. All from one config file.
+            </p>
+            <p class="content__paragraph">
+              Around that sits the rest of a base system. A fluid type scale
+              that stretches smoothly between viewports instead of jumping at
+              breakpoints, spacing that can follow the type scale or stand on
+              its own, OKLCH color tokens with automatic fallbacks for older
+              browsers, and metric-matched fallback fonts so nothing shifts when
+              the web font loads. Tokens, utility classes and cascade layers are
+              all generated from one config file, as SCSS or as plain CSS.
+            </p>
+          </section>
+
+          <section id="leading-trim" class="content__section">
+            <h2 class="content__title">Leading Trim</h2>
+            <p class="content__paragraph">
+              Leading trim removes the space CSS adds above the capitals and
+              below the baseline, so a text box starts at the cap height and
+              ends at the baseline. The spacing you write is then the spacing
+              you see.
+            </p>
+            <p class="content__paragraph">
+              Both columns below have the same visible space between blocks. The
+              blue stripes show the gap each one needed to get there.
+            </p>
+            <div class="leading-trim-demo">
+              <div class="leading-trim-demo__no-trim">
+                <h3>Without trim</h3>
+                <p>
+                  This box includes the line height (half-leading) above and
+                  below the text.
+                </p>
+                <p>
+                  The gap above this paragraph is 1em, and the line height adds
+                  to what you see.
+                </p>
+              </div>
+              <div class="leading-trim-demo__trim">
+                <h3 class="trim-text-heading">With trim</h3>
+                <p class="trim-text-body">
+                  This box starts at the top of the first line's capitals and
+                  ends on the last line's baseline.
+                </p>
+                <p class="trim-text-body">
+                  The gap above this paragraph is 1.5em, and so is the space you
+                  see.
+                </p>
+              </div>
+            </div>
+            <p class="content__paragraph">
+              Without trim, a 1em gap looks more like 1.5em, because each line
+              box brings its own share of hidden space. How much depends on the
+              font and the line height, so the number in your CSS never quite
+              matches the page. With trim, the gap is 1.5em and it looks like
+              1.5em.
+            </p>
+            <p class="content__paragraph">
+              Every font role in your config gets a trim class, like
+              <code>.trim-text-heading</code> or <code>.trim-text-body</code>,
+              and the <code>font-setup</code> mixin does the same inside your
+              own components. Browsers with native
+              <code>text-box-trim</code> use it directly. Older ones get a
+              fallback built from the font metrics TrimScale reads at build
+              time.
+            </p>
+          </section>
+
+          <section id="getting-started" class="content__section">
+            <h2 class="content__title">Getting Started</h2>
+          </section>
+
+          <section id="design-tokens" class="content__section">
+            <h2 class="content__title">Design Tokens</h2>
+          </section>
+
+          <section id="fluid-functions" class="content__section">
+            <h2 class="content__title">Fluid Functions</h2>
+          </section>
+
+          <section id="utility-classes" class="content__section">
+            <h2 class="content__title">Utility Classes</h2>
+          </section>
+        </article>
+        <!-- CONTENT END -->
+      </div>
+    </main>
+    <!-- PAGE CONTENT END -->
+
+    <!-- Footer START -->
+    <footer class="footer"></footer>
+    <!-- Footer START -->
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

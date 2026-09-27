@@ -11,7 +11,10 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        loadPaths: [path.resolve(__dirname, '../styles')],
+        loadPaths: [
+          'node_modules/trimscale-css/styles',
+          './src',
+        ],
       },
     },
   },
