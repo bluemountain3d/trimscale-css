@@ -1,4 +1,6 @@
+import { codeBlocks } from './codeBlocks';
 import { scrollSpy } from './scrollSpy';
+import { tabs } from './tabs';
 import './styles/globals.scss';
 
 // import logoLarge from './assets/trimscale-logo-large.svg?raw';
@@ -12,3 +14,11 @@ if (headerBrand) headerBrand.innerHTML = logoSmall
 // sidebar scroll-spy fallback
 const sidebarList = document.querySelector<HTMLElement>('.sidebar__list')
 if (sidebarList) scrollSpy(sidebarList)
+
+// copy buttons on code blocks
+codeBlocks()
+
+// tabbed panels
+for (const tabList of document.querySelectorAll<HTMLElement>('.tabs__list')) {
+  tabs(tabList)
+}

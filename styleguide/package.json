@@ -12,6 +12,7 @@
   "devDependencies": {
     "@types/node": "^25.9.1",
     "sass-embedded": "^1.100.0",
+    "shiki": "^4.4.3",
     "trimscale-css": "workspace:*",
     "typescript": "~6.0.2",
     "vite": "^8.0.12"

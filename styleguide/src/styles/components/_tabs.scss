@@ -1,0 +1,44 @@
+@use "abstracts/mixins" as mx;
+
+@layer components {
+
+  .tabs {
+    margin-block-start: 1.5em;
+
+    &__list {
+      display: flex;
+      gap: var(--space-6);
+      border-block-end: 1px solid var(--color-details);
+    }
+
+    &__tab {
+      margin-block-end: -1px;
+      padding-block: var(--space-3);
+      border: 0;
+      border-block-end: 1px solid transparent;
+      background: none;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition:
+        color 0.2s,
+        border-color 0.2s;
+
+      @include mx.font-setup(
+        $font: "ui",
+        $font-size: var(--text-sm),
+        $font-weight: var(--font-weight-medium)
+      );
+      letter-spacing: 0.05em;
+
+      &:hover {
+        color: var(--color-text-primary);
+      }
+
+      &[aria-selected="true"] {
+        color: var(--color-accent);
+        border-block-end-color: var(--color-accent);
+      }
+    }
+  }
+
+}

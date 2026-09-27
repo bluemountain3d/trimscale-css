@@ -1,0 +1,84 @@
+@use "abstracts/mixins" as mx;
+
+@layer components {
+
+  .code-block {
+    position: relative;
+    margin-block-start: 1.5em;
+    border-radius: 0 var(--space-4);
+    background-color: var(--color-code-background);
+
+    // Shiki's css-variables theme (vite.config.ts), mapped onto the syntax
+    // aliases in trimscale.config.ts
+    --shiki-background: transparent;
+    --shiki-foreground: var(--color-syntax-text);
+    --shiki-token-comment: var(--color-syntax-comment);
+    --shiki-token-punctuation: var(--color-syntax-punctuation);
+    --shiki-token-keyword: var(--color-syntax-keyword);
+    --shiki-token-function: var(--color-syntax-function);
+    --shiki-token-parameter: var(--color-syntax-text);
+    --shiki-token-string: var(--color-syntax-string);
+    --shiki-token-string-expression: var(--color-syntax-string);
+    --shiki-token-constant: var(--color-syntax-constant);
+    --shiki-token-link: var(--color-link);
+
+    > pre {
+      overflow-x: auto;
+      padding: var(--space-5) var(--space-6);
+    }
+
+    code {
+      @include mx.font-setup(
+        $font: "code",
+        $font-size: var(--text-xs),
+        $line-height: var(--line-height-160)
+      );
+      width: max-content;
+      white-space: pre;
+    }
+
+    &__copy {
+      position: absolute;
+      inset-block-start: var(--space-3);
+      inset-inline-end: var(--space-3);
+      padding: 0.5em 0.75em;
+      border: 1px solid var(--color-details);
+      border-radius: 999px;
+      background-color: var(--color-code-background);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      opacity: 0;
+      transition:
+        opacity 0.2s,
+        color 0.2s,
+        border-color 0.2s;
+
+      @include mx.font-setup(
+        $font: "ui",
+        $font-size: var(--text-xs),
+        $font-weight: var(--font-weight-medium)
+      );
+
+      &:hover {
+        color: var(--color-text-primary);
+        border-color: var(--color-accent);
+      }
+
+      &:focus-visible,
+      &[data-copied] {
+        opacity: 1;
+      }
+    }
+
+    &:hover &__copy {
+      opacity: 1;
+    }
+
+    @media (hover: none) {
+      &__copy {
+        opacity: 1;
+      }
+    }
+  }
+
+}

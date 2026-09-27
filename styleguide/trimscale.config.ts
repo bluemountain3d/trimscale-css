@@ -352,6 +352,10 @@ const config: TrimscaleConfig = {
           light: { oklch: 'oklch(0.85 0.09 95)', hex: '#e0ce89' },
           dark:  { oklch: 'oklch(0.35 0.09 95)', hex: '#493900' },
         },
+        secondaryAccent: {
+          light: { oklch: 'oklch(0.50 0.11 155)', hex: '#1e7546' },
+          dark:  { oklch: 'oklch(0.78 0.11 155)', hex: '#7bcc98' },
+        },
       },
     },
 
@@ -372,6 +376,16 @@ const config: TrimscaleConfig = {
       "button": {token: 'accent', opacity: 0.565, lightnessMultiplier: { light: 0.679, dark: 1.1} },
       "buttonHover": {token: 'accent', opacity: 0.565, lightnessMultiplier: { light: 0.755, dark: 1.21} },
       "buttonActive": {token: 'accent', opacity: 0.565, lightnessMultiplier: { light: 0.611, dark: 1} },
+      // Code blocks sit a step below the page in light mode, above it in dark
+      "codeBackground": { token: 'surfaceBase', lightnessMultiplier: { light: 0.96, dark: 1.5 } },
+      // Syntax highlighting, mapped onto Shiki's css-variables theme in _code-block.scss
+      "syntaxText": { token: 'textPrimary' },
+      "syntaxComment": { token: 'textSecondary', lightnessMultiplier: { light: 1.2, dark: 0.9 } },
+      "syntaxPunctuation": { token: 'textSecondary' },
+      "syntaxKeyword": { token: 'accent' },
+      "syntaxFunction": { token: 'accent', lightnessMultiplier: { light: 0.8, dark: 1.2 }, chromaMultiplier: 0.6 },
+      "syntaxString": { token: 'secondaryAccent' },
+      "syntaxConstant": { token: 'highlight', lightnessMultiplier: { light: 0.6, dark: 2.35 }, chromaMultiplier: 1.3 },
     },
   },
 }

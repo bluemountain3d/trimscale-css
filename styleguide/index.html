@@ -207,6 +207,222 @@
 
           <section id="getting-started" class="content__section">
             <h2 class="content__title">Getting Started</h2>
+            <p class="content__paragraph">
+              One install, one config file, one generate command. Everything
+              runs at build time, so nothing from the package ends up in your
+              JavaScript bundle.
+            </p>
+            <aside class="content__note">
+              <h3 class="content__note-title">Requirements</h3>
+              <ul class="content__note-list">
+                <li>Node.js 22.18</li>
+                <li>Sass 1.95</li>
+              </ul>
+            </aside>
+            <ol class="steps">
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span>Install
+                </h3>
+                <p class="content__paragraph">
+                  Add the package as a dev dependency.
+                </p>
+                <div class="code-block">
+                  <pre><code data-lang="bash">npm install -D trimscale-css</code></pre>
+                </div>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span
+                  >Initialize
+                </h3>
+                <p class="content__paragraph">
+                  Copies <code>trimscale.config.ts</code> into your project root
+                  and adds a <code>trimscale:generate</code> script to your
+                  <code>package.json</code>.
+                </p>
+                <div class="code-block">
+                  <pre><code data-lang="bash">npx trimscale-css init</code></pre>
+                </div>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span
+                  >Configure
+                </h3>
+                <p class="content__paragraph">
+                  Fonts, type scale, breakpoints, spacing and colors all live in
+                  <code>trimscale.config.ts</code>. This is the font setup
+                  behind the page you're reading:
+                </p>
+                <div class="code-block">
+                  <pre><code data-lang="ts">appFonts: {
+  localFontsPath: 'public/fonts',
+  families: {
+    'roboto': {
+      source: 'local',
+      fallback: { matched: 'sans-serif' },
+    },
+    'roboto-serif': {
+      source: 'local',
+      fallback: { matched: 'serif' },
+    },
+    'roboto-mono': {
+      source: 'local',
+      fallback: { matched: 'monospace' },
+    },
+  },
+  fontRoles: {
+    primary: 'roboto-serif',
+    heading: 'roboto-serif',
+    body: 'roboto',
+    code: 'roboto-mono',
+  },
+},</code></pre>
+                </div>
+                <p class="content__paragraph">
+                  Every role gets its own trim class and font token, so
+                  <code>heading</code> above becomes
+                  <code>.trim-text-heading</code>. Fonts are optional: without
+                  <code>appFonts</code> you still get the type scale, spacing
+                  and colors, just no leading trim.
+                  <a
+                    href="https://github.com/bluemountain3d/trimscale-css/blob/main/styleguide/trimscale.config.ts"
+                    >See this page's full config</a
+                  >.
+                </p>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span>Generate
+                </h3>
+                <p class="content__paragraph">
+                  Reads your config and font files and writes the result into
+                  <code>./trimscale-generated</code>, inside your own project.
+                  Run it again whenever the config changes.
+                </p>
+                <div class="code-block">
+                  <pre><code data-lang="bash">npm run trimscale:generate</code></pre>
+                </div>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span>Import
+                </h3>
+                <p class="content__paragraph">
+                  Use it as SCSS, or as a plain CSS file with no Sass setup at
+                  all.
+                </p>
+                <div class="tabs">
+                  <div
+                    class="tabs__list"
+                    role="tablist"
+                    aria-label="Output format">
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="import-tab-scss"
+                      aria-controls="import-panel-scss">
+                      SCSS
+                    </button>
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="import-tab-css"
+                      aria-controls="import-panel-css">
+                      Plain CSS
+                    </button>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="import-panel-scss"
+                    aria-labelledby="import-tab-scss">
+                    <p class="content__paragraph">
+                      Point Sass at the package, then load the generated files
+                      once at your entry point.
+                    </p>
+                    <div class="code-block">
+                      <pre><code data-lang="ts">// vite.config.ts
+export default {
+  css: {
+    preprocessorOptions: {
+      scss: {
+        loadPaths: ['node_modules/trimscale-css/styles'],
+      },
+    },
+  },
+};</code></pre>
+                    </div>
+                    <div class="code-block">
+                      <pre><code data-lang="scss">// main.scss
+@use './trimscale-generated';</code></pre>
+                    </div>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="import-panel-css"
+                    aria-labelledby="import-tab-css">
+                    <p class="content__paragraph">
+                      Turn on the CSS output, generate again, and link the
+                      bundle. You get the same tokens and utility classes,
+                      without the SCSS mixins.
+                    </p>
+                    <div class="code-block">
+                      <pre><code data-lang="ts">// trimscale.config.ts
+output: { css: true },</code></pre>
+                    </div>
+                    <div class="code-block">
+                      <pre><code data-lang="html">&lt;link
+  rel="stylesheet"
+  href="/trimscale-generated/trimscale.bundle.min.css"
+/&gt;</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span>Trim
+                  your first heading
+                </h3>
+                <p class="content__paragraph">
+                  Add a trim class in your markup, or use the
+                  <code>font-setup</code> mixin in your own components.
+                </p>
+                <div class="code-block">
+                  <pre><code data-lang="html">&lt;h2 class="trim-text-heading"&gt;Flush with the grid&lt;/h2&gt;</code></pre>
+                </div>
+                <div class="code-block">
+                  <pre><code data-lang="scss">@use 'abstracts/mixins' as mx;
+
+.card__title {
+  @include mx.font-setup(
+    $font: 'heading',
+    $font-size: var(--heading-3)
+  );
+}</code></pre>
+                </div>
+              </li>
+            </ol>
+            <p class="content__paragraph">
+              Next.js, the <code>pkg:</code> importer and the rest of the setup
+              details are in the
+              <a
+                href="https://github.com/bluemountain3d/trimscale-css/blob/main/docs/getting-started.md"
+                >full getting started guide</a
+              >.
+            </p>
           </section>
 
           <section id="design-tokens" class="content__section">

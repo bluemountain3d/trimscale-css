@@ -415,6 +415,16 @@
           "hex": #493900,
         ),
       ),
+      "secondary-accent": (
+        "light": (
+          "oklch": oklch(0.50 0.11 155),
+          "hex": #1e7546,
+        ),
+        "dark": (
+          "oklch": oklch(0.78 0.11 155),
+          "hex": #7bcc98,
+        ),
+      ),
     ),
   ),
   $custom-color-tokens: (
@@ -457,6 +467,36 @@
       "token": "accent",
       "opacity": 0.565,
       "lightness-multiplier": (light: 0.611, dark: 1),
+    ),
+    "code-background": (
+      "token": "surface-base",
+      "lightness-multiplier": (light: 0.96, dark: 1.5),
+    ),
+    "syntax-text": (
+      "token": "text-primary",
+    ),
+    "syntax-comment": (
+      "token": "text-secondary",
+      "lightness-multiplier": (light: 1.2, dark: 0.9),
+    ),
+    "syntax-punctuation": (
+      "token": "text-secondary",
+    ),
+    "syntax-keyword": (
+      "token": "accent",
+    ),
+    "syntax-function": (
+      "token": "accent",
+      "lightness-multiplier": (light: 0.8, dark: 1.2),
+      "chroma-multiplier": 0.6,
+    ),
+    "syntax-string": (
+      "token": "secondary-accent",
+    ),
+    "syntax-constant": (
+      "token": "highlight",
+      "lightness-multiplier": (light: 0.6, dark: 2.35),
+      "chroma-multiplier": 1.3,
     ),
   ),
   $base-grid-size: 4,
