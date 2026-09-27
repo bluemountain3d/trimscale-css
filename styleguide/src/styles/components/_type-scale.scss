@@ -1,0 +1,51 @@
+@use "abstracts/mixins" as mx;
+
+@layer components {
+
+  // Live px value next to a token, filled in by src/tokenValues.ts
+  .token-value {
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .type-scale {
+    margin-block-start: 1.5em;
+
+    &__row {
+      display: grid;
+      // Without minmax(0, …) the no-wrap sample sets the row's minimum width
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-4);
+      padding-block: calc(var(--space-4) * 2);
+      border-block-start: 1px solid var(--color-details);
+
+      &:last-child {
+        padding-block-end: 0;
+      }
+    }
+
+    &__meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: var(--space-2) var(--space-4);
+      color: var(--color-text-secondary);
+
+      @include mx.font-setup(
+        $font: "code",
+        $font-size: var(--text-xs)
+      );
+    }
+
+    &__sample {
+      overflow-x: clip;
+      white-space: nowrap;
+      mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
+      // The mask hides everything outside the border box, so the box is
+      // stretched over the descenders without moving the trimmed layout
+      padding-block: 0.3em;
+      margin-block: -0.3em;
+    }
+  }
+
+}

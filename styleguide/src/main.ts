@@ -1,6 +1,7 @@
 import { codeBlocks } from './codeBlocks';
 import { scrollSpy } from './scrollSpy';
 import { tabs } from './tabs';
+import { schemeToggle, tokenValues } from './tokenValues';
 import './styles/globals.scss';
 
 // import logoLarge from './assets/trimscale-logo-large.svg?raw';
@@ -22,3 +23,10 @@ codeBlocks()
 for (const tabList of document.querySelectorAll<HTMLElement>('.tabs__list')) {
   tabs(tabList)
 }
+
+// live px values in the token tables
+tokenValues()
+
+// light/dark switch on the color swatches
+const colorTokens = document.querySelector<HTMLElement>('.color-tokens')
+if (colorTokens) schemeToggle(colorTokens)

@@ -1,9 +1,11 @@
 import path from 'node:path'
 import { defineConfig } from 'vite'
 import { highlightCode } from './plugins/highlightCode.ts'
+import { tokenTables } from './plugins/tokenTables.ts'
+import trimscaleConfig from './trimscale.config.ts'
 
 export default defineConfig({
-  plugins: [highlightCode()],
+  plugins: [tokenTables(trimscaleConfig), highlightCode()],
   resolve: {
     alias: {
       '@trimscale': path.resolve(__dirname, '..'),

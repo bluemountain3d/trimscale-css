@@ -70,6 +70,15 @@
       }
     }
 
+    &__subtitle {
+      margin-block-start: var(--space-8);
+      @include mx.font-setup(
+        $font: "heading",
+        $font-size: var(--heading-4),
+        $font-weight: var(--font-weight-medium)
+      );
+    }
+
     &__paragraph, &__list {
       margin-block-start: 1.5em;
       text-wrap: pretty;

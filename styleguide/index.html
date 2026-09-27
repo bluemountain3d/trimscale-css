@@ -427,6 +427,54 @@ output: { css: true },</code></pre>
 
           <section id="design-tokens" class="content__section">
             <h2 class="content__title">Design Tokens</h2>
+            <p class="content__paragraph">
+              Every token is a CSS custom property, generated from
+              <code>trimscale.config.ts</code>. The values below are this
+              page's own, measured live. Resize the window and watch the fluid
+              ones change.
+            </p>
+
+            <h3 class="content__subtitle">Type scale</h3>
+            <p class="content__paragraph">
+              Semantic sizes on top of a fluid modular scale. Each one is a
+              <code>clamp()</code> between a mobile and a desktop ratio, or a
+              fixed fraction of another size.
+            </p>
+            <div data-tokens="type-scale"></div>
+
+            <h3 class="content__subtitle">Font families</h3>
+            <p class="content__paragraph">
+              Each family is used by one or more roles, and every role gets a
+              <code>--font-family-*</code> token of its own.
+            </p>
+            <div data-tokens="font-families"></div>
+
+            <h3 class="content__subtitle">Font weights</h3>
+            <div data-tokens="font-weights"></div>
+            <p class="content__paragraph">
+              Line heights work the same way, from
+              <code>--line-height-100</code> to <code>--line-height-200</code>.
+              Most text never needs them: it gets
+              <code>--line-height-dynamic</code>, which recalculates itself for
+              any font size.
+            </p>
+
+            <h3 class="content__subtitle">Spacing</h3>
+            <p class="content__paragraph">
+              Two units. Small steps build on a fixed micro unit and stay put,
+              large steps build on a fluid macro unit and grow with the
+              viewport. A numeric scale, <code>--space-1</code> and up, sits
+              alongside the named sizes.
+            </p>
+            <div data-tokens="space-scale"></div>
+
+            <h3 class="content__subtitle">Colors</h3>
+            <p class="content__paragraph">
+              OKLCH tokens with <code>light-dark()</code> switching and a hex
+              fallback for older browsers. Semantic aliases reference a base
+              token and adjust it, instead of adding another hand-picked pair.
+            </p>
+            <div data-tokens="color-tokens"></div>
           </section>
 
           <section id="fluid-functions" class="content__section">
