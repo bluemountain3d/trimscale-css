@@ -59,7 +59,7 @@
   @keyframes shrink-header {
     0% {
       --header-height: var(--header-height-max);
-      --_header-padding: var(--space-4);
+      --_header-padding: calc(var(--space-2) * 2);
     }
   
     100% {
