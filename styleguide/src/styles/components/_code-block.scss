@@ -5,8 +5,14 @@
   .code-block {
     position: relative;
     margin-block-start: 1.5em;
-    border-radius: 0 var(--space-4);
+    border-radius: 0 var(--space-3);
     background-color: var(--color-code-background);
+
+    // Not after a hidden one: a block that swaps with a sibling, like the
+    // fluid-value chart's clamp/max pair, keeps its normal margin
+    &:not([hidden]) + & {
+      margin-block-start: 1em;
+    }
 
     // Shiki's css-variables theme (vite.config.ts), mapped onto the syntax
     // aliases in trimscale.config.ts
@@ -24,7 +30,18 @@
 
     > pre {
       overflow-x: auto;
-      padding: var(--space-5) var(--space-6);
+      scrollbar-width: thin;
+      // scrollbar-color: var(--color-details) var(--color-surface-elevated);
+      padding: calc(var(--space-2) * 2); // var(--space-3) var(--space-3);
+    }
+
+    // A note already pads its content, and its surface matches the code
+    // background, so the code lines up with the note's text instead. Without
+    // padding, the trimmed last line sticks out of the pre, and overflow-x:
+    // auto would turn that into a vertical scrollbar.
+    .content__note & > pre {
+      overflow: visible;
+      padding: 0;
     }
 
     code {
@@ -67,6 +84,19 @@
       &:focus-visible,
       &[data-copied] {
         opacity: 1;
+      }
+
+      // Flush with the unpadded code in a note, see the pre above
+      .content__note & {
+        inset-block-start: 0;
+        inset-inline-end: 0;
+      }
+
+      // Set by codeBlocks.ts: a one-line block is too short for the top
+      // offset, so the button centers on the line instead
+      .code-block--single-line & {
+        inset-block-start: 50%;
+        translate: 0 -50%;
       }
     }
 
