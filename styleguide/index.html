@@ -883,6 +883,189 @@ output: { css: true },</code></pre>
 
           <section id="utility-classes" class="content__section">
             <h2 class="content__title">Utility Classes</h2>
+            <p class="content__paragraph">
+              Utility classes put the tokens straight into your markup. Each one
+              sets a single thing from the scale, like a size, a weight or a
+              padding, so you can compose text and spacing without writing any
+              SCSS. They sit in <code>@layer utilities</code>, the last layer,
+              so they win over base styles and your components.
+            </p>
+
+            <h3 class="content__subtitle">Take only what you use</h3>
+            <p class="content__paragraph">
+              Every group is on by default, and every group can be turned off in
+              <code>output.utilities</code>. Turn off everything, a whole
+              section, or a single group inside one. This page writes its
+              layout in SCSS, so it turns off the spacing classes.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="ts">// trimscale.config.ts
+
+// No utility classes at all
+output: { utilities: false },
+
+// A whole section, like this page does
+output: { utilities: { spacing: false } },
+
+// A single group inside a section
+output: { utilities: { spacing: { numeric: false } } },</code></pre>
+            </div>
+            <p class="content__paragraph">
+              It's a question of whether you want the classes, not of file
+              size. If you style through the tokens in your own SCSS, the
+              classes are just unused CSS. If you already have your own set, you
+              don't want two competing in the cascade.
+            </p>
+
+            <h3 class="content__subtitle">The groups</h3>
+            <aside class="content__note">
+              <h4 class="content__note-title">Trim in the CSS bundle</h4>
+              <p class="content__note-paragraph">
+                Keep <code>typography.trim</code> on if you use the vanilla CSS
+                bundle. There, <code>.trim-text-*</code> is the only way to
+                leading trim: the trim metrics ship inside those classes, so
+                turning them off removes trim from the file entirely. The SCSS
+                setup keeps <code>font-setup</code> either way.
+              </p>
+            </aside>
+            <p class="content__paragraph">
+              One row per group you can turn off. The flag is its key inside
+              the section, under <code>output.utilities</code>.
+            </p>
+            <div class="utility-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Group</th>
+                    <th scope="col">Classes</th>
+                    <th scope="col">Flag</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="utility-table__section">
+                    <th scope="colgroup" colspan="3"><code>spacing</code></th>
+                  </tr>
+                  <tr>
+                    <th scope="row">Fixed</th>
+                    <td><code>.m-none</code>, <code>.mx-auto</code>, …</td>
+                    <td><code>base</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">T-shirt sizes</th>
+                    <td><code>.{m|p}{side?}-{size}</code></td>
+                    <td><code>tShirt</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Numeric sizes</th>
+                    <td><code>.{m|p}{side?}-{step}</code></td>
+                    <td><code>numeric</code></td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr class="utility-table__section">
+                    <th scope="colgroup" colspan="3"><code>typography</code></th>
+                  </tr>
+                  <tr>
+                    <th scope="row">Trim text</th>
+                    <td><code>.trim-text-{role}</code></td>
+                    <td><code>trim</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Font family</th>
+                    <td><code>.font-family-{role}</code></td>
+                    <td><code>family</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Font size</th>
+                    <td><code>.font-size-{step}</code></td>
+                    <td><code>size</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Line height</th>
+                    <td><code>.line-height-{step}</code></td>
+                    <td><code>lineHeight</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Font weight</th>
+                    <td><code>.font-weight-{weight}</code></td>
+                    <td><code>weight</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Font style</th>
+                    <td><code>.font-style-{style}</code></td>
+                    <td><code>style</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Text transform</th>
+                    <td><code>.text-transform-{value}</code></td>
+                    <td><code>textTransform</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Text align</th>
+                    <td><code>.text-align-{side}</code></td>
+                    <td><code>textAlign</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Numeric figures</th>
+                    <td><code>.num-{figures}-{width}</code></td>
+                    <td><code>numericFigures</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="content__paragraph">
+              The role and size classes follow your config: every font role you
+              define gets a <code>.trim-text-*</code> and a
+              <code>.font-family-*</code>, and every step on your type scale
+              gets a <code>.font-size-*</code>.
+            </p>
+
+            <h3 class="content__subtitle">Composing in markup</h3>
+            <p class="content__paragraph">
+              A trim class sets the typeface and the trim, and the other classes
+              add to it. The spacing between the lines below comes from this
+              page's SCSS, since its spacing classes are off.
+            </p>
+            <figure class="utility-demo">
+              <div class="utility-demo__preview">
+                <p
+                  class="trim-text-ui font-size-text-xs font-weight-medium text-transform-uppercase">
+                  Release notes
+                </p>
+                <p
+                  class="trim-text-heading font-size-heading-3 font-weight-medium">
+                  Flush with the grid
+                </p>
+                <p class="trim-text-body font-size-text-base">
+                  Every line starts at the cap height and ends on the baseline,
+                  with no class written for either.
+                </p>
+              </div>
+              <div class="code-block">
+                <pre><code data-lang="html">&lt;p class="trim-text-ui font-size-text-xs font-weight-medium text-transform-uppercase"&gt;
+  Release notes
+&lt;/p&gt;
+&lt;p class="trim-text-heading font-size-heading-3 font-weight-medium"&gt;
+  Flush with the grid
+&lt;/p&gt;
+&lt;p class="trim-text-body font-size-text-base"&gt;…&lt;/p&gt;</code></pre>
+              </div>
+            </figure>
+            <p class="content__paragraph">
+              An element with its own <code>::before</code>,
+              <code>::after</code> or <code>display</code> takes the trim class
+              on a nested <code>&lt;span&gt;</code> instead. The
+              <a
+                href="https://github.com/bluemountain3d/trimscale-css/blob/main/docs/utility-classes.md"
+                >utility classes guide</a
+              >
+              explains why.
+            </p>
+            <p class="content__paragraph">
+              For the exact list your config produces, look in your output
+              folder: <code>generate</code> writes
+              <code>utility-classes.md</code> next to the generated styles.
+            </p>
           </section>
         </article>
         <!-- CONTENT END -->
