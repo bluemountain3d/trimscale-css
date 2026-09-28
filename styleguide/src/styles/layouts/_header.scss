@@ -1,4 +1,5 @@
 @use "abstracts/functions" as fn;
+@use "abstracts/mixins" as mx;
 
 @property --header-height {
   syntax: "<length>";
@@ -52,6 +53,29 @@
       > svg {
         height: calc(var(--header-height) - 2 * var(--_header-padding));
         width: auto;
+      }
+    }
+  }
+
+  .nav {
+    &__menu {
+      display: flex;
+      gap: var(--space-5);
+      list-style: none;
+    }
+
+    &__link {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+      @include mx.font-setup(
+        $font: "ui",
+        $font-size: var(--text-sm),
+        $font-weight: var(--font-weight-medium)
+      );
+
+      &:hover {
+        color: var(--color-text-primary);
       }
     }
   }

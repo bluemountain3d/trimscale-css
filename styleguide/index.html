@@ -10,14 +10,26 @@
     <!-- HEADER START -->
     <header class="header">
       <div class="header__inner wrapper wrapper--overshoot">
-        <div class="header__brand" />
-        <nav class="nav">
+        <div class="header__brand"></div>
+        <nav class="nav" aria-label="Project links">
           <ul class="nav__menu">
             <li class="nav__item">
-              <a href="/" class="nav__link">Get NPM package</a>
+              <a
+                href="https://www.npmjs.com/package/trimscale-css"
+                target="_blank"
+                rel="noreferrer"
+                class="nav__link"
+                >npm</a
+              >
             </li>
             <li class="nav__item">
-              <a href="/" class="nav__link">GitHub repo</a>
+              <a
+                href="https://github.com/bluemountain3d/trimscale-css"
+                target="_blank"
+                rel="noreferrer"
+                class="nav__link"
+                >GitHub</a
+              >
             </li>
           </ul>
         </nav>
@@ -97,6 +109,9 @@
               <a href="#utility-classes" class="sidebar__link"
                 >Utility classes</a
               >
+            </li>
+            <li class="sidebar__item">
+              <a href="#the-method" class="sidebar__link">The method</a>
             </li>
           </ul>
         </aside>
@@ -398,6 +413,8 @@
                   and colors, just no leading trim.
                   <a
                     href="https://github.com/bluemountain3d/trimscale-css/blob/main/styleguide/trimscale.config.ts"
+                    target="_blank"
+                    rel="noreferrer"
                     >See this page's full config</a
                   >.
                 </p>
@@ -583,6 +600,8 @@ output: { css: true },</code></pre>
               details are in the
               <a
                 href="https://github.com/bluemountain3d/trimscale-css/blob/main/docs/getting-started.md"
+                target="_blank"
+                rel="noreferrer"
                 >full getting started guide</a
               >.
             </p>
@@ -637,6 +656,21 @@ output: { css: true },</code></pre>
               fallback for older browsers. Semantic aliases reference a base
               token and adjust it, instead of adding another hand-picked pair.
             </p>
+            <aside class="content__note">
+              <h4 class="content__note-title">Forcing a scheme</h4>
+              <p class="content__note-paragraph">
+                Tokens follow the system setting. Add
+                <code>.theme-light</code> or <code>.theme-dark</code> to
+                <code>:root</code> to force one. To give part of the page its
+                own scheme, add <code>.app-theme-container</code>
+                to any element and put the theme class on it.
+              </p>
+              <p class="content__note-paragraph">
+                Nothing in the package reads a color token, so the whole palette
+                is optional. Leave out <code>colorSetup</code> and the output
+                has no colors at all.
+              </p>
+            </aside>
             <div data-tokens="color-tokens"></div>
           </section>
 
@@ -649,8 +683,6 @@ output: { css: true },</code></pre>
               They are SCSS functions, so calling them yourself needs the SCSS
               setup; the plain CSS bundle ships their results as tokens instead.
             </p>
-
-            <h3 class="content__subtitle">Fluid values</h3>
             <aside class="content__note">
               <h4 class="content__note-title">$fluid-scale</h4>
               <p class="content__note-paragraph">
@@ -670,6 +702,9 @@ output: { css: true },</code></pre>
 );</code></pre>
               </div>
             </aside>
+
+            <h3 class="content__subtitle">Fluid values</h3>
+
             <p class="content__paragraph">
               <code>fn.fluid-value</code> takes a size for the narrowest
               viewport and one for the widest, and returns the
@@ -895,8 +930,8 @@ output: { css: true },</code></pre>
             <p class="content__paragraph">
               Every group is on by default, and every group can be turned off in
               <code>output.utilities</code>. Turn off everything, a whole
-              section, or a single group inside one. This page writes its
-              layout in SCSS, so it turns off the spacing classes.
+              section, or a single group inside one. This page writes its layout
+              in SCSS, so it turns off the spacing classes.
             </p>
             <div class="code-block">
               <pre><code data-lang="ts">// trimscale.config.ts
@@ -911,10 +946,10 @@ output: { utilities: { spacing: false } },
 output: { utilities: { spacing: { numeric: false } } },</code></pre>
             </div>
             <p class="content__paragraph">
-              It's a question of whether you want the classes, not of file
-              size. If you style through the tokens in your own SCSS, the
-              classes are just unused CSS. If you already have your own set, you
-              don't want two competing in the cascade.
+              It's a question of whether you want the classes, not of file size.
+              If you style through the tokens in your own SCSS, the classes are
+              just unused CSS. If you already have your own set, you don't want
+              two competing in the cascade.
             </p>
 
             <h3 class="content__subtitle">The groups</h3>
@@ -929,8 +964,8 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
               </p>
             </aside>
             <p class="content__paragraph">
-              One row per group you can turn off. The flag is its key inside
-              the section, under <code>output.utilities</code>.
+              One row per group you can turn off. The flag is its key inside the
+              section, under <code>output.utilities</code>.
             </p>
             <div class="utility-table">
               <table>
@@ -963,7 +998,9 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
                 </tbody>
                 <tbody>
                   <tr class="utility-table__section">
-                    <th scope="colgroup" colspan="3"><code>typography</code></th>
+                    <th scope="colgroup" colspan="3">
+                      <code>typography</code>
+                    </th>
                   </tr>
                   <tr>
                     <th scope="row">Trim text</th>
@@ -1057,6 +1094,8 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
               on a nested <code>&lt;span&gt;</code> instead. The
               <a
                 href="https://github.com/bluemountain3d/trimscale-css/blob/main/docs/utility-classes.md"
+                target="_blank"
+                rel="noreferrer"
                 >utility classes guide</a
               >
               explains why.
@@ -1067,6 +1106,45 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
               <code>utility-classes.md</code> next to the generated styles.
             </p>
           </section>
+
+          <section id="the-method" class="content__section">
+            <h2 class="content__title">The Method Behind the Metrics</h2>
+            <p class="content__paragraph">
+              The trim values come from a thesis project on font metrics, and
+              <a
+                href="https://precisionspec.dev"
+                target="_blank"
+                rel="noreferrer"
+                >PrecisionSpec</a
+              >
+              is where that work lives. Drop a font file in and see its metrics
+              as diagrams: where the cap height sits, how much space the line
+              box adds, and how far the glyphs sit from their edges.
+            </p>
+            <p class="content__paragraph">
+              Two articles walk through the math.
+              <a
+                href="https://precisionspec.dev/learn/font-metrics-article"
+                target="_blank"
+                rel="noreferrer"
+                >Why line-height is lying to you</a
+              >
+              covers the vertical trim, and
+              <a
+                href="https://precisionspec.dev/learn/precision-alignment-article"
+                target="_blank"
+                rel="noreferrer"
+                >Precision Alignment</a
+              >
+              covers the side bearings that line text up with its edges
+              horizontally.
+            </p>
+            <p class="content__paragraph">
+              It's also where to measure a font TrimScale can't read itself,
+              like one served only from a CDN, and enter its values with
+              <code>source: 'manual'</code>.
+            </p>
+          </section>
         </article>
         <!-- CONTENT END -->
       </div>
@@ -1075,11 +1153,52 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
 
     <!-- Footer START -->
     <footer class="footer">
-      <div class=" footer__inner wrapper wrapper--boxed">
-        <p class="trim-text-body font-size-text-base">Footer text here</p>
+      <div class="footer__inner wrapper wrapper--boxed">
+        <div class="footer__brand">
+          <p class="footer__name">TrimScale CSS</p>
+          <p class="footer__meta">v%TRIMSCALE_VERSION% · MIT</p>
+        </div>
+        <ul class="footer__links">
+          <li>
+            <a
+              href="https://www.npmjs.com/package/trimscale-css"
+              target="_blank"
+              rel="noreferrer"
+              class="footer__link"
+              >npm</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/bluemountain3d/trimscale-css"
+              target="_blank"
+              rel="noreferrer"
+              class="footer__link"
+              >GitHub</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://precisionspec.dev"
+              target="_blank"
+              rel="noreferrer"
+              class="footer__link"
+              >PrecisionSpec</a
+            >
+          </li>
+        </ul>
+        <p class="footer__credit">
+          Made by
+          <a
+            href="https://portfolio.egileskilsson.se"
+            target="_blank"
+            rel="noreferrer"
+            >Egil Eskilsson</a
+          >
+        </p>
       </div>
     </footer>
-    <!-- Footer START -->
+    <!-- Footer END -->
 
     <script type="module" src="/src/main.ts"></script>
   </body>

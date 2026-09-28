@@ -1,6 +1,84 @@
+@use "abstracts/mixins" as mx;
+
 @layer layouts {
   .footer {
-    height: 48px;
-    background: red;
+    position: relative;
+    padding-block: var(--space-5) var(--space-4);
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      inset-inline: 10%;
+      height: 1px;
+      background-color: var(--color-details);
+    }
+
+    &__inner {
+      position: relative;
+      display: grid;
+      gap: var(--space-5);
+
+      @include mx.and-up("tablet") {
+        grid-template-columns: 1fr auto;
+        align-items: start;
+      }
+    }
+
+    &__brand {
+      display: grid;
+      gap: var(--space-3);
+    }
+
+    &__name {
+      @include mx.font-setup(
+        $font: "heading",
+        $font-size: var(--text-md),
+        $font-weight: var(--font-weight-medium)
+      );
+    }
+
+    &__meta,
+    &__credit {
+      color: var(--color-text-secondary);
+      @include mx.font-setup(
+        $font: "ui",
+        $font-size: var(--text-xs)
+      );
+    }
+
+    &__links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-5);
+      list-style: none;
+    }
+
+    &__link {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+      @include mx.font-setup(
+        $font: "ui",
+        $font-size: var(--text-sm),
+        $font-weight: var(--font-weight-medium)
+      );
+
+      &:hover {
+        color: var(--color-text-primary);
+      }
+    }
+
+    &__credit {
+      grid-column: 1 / -1;
+
+      > a {
+        color: var(--color-link);
+
+        &:hover {
+          color: var(--color-link-hover);
+        }
+      }
+    }
   }
 }
