@@ -1,4 +1,5 @@
 import { codeBlocks } from './codeBlocks';
+import { fluidValueChart, fontSizeChart, lineHeightChart } from './fluidCharts';
 import { scrollSpy } from './scrollSpy';
 import { tabs } from './tabs';
 import { schemeToggle, tokenValues } from './tokenValues';
@@ -30,3 +31,13 @@ tokenValues()
 // light/dark switch on the color swatches
 const colorTokens = document.querySelector<HTMLElement>('.color-tokens')
 if (colorTokens) schemeToggle(colorTokens)
+
+// fluid function charts
+const fluidValueFigure = document.querySelector<HTMLElement>('.fluid-chart--fluid-value')
+if (fluidValueFigure) fluidValueChart(fluidValueFigure)
+
+const fontSizeFigure = document.querySelector<HTMLElement>('.fluid-chart--font-size')
+if (fontSizeFigure) fontSizeChart(fontSizeFigure)
+
+const lineHeightFigure = document.querySelector<HTMLElement>('.fluid-chart--line-height')
+if (lineHeightFigure) lineHeightChart(lineHeightFigure)

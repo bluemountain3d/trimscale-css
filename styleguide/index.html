@@ -479,6 +479,244 @@ output: { css: true },</code></pre>
 
           <section id="fluid-functions" class="content__section">
             <h2 class="content__title">Fluid Functions</h2>
+            <p class="content__paragraph">
+              Fluid values scale linearly with the viewport between the two
+              widths in <code>fluidScale</code>, and hold still outside them.
+              Every fluid token on this page comes from the functions below.
+              They are SCSS functions, so calling them yourself needs the SCSS
+              setup; the plain CSS bundle ships their results as tokens
+              instead.
+            </p>
+
+            <h3 class="content__subtitle">Fluid values</h3>
+            <aside class="content__note">
+              <h4 class="content__note-title">$fluid-scale</h4>
+              <p class="content__note-paragraph">
+                The viewport range every fluid function interpolates across,
+                generated from <code>fluidScale</code> in the config. This
+                page's values:
+              </p>
+              <div class="code-block">
+                <pre><code data-lang="scss">$fluid-scale: (
+  "min-width": 360,
+  "max-width": 1440,
+  "min-font-size": 16,
+  "max-font-size": 20,
+  "min-type-scale": 1.2,
+  "max-type-scale": 1.333,
+  "precision": 4,
+);</code></pre>
+              </div>
+            </aside>
+            <p class="content__paragraph">
+              <code>fn.fluid-value</code> takes a size for the narrowest
+              viewport and one for the widest, and returns the
+              <code>clamp()</code> between them. Reach for it when a value
+              belongs on neither the type scale nor the spacing scale, like an
+              icon size or a component's own padding. With
+              <code>$type: 'max'</code> there is no ceiling, and the value
+              keeps growing past the widest viewport instead of stopping there.
+            </p>
+            <p class="content__paragraph">
+              The line is the formula. The dot is an element on this page that
+              uses it, measured live, so it follows when you resize the window.
+              Tick Simulate to drag a width instead.
+            </p>
+            <figure class="fluid-chart fluid-chart--fluid-value">
+              <div
+                class="fluid-chart__controls"
+                role="group"
+                aria-label="Function type">
+                <button
+                  class="fluid-chart__type"
+                  type="button"
+                  data-type="clamp"
+                  aria-pressed="true">
+                  clamp
+                </button>
+                <button
+                  class="fluid-chart__type"
+                  type="button"
+                  data-type="max"
+                  aria-pressed="false">
+                  max
+                </button>
+              </div>
+              <svg class="fluid-chart__svg" role="img"></svg>
+              <div class="fluid-chart__controls">
+                <span class="fluid-chart__toggle">
+                  <input
+                    id="fluid-value-simulate"
+                    type="checkbox"
+                    data-simulate />
+                  <label for="fluid-value-simulate">Simulate</label>
+                </span>
+                <input
+                  type="range"
+                  aria-label="Simulated viewport width"
+                  data-simulate />
+              </div>
+              <figcaption>
+                <output class="fluid-chart__readout"></output>
+              </figcaption>
+              <div class="code-block" data-code="clamp">
+                <pre><code data-lang="scss">@use 'abstracts/functions' as fn;
+
+.title {
+  font-size: fn.fluid-value(16, 32);
+}
+
+// Compiles to
+// clamp(1rem, 0.6667rem + 1.4815 * var(--vwx), 2rem)</code></pre>
+              </div>
+              <div class="code-block" data-code="max" hidden>
+                <pre><code data-lang="scss">@use 'abstracts/functions' as fn;
+
+.title {
+  font-size: fn.fluid-value(16, 32, $type: 'max');
+}
+
+// Compiles to
+// max(1rem, 0.6667rem + 1.4815 * var(--vwx))</code></pre>
+              </div>
+              <span
+                class="fluid-chart__probe fluid-chart__probe--clamp"
+                data-probe="clamp"
+                aria-hidden="true"
+                >x</span
+              >
+              <span
+                class="fluid-chart__probe fluid-chart__probe--max"
+                data-probe="max"
+                aria-hidden="true"
+                >x</span
+              >
+              <span
+                class="fluid-chart__probe fluid-chart__probe--viewport"
+                data-probe="viewport"
+                aria-hidden="true"></span>
+              <div class="fluid-chart__sim" data-sim aria-hidden="true">
+                <span
+                  class="fluid-chart__probe fluid-chart__probe--clamp-sim"
+                  data-probe="clamp-sim"
+                  >x</span
+                >
+                <span
+                  class="fluid-chart__probe fluid-chart__probe--max-sim"
+                  data-probe="max-sim"
+                  >x</span
+                >
+              </div>
+            </figure>
+
+            <h3 class="content__subtitle">Fluid font sizes</h3>
+            <p class="content__paragraph">
+              <code>fn.fluid-font-size</code> takes a step on the modular scale
+              instead of two sizes. Both ends come from
+              <code>$fluid-scale</code>: the base size times the mobile ratio
+              at the narrowest viewport, times the desktop ratio at the widest.
+              The desktop ratio is the larger one, so the scale spreads as the
+              screen grows. Body text barely moves, display sizes more than
+              double. Every whole step of the scale is one of these lines.
+            </p>
+            <p class="content__paragraph">
+              The chart's height is logarithmic, so an even ratio between steps
+              shows as an even gap.
+            </p>
+            <figure class="fluid-chart fluid-chart--font-size">
+              <svg class="fluid-chart__svg" role="img"></svg>
+              <div class="fluid-chart__controls">
+                <span class="fluid-chart__toggle">
+                  <input
+                    id="font-size-simulate"
+                    type="checkbox"
+                    data-simulate />
+                  <label for="font-size-simulate">Simulate</label>
+                </span>
+                <input
+                  type="range"
+                  aria-label="Simulated viewport width"
+                  data-simulate />
+              </div>
+              <figcaption>
+                <output class="fluid-chart__readout"></output>
+              </figcaption>
+              <div class="code-block">
+                <pre><code data-lang="scss">@use 'abstracts/functions' as fn;
+
+.title {
+  font-size: fn.fluid-font-size(3);
+}
+
+// Compiles to
+// clamp(1.728rem, 1.3171rem + 1.8263 * var(--vwx), 2.9607rem)</code></pre>
+              </div>
+              <span
+                class="fluid-chart__probe fluid-chart__probe--viewport"
+                data-probe="viewport"
+                aria-hidden="true"></span>
+              <div class="fluid-chart__sim" data-sim aria-hidden="true"></div>
+            </figure>
+
+            <h3 class="content__subtitle">Dynamic line height</h3>
+            <aside class="content__note">
+              <h4 class="content__note-title">$dynamic-line-height</h4>
+              <p class="content__note-paragraph">
+                The two pinned points and the cap the curve is drawn from,
+                generated from <code>dynamicLineHeight</code> in the config.
+                This page uses the defaults:
+              </p>
+              <div class="code-block">
+                <pre><code data-lang="scss">$dynamic-line-height: (
+  "fs-base": 16,
+  "ratio-base": 1.5,
+  "fs-ceil": 64,
+  "ratio-ceil": 1.05,
+  "ratio-cap": 1.6,
+);</code></pre>
+              </div>
+              <p class="content__note-paragraph">
+                <strong>Keep it unregistered.</strong>
+                <code>--line-height-dynamic</code> only works as an unregistered
+                custom property. Registered with <code>@property</code>, it
+                resolves once at the root, and every element inherits the same
+                number.
+              </p>
+            </aside>
+            <p class="content__paragraph">
+              A line height that suits body text is far too loose on a large
+              heading. <code>fn.dynamic-line-height</code> tightens it as the
+              font size grows, between the two points in the note, and caps it
+              for small text. It resolves per element when the page renders,
+              against that element's own font size, so one declaration covers
+              every size on the page, including sizes that aren't on the type
+              scale.
+            </p>
+            <figure class="fluid-chart fluid-chart--line-height">
+              <svg class="fluid-chart__svg" role="img"></svg>
+              <div class="fluid-chart__controls">
+                <label for="line-height-size">Font size</label>
+                <input id="line-height-size" type="range" step="0.5" />
+              </div>
+              <figcaption>
+                <output
+                  class="fluid-chart__readout"
+                  for="line-height-size"></output>
+              </figcaption>
+              <p class="fluid-chart__sample" data-sample>
+                Sphinx of black quartz, judge my vow
+              </p>
+              <div class="code-block">
+                <pre><code data-lang="scss">.sample {
+  line-height: var(--line-height-dynamic);
+}
+
+// --line-height-dynamic is fn.dynamic-line-height()
+// with the config's dynamicLineHeight values,
+// and compiles to
+// clamp(1.05, 0.9 + tan(atan2(9.6px, 1em)), 1.6)</code></pre>
+              </div>
+            </figure>
           </section>
 
           <section id="utility-classes" class="content__section">
