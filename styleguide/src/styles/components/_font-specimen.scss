@@ -18,9 +18,10 @@
       display: grid;
       align-content: start;
       gap: var(--space-4);
-      padding: var(--space-6);
+      padding: var(--space-4);
       border-radius: 0 var(--space-4);
       background-color: var(--color-surface-elevated);
+      box-shadow: inset 0 0 0 1px oklch(from var(--color-text-primary) l c h / 0.12);
     }
 
     &__sample {

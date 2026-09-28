@@ -7,6 +7,11 @@
 @forward './layouts';
 @forward './components';
 
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-details) transparent;
+  scrollbar-gutter: stable;
+}
 
 body {
   background-color: var(--color-surface-base);

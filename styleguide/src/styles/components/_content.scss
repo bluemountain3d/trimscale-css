@@ -90,10 +90,11 @@
       max-width: 40rem;
       margin-block: 2em;
       padding: 1.5em 1em 1em;
-      border-radius: 0 var(--space-4);
+      border-radius: 0 var(--space-3);
       background-color: var(--color-surface-elevated);
 
-      @include mx.and-up("tablet") {
+      @include mx.and-up("phablet") {
+        margin-inline: max(0.25em, 1rem);
         border-radius: 0 var(--space-6) 0 var(--space-4);
 
         &::before,
@@ -125,6 +126,7 @@
 
       @include mx.and-up("laptop") {
         margin: 0;
+        padding: 1.5em 1em;
         position: absolute;
         inset-inline-start: calc((4 * var(--_column-width)) + (4 * var(--grid-gap)));
         inline-size: calc((2 * var(--_column-width)) + var(--grid-gap));
@@ -143,11 +145,11 @@
     &__note-paragraph, &__note-list {
       margin-block-start: 1.5em;
       @include mx.font-setup($font: "body",
-        $font-size: var(--text-base));
+        $font-size: var(--text-sm));
     }
 
     &__note-list {
-      padding-inline-start: var(--space-5);
+      padding-inline-start: var(--space-4);
       display: grid;
       row-gap: var(--space-1);
     }
