@@ -29,18 +29,18 @@
 
     &__row {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 13ch 7ch minmax(0, 1fr);
       grid-template-areas:
-        "token value"
-        "bar bar";
+        "token token token"
+        "source value bar";
       align-items: center;
-      gap: var(--space-2) var(--space-4);
+      gap: var(--space-1) var(--space-3);
       font-family: var(--font-family-code);
       font-size: var(--text-xs);
 
       @include mx.and-up("phablet") {
-        grid-template-columns: 6.5rem 6.5rem 1fr 4.5rem;
-        grid-template-areas: "token source bar value";
+        grid-template-columns: 13ch 11ch 7ch minmax(0, 1fr);
+        grid-template-areas: "token source value bar";
       }
 
       > code {
@@ -50,17 +50,25 @@
     }
 
     &__source {
-      display: none;
+      display: block;
       grid-area: source;
       color: var(--color-text-secondary);
+    }
 
-      @include mx.and-up("phablet") {
-        display: block;
-      }
+    // Clips an oversized bar at the column edge while the bar keeps its real
+    // width, which tokenValues measures. The fade grows with the clipped
+    // amount, up to 2rem, so a bar that fits gets none.
+    &__track {
+      --_fade: clamp(0px, var(--_bar) - 100%, 2rem);
+
+      grid-area: bar;
+      overflow-x: clip;
+      mask-image: linear-gradient(to right, #000 calc(100% - var(--_fade)), transparent);
     }
 
     &__bar {
-      grid-area: bar;
+      display: block;
+      inline-size: var(--_bar);
       block-size: 0.75rem;
       border-radius: 2px;
       background-color: var(--color-accent);

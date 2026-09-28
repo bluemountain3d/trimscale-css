@@ -115,7 +115,9 @@ function spaceScale(config: TrimscaleConfig) {
           <li class="space-scale__row" data-token>
             ${code(`--space-${size}`)}
             <span class="space-scale__source">${unit} × ${multiplier}</span>
-            <span class="space-scale__bar" style="inline-size: var(--space-${size})" data-measure="inline-size"></span>
+            <span class="space-scale__track" style="--_bar: var(--space-${size})">
+              <span class="space-scale__bar" data-measure="inline-size"></span>
+            </span>
             ${liveValue}
           </li>`,
       )
