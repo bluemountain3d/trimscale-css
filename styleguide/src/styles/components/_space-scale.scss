@@ -29,7 +29,7 @@
 
     &__row {
       display: grid;
-      grid-template-columns: 13ch 7ch minmax(0, 1fr);
+      grid-template-columns: 13ch 6ch minmax(0, 1fr);
       grid-template-areas:
         "token token token"
         "source value bar";
@@ -39,7 +39,7 @@
       font-size: var(--text-xs);
 
       @include mx.and-up("phablet") {
-        grid-template-columns: 13ch 11ch 7ch minmax(0, 1fr);
+        grid-template-columns: 13ch 11ch 6ch minmax(0, 1fr);
         grid-template-areas: "token source value bar";
       }
 

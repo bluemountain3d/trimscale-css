@@ -127,6 +127,10 @@ $font-size-steps: ();
       block-size: auto;
       margin-block: var(--space-4);
       overflow: visible;
+
+      &:first-child {
+        margin-block-start: 0;
+      }
     }
 
     &__axis,
@@ -221,8 +225,10 @@ $font-size-steps: ();
     // The page's own token, not a copy of the expression, so the dot proves
     // --line-height-dynamic itself
     &__sample {
+      overflow: clip;
       max-inline-size: 16ch;
-      margin-block-start: var(--space-6);
+      max-block-size: 3lh;
+      margin-block-start: var(--space-5);
       font-family: var(--font-family-body);
       line-height: var(--line-height-dynamic);
     }

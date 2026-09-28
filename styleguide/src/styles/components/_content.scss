@@ -1,4 +1,5 @@
 @use "abstracts/mixins" as mx;
+@use "abstracts/functions" as fn;
 
 @layer components {
   .content {
@@ -149,7 +150,7 @@
     }
 
     &__note-list {
-      padding-inline-start: var(--space-4);
+      padding-inline-start: #{fn.fluid-value(16, 24)};
       display: grid;
       row-gap: var(--space-1);
     }
