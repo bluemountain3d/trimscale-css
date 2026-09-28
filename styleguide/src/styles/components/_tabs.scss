@@ -3,17 +3,17 @@
 @layer components {
 
   .tabs {
-    margin-block-start: 1.5em;
+    margin-block-start: 1em;
 
     &__list {
       display: flex;
-      gap: var(--space-6);
       border-block-end: 1px solid var(--color-details);
     }
 
     &__tab {
       margin-block-end: -1px;
       padding-block: var(--space-3);
+      padding-inline: var(--space-3);
       border: 0;
       border-block-end: 1px solid transparent;
       background: none;

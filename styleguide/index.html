@@ -47,14 +47,22 @@
         </p>
 
         <div class="hero__cta-row">
-          <a href="/" class="button button--primary">
+          <a
+            href="https://github.com/bluemountain3d/trimscale-css"
+            target="_blank"
+            rel="noreferrer"
+            class="button button--primary">
             <span class="button__text">GitHub repo</span>
           </a>
-          <a href="/" class="button button--link"
-            ><span class="button__text"
-              ><code>npm install -D trimscale-css</code></span
-            ></a
-          >
+          <a
+            href="https://www.npmjs.com/package/trimscale-css"
+            target="_blank"
+            rel="noreferrer"
+            class="button button--link">
+            <span class="button__text">
+              <code>npm install -D trimscale-css</code>
+            </span>
+          </a>
         </div>
       </section>
       <!-- HERO SECTION END -->
@@ -115,16 +123,6 @@
               way it did. The usual answer was a magic number per font, which
               holds up right until someone changes the font.
             </p>
-            <!-- <aside class="content__note">
-              <h3 class="content__note-title">Lorem ipsum</h3>
-              <p class="content__note-paragraph">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                Nesciunt expedita consectetur, mollitia, nemo distinctio dolore
-                eum quod, ipsum adipisci <code>inventore</code> iure repellendus
-                quas? Amet rerum <a href="/">voluptatibus</a> optio nemo. Nulla,
-                illo!
-              </p>
-            </aside> -->
             <p class="content__paragraph">
               Chasing the why turned into a degree project, Precision Typography
               Toolkit: a polyfill for <code>text-box-trim</code> and an
@@ -227,14 +225,63 @@
                 <p class="content__paragraph">
                   Add the package as a dev dependency.
                 </p>
-                <div class="code-block">
-                  <pre><code data-lang="bash">npm install -D trimscale-css</code></pre>
-                </div>
-                <div class="code-block">
-                  <pre><code data-lang="bash">pnpm add -D trimscale-css</code></pre>
-                </div>
-                <div class="code-block">
-                  <pre><code data-lang="bash">yarn add -D trimscale-css</code></pre>
+                <div class="tabs">
+                  <div
+                    class="tabs__list"
+                    role="tablist"
+                    aria-label="Install using">
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="install-tap-npm"
+                      aria-controls="install-tab-panel-npm">
+                      npm
+                    </button>
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="install-tap-pnpm"
+                      aria-controls="install-tab-panel-pnpm">
+                      pnpm
+                    </button>
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="install-tap-yarn"
+                      aria-controls="install-tab-panel-yarn">
+                      yarn
+                    </button>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="install-tab-panel-npm"
+                    aria-labelledby="install-tap-npm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">npm install -D trimscale-css</code></pre>
+                    </div>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="install-tab-panel-pnpm"
+                    aria-labelledby="install-tap-pnpm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">pnpm add -D trimscale-css</code></pre>
+                    </div>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="install-tab-panel-yarn"
+                    aria-labelledby="install-tap-yarn">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">yarn add -D trimscale-css</code></pre>
+                    </div>
+                  </div>
                 </div>
               </li>
 
@@ -248,14 +295,63 @@
                   and adds a <code>trimscale:generate</code> script to your
                   <code>package.json</code>.
                 </p>
-                <div class="code-block">
-                  <pre><code data-lang="bash">npx trimscale-css init</code></pre>
-                </div>
-                <div class="code-block">
-                  <pre><code data-lang="bash">pnpm dlx trimscale-css init</code></pre>
-                </div>
-                <div class="code-block">
-                  <pre><code data-lang="bash">yarn dlx trimscale-css init</code></pre>
+                <div class="tabs">
+                  <div
+                    class="tabs__list"
+                    role="tablist"
+                    aria-label="Initialize using">
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="initialize-tab-npm"
+                      aria-controls="initialize-tab-panel-npm">
+                      npm
+                    </button>
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="initialize-tab-pnpm"
+                      aria-controls="initialize-tab-panel-pnpm">
+                      pnpm
+                    </button>
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="initialize-tab-yarn"
+                      aria-controls="initialize-tab-panel-yarn">
+                      yarn
+                    </button>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="initialize-tab-panel-npm"
+                    aria-labelledby="initialize-tab-npm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">npx trimscale-css init</code></pre>
+                    </div>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="initialize-tab-panel-pnpm"
+                    aria-labelledby="initialize-tab-pnpm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">pnpm dlx trimscale-css init</code></pre>
+                    </div>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="initialize-tab-panel-yarn"
+                    aria-labelledby="initialize-tab-yarn">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">yarn dlx trimscale-css init</code></pre>
+                    </div>
+                  </div>
                 </div>
               </li>
 
@@ -316,14 +412,63 @@
                   <code>./trimscale-generated</code>, inside your own project.
                   Run it again whenever the config changes.
                 </p>
-                <div class="code-block">
-                  <pre><code data-lang="bash">npm run trimscale:generate</code></pre>
-                </div>
-                <div class="code-block">
-                  <pre><code data-lang="bash">pnpm trimscale:generate</code></pre>
-                </div>
-                <div class="code-block">
-                  <pre><code data-lang="bash">yarn trimscale:generate</code></pre>
+                <div class="tabs">
+                  <div
+                    class="tabs__list"
+                    role="tablist"
+                    aria-label="generate using">
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="generate-tab-npm"
+                      aria-controls="generate-tab-panel-npm">
+                      npm
+                    </button>
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="generate-tab-pnpm"
+                      aria-controls="generate-tab-panel-pnpm">
+                      pnpm
+                    </button>
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="generate-tab-yarn"
+                      aria-controls="generate-tab-panel-yarn">
+                      yarn
+                    </button>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="generate-tab-panel-npm"
+                    aria-labelledby="generate-tab-npm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">npm run trimscale:generate</code></pre>
+                    </div>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="generate-tab-panel-pnpm"
+                    aria-labelledby="generate-tab-pnpm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">pnpm trimscale:generate</code></pre>
+                    </div>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="generate-tab-panel-yarn"
+                    aria-labelledby="generate-tab-yarn">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">yarn trimscale:generate</code></pre>
+                    </div>
+                  </div>
                 </div>
               </li>
 
@@ -332,7 +477,7 @@
                   <span class="steps__number" aria-hidden="true"></span>Import
                 </h3>
                 <p class="content__paragraph">
-                  Use it as SCSS, or as a plain CSS file with no Sass setup at
+                  Use it as SCSS, or as a vanilla CSS file with no Sass setup at
                   all.
                 </p>
                 <div class="tabs">
@@ -354,7 +499,7 @@
                       role="tab"
                       id="import-tab-css"
                       aria-controls="import-panel-css">
-                      Plain CSS
+                      Vanilla CSS
                     </button>
                   </div>
 
@@ -447,9 +592,9 @@ output: { css: true },</code></pre>
             <h2 class="content__title">Design Tokens</h2>
             <p class="content__paragraph">
               Every token is a CSS custom property, generated from
-              <code>trimscale.config.ts</code>. The values below are this
-              page's own, measured live. Resize the window and watch the fluid
-              ones change.
+              <code>trimscale.config.ts</code>. The values below are this page's
+              own, measured live. Resize the window and watch the fluid ones
+              change.
             </p>
 
             <h3 class="content__subtitle">Type scale</h3>
@@ -471,10 +616,10 @@ output: { css: true },</code></pre>
             <div data-tokens="font-weights"></div>
             <p class="content__paragraph">
               Line heights work the same way, from
-              <code>--line-height-100</code> to <code>--line-height-200</code> in increments of 5.
-              Most text never needs them: it gets
-              <code>--line-height-dynamic</code>, which recalculates itself for
-              any font size.
+              <code>--line-height-100</code> to
+              <code>--line-height-200</code> in increments of 5. Most text never
+              needs them: it gets <code>--line-height-dynamic</code>, which
+              recalculates itself for any font size.
             </p>
 
             <h3 class="content__subtitle">Spacing</h3>
@@ -502,8 +647,7 @@ output: { css: true },</code></pre>
               widths in <code>fluidScale</code>, and hold still outside them.
               Every fluid token on this page comes from the functions below.
               They are SCSS functions, so calling them yourself needs the SCSS
-              setup; the plain CSS bundle ships their results as tokens
-              instead.
+              setup; the plain CSS bundle ships their results as tokens instead.
             </p>
 
             <h3 class="content__subtitle">Fluid values</h3>
@@ -532,8 +676,8 @@ output: { css: true },</code></pre>
               <code>clamp()</code> between them. Reach for it when a value
               belongs on neither the type scale nor the spacing scale, like an
               icon size or a component's own padding. With
-              <code>$type: 'max'</code> there is no ceiling, and the value
-              keeps growing past the widest viewport instead of stopping there.
+              <code>$type: 'max'</code> there is no ceiling, and the value keeps
+              growing past the widest viewport instead of stopping there.
             </p>
             <p class="content__paragraph">
               The line is the formula. The dot is an element on this page that
@@ -631,9 +775,9 @@ output: { css: true },</code></pre>
             <p class="content__paragraph">
               <code>fn.fluid-font-size</code> takes a step on the modular scale
               instead of two sizes. Both ends come from
-              <code>$fluid-scale</code>: the base size times the mobile ratio
-              at the narrowest viewport, times the desktop ratio at the widest.
-              The desktop ratio is the larger one, so the scale spreads as the
+              <code>$fluid-scale</code>: the base size times the mobile ratio at
+              the narrowest viewport, times the desktop ratio at the widest. The
+              desktop ratio is the larger one, so the scale spreads as the
               screen grows. Body text barely moves, display sizes more than
               double. Every whole step of the scale is one of these lines.
             </p>
@@ -747,7 +891,11 @@ output: { css: true },</code></pre>
     <!-- PAGE CONTENT END -->
 
     <!-- Footer START -->
-    <footer class="footer"></footer>
+    <footer class="footer">
+      <div class=" footer__inner wrapper wrapper--boxed">
+        <p class="trim-text-body font-size-text-base">Footer text here</p>
+      </div>
+    </footer>
     <!-- Footer START -->
 
     <script type="module" src="/src/main.ts"></script>
