@@ -2,9 +2,17 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0C0D10" />
+
     <title>TrimScale CSS</title>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
   </head>
   <body class="body">
     <!-- HEADER START -->
@@ -22,6 +30,7 @@
                 >npm</a
               >
             </li>
+
             <li class="nav__item">
               <a
                 href="https://github.com/bluemountain3d/trimscale-css"
@@ -66,6 +75,7 @@
             class="button button--primary">
             <span class="button__text">GitHub repo</span>
           </a>
+
           <a
             href="https://www.npmjs.com/package/trimscale-css"
             target="_blank"
@@ -80,7 +90,7 @@
       <!-- HERO SECTION END -->
 
       <div class="content-row wrapper wrapper--overshoot">
-        <!-- CONTENT MENU START -->
+        <!-- CONTENT SIDEBAR MENU START -->
         <aside class="sidebar">
           <p class="sidebar__title">On this page</p>
           <ul class="sidebar__list">
@@ -89,38 +99,45 @@
                 >Why TrimScale CSS?</a
               >
             </li>
+
             <li class="sidebar__item">
               <a href="#leading-trim" class="sidebar__link">Leading Trim</a>
             </li>
+
             <li class="sidebar__item">
               <a href="#getting-started" class="sidebar__link"
                 >Getting started</a
               >
             </li>
+
             <li class="sidebar__item">
               <a href="#design-tokens" class="sidebar__link">Design tokens</a>
             </li>
+
             <li class="sidebar__item">
               <a href="#fluid-functions" class="sidebar__link"
                 >Fluid functions</a
               >
             </li>
+
             <li class="sidebar__item">
               <a href="#utility-classes" class="sidebar__link"
                 >Utility classes</a
               >
             </li>
+
             <li class="sidebar__item">
               <a href="#the-method" class="sidebar__link">The method</a>
             </li>
           </ul>
         </aside>
-        <!-- CONTENT MENU END -->
+        <!-- CONTENT SIDEBAR MENU END -->
 
         <!-- CONTENT START -->
         <article class="content">
           <section id="why-trimscale-css" class="content__section">
             <h2 class="content__title">Why TrimScale CSS?</h2>
+
             <p class="content__paragraph">
               In print, leading is the space between lines, and nothing else.
               CSS sees it differently. Every line box splits its extra
@@ -130,6 +147,7 @@
               next to it, and a 24px gap that is really 24px plus whatever the
               font felt like that day.
             </p>
+
             <p class="content__paragraph">
               The project started with a photography website, built by hand
               rather than in a drag-and-drop editor, from a background in design
@@ -138,6 +156,7 @@
               way it did. The usual answer was a magic number per font, which
               holds up right until someone changes the font.
             </p>
+
             <p class="content__paragraph">
               Chasing the why turned into a degree project, Precision Typography
               Toolkit: a polyfill for <code>text-box-trim</code> and an
@@ -146,6 +165,7 @@
               config-driven npm package that works with the fonts a project
               actually uses, not just the ones it was tested on.
             </p>
+
             <p class="content__paragraph">
               It reads your font files at build time and handles three things
               magic numbers can't: leading-trim that removes the space above
@@ -153,6 +173,7 @@
               text with its edges horizontally too, and a line height that
               recalculates itself for any font size. All from one config file.
             </p>
+
             <p class="content__paragraph">
               Around that sits the rest of a base system. A fluid type scale
               that stretches smoothly between viewports instead of jumping at
@@ -166,23 +187,28 @@
 
           <section id="leading-trim" class="content__section">
             <h2 class="content__title">Leading Trim</h2>
+
             <p class="content__paragraph">
               Leading trim removes the space CSS adds above the capitals and
               below the baseline, so a text box starts at the cap height and
               ends at the baseline. The spacing you write is then the spacing
               you see.
             </p>
+
             <p class="content__paragraph">
               Both columns below have the same visible space between blocks. The
               blue stripes show the gap each one needed to get there.
             </p>
+
             <div class="leading-trim-demo">
               <div class="leading-trim-demo__no-trim">
                 <h3>Without trim</h3>
+
                 <p>
                   This box includes the line height (half-leading) above and
                   below the text.
                 </p>
+
                 <p>
                   The gap above this paragraph is 1em, and the line height adds
                   to what you see.
@@ -190,16 +216,19 @@
               </div>
               <div class="leading-trim-demo__trim">
                 <h3 class="trim-text-heading">With trim</h3>
+
                 <p class="trim-text-body">
                   This box starts at the top of the first line's capitals and
                   ends on the last line's baseline.
                 </p>
+
                 <p class="trim-text-body">
                   The gap above this paragraph is 1.5em, and so is the space you
                   see.
                 </p>
               </div>
             </div>
+
             <p class="content__paragraph">
               Without trim, a 1em gap looks more like 1.5em, because each line
               box brings its own share of hidden space. How much depends on the
@@ -207,6 +236,7 @@
               matches the page. With trim, the gap is 1.5em and it looks like
               1.5em.
             </p>
+
             <p class="content__paragraph">
               Every font role in your config gets a trim class, like
               <code>.trim-text-heading</code> or <code>.trim-text-body</code>,
@@ -220,11 +250,13 @@
 
           <section id="getting-started" class="content__section">
             <h2 class="content__title">Getting Started</h2>
+
             <p class="content__paragraph">
               One install, one config file, one generate command. Everything
               runs at build time, so nothing from the package ends up in your
               JavaScript bundle.
             </p>
+
             <aside class="content__note">
               <h3 class="content__note-title">Requirements</h3>
               <ul class="content__note-list">
@@ -232,14 +264,17 @@
                 <li>Sass 1.95</li>
               </ul>
             </aside>
+
             <ol class="steps">
               <li class="steps__item">
                 <h3 class="steps__title">
                   <span class="steps__number" aria-hidden="true"></span>Install
                 </h3>
+
                 <p class="content__paragraph">
                   Add the package as a dev dependency.
                 </p>
+
                 <div class="tabs">
                   <div
                     class="tabs__list"
@@ -253,6 +288,7 @@
                       aria-controls="install-tab-panel-npm">
                       npm
                     </button>
+
                     <button
                       class="tabs__tab"
                       type="button"
@@ -261,6 +297,7 @@
                       aria-controls="install-tab-panel-pnpm">
                       pnpm
                     </button>
+
                     <button
                       class="tabs__tab"
                       type="button"
@@ -279,6 +316,7 @@
                       <pre><code data-lang="bash">npm install -D trimscale-css</code></pre>
                     </div>
                   </div>
+
                   <div
                     class="tabs__panel"
                     role="tabpanel"
@@ -288,6 +326,7 @@
                       <pre><code data-lang="bash">pnpm add -D trimscale-css</code></pre>
                     </div>
                   </div>
+
                   <div
                     class="tabs__panel"
                     role="tabpanel"
@@ -305,11 +344,13 @@
                   <span class="steps__number" aria-hidden="true"></span
                   >Initialize
                 </h3>
+
                 <p class="content__paragraph">
                   Copies <code>trimscale.config.ts</code> into your project root
                   and adds a <code>trimscale:generate</code> script to your
                   <code>package.json</code>.
                 </p>
+
                 <div class="tabs">
                   <div
                     class="tabs__list"
@@ -323,6 +364,7 @@
                       aria-controls="initialize-tab-panel-npm">
                       npm
                     </button>
+
                     <button
                       class="tabs__tab"
                       type="button"
@@ -331,6 +373,7 @@
                       aria-controls="initialize-tab-panel-pnpm">
                       pnpm
                     </button>
+
                     <button
                       class="tabs__tab"
                       type="button"
@@ -349,6 +392,7 @@
                       <pre><code data-lang="bash">npx trimscale-css init</code></pre>
                     </div>
                   </div>
+
                   <div
                     class="tabs__panel"
                     role="tabpanel"
@@ -358,6 +402,7 @@
                       <pre><code data-lang="bash">pnpm dlx trimscale-css init</code></pre>
                     </div>
                   </div>
+
                   <div
                     class="tabs__panel"
                     role="tabpanel"
@@ -375,11 +420,13 @@
                   <span class="steps__number" aria-hidden="true"></span
                   >Configure
                 </h3>
+
                 <p class="content__paragraph">
                   Fonts, type scale, breakpoints, spacing and colors all live in
                   <code>trimscale.config.ts</code>. This is the font setup
                   behind the page you're reading:
                 </p>
+
                 <div class="code-block">
                   <pre><code data-lang="ts">appFonts: {
   localFontsPath: 'public/fonts',
@@ -405,6 +452,7 @@
   },
 },</code></pre>
                 </div>
+
                 <p class="content__paragraph">
                   Every role gets its own trim class and font token, so
                   <code>heading</code> above becomes
@@ -424,11 +472,13 @@
                 <h3 class="steps__title">
                   <span class="steps__number" aria-hidden="true"></span>Generate
                 </h3>
+
                 <p class="content__paragraph">
                   Reads your config and font files and writes the result into
                   <code>./trimscale-generated</code>, inside your own project.
                   Run it again whenever the config changes.
                 </p>
+
                 <div class="tabs">
                   <div
                     class="tabs__list"
@@ -442,6 +492,7 @@
                       aria-controls="generate-tab-panel-npm">
                       npm
                     </button>
+
                     <button
                       class="tabs__tab"
                       type="button"
@@ -450,6 +501,7 @@
                       aria-controls="generate-tab-panel-pnpm">
                       pnpm
                     </button>
+
                     <button
                       class="tabs__tab"
                       type="button"
@@ -459,6 +511,7 @@
                       yarn
                     </button>
                   </div>
+
                   <div
                     class="tabs__panel"
                     role="tabpanel"
@@ -468,6 +521,7 @@
                       <pre><code data-lang="bash">npm run trimscale:generate</code></pre>
                     </div>
                   </div>
+
                   <div
                     class="tabs__panel"
                     role="tabpanel"
@@ -477,6 +531,7 @@
                       <pre><code data-lang="bash">pnpm trimscale:generate</code></pre>
                     </div>
                   </div>
+
                   <div
                     class="tabs__panel"
                     role="tabpanel"
@@ -493,10 +548,12 @@
                 <h3 class="steps__title">
                   <span class="steps__number" aria-hidden="true"></span>Import
                 </h3>
+
                 <p class="content__paragraph">
                   Use it as SCSS, or as a vanilla CSS file with no Sass setup at
                   all.
                 </p>
+
                 <div class="tabs">
                   <div
                     class="tabs__list"
@@ -510,6 +567,7 @@
                       aria-controls="import-panel-scss">
                       SCSS
                     </button>
+
                     <button
                       class="tabs__tab"
                       type="button"
@@ -529,6 +587,7 @@
                       Point Sass at the package, then load the generated files
                       once at your entry point.
                     </p>
+
                     <div class="code-block">
                       <pre><code data-lang="ts">// vite.config.ts
 export default {
@@ -557,6 +616,7 @@ export default {
                       bundle. You get the same tokens and utility classes,
                       without the SCSS mixins.
                     </p>
+
                     <div class="code-block">
                       <pre><code data-lang="ts">// trimscale.config.ts
 output: { css: true },</code></pre>
@@ -576,13 +636,16 @@ output: { css: true },</code></pre>
                   <span class="steps__number" aria-hidden="true"></span>Trim
                   your first heading
                 </h3>
+
                 <p class="content__paragraph">
                   Add a trim class in your markup, or use the
                   <code>font-setup</code> mixin in your own components.
                 </p>
+
                 <div class="code-block">
                   <pre><code data-lang="html">&lt;h2 class="trim-text-heading"&gt;Flush with the grid&lt;/h2&gt;</code></pre>
                 </div>
+
                 <div class="code-block">
                   <pre><code data-lang="scss">@use 'abstracts/mixins' as mx;
 
@@ -595,6 +658,7 @@ output: { css: true },</code></pre>
                 </div>
               </li>
             </ol>
+
             <p class="content__paragraph">
               Next.js, the <code>pkg:</code> importer and the rest of the setup
               details are in the
@@ -683,6 +747,7 @@ output: { css: true },</code></pre>
               They are SCSS functions, so calling them yourself needs the SCSS
               setup; the plain CSS bundle ships their results as tokens instead.
             </p>
+
             <aside class="content__note">
               <h4 class="content__note-title">$fluid-scale</h4>
               <p class="content__note-paragraph">
@@ -704,7 +769,6 @@ output: { css: true },</code></pre>
             </aside>
 
             <h3 class="content__subtitle">Fluid values</h3>
-
             <p class="content__paragraph">
               <code>fn.fluid-value</code> takes a size for the narrowest
               viewport and one for the widest, and returns the
@@ -714,11 +778,13 @@ output: { css: true },</code></pre>
               <code>$type: 'max'</code> there is no ceiling, and the value keeps
               growing past the widest viewport instead of stopping there.
             </p>
+
             <p class="content__paragraph">
               The line is the formula. The dot is an element on this page that
               uses it, measured live, so it follows when you resize the window.
               Tick Simulate to drag a width instead.
             </p>
+
             <figure class="fluid-chart fluid-chart--fluid-value">
               <div
                 class="fluid-chart__controls"
