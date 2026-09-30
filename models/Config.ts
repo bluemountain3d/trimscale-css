@@ -469,12 +469,18 @@ export type TrimscaleConfig = {
   rootFontSize?: number
   breakpoints: Breakpoints
   /**
-   * Viewport height (px) threshold for the `--vwx` ultrawide switch-over:
-   * past this height (combined with a ≥ 21:9 aspect ratio), `--vwx` switches
-   * from `1vw` to `2vh` to stop fluid sizes from growing unbounded on very
-   * wide monitors. @default 944
+   * Viewport height (px) past which `--vwx` is capped by
+   * `ultrawideAspectRatio`, so fluid sizes stop growing on very wide
+   * monitors. @default 944
    */
   ultrawideHeightThresholdPx?: number
+  /**
+   * Widest aspect ratio `--vwx` scales for, past `ultrawideHeightThresholdPx`:
+   * `--vwx` is `min(1vw, <ratio>vh)`, so fluid sizes never grow as if the
+   * viewport were wider than this many times its height. Must be greater
+   * than 1. @default 2
+   */
+  ultrawideAspectRatio?: number
   modularTypographicScale: ModularTypographicScale
   semanticFontSizes: SemanticFontSizes
   fontWeights: FontWeights

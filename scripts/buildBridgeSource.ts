@@ -66,6 +66,7 @@ export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFl
     setWithArg('root-font-size', raw(`${rootFontSize}px`)),
     setWithArg('breakpoints', breakpointsTree(cfg.breakpoints, rootFontSize)),
     setWithArg('ultrawide-height-threshold-px', raw(`${cfg.ultrawideHeightThresholdPx ?? 944}px`)),
+    setWithArg('ultrawide-aspect-ratio', raw(`${cfg.ultrawideAspectRatio ?? 2}`)),
     setWithArg('fluid-scale', fluidScaleTree(cfg.fluidScale)),
     setWithArg('font-metrics', metricsTree(fontData.metrics)),
     setWithArg('font-faces', fontFacesTree(fontData.fontFaces)),

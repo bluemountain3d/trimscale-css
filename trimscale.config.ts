@@ -15,7 +15,7 @@ import type { TrimscaleConfig } from './models/Config.ts'
  *   → docs/customizing-breakpoints.md
  * - rootFontSize
  *   → docs/full-config-reference.md#rootfontsize
- * - ultrawideHeightThresholdPx
+ * - ultrawideHeightThresholdPx, ultrawideAspectRatio
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
@@ -147,11 +147,13 @@ const config: TrimscaleConfig = {
   // rootFontSize: 16,
 
   /**
-   * Viewport height (px) threshold for the --vwx ultrawide switch-over
-   * (paired with a >= 21:9 aspect ratio check). Optional, defaults to 944.
+   * Past this viewport height (px), --vwx is capped at ultrawideAspectRatio
+   * times 1vh, so fluid sizes stop growing on very wide screens. Optional,
+   * defaults to 944 and 2.
    * → docs/design-tokens.md#base-tokens
    */
   // ultrawideHeightThresholdPx: 944,
+  // ultrawideAspectRatio: 2,
 
   /**
    * Fluid clamp() boundaries: base font-size and modular-scale ratio at the min/max viewport widths.
