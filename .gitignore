@@ -14,3 +14,4 @@ models/*.js
 # dev-docs
 devDocs/roadmap.md
 devDocs/backlog.md
+devDocs/backlog/
