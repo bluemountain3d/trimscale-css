@@ -94,6 +94,19 @@ The divisor is `spacingSetup.baseGridSize`, so a level of 12 on the default grid
 
 `fn.fluid-space-step` stays. It reads its levels the same way, so under `'independent'` its result matches no `--space-*` token either, and [abstracts.md](abstracts.md) now says so. It is kept because a named, scale-anchored range is coming to the config and needs exactly that function, rewritten against the token model your config actually uses.
 
+**Fluid tokens are no longer registered with `@property`.** That covers `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and every fluid `--space-*`. A registered length is computed where it is declared, on `:root`, and a `vw` there doesn't match the `vw` the rest of the page sees. In Chromium with classic scrollbars (the Windows default) the scrollbar was subtracted twice, so every fluid token came out 1-2 % small in its fluid part. Left unregistered, a token resolves on the element that uses it. Static tokens (`--unit-micro`, the `--space-*` steps built on it, `--header-height`, font weights, line heights) stay registered.
+
+What it means, in two places:
+
+- A `transition` on a fluid token jumps instead of animating, since only registered properties interpolate.
+- Reading a fluid token from `:root` in JavaScript returns its expression, not px: `getComputedStyle(document.documentElement).getPropertyValue('--fs-600')` gives `clamp(...)`. Read a real property off an element that uses the token instead, for example its `font-size`.
+
+**`--vwx` caps smoothly on wide screens.** On a viewport at least `ultrawideHeightThresholdPx` tall (default `944`), `--vwx` is `min(1vw, 2vh)`. It used to switch from `1vw` to `2vh` at a 21:9 aspect ratio, and because the two differ by 14 % at that ratio, fluid sizes dropped in one step when a window was dragged across it.
+
+What it means: nothing at 2:1 and narrower, and nothing at 21:9 and wider, where the output is the same as before. Between the two, fluid sizes are capped where they weren't, by up to 14 % just below 21:9. In a default config only the uncapped tokens (`--fs-800-uncapped`, `--fs-900-uncapped`) are affected, since everything clamped has already reached its max at those widths. The ratio is the new `ultrawideAspectRatio` key (default `2`, must be greater than 1).
+
+→ [design-tokens.md#base-tokens](design-tokens.md#base-tokens)
+
 ### New
 
 - **Opt out of the leading-trim fallback.** `leadingTrimFallback: false` on a family trims it in browsers with native `text-box-trim` only, and leaves normal leading in the rest, for a family whose `@font-face` isn't trimscale's to write and whose fallback trim therefore lands off. `appFonts.leadingTrimFallbackDefault` sets it for every family, and a family's own `leadingTrimFallback` wins. Default `true`, so a config that sets neither gets the same trim as before. See [adding-a-font.md](adding-a-font.md#opting-out-of-the-leading-trim-fallback).

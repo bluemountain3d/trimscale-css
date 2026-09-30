@@ -34,6 +34,14 @@ All notable changes to this project are documented in this file.
   every role. `warnIfTrimUncorrectable` is skipped for an opted-out family
   and names `leadingTrimFallback: false` as a way out otherwise, and the
   `manual` clause of `warnIfFamilyNameUnverifiable` is dropped for one.
+- `ultrawideAspectRatio` (optional, `number`, default `2`), a sibling of
+  `ultrawideHeightThresholdPx` with the same plumbing: `Config.ts`, both
+  config files, `buildBridgeSource.ts`, `$ultrawide-aspect-ratio` in
+  `_breakpoints.scss` and `trimscale.scss`'s `show` list. `_base-tokens.scss`
+  raises an `@error` unless it is a unitless number above 1. The check is
+  load-bearing: with the aspect-ratio condition gone from the media query,
+  a ratio of 1 or less makes `min()` pick the height side on portrait
+  viewports.
 
 ### Changed
 
@@ -112,6 +120,14 @@ All notable changes to this project are documented in this file.
   is meant to be rewritten against the active token model rather than removed,
   since a config-side named range needs exactly that resolver, but the gap is
   real until then and now says so.
+- `--vwx` is `min(1vw, #{$ultrawide-aspect-ratio}vh)` behind the height gate
+  alone, replacing `@media (aspect-ratio >= 21/9) and (height >= …)` with a
+  flat `2vh`. `1vw` and `2vh` are equal at 2:1, not at 21:9, so the old gate
+  dropped `--vwx` by 14 % in one step (`--fs-900-uncapped` 164.4px → 145.6px
+  at 2330 → 2340 × 1000, measured in Chromium). `min()` does the ratio check
+  itself and is continuous by construction. Default 2 keeps the cap value:
+  at 3440×1440 `--fs-900` is 112.2px before and after. The only change is
+  the band between 2:1 and 21:9, which is now capped.
 
 ### Removed
 
@@ -134,6 +150,24 @@ All notable changes to this project are documented in this file.
   byte-identical at precision 4 and 2 before, 19356 vs 19264 bytes after.
   Compiling `@use "tokens"` on its own tests the `!default` map and not the
   bridge, since nothing inside `styles/` loads `styles/generated/_index.scss`.
+- Every `vw`-dependent token loses its `@property` registration: `--vwx`,
+  `--fluid-base`, `--unit`, `--unit-macro`, all `--fs-*` (scale,
+  `-uncapped` and semantic aliases) and every `--space-*` built on `--unit`
+  or `--unit-macro`. With `html { scrollbar-gutter: stable }`, a registered
+  `<length>` holding `vw` on `:root` gets the scrollbar subtracted twice in
+  Chromium 145+ (minimal repro: `100vw` on `:root` computes to 609px where
+  `100vw` on an element is 624px, innerWidth 639). The same property on an
+  element is correct, as is `scrollbar-gutter: auto`. No existing crbug was
+  found. CSSWG #6026 also exempts `vw` on the root from the scrollbar
+  adjustment, so a registered `vw` on `:root` is off even per spec, and
+  waiting for a Chromium fix wouldn't be enough. Unregistered, the tokens
+  substitute into the `var()` call site and resolve there, which is where
+  they were before beta.5 fixed the rejected `initial-value`s. Under
+  `independent`, the micro steps and `--unit-micro` stay registered: the
+  `--space-*` loops in `_spacing-tokens.scss` are split so only
+  `$_space-micro` and `1..$numeric-scale-micro-end` register. Nothing
+  validates that `tShirtScaleMicro` and `tShirtScaleMacro` have disjoint
+  keys; a shared key would register and then get the fluid value.
 
 ### Internal
 

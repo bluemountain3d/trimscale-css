@@ -139,13 +139,14 @@ Named viewport breakpoints (px), converted to rem for the `$breakpoints` SCSS ma
 
 → Full guide: [customizing-breakpoints.md](customizing-breakpoints.md)
 
-## `ultrawideHeightThresholdPx`
+## `ultrawideHeightThresholdPx`, `ultrawideAspectRatio`
 
-Viewport height (px) threshold for the `--vwx` ultrawide switch-over, paired with a fixed ≥ 21:9 aspect-ratio check.
+Together they cap `--vwx` on very wide screens: past the height threshold, `--vwx` is `min(1vw, <ratio>vh)`.
 
-| Property                     | Type     | Required | Description                                                      |
-| ---------------------------- | -------- | :------: | ---------------------------------------------------------------- |
-| `ultrawideHeightThresholdPx` | `number` |    No    | Height (px) past which `--vwx` switches to `2vh`. Default `944`. |
+| Property                     | Type     | Required | Description                                                                                                                                                  |
+| ---------------------------- | -------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ultrawideHeightThresholdPx` | `number` |    No    | Viewport height (px) past which the cap applies. Default `944`.                                                                                             |
+| `ultrawideAspectRatio`       | `number` |    No    | Widest aspect ratio fluid sizes scale for. Past it, `--vwx` follows the viewport height instead of the width. Must be greater than 1. Default `2`. |
 
 → Full guide: [design-tokens.md#base-tokens](design-tokens.md#base-tokens)
 
