@@ -113,6 +113,8 @@ export type FontSource =
       fallback?: FontFallback
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `false` here if most of your fonts go through `next/font` but this particular one doesn't. */
       nextFont?: boolean
+      /** Overrides `AppFonts.leadingTrimFallbackDefault` for this family only. */
+      leadingTrimFallback?: boolean
     }
   | {
       source: 'cdn'
@@ -124,6 +126,8 @@ export type FontSource =
       generateFontFace?: boolean
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `true` here for a `next/font/google` font when most of your other fonts *aren't* going through `next/font`, or `false` if this one isn't even though most are. */
       nextFont?: boolean
+      /** Overrides `AppFonts.leadingTrimFallbackDefault` for this family only. */
+      leadingTrimFallback?: boolean
     }
   | {
       source: 'manual'
@@ -133,6 +137,8 @@ export type FontSource =
       metrics: RawFontMetrics
       /** Overrides `AppFonts.nextFontDefault` for this family only. */
       nextFont?: boolean
+      /** Overrides `AppFonts.leadingTrimFallbackDefault` for this family only. The usual reason to set it `false`: a `manual` family's @font-face isn't trimscale's, so nothing guarantees the browser measures it as 1em tall. */
+      leadingTrimFallback?: boolean
     }
 
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
@@ -152,6 +158,17 @@ export type AppFonts = {
   /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `families` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
   nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted
+  /**
+   * Whether leading trim also applies in browsers without native
+   * `text-box-trim`. The fallback there is exact only if the browser measures
+   * the font as exactly 1em tall, which trimscale guarantees for the
+   * `@font-face` rules it writes itself and nothing else. `false` trims in
+   * native engines only and leaves the rest with normal leading. A family's
+   * own `leadingTrimFallback` wins for that family. See
+   * docs/adding-a-font.md#opting-out-of-the-leading-trim-fallback.
+   * @default true
+   */
+  leadingTrimFallbackDefault?: boolean
   /** The `fallback` used by families that don't set their own. Generic keywords only: a metric-matched fallback has to suit the font's own category, so it's chosen per family. */
   defaultFallback: FontFallbacks
 }

@@ -49,6 +49,7 @@ const config: TrimscaleConfig = {
     nextFontDefault: false, // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font', // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
     defaultFallback: 'sans-serif', // used when a families entry below has no `fallback` of its own
+    leadingTrimFallbackDefault: true, // false = leading trim only in browsers with native text-box-trim
     families: {
       // Placeholder so `generate` produces working output before you've set
       // up a real font. Replace it, see docs/adding-a-font.md.
