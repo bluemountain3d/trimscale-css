@@ -34,6 +34,9 @@
 ///   Above base, so the geometry stays paired with the font-family it was
 ///   measured from. A base rule like `code { font-family: ... }` would
 ///   otherwise leave the trim measured against a typeface that isn't rendered.
+/// - %text-trim-fallback (@layer trim): the ::before/::after trim for engines
+///   without native text-box-trim, extended per role unless its family sets
+///   `leadingTrimFallback: false`.
 ///
 /// Usage: Extend %{role}-text OR use font-setup (recommended, it validates the
 /// role and takes typography parameters). Both go through @extend, so either
@@ -71,6 +74,18 @@
   @return map.get(map.get(var.$font-metrics, $font-name), $property);
 }
 
+/// Whether a font role gets the fallback trim in engines without native
+/// text-box-trim. Reads the role's family's `leading-trim-fallback` entry,
+/// which `generate` resolves from `leadingTrimFallback` and
+/// `leadingTrimFallbackDefault`. A family without the entry, e.g. in a
+/// hand-written $font-metrics map, gets it.
+/// @access private
+/// @param {String} $font-key - Font role key (e.g., 'primary', 'body', 'heading')
+/// @return {Boolean}
+@function _hasLeadingTrimFallback($font-key) {
+  @return _getFontMetric($font-key, "leading-trim-fallback") != false;
+}
+
 /// Apply font-specific leading trim metrics
 ///
 /// CRITICAL: Units are appended to values for cross-browser compatibility
@@ -79,7 +94,9 @@
 ///
 /// @access private
 /// @param {String} $font ['primary'] - Font role key from $font-roles map
-/// @output CSS custom properties with em units for trim values and side bearings
+/// @output CSS custom properties with em units for trim values and side
+///   bearings. The two trim values only feed %text-trim-fallback, so a role
+///   without it gets the side bearings alone.
 ///
 /// @example scss - Output
 ///   --_top-trim: 0.196em;
@@ -88,16 +105,16 @@
 ///   --_rsb-adjust: -0.0789em;
 ///
 @mixin leading-trim($font: "primary") {
-  $_fontName: map.get(var.$font-roles, $font);
+  @if _hasLeadingTrimFallback($font) {
+    /// Font-specific vertical metrics (normalized to em units)
+    /// Calculate from font file: (OS/2 ascender - cap-height) / UPM
+    /// Units (em) appended here for Firefox calc() compatibility
+    --_top-trim: #{math.abs(_getFontMetric($font, "top-trim"))}em;
 
-  /// Font-specific vertical metrics (normalized to em units)
-  /// Calculate from font file: (OS/2 ascender - cap-height) / UPM
-  /// Units (em) appended here for Firefox calc() compatibility
-  --_top-trim: #{math.abs(_getFontMetric($font, "top-trim"))}em;
-
-  /// Calculate from font file: abs(OS/2 descender) / UPM
-  /// Units (em) appended here for Firefox calc() compatibility
-  --_bottom-trim: #{math.abs(_getFontMetric($font, "bottom-trim"))}em;
+    /// Calculate from font file: abs(OS/2 descender) / UPM
+    /// Units (em) appended here for Firefox calc() compatibility
+    --_bottom-trim: #{math.abs(_getFontMetric($font, "bottom-trim"))}em;
+  }
 
   /// Left side bearing (LSB) adjustment
   /// Units (em) appended here for Firefox calc() compatibility
@@ -200,10 +217,33 @@
     margin-left: var(--_lsb-adjust);
     margin-right: var(--_rsb-adjust);
 
+    /// Native text-box-trim implementation (future-proof)
+    /// Automatically handles font metrics when browser support arrives
+    @supports (text-box-trim: trim-both) {
+      text-box-trim: trim-both;
+      text-box-edge: cap alphabetic;
+    }
+  }
+
+  /// The fallback trim, for engines without native text-box-trim.
+  ///
+  /// Separate from %text-geometry so a role can leave it out: a family with
+  /// `"leading-trim-fallback": false` in $font-metrics doesn't extend it, and
+  /// renders untrimmed with normal leading in those engines instead. Wrong
+  /// trim looks worse than none, and the fallback is only as right as the
+  /// content area is 1em, which a font whose @font-face isn't trimscale's
+  /// can't guarantee.
+  /// Every extending role still lands in one grouped rule, and when no role
+  /// extends it, nothing is emitted, @supports block included.
+  ///
+  /// Defined after %text-geometry, so its rules follow the geometry within
+  /// @layer trim.
+  %text-trim-fallback {
     /// REVISIT: text-box-trim reached support in all major engines Aug 2026.
     /// This fallback block is not needed once real traffic from unsupported
     /// browser versions drops below our threshold — check analytics, not
     /// Baseline's "Widely available" date (documentation delay, not usage).
+    /// Removing it turns every `leadingTrimFallback` config flag into a no-op.
     @supports not (text-box-trim: trim-both) {
       /// Trim excess space above cap-height, using the 'lh' unit
       /// The 'lh' unit equals the computed line-height of the element
@@ -235,13 +275,6 @@
         margin-bottom: calc((1lh - 1em) * -0.5 - var(--_bottom-trim));
       }
     }
-
-    /// Native text-box-trim implementation (future-proof)
-    /// Automatically handles font metrics when browser support arrives
-    @supports (text-box-trim: trim-both) {
-      text-box-trim: trim-both;
-      text-box-edge: cap alphabetic;
-    }
   }
 }
 
@@ -250,8 +283,8 @@
   /// Font-Specific Placeholders
   /// ============================================================================
   /// One %{role}-text placeholder per var.$font-roles key, each extending both
-  /// base placeholders and applying that role's leading-trim metrics +
-  /// font-family.
+  /// base placeholders, plus %text-trim-fallback unless the role's family
+  /// opts out, and applying that role's leading-trim metrics + font-family.
   ///
   /// The role's font-family belongs with the geometry, not the baseline, so it
   /// is declared here in @layer trim rather than in trim-defaults.
@@ -267,6 +300,9 @@
     %#{$key}-text {
       @extend %text-baseline;
       @extend %text-geometry;
+      @if _hasLeadingTrimFallback($key) {
+        @extend %text-trim-fallback;
+      }
       @include leading-trim($key);
       font-family: var(--font-family-#{$key});
     }
