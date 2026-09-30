@@ -25,24 +25,20 @@ $_space-macro: () !default;
   $space-values: map.merge($_space-micro, $_space-macro);
 }
 
-@each $size, $factor in $space-values {
-  @property --space-#{$size} {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 4px;
-  }
-}
-
-@if var.$spacing-approach == "coupled" {
-  @for $i from 1 through var.$numeric-scale-end {
-    @property --space-#{$i} {
+// Only the micro steps under the independent approach are registered: they
+// are static (--unit-micro). Every other --space-* carries a vw, via --unit or
+// --unit-macro, and stays unregistered for the reason given at --vwx in
+// _base-tokens.scss.
+@if var.$spacing-approach != "coupled" {
+  @each $size, $factor in $_space-micro {
+    @property --space-#{$size} {
       syntax: "<length>";
       inherits: true;
       initial-value: 4px;
     }
   }
-} @else {
-  @for $i from 1 through var.$numeric-scale-macro-end {
+
+  @for $i from 1 through var.$numeric-scale-micro-end {
     @property --space-#{$i} {
       syntax: "<length>";
       inherits: true;

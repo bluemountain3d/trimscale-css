@@ -11,32 +11,15 @@
   @error "$macro-range-max (#{var.$macro-range-max}) must be greater than $base-grid-size (#{var.$base-grid-size}).";
 }
 
-@property --vwx {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 1vw;
-}
-
-@property --fluid-base {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 16px;
-}
-
-@if var.$spacing-approach == "coupled" {
-  @property --unit {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 4px;
-  }
-} @else {
+// --vwx, --fluid-base, --unit and --unit-macro have no @property declarations.
+// A registered <length> computes where it is declared, and on :root a vw
+// doesn't match the vw every other element sees: Chromium subtracts
+// scrollbar-gutter twice there, and the CSSWG resolution in
+// https://github.com/w3c/csswg-drafts/issues/6026 exempts the root from the
+// adjustment altogether. Left unregistered, they substitute into the var()
+// call site and the vw resolves there.
+@if var.$spacing-approach != "coupled" {
   @property --unit-micro {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 4px;
-  }
-
-  @property --unit-macro {
     syntax: "<length>";
     inherits: true;
     initial-value: 4px;

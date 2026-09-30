@@ -22,31 +22,12 @@
 // Nor does --line-height-dynamic have an @property declaration,
 // see comment in _fn_dynamic-line-height.scss.
 // Registering as <number> computes 1em against :root and freezes the ratio.
+//
+// Nor do --fs-* (and their -uncapped and semantic aliases) have @property
+// declarations. They are fluid, and a registered vw on :root resolves
+// differently from the vw on the element that uses the token, see --vwx in
+// _base-tokens.scss.
 // ============================================================================
-
-@each $key, $value in var.$modular-typographic-scale {
-  @property --#{$key} {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 16px;
-  }
-
-  @if map.get($value, "uncapped") {
-    @property --#{$key}-uncapped {
-      syntax: "<length>";
-      inherits: true;
-      initial-value: 16px;
-    }
-  }
-}
-
-@each $key, $value in var.$semantic-font-sizes {
-  @property --#{$key} {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 16px;
-  }
-}
 
 @each $key, $value in var.$font-weights {
   @property --font-weight-#{"" + $key} {
