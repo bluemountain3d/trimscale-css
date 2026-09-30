@@ -128,6 +128,14 @@ All notable changes to this project are documented in this file.
   itself and is continuous by construction. Default 2 keeps the cap value:
   at 3440×1440 `--fs-900` is 112.2px before and after. The only change is
   the band between 2:1 and 21:9, which is now capped.
+- `docs/design-tokens.md` gains "Registered and unregistered tokens": which
+  tokens carry `@property`, what that changes for `transition` and for
+  reading a token from JS, and the rule behind the split (register only
+  values that compute the same on any element: `px`, `rem`, numbers,
+  colors). The `--vwx` comment in `_base-tokens.scss` links to it and leads
+  with the spec's root exemption rather than the Chromium bug, and
+  `_leading-trim.scss` drops "unlike every other `<length>` token", which no
+  longer held.
 
 ### Removed
 
@@ -155,10 +163,12 @@ All notable changes to this project are documented in this file.
   `-uncapped` and semantic aliases) and every `--space-*` built on `--unit`
   or `--unit-macro`. With `html { scrollbar-gutter: stable }`, a registered
   `<length>` holding `vw` on `:root` gets the scrollbar subtracted twice in
-  Chromium 145+ (minimal repro: `100vw` on `:root` computes to 609px where
-  `100vw` on an element is 624px, innerWidth 639). The same property on an
-  element is correct, as is `scrollbar-gutter: auto`. No existing crbug was
-  found. CSSWG #6026 also exempts `vw` on the root from the scrollbar
+  Chromium 145 to 152 (minimal repro in 152: `100vw` on `:root` computes to
+  609px where `100vw` on an element is 624px, innerWidth 639). The same
+  property on an element is correct, as is `scrollbar-gutter: auto`. No crbug
+  report existed, and none was filed: the same repro is correct in Chrome
+  154 and a current Brave, so it was fixed upstream in between. CSSWG #6026
+  also exempts `vw` on the root from the scrollbar
   adjustment, so a registered `vw` on `:root` is off even per spec, and
   waiting for a Chromium fix wouldn't be enough. Unregistered, the tokens
   substitute into the `var()` call site and resolve there, which is where

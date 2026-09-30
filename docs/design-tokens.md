@@ -131,3 +131,20 @@ Two things move to your side of the line when you do that:
 - **The theme switch is yours too.** `.theme-light`/`.theme-dark` only ever forced `color-scheme` for trimscale's own `light-dark()` tokens, so they have nothing left to switch.
 
 Everything else keeps working as documented, including `mx.generate-color-tokens` if you want to run your own palette through the same three-tier fallback from your own SCSS.
+
+## Registered and unregistered tokens
+
+Some tokens are registered with `@property`, some are not, and the split is deliberate. It decides two things you can observe: whether a `transition` on the token animates, and what JavaScript reads back from `:root`.
+
+| Registered | Unregistered |
+| --- | --- |
+| `--unit-micro` and the `--space-*` steps built on it, `--header-height`, `--font-weight-*`, `--line-height-*`, every color token | `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and `--text-*`, the fluid `--space-*` steps, `--line-height-dynamic`, `--avg-char-width-*`, `--font-family-*` |
+
+A registered token transitions smoothly and reads back as a computed value, such as `16px`. An unregistered one jumps when transitioned, and reading it from `:root` returns its expression: `getComputedStyle(document.documentElement).getPropertyValue('--fs-600')` gives `clamp(...)`. To get a number, read a real property, such as `font-size`, off an element that uses the token.
+
+The reason for the split is where each kind of token resolves. A registered property is computed **where it is declared**, and every token here is declared on `:root`. From there, descendants inherit the finished value. An unregistered property is substituted as text at each `var()` and computed **on the element that uses it**. So a token is registered only when it comes out the same wherever it is computed:
+
+- **Safe to register:** `px`, `rem`, plain numbers, colors.
+- **Keep unregistered:** anything that depends on the element or on where it sits. `em` and `lh` resolve against the root's font size, so every element inherits the root's ratio. `%` and container units resolve against the root's box. `vw` on the root is exempt from the scrollbar adjustment that `vw` elsewhere gets (CSSWG [#6026](https://github.com/w3c/csswg-drafts/issues/6026)), and Chromium 145 to 152 subtracted the scrollbar twice there instead.
+
+The same applies to tokens you add in your own CSS. One more trap when you do register: an `@property` whose `initial-value` isn't computationally independent (`1em`, `1rem`, a `var()`) is dropped entirely by the browser, with no warning.
