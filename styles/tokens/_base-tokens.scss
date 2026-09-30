@@ -1,6 +1,8 @@
 
 @use "abstracts/functions/" as fn;
 @use "abstracts/variables" as var;
+@use "sass:math";
+@use "sass:meta";
 
 /// @group Tokens
 /// @name Base Tokens
@@ -11,32 +13,22 @@
   @error "$macro-range-max (#{var.$macro-range-max}) must be greater than $base-grid-size (#{var.$base-grid-size}).";
 }
 
-@property --vwx {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 1vw;
+// At 1 or below, min() below picks the height-based side on any viewport
+// that isn't wider than it is tall, portrait phones included, and nothing
+// else in the media query stops it.
+@if meta.type-of(var.$ultrawide-aspect-ratio) != "number" or not math.is-unitless(var.$ultrawide-aspect-ratio) or var.$ultrawide-aspect-ratio <= 1 {
+  @error "$ultrawide-aspect-ratio (#{var.$ultrawide-aspect-ratio}) must be a unitless number greater than 1.";
 }
 
-@property --fluid-base {
-  syntax: "<length>";
-  inherits: true;
-  initial-value: 16px;
-}
-
-@if var.$spacing-approach == "coupled" {
-  @property --unit {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 4px;
-  }
-} @else {
+// --vwx, --fluid-base, --unit and --unit-macro have no @property declarations.
+// A registered <length> computes where it is declared, and on :root a vw
+// doesn't match the vw every other element sees: Chromium subtracts
+// scrollbar-gutter twice there, and the CSSWG resolution in
+// https://github.com/w3c/csswg-drafts/issues/6026 exempts the root from the
+// adjustment altogether. Left unregistered, they substitute into the var()
+// call site and the vw resolves there.
+@if var.$spacing-approach != "coupled" {
   @property --unit-micro {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 4px;
-  }
-
-  @property --unit-macro {
     syntax: "<length>";
     inherits: true;
     initial-value: 4px;
@@ -55,15 +47,16 @@
     // Viewport Unit System
     // ============================================================================
 
-    /// Custom viewport unit that adapts to ultrawide displays
+    /// Custom viewport unit that stops fluid sizes from growing on very wide screens
     /// Standard: 1vw (viewport width)
-    /// Ultrawide (≥21:9 & ≥ $ultrawide-threshold-px): 2vh to prevent excessive scaling
+    /// Past $ultrawide-height-threshold-px: 1vw, capped at $ultrawide-aspect-ratio vh
     --vwx: 1vw;
 
-    /// Switch to height-based scaling on ultrawide displays
-    /// Prevents text from becoming too large on very wide screens
-    @media (aspect-ratio >= 21/9) and (height >= #{fn.px-to-rem(var.$ultrawide-height-threshold-px)}) {
-      --vwx: 2vh;
+    /// min() does the aspect-ratio check: N·vh is smaller than 1vw exactly when
+    /// the viewport is wider than N times its height, and the two are equal at
+    /// that point, so --vwx never jumps at the transition.
+    @media (height >= #{fn.px-to-rem(var.$ultrawide-height-threshold-px)}) {
+      --vwx: min(1vw, #{var.$ultrawide-aspect-ratio}vh);
     }
 
     // ==========================================================================
