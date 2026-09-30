@@ -1,6 +1,8 @@
 
 @use "abstracts/functions/" as fn;
 @use "abstracts/variables" as var;
+@use "sass:math";
+@use "sass:meta";
 
 /// @group Tokens
 /// @name Base Tokens
@@ -9,6 +11,13 @@
 
 @if var.$spacing-approach != "coupled" and var.$macro-range-max <= var.$base-grid-size {
   @error "$macro-range-max (#{var.$macro-range-max}) must be greater than $base-grid-size (#{var.$base-grid-size}).";
+}
+
+// At 1 or below, min() below picks the height-based side on any viewport
+// that isn't wider than it is tall, portrait phones included, and nothing
+// else in the media query stops it.
+@if meta.type-of(var.$ultrawide-aspect-ratio) != "number" or not math.is-unitless(var.$ultrawide-aspect-ratio) or var.$ultrawide-aspect-ratio <= 1 {
+  @error "$ultrawide-aspect-ratio (#{var.$ultrawide-aspect-ratio}) must be a unitless number greater than 1.";
 }
 
 // --vwx, --fluid-base, --unit and --unit-macro have no @property declarations.
@@ -38,15 +47,16 @@
     // Viewport Unit System
     // ============================================================================
 
-    /// Custom viewport unit that adapts to ultrawide displays
+    /// Custom viewport unit that stops fluid sizes from growing on very wide screens
     /// Standard: 1vw (viewport width)
-    /// Ultrawide (≥21:9 & ≥ $ultrawide-threshold-px): 2vh to prevent excessive scaling
+    /// Past $ultrawide-height-threshold-px: 1vw, capped at $ultrawide-aspect-ratio vh
     --vwx: 1vw;
 
-    /// Switch to height-based scaling on ultrawide displays
-    /// Prevents text from becoming too large on very wide screens
-    @media (aspect-ratio >= 21/9) and (height >= #{fn.px-to-rem(var.$ultrawide-height-threshold-px)}) {
-      --vwx: 2vh;
+    /// min() does the aspect-ratio check: N·vh is smaller than 1vw exactly when
+    /// the viewport is wider than N times its height, and the two are equal at
+    /// that point, so --vwx never jumps at the transition.
+    @media (height >= #{fn.px-to-rem(var.$ultrawide-height-threshold-px)}) {
+      --vwx: min(1vw, #{var.$ultrawide-aspect-ratio}vh);
     }
 
     // ==========================================================================
