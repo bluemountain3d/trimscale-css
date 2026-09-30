@@ -22,11 +22,12 @@
 
 // --vwx, --fluid-base, --unit and --unit-macro have no @property declarations.
 // A registered <length> computes where it is declared, and on :root a vw
-// doesn't match the vw every other element sees: Chromium subtracts
-// scrollbar-gutter twice there, and the CSSWG resolution in
+// doesn't match the vw every other element sees: the CSSWG resolution in
 // https://github.com/w3c/csswg-drafts/issues/6026 exempts the root from the
-// adjustment altogether. Left unregistered, they substitute into the var()
-// call site and the vw resolves there.
+// scrollbar-gutter adjustment, and Chromium 145-152 subtracted the gutter
+// twice there instead. Left unregistered, they substitute into the var()
+// call site and the vw resolves there. See docs/design-tokens.md, "Registered
+// and unregistered tokens".
 @if var.$spacing-approach != "coupled" {
   @property --unit-micro {
     syntax: "<length>";

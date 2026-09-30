@@ -126,7 +126,7 @@
 }
  
 /// The four --_* metrics above are deliberately not registered with
-/// @property, unlike every other `<length>` token in the package.
+/// @property.
 ///
 /// Registration buys nothing here. %text-geometry declares all four
 /// explicitly, so an initial-value is never reached. They are private, so
