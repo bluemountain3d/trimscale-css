@@ -230,8 +230,8 @@ type ParsedEntry = {
 /** A `local` or `cdn` family: the two whose files trimscale reads itself, as opposed to `manual`, whose metrics arrive already measured. */
 type FileBackedFontSource = Extract<FontSource, { source: 'local' | 'cdn' }>
 
-/** One family's full metrics entry: the raw extracted/manual metrics plus its resolved SCSS-ready `family` string. */
-export type FamilyFontMetrics = RawFontMetrics & { family: string }
+/** One family's full metrics entry: the raw extracted/manual metrics plus its resolved SCSS-ready `family` string and `leadingTrimFallback` flag. */
+export type FamilyFontMetrics = RawFontMetrics & { family: string; leadingTrimFallback: boolean }
 
 /** Map of resolved font family name to its extracted metrics */
 export type FontMetricsMap = Record<string, FamilyFontMetrics>
@@ -290,11 +290,17 @@ const resolveLocalFontPaths = async (
  * describe whichever file the consumer measured, not the one the CDN serves,
  * and those differ in practice (see devDocs/font-vertical-metrics.md). So the
  * most that can honestly be said is where to look if the symptom appears.
+ * The clause is dropped when the family has opted out of the fallback trim,
+ * since the fallback is the only path it concerns.
  */
-const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cdn'): void => {
+const warnIfFamilyNameUnverifiable = (
+  familyName: string,
+  source: 'manual' | 'cdn',
+  leadingTrimFallback: boolean,
+): void => {
   const trimNote =
-    source === 'manual'
-      ? ' Its leading trim is unverified for the same reason: no @font-face means no `ascent-override` pinning the content area to 1em. If trimmed text sits low in one browser but not another, see docs/adding-a-font.md#when-trimmed-text-sits-low-in-one-browser-but-not-another'
+    source === 'manual' && leadingTrimFallback
+      ? ' Its leading trim is unverified for the same reason: no @font-face means no `ascent-override` pinning the content area to 1em. If trimmed text sits low in one browser but not another, see docs/adding-a-font.md#when-trimmed-text-sits-low-in-one-browser-but-not-another, or set `leadingTrimFallback: false` to trim in native engines only.'
       : ''
 
   console.warn(
@@ -314,7 +320,8 @@ const MIN_REPORTED_TRIM_ERROR = 0.01
  * Warns that a family's leading trim will be visibly off because its
  * `@font-face` belongs to someone else, so the metric overrides that would
  * pin its content area to 1em can't be written (see `FontFace.ascentOverride`).
- * Silent below `MIN_REPORTED_TRIM_ERROR`, which covers most fonts.
+ * Silent below `MIN_REPORTED_TRIM_ERROR`, which covers most fonts, and not
+ * called at all for a family with `leadingTrimFallback: false`, the other way out.
  *
  * The message carries the two values and the one edit that applies them,
  * rather than the reasoning: a `generate` run is the wrong place to explain
@@ -336,7 +343,7 @@ const warnIfTrimUncorrectable = (
     : 'Set `generateFontFace: true` and trimscale writes the rule, overrides included.'
 
   console.warn(
-    `⚠ "${familyName}" needs \`ascent-override: ${(best.corrected.ascender * 100).toFixed(1)}%\` and \`descent-override: ${(best.corrected.descender * 100).toFixed(1)}%\` for its leading trim to land right, and its @font-face is written by ${owner}, so trimscale can't add them. Without them the trim sits ${best.trimError.toFixed(3)}em off (${(best.trimError * 16).toFixed(1)}px at 16px) in browsers with no native text-box-trim. ${fix} Why: docs/adding-a-font.md#font-metric-overrides`,
+    `⚠ "${familyName}" needs \`ascent-override: ${(best.corrected.ascender * 100).toFixed(1)}%\` and \`descent-override: ${(best.corrected.descender * 100).toFixed(1)}%\` for its leading trim to land right, and its @font-face is written by ${owner}, so trimscale can't add them. Without them the trim sits ${best.trimError.toFixed(3)}em off (${(best.trimError * 16).toFixed(1)}px at 16px) in browsers with no native text-box-trim. ${fix} Or set \`leadingTrimFallback: false\` on the family to trim in native engines only. Why: docs/adding-a-font.md#font-metric-overrides`,
   )
 }
 
@@ -552,6 +559,7 @@ export const computeFontData = async (
 
   for (const [familyName, fontSource] of Object.entries(appFonts.families)) {
     const usesNextFont = fontSource.nextFont ?? appFonts.nextFontDefault ?? false
+    const leadingTrimFallback = fontSource.leadingTrimFallback ?? appFonts.leadingTrimFallbackDefault ?? true
 
     if (usesNextFont) {
       console.log(
@@ -562,11 +570,11 @@ export const computeFontData = async (
     // `manual` skips every step below that reads a file, and takes the
     // config's metrics as its own. Everything after that is shared.
     if (fontSource.source === 'manual') {
-      warnIfFamilyNameUnverifiable(familyName, 'manual')
+      warnIfFamilyNameUnverifiable(familyName, 'manual', leadingTrimFallback)
 
       const resolved = resolveFamilyFallback(appFonts, familyName, fontSource, fontSource.metrics, usesNextFont)
       fallbackFontFaces.push(...resolved.fallbackFaces)
-      metrics[familyName] = { ...fontSource.metrics, family: resolved.family }
+      metrics[familyName] = { ...fontSource.metrics, family: resolved.family, leadingTrimFallback }
       continue
     }
 
@@ -575,19 +583,19 @@ export const computeFontData = async (
 
     const resolved = resolveFamilyFallback(appFonts, familyName, fontSource, best.raw, usesNextFont)
     fallbackFontFaces.push(...resolved.fallbackFaces)
-    metrics[familyName] = { ...best.raw, family: resolved.family }
+    metrics[familyName] = { ...best.raw, family: resolved.family, leadingTrimFallback }
 
     // A `local` family's rule is trimscale's to write unless next/font is
     // writing it instead; a `cdn` family's is opt-in.
     const writesFontFace = fontSource.source === 'local' ? !usesNextFont : (fontSource.generateFontFace ?? false)
 
     if (fontSource.source === 'cdn' && !writesFontFace) {
-      warnIfFamilyNameUnverifiable(familyName, 'cdn')
+      warnIfFamilyNameUnverifiable(familyName, 'cdn', leadingTrimFallback)
     }
 
     if (writesFontFace) {
       fontFaces.push(...buildFontFaces(familyName, parsed))
-    } else {
+    } else if (leadingTrimFallback) {
       warnIfTrimUncorrectable(familyName, best, usesNextFont, fontSource.source)
     }
   }

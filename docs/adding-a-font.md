@@ -186,7 +186,7 @@ const D = fontBoundingBoxDescent / size
 
 Adding that offset to `topTrim` and subtracting it from `bottomTrim` puts the split back where it belongs. The sum is unchanged, so the box height is too, and the native path never reads either value, so browsers that have it are unaffected. Keep both results positive: a negative trim value is silently flipped rather than rejected.
 
-Whether that edit is worth making depends on your traffic. The two tables it corrects for are read per platform, Windows engines taking one and macOS the other, so one pair of numbers can only ever be right for one of them, and the edit that squares a font on Windows can introduce the same offset on macOS. Weigh it against how much of your audience is still on the fallback path at all.
+Whether that edit is worth making depends on your traffic. The two tables it corrects for are read per platform, Windows engines taking one and macOS the other, so one pair of numbers can only ever be right for one of them, and the edit that squares a font on Windows can introduce the same offset on macOS. Weigh it against how much of your audience is still on the fallback path at all. If no pair of numbers is right for enough of it, [opt the family out of the leading-trim fallback](#opting-out-of-the-leading-trim-fallback) instead.
 
 ## Font metric overrides
 
@@ -207,10 +207,27 @@ The overrides can only go in an `@font-face` rule trimscale writes itself, which
 | ------ | ------- |
 | `cdn`, loaded via your own `<link>` | Set `generateFontFace: true` and let trimscale write the rule |
 | `next/font/local` | Pass the values through `localFont()`'s `declarations` option, see [using-with-nextjs.md](using-with-nextjs.md#step-5-metric-overrides-if-generate-asked-for-them) |
-| `next/font/google` | No hook exists. Load the family's files yourself instead, see [using-with-nextjs.md](using-with-nextjs.md#nextfontgoogle) |
-| `manual` | Not detectable, the file trimscale would have read isn't there. Add the overrides to whatever rule does load the font, or see [when trimmed text sits low in one browser but not another](#when-trimmed-text-sits-low-in-one-browser-but-not-another) if that rule isn't yours to edit |
+| `next/font/google` | No hook exists. Load the family's files yourself instead, see [using-with-nextjs.md](using-with-nextjs.md#nextfontgoogle), or [opt it out of the leading-trim fallback](#opting-out-of-the-leading-trim-fallback) |
+| `manual` | Not detectable, the file trimscale would have read isn't there. Add the overrides to whatever rule does load the font, or see [when trimmed text sits low in one browser but not another](#when-trimmed-text-sits-low-in-one-browser-but-not-another) if that rule isn't yours to edit, or [opt it out of the leading-trim fallback](#opting-out-of-the-leading-trim-fallback) |
 
 The warning stays silent below a hundredth of an em, which covers the large majority of fonts. It fires on the measured error, not on the flag: two thirds of the fonts that leave `USE_TYPO_METRICS` clear have tables that agree closely enough to cost nothing.
+
+### Opting out of the leading-trim fallback
+
+When none of the ways out above is available, a family can skip the fallback trim instead:
+
+```ts
+appFonts: {
+  leadingTrimFallbackDefault: true, // the default, every family gets the fallback trim
+  families: {
+    'proxima-nova': { source: 'manual', leadingTrimFallback: false, /* ... */ },
+  },
+}
+```
+
+This doesn't turn leading trim off. The family is still trimmed exactly in every browser with native `text-box-trim`, and in the rest its text keeps normal leading. Text with normal leading looks like ordinary text, while text trimmed by the wrong amount looks broken, so for a family the fallback can't get right, no fallback trim is the better result.
+
+`leadingTrimFallback` on a family wins over `leadingTrimFallbackDefault`, the same relation as `nextFont` and `nextFontDefault`. Set `leadingTrimFallbackDefault: false` to skip the fallback trim everywhere, and `leadingTrimFallback: true` on any family that should keep it. Side-bearing correction applies either way, and `generate` doesn't warn about the overrides for a family that has opted out.
 
 ## Metric-matched fallback fonts (`fallback: { matched }`)
 

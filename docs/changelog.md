@@ -94,6 +94,10 @@ The divisor is `spacingSetup.baseGridSize`, so a level of 12 on the default grid
 
 `fn.fluid-space-step` stays. It reads its levels the same way, so under `'independent'` its result matches no `--space-*` token either, and [abstracts.md](abstracts.md) now says so. It is kept because a named, scale-anchored range is coming to the config and needs exactly that function, rewritten against the token model your config actually uses.
 
+### New
+
+- **Opt out of the leading-trim fallback.** `leadingTrimFallback: false` on a family trims it in browsers with native `text-box-trim` only, and leaves normal leading in the rest, for a family whose `@font-face` isn't trimscale's to write and whose fallback trim therefore lands off. `appFonts.leadingTrimFallbackDefault` sets it for every family, and a family's own `leadingTrimFallback` wins. Default `true`, so a config that sets neither gets the same trim as before. See [adding-a-font.md](adding-a-font.md#opting-out-of-the-leading-trim-fallback).
+
 ### Fixed
 
 - `fluidScale.precision` had no effect on anything. It is required in the config, documented as the decimal places in generated `clamp()` values and written into the bridge file, but nothing read it: every fluid function rounded to a hardcoded 4. It governs all four now, so a config that set anything other than `4` gets different decimals after upgrading, and `--fs-*`, `--space-*` and `--unit-macro` move with it. `4` stays the default and the value to keep: rem at four decimals is already 0.0016px, and fewer decimals round the clamp endpoints rather than just the slope.

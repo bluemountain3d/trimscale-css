@@ -16,6 +16,24 @@ All notable changes to this project are documented in this file.
   `@layer base` as the matching percentage; 16 emits nothing, so a default
   config's output is unchanged. `loadConfig` throws on a non-positive value
   and warns outside 8-32px.
+- `appFonts.leadingTrimFallbackDefault` (optional, `boolean`, default `true`)
+  and a per-family `leadingTrimFallback` on all three `FontSource` shapes,
+  resolved as `leadingTrimFallback ?? leadingTrimFallbackDefault ?? true`, the
+  same relation as `nextFont`/`nextFontDefault`. The resolved value reaches the
+  bridge as a `"leading-trim-fallback"` entry on the family's `$font-metrics`
+  map, so the global flag needs no SCSS variable of its own. Named for the
+  feature rather than as `trimFallback`, which reads as "trim the fallback
+  font" next to `fallback`. `_leading-trim.scss` moves the
+  `@supports not` block out of `%text-geometry` into a new
+  `%text-trim-fallback`, which each `%{role}-text` extends unless its family's
+  entry is `false`; a missing entry counts as `true`, so hand-written
+  `$font-metrics` maps are unaffected. Opted-in roles still share one grouped
+  rule, and when every role opts out no `@supports not` rule is emitted at
+  all. Opted-out roles also skip `--_top-trim`/`--_bottom-trim`, which only
+  the fallback reads; side-bearing margins and `display: flow-root` stay on
+  every role. `warnIfTrimUncorrectable` is skipped for an opted-out family
+  and names `leadingTrimFallback: false` as a way out otherwise, and the
+  `manual` clause of `warnIfFamilyNameUnverifiable` is dropped for one.
 
 ### Changed
 
