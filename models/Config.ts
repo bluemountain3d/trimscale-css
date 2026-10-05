@@ -385,6 +385,8 @@ export type UtilitiesConfig = {
         tShirt?: boolean
         /** `.{m|p}{side?}-{1..numericScaleEnd}`. */
         numeric?: boolean
+        /** `.{m|p}{side?}-fixed-*`, for whichever of `tShirt`/`numeric` is on. No effect under `approach: 'coupled'`, which has no fixed scale. */
+        fixed?: boolean
       }
   typography?:
     | boolean
