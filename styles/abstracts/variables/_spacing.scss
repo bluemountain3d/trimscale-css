@@ -17,7 +17,8 @@ $spacing-approach: "independent" !default;
 /// @type Number
 $macro-range-max: 8 !default;
 
-/// T-shirt scale multipliers of --unit. Coupled approach only.
+/// T-shirt scale multipliers of --unit, emitted as --space-*. Coupled
+/// approach only.
 /// @type Map
 $t-shirt-scale: (
   "3xs": 1,
@@ -27,17 +28,19 @@ $t-shirt-scale: (
   "md": 5,
   "lg": 6,
   "xl": 8,
-  "2xl": 12,
-  "3xl": 16,
-  "4xl": 20,
-  "5xl": 24,
-  "6xl": 28,
-  "7xl": 32,
-  "8xl": 40,
-  "9xl": 48,
+  "2xl": 10,
+  "3xl": 12,
+  "4xl": 14,
+  "5xl": 16,
+  "6xl": 20,
+  "7xl": 24,
+  "8xl": 28,
+  "9xl": 32,
 ) !default;
 
-/// T-shirt scale multipliers of --unit-micro. Independent approach only.
+/// T-shirt scale multipliers of --unit-micro, emitted as the fixed
+/// --space-fixed-*. Keys may overlap with $t-shirt-scale-macro. Independent
+/// approach only.
 /// @type Map
 $t-shirt-scale-micro: (
   "3xs": 1,
@@ -46,15 +49,23 @@ $t-shirt-scale-micro: (
   "sm": 4,
   "md": 5,
   "lg": 6,
+  "xl": 8,
 ) !default;
 
-/// T-shirt scale multipliers of --unit-macro. Independent approach only.
+/// T-shirt scale multipliers of --unit-macro, emitted as the fluid --space-*.
+/// Keys may overlap with $t-shirt-scale-micro. Independent approach only.
 /// @type Map
 $t-shirt-scale-macro: (
-  "xl": 6,
-  "2xl": 8,
-  "3xl": 10,
-  "4xl": 12,
+  "3xs": 1,
+  "2xs": 2,
+  "xs": 3,
+  "sm": 4,
+  "md": 5,
+  "lg": 6,
+  "xl": 8,
+  "2xl": 10,
+  "3xl": 12,
+  "4xl": 14,
   "5xl": 16,
   "6xl": 20,
   "7xl": 24,
@@ -64,14 +75,14 @@ $t-shirt-scale-macro: (
 
 /// Numeric spacing scale upper bound (--space-1..N). Coupled approach only.
 /// @type Number
-$numeric-scale-end: 48 !default;
+$numeric-scale-end: 32 !default;
 
-/// Numeric scale upper bound for --unit-micro-based steps (--space-1..N).
+/// Numeric scale upper bound for the fixed --unit-micro steps
+/// (--space-fixed-1..N). Independent approach only.
+/// @type Number
+$numeric-scale-micro-end: 8 !default;
+
+/// Numeric scale upper bound for the fluid --unit-macro steps (--space-1..N).
 /// Independent approach only.
 /// @type Number
-$numeric-scale-micro-end: 6 !default;
-
-/// Numeric scale upper bound for --unit-macro-based steps (picks up where
-/// $numeric-scale-micro-end leaves off). Independent approach only.
-/// @type Number
-$numeric-scale-macro-end: 48 !default;
+$numeric-scale-macro-end: 32 !default;
