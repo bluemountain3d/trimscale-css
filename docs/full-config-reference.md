@@ -37,6 +37,7 @@ Optional. Opt-out toggles for the config-driven utility-class groups in `styles/
 | `output.utilities.spacing.base`           | `boolean` |    No    | `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`. |
 | `output.utilities.spacing.tShirt`         | `boolean` |    No    | `.{m\|p}{side?}-{3xs..9xl}`.                                        |
 | `output.utilities.spacing.numeric`        | `boolean` |    No    | `.{m\|p}{side?}-{1..numericScaleEnd}`.                               |
+| `output.utilities.spacing.fixed`          | `boolean` |    No    | `.{m\|p}{side?}-fixed-*`, for whichever of `tShirt`/`numeric` is on. No effect under `approach: 'coupled'`. |
 | `output.utilities.typography`             | `boolean` or object |    No    | `true`/`false` for the whole group, or an object to toggle sub-groups individually (see below). |
 | `output.utilities.typography.trim`        | `boolean` |    No    | `.trim-text-*`.                                                     |
 | `output.utilities.typography.family`      | `boolean` |    No    | `.font-family-*`.                                                   |
@@ -222,7 +223,7 @@ Optional. Curve for the self-scaling `--line-height-dynamic` token. Every field 
 
 ## `spacingSetup`
 
-How `--space-*` tokens grow across viewport widths. A discriminated union on `approach`, the two shapes aren't combinable.
+How spacing tokens grow across viewport widths. `--space-*` is fluid under both approaches, and `'independent'` adds the static `--space-fixed-*`. A discriminated union on `approach`, the two shapes aren't combinable.
 
 | Property                                       | Type                                                                                      | Required | Applies to    | Description                                                                     |
 | ---------------------------------------------- | ----------------------------------------------------------------------------------------- | :------: | ------------- | ------------------------------------------------------------------------------- |
@@ -231,8 +232,10 @@ How `--space-*` tokens grow across viewport widths. A discriminated union on `ap
 | `tShirtScale`                                  | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `coupled`     | Tier → multiplier of `--unit`.                                                  |
 | `numericScaleEnd`                              | `number`                                                                                  |   Yes    | `coupled`     | Upper bound of the numbered `--space-1`..`N` scale.                             |
 | `macroRangeMultiplier`                         | one of `1.25`, `1.5`, `1.75`, `2`, `2.25`, `2.5`, `2.75`, `3`, `3.25`, `3.5`, `3.75`, `4` |    No    | `independent` | Multiplier of `baseGridSize` giving `--unit-macro`'s ceiling (px). Default `2`. |
-| `tShirtScaleMicro`, `tShirtScaleMacro`         | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `independent` | Tier → multiplier of `--unit-micro`/`--unit-macro` respectively.                |
-| `numericScaleMicroEnd`, `numericScaleMacroEnd` | `number`                                                                                  |   Yes    | `independent` | Upper bounds of the micro/macro segments of the numbered scale.                 |
+| `tShirtScaleMacro`                             | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `independent` | Tier → multiplier of `--unit-macro`, the fluid `--space-{tier}`.                |
+| `tShirtScaleMicro`                             | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `independent` | Tier → multiplier of `--unit-micro`, the fixed `--space-fixed-{tier}`. May share keys with `tShirtScaleMacro`. |
+| `numericScaleMacroEnd`                         | `number`                                                                                  |   Yes    | `independent` | Upper bound of the fluid `--space-1`..`N` scale.                                |
+| `numericScaleMicroEnd`                         | `number`                                                                                  |   Yes    | `independent` | Upper bound of the fixed `--space-fixed-1`..`N` scale.                          |
 
 → Full guide: [customizing-spacing.md](customizing-spacing.md)
 

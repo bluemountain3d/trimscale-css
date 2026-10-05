@@ -45,6 +45,51 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Breaking:** under `independent`, `--space-*` is the fluid namespace
+  throughout and the `--unit-micro` steps move to `--space-fixed-*`
+  (backlog point 24). `tShirtScaleMacro` and `numericScaleMacroEnd` drive
+  `--space-*`, the numeric macro loop starts at 1 instead of
+  `numericScaleMicroEnd + 1`; `tShirtScaleMicro` and `numericScaleMicroEnd`
+  drive `--space-fixed-*`. Overlapping keys are intended: `$space-values`
+  was `map.merge(micro, macro)` and `:root` emitted a shared key twice with
+  macro silently winning, it is now the fluid map alone, beside new
+  `$space-fixed-values`. The fluid name stays unprefixed so it means the same
+  under both approaches and `coupled` → `independent` only adds names;
+  `--space-fluid-*` with fixed unprefixed was weighed and dropped since it
+  would rename `coupled` too. Config fields keep `Micro`/`Macro`, they name
+  the units. `@property` registration follows the fixed scale. Defaults:
+  fluid `3xs`–`9xl` (1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32) and
+  `1`–`32`, fixed `3xs`–`xl` and `1`–`8`, both ending at 32px; the `coupled`
+  `$t-shirt-scale` default and template example get the same 15 multipliers
+  and `numericScaleEnd: 32`. The map fields are required, so an upgrader's
+  config keeps its own values: old-default micro tiers vanish from
+  `--space-*` (visible), `--space-1`–`6` turn fluid (silent).
+- Under `coupled`, every `--space-*` is `round(nearest, calc(var(--unit) *
+  N), 1px)`. Rounded per step, not on `--unit`: `--unit` spans 4px → 5px by
+  default, so rounding it would move every step in one jump at the midpoint,
+  per step climbs in 1px increments. `--unit-macro` already rounds, so
+  `independent` needs nothing. Motivation is horizontal spacing (fractional
+  `padding-inline` offsets text); vertical rhythm is fractional anyway via
+  `line-height`, which is also why `--fs-*` stays unrounded. Coupled output
+  vs dev differs in exactly the 63 `--space-*` declarations (15 + 48).
+- `$space-numeric-end` and `$space-fixed-numeric-end` are public in
+  `tokens/_spacing-tokens.scss` and `_spacing-utilities.scss` reads them
+  instead of recomputing its own `if(coupled …)` end, so the two can't drift.
+  The 14 hand-written classes per step become a `_spacing-classes` mixin over
+  a property map in the old emission order, so `coupled` output is unchanged.
+- `output.utilities.spacing.fixed` (default `true`): `.{m|p}{side?}-fixed-*`,
+  an axis orthogonal to `tShirt`/`numeric` (fixed t-shirt classes need
+  `tShirt && fixed`). No effect under `coupled`, documented rather than
+  typed, since `UtilitiesConfig` sits under `output` and not in the
+  `SpacingSetup` union. Reaches SCSS as `$utilities-spacing-fixed`, added to
+  `trimscale.scss`'s `@forward ... show` list. `utility-classes.md` gets a
+  separate fixed section, and the base classes' heading is "Spacing (base)"
+  so "fixed" doesn't mean two things there.
+- Dev dependency `sass-embedded` → `sass` (root and styleguide). Windows
+  Smart App Control blocks the unsigned `dart.exe` in `sass-embedded`
+  (`spawn UNKNOWN`). `generateCss.ts` already accepts either. The styleguide
+  needs `pnpm install --ignore-workspace`, plain `pnpm install` there walks up
+  to the root `pnpm-workspace.yaml`.
 - **Breaking:** `defaultScheme`, `baseColorTokens`, `customColorTokens` and
   `semanticColorAliases` move from the top level of `TrimscaleConfig` into a
   new `colorSetup` group, the last axis that was still spread across the top
@@ -150,6 +195,11 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- Numeric spacing loops are guarded with `@if $end > 0`. `@for $i from 1
+  through 0` counts down in Sass, so an end of 0 emitted `--space-1` and
+  `--space-0`, and the old macro loop (`from micro-end + 1`) did the same
+  whenever `numericScaleMacroEnd <= numericScaleMicroEnd`. Applies to the
+  tokens, their `@property` blocks and the utility classes.
 - `fluidScale.precision` was read by nothing. `fluidScaleTree` is
   `kebabKeys(data)`, so the key rode into `$fluid-scale` with the rest of the
   map and looked wired, while all four functions used `round()`'s hardcoded

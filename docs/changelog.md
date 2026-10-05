@@ -32,6 +32,35 @@ colorSetup: {
 
 ### Changes worth a look
 
+**`--space-*` is always fluid, and the fixed steps are `--space-fixed-*`.** Under the default `'independent'` approach, every spacing step used to be either fixed or fluid, never both: `tShirtScaleMicro` and `--space-1` up to `numericScaleMicroEnd` sat on the static `--unit-micro`, the rest on the fluid `--unit-macro`, all under `--space-*`. A value like 16px → 32px had no name when `sm` was a fixed tier. Now `--space-*` is the fluid scale throughout (`tShirtScaleMacro`, and `--space-1` up to `numericScaleMacroEnd`), the same meaning it has under `'coupled'`, and the fixed steps get their own namespace: `--space-fixed-{tier}` from `tShirtScaleMicro` and `--space-fixed-1` up to `numericScaleMicroEnd`. The two maps may share keys, `sm` in both gives a fluid `--space-sm` and a fixed `--space-fixed-sm`. Each fixed step has utility classes too, `.p-fixed-sm`, `.mt-fixed-4` and so on, and `output.utilities.spacing.fixed` turns them off.
+
+What it means for a config you don't change. Its `tShirtScaleMicro` tiers move to the new names, and nothing fails to compile:
+
+- `--space-3xs` to `--space-lg` (the old default micro tiers) no longer exist, and neither do `.p-sm` and the other classes built on them. A `var()` pointing at one resolves to nothing, so look for padding and margins that collapsed to zero.
+- `--space-1` to `--space-6` exist still, but grow with the viewport where they were fixed: the same size at `fluidScale.minWidth`, up to twice it at `maxWidth`. This is the one change you can't see in the output's token list.
+- Your `tShirtScaleMacro` tiers and the numeric steps above `numericScaleMicroEnd` are unchanged.
+
+To keep exactly what you had, rename: `--space-sm` → `--space-fixed-sm`, `--space-4` → `--space-fixed-4`, `.p-sm` → `.p-fixed-sm`. To adopt the new defaults instead, where every tier exists in both forms, copy `spacingSetup` from the template:
+
+```ts
+tShirtScaleMicro: {
+  '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+},
+tShirtScaleMacro: {
+  '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+  '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+  '7xl': 24, '8xl': 28, '9xl': 32,
+},
+numericScaleMicroEnd: 8,
+numericScaleMacroEnd: 32,
+```
+
+Note that this also changes `--space-xl` to `--space-4xl` (new multipliers 8, 10, 12, 14 where they were 6, 8, 10, 12) and drops `--space-33` to `--space-48`. The default numeric scale ends at 32, since steps past it are rarely needed and `calc()` covers them.
+
+`'coupled'` configs keep their names: `tShirtScale` was already fluid `--space-*`, and there is no fixed scale. What changes is that each `--space-*` rounds to the nearest whole pixel, `round(nearest, calc(var(--unit) * N), 1px)`, the way `'independent'` steps already did through `--unit-macro`. A step moves by less than a pixel at most, so expect no visible change beyond sharper alignment where horizontal padding used to land between pixels. The template's commented-out coupled example uses the same 15 multipliers and end of 32 as the new independent fluid scale. In SCSS, `$space-values` holds only the fluid map (it was the merge of both), and `$space-fixed-values`, `$space-numeric-end` and `$space-fixed-numeric-end` are new.
+
+→ [customizing-spacing.md](customizing-spacing.md#independent-default)
+
 **Colors are optional now.** Omit `colorSetup` entirely and the output holds nothing color-related: no `--{prefix}-*` custom properties, no `color-scheme` declaration, and no `.theme-light`/`.theme-dark` rules. For a project whose colors come from somewhere else, that was previously a palette you had to fill in to get `generate` to run at all, and then had to ignore.
 
 Two things become yours when you leave it out. Declare `color-scheme` on `:root` yourself, matching the palette you do ship: it governs how the browser renders form controls, scrollbars and the canvas, so a `light dark` left behind over a light-only palette renders dark controls on light surfaces. And the theme switch goes with it, since `.theme-light`/`.theme-dark` only ever forced `color-scheme` for trimscale's own `light-dark()` tokens.
@@ -81,7 +110,7 @@ What it means: rename the calls. The arguments, their order and the output are u
 
 → [abstracts.md](abstracts.md)
 
-**`fn.fluid-spacing` is gone, and a token replaces it.** It returned a fluid multiple of `fluidScale`'s base font-size, which is what `spacingSetup`'s `'coupled'` approach builds `--space-*` from. Under `'independent'`, the default, the tokens come from `--unit-micro` and `--unit-macro` instead, so the function's result matched no token in your output: `fn.fluid-spacing(4)` ran 16px to 20px where `--space-4` is a static 16px.
+**`fn.fluid-spacing` is gone, and a token replaces it.** It returned a fluid multiple of `fluidScale`'s base font-size, which is what `spacingSetup`'s `'coupled'` approach builds `--space-*` from. Under `'independent'`, the default, the tokens come from `--unit-micro` and `--unit-macro` instead, so the function's result matched no token in your output: `fn.fluid-spacing(4)` ran 16px to 20px, where `--space-4` runs 16px to 32px and `--space-fixed-4` is a static 16px.
 
 What it means: write the multiple in CSS instead. `--fluid-base` is a token, so this needs no Sass and works the same in a project consuming the compiled CSS:
 
@@ -94,7 +123,7 @@ The divisor is `spacingSetup.baseGridSize`, so a level of 12 on the default grid
 
 `fn.fluid-space-step` stays. It reads its levels the same way, so under `'independent'` its result matches no `--space-*` token either, and [abstracts.md](abstracts.md) now says so. It is kept because a named, scale-anchored range is coming to the config and needs exactly that function, rewritten against the token model your config actually uses.
 
-**Fluid tokens are no longer registered with `@property`.** That covers `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and every fluid `--space-*`. A registered length is computed where it is declared, on `:root`, and a `vw` there doesn't match the `vw` the rest of the page sees: the spec exempts the root from the scrollbar adjustment every other element gets. In Chromium 145 to 152 with classic scrollbars (the Windows default) the scrollbar was subtracted twice instead, so every fluid token came out 1-2 % small in its fluid part. Left unregistered, a token resolves on the element that uses it. See [design-tokens.md](design-tokens.md#registered-and-unregistered-tokens) for which tokens are registered and why. Static tokens (`--unit-micro`, the `--space-*` steps built on it, `--header-height`, font weights, line heights) stay registered.
+**Fluid tokens are no longer registered with `@property`.** That covers `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and every fluid `--space-*`. A registered length is computed where it is declared, on `:root`, and a `vw` there doesn't match the `vw` the rest of the page sees: the spec exempts the root from the scrollbar adjustment every other element gets. In Chromium 145 to 152 with classic scrollbars (the Windows default) the scrollbar was subtracted twice instead, so every fluid token came out 1-2 % small in its fluid part. Left unregistered, a token resolves on the element that uses it. See [design-tokens.md](design-tokens.md#registered-and-unregistered-tokens) for which tokens are registered and why. Static tokens (`--unit-micro`, every `--space-fixed-*`, `--header-height`, font weights, line heights) stay registered.
 
 What it means, in two places:
 
@@ -113,6 +142,7 @@ What it means: nothing at 2:1 and narrower, and nothing at 21:9 and wider, where
 
 ### Fixed
 
+- A numeric spacing scale ending at `0` generated two steps instead of none. Sass's `@for` counts down when its end is below its start, so `numericScaleMicroEnd: 0` emitted `--space-1` and `--space-0`, plus their utility classes. An end of `0` now generates nothing for that scale.
 - `fluidScale.precision` had no effect on anything. It is required in the config, documented as the decimal places in generated `clamp()` values and written into the bridge file, but nothing read it: every fluid function rounded to a hardcoded 4. It governs all four now, so a config that set anything other than `4` gets different decimals after upgrading, and `--fs-*`, `--space-*` and `--unit-macro` move with it. `4` stays the default and the value to keep: rem at four decimals is already 0.0016px, and fewer decimals round the clamp endpoints rather than just the slope.
 
 ## 1.0.0-beta.5

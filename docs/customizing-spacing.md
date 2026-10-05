@@ -32,33 +32,39 @@ Spacing has its own two-unit system, decoupled from the type scale:
 - `--unit-micro`: a static grid unit (`baseGridSize`). Never scales with the viewport.
 - `--unit-macro`: its own fluid clamp from `baseGridSize` up to `baseGridSize × spacingSetup.macroRangeMultiplier` (optional, defaults to `2`, so `8px` at the default `baseGridSize: 4`), across the viewport width range set in `fluidScale` (`minWidth`/`maxWidth`), only the viewport range is shared with the type scale. `macroRangeMultiplier` must be greater than `1` (so the macro ceiling always exceeds `baseGridSize`), the generator throws if it isn't. If you narrow `fluidScale`'s viewport range significantly (e.g. `minWidth`/`maxWidth` of `360`/`800` instead of the default `360`/`1440`), reconsider `macroRangeMultiplier` too: the resulting ceiling is a fixed target value, not derived from the range, so a much narrower range reaches it over a much shorter distance and can make the large tiers (which multiply `--unit-macro`) feel disproportionately large relative to the viewport at `maxWidth`.
 
-Small tiers (`3xs`–`lg`) multiply `--unit-micro`; large tiers (`xl`–`9xl`) multiply `--unit-macro`. This is why `--space-lg` stays fixed while `--space-xl` and up grow with the viewport: the split is deliberate, not an artifact.
+The two units give two token namespaces:
+
+- `--space-*` is the fluid scale, multiples of `--unit-macro`, from `tShirtScaleMacro` and `numericScaleMacroEnd`. It covers the whole range, from `3xs` to `9xl`.
+- `--space-fixed-*` is the static scale, multiples of `--unit-micro`, from `tShirtScaleMicro` and `numericScaleMicroEnd`. It is a separate set for the places where a value must not grow with the viewport.
+
+The two maps may share keys, and do by default: `sm` in both gives a fluid `--space-sm` (16px → 32px) and a fixed `--space-fixed-sm` (16px everywhere). Both start at the same value at `fluidScale.minWidth`, since both units equal `baseGridSize` there.
 
 ```ts
 spacingSetup: {
   baseGridSize: 4,
   approach: 'independent',
-  tShirtScaleMicro: {
-    '3xs': 1, '2xs': 2, 'xs': 3, 'sm': 4, 'md': 5, 'lg': 6,
+  tShirtScaleMicro: { // --space-fixed-*
+    '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
   },
-  tShirtScaleMacro: {
-    'xl': 6, '2xl': 8, '3xl': 10, '4xl': 12,
-    '5xl': 16, '6xl': 20, '7xl': 24, '8xl': 28, '9xl': 32,
+  tShirtScaleMacro: { // --space-*
+    '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+    '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+    '7xl': 24, '8xl': 28, '9xl': 32,
   },
-  numericScaleMicroEnd: 6,   // --space-1 .. --space-6 use --unit-micro
-  numericScaleMacroEnd: 48,  // --space-7 .. --space-48 use --unit-macro
+  numericScaleMicroEnd: 8,   // --space-fixed-1 .. --space-fixed-8
+  numericScaleMacroEnd: 32,  // --space-1 .. --space-32
   // macroRangeMultiplier: 2, // optional, defaults to 2, must be > 1
 }
 ```
 
-With the example values above, the split lands here:
+| Tokens                                         | From                   | Unit                    |
+| ---------------------------------------------- | ---------------------- | ----------------------- |
+| `--space-3xs` … `--space-9xl`                  | `tShirtScaleMacro`     | `--unit-macro` (fluid)  |
+| `--space-1` … `--space-32`                     | `numericScaleMacroEnd` | `--unit-macro` (fluid)  |
+| `--space-fixed-3xs` … `--space-fixed-xl`       | `tShirtScaleMicro`     | `--unit-micro` (static) |
+| `--space-fixed-1` … `--space-fixed-8`          | `numericScaleMicroEnd` | `--unit-micro` (static) |
 
-| Tier                          | Multiplier of | Unit           |
-| ------------------------------ | :-------------: | ---------------- |
-| `3xs`, `2xs`, `xs`, `sm`, `md`, `lg` | 1–6            | `--unit-micro` (static) |
-| `xl`, `2xl`, `3xl`, `4xl`, `5xl`, `6xl`, `7xl`, `8xl`, `9xl` | 6–32 | `--unit-macro` (fluid) |
-
-`lg` is the last micro tier, `xl` is the first macro one, that boundary is a config choice (whichever key you last put in `tShirtScaleMicro` vs. first in `tShirtScaleMacro`), not a fixed rule, rename or move tiers between the two maps freely.
+Both maps are free to hold any tiers: the fixed scale doesn't have to stop at `xl`, and the fluid one doesn't have to start at `3xs`. Each also gets utility classes, `.p-sm` for the fluid step and `.p-fixed-sm` for the fixed one, see [utility-classes.md](utility-classes.md#spacing).
 
 **Use this when** you want to tune how aggressively text grows (`fluidScale`'s type-scale ratio) without spacing following along at the same rate, the two systems can be adjusted independently.
 
@@ -66,20 +72,24 @@ With the example values above, the split lands here:
 
 Spacing and text scale in lockstep. A single `--unit` (`fluidScale`'s base font-size ÷ `baseGridSize`) drives every tier: the Utopia.fyi-style model.
 
+`--unit` itself isn't rounded, each `--space-*` rounds its own product to the nearest whole pixel instead: `round(nearest, calc(var(--unit) * 4), 1px)`. Rounding `--unit` would move every tier in the same single jump (it only spans 4px → 5px by default), while rounding per tier lets `--space-sm` climb 16, 17, 18, 19, 20. Whole pixels matter most for horizontal spacing, where a fractional `padding-inline` shifts where text starts.
+
 ```ts
 spacingSetup: {
   baseGridSize: 4,
   approach: 'coupled',
   tShirtScale: {
-    '3xs': 1, '2xs': 2, 'xs': 3, 'sm': 4, 'md': 5, 'lg': 6,
-    'xl': 8, '2xl': 12, '3xl': 16, '4xl': 20,
-    '5xl': 24, '6xl': 28, '7xl': 32, '8xl': 40, '9xl': 48,
+    '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+    '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+    '7xl': 24, '8xl': 28, '9xl': 32,
   },
-  numericScaleEnd: 48,  // --space-1 .. --space-48 all use --unit
+  numericScaleEnd: 32,  // --space-1 .. --space-32 all use --unit
 }
 ```
 
-Note the multipliers are different from the independent example above: `--unit` is a much narrower range (`4px` at 360px viewport → `5px` at 1440px, since it's `fluidScale.minFontSize / 4` to `fluidScale.maxFontSize / 4` at the default `baseGridSize: 4`) than `--unit-macro`'s `4px → 8px` (its default `macroRangeMultiplier` of `2`), so a tier needs a larger multiplier to land on a similar target pixel value.
+The multipliers match the fluid scale in the independent example above, only the unit differs. `--unit` is a much narrower range (`4px` at 360px viewport → `5px` at 1440px, since it's `fluidScale.minFontSize / 4` to `fluidScale.maxFontSize / 4` at the default `baseGridSize: 4`) than `--unit-macro`'s `4px → 8px` (its default `macroRangeMultiplier` of `2`), so the same tier grows less: `--space-9xl` ends at `160px` here and at `256px` under `'independent'`. Raise the multipliers if you want coupled tiers to reach similar pixel values. There is no `--space-fixed-*` under `'coupled'`.
+
+Switching from `'coupled'` to `'independent'` keeps every `--space-*` name and its fluid behavior, and adds the `--space-fixed-*` scale on top.
 
 **Use this when** you want spacing to visually "breathe" with text at the same rate everywhere: a simpler mental model, at the cost of not being able to tune one without the other.
 
@@ -90,7 +100,7 @@ Note the multipliers are different from the independent example above: `--unit` 
 Both approaches share the same shape for their scale maps:
 
 - **T-shirt tiers**: a map from tier name to a multiplier of the relevant unit. Tier names are `'xs' | 'sm' | 'md' | 'lg' | 'xl'` or `` `${number}xs` ``/`` `${number}xl` `` for extra tiers beyond those (e.g. `'2xs'`, `'10xl'`): add or remove keys freely, there's no fixed list you must match.
-- **Numeric range**: `numericScaleEnd` (coupled) or `numericScaleMicroEnd`/`numericScaleMacroEnd` (independent) set how far the numbered `--space-1`..`--space-N` scale goes. Lower it if you don't need the full range: it directly controls how many `--space-*` custom properties get generated.
+- **Numeric range**: `numericScaleEnd` (coupled) or `numericScaleMacroEnd` (independent) sets how far the numbered `--space-1`..`--space-N` scale goes, and `numericScaleMicroEnd` (independent) how far `--space-fixed-1`..`--space-fixed-N` goes. Both start at `1`. Lower them if you don't need the full range: they directly control how many custom properties and utility classes get generated, and `0` generates none.
 
 ---
 
