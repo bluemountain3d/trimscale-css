@@ -73,13 +73,13 @@
       /// Used as foundation for all spacing tokens
       --unit: calc(var(--fluid-base) / #{var.$base-grid-size});
     } @else {
-      /// Base spacing unit for small steps — static grid unit ($base-grid-size), not fluid.
+      /// Base spacing unit for the fixed --space-fixed-* scale — static grid unit ($base-grid-size), not fluid.
       /// A fluid clamp here would only round to a pixel or two apart across the
       /// viewport range (e.g. 4px vs 5px under the default fluidScale), so it's
       /// kept as a plain static value instead of a needless clamp().
       --unit-micro: #{fn.px-to-rem(var.$base-grid-size)};
 
-      /// Base spacing unit for large steps, an independent $base-grid-size → $macro-range-max fluid clamp
+      /// Base spacing unit for the fluid --space-* scale, an independent $base-grid-size → $macro-range-max fluid clamp
       --unit-macro: round(
                       nearest,
                       #{fn.fluid-value(var.$base-grid-size, var.$macro-range-max, "vwx")},

@@ -1,45 +1,69 @@
 
 @use "abstracts/variables" as var;
-@use "sass:map";
 
 /// @group Tokens
 /// @name Spacing Tokens
-/// @description Fluid spacing scale based on --unit (coupled) or
-/// --unit-micro/--unit-macro (independent) from base tokens. Provides both
-/// t-shirt sizes (xs, sm, md...) and a numeric scale.
+/// @description Spacing scale based on --unit (coupled) or
+/// --unit-micro/--unit-macro (independent) from base tokens. --space-* is
+/// always fluid; under independent, --space-fixed-* adds a static scale on
+/// --unit-micro. Both provide t-shirt sizes (xs, sm, md...) and a numeric scale.
 /// ===========================================================================
 
-/// The t-shirt-size scale actually in effect (var.$t-shirt-scale under the
-/// coupled approach, or the merge of var.$t-shirt-scale-micro/-macro under
-/// independent) — consumed by utilities/_spacing-utilities.scss.
+/// The fluid t-shirt scale behind --space-* (var.$t-shirt-scale under the
+/// coupled approach, var.$t-shirt-scale-macro under independent), consumed by
+/// utilities/_spacing-utilities.scss.
 /// @type Map
 $space-values: () !default;
-$_space-micro: () !default;
-$_space-macro: () !default;
+
+/// The fixed t-shirt scale behind --space-fixed-* (var.$t-shirt-scale-micro),
+/// empty under the coupled approach. Consumed by utilities/_spacing-utilities.scss.
+/// @type Map
+$space-fixed-values: () !default;
+
+/// Upper bound of the fluid numeric scale, --space-1..N (var.$numeric-scale-end
+/// under the coupled approach, var.$numeric-scale-macro-end under independent).
+/// Consumed by utilities/_spacing-utilities.scss.
+/// @type Number
+$space-numeric-end: var.$numeric-scale-end;
+
+/// Upper bound of the fixed numeric scale, --space-fixed-1..N
+/// (var.$numeric-scale-micro-end), 0 under the coupled approach. Consumed by
+/// utilities/_spacing-utilities.scss.
+/// @type Number
+$space-fixed-numeric-end: 0;
 
 @if var.$spacing-approach == "coupled" {
   $space-values: var.$t-shirt-scale;
 } @else {
-  $_space-micro: var.$t-shirt-scale-micro;
-  $_space-macro: var.$t-shirt-scale-macro;
-  $space-values: map.merge($_space-micro, $_space-macro);
+  $space-values: var.$t-shirt-scale-macro;
+  $space-fixed-values: var.$t-shirt-scale-micro;
+  $space-numeric-end: var.$numeric-scale-macro-end;
+  $space-fixed-numeric-end: var.$numeric-scale-micro-end;
 }
 
-// Only the micro steps under the independent approach are registered: they
-// are static (--unit-micro). Every other --space-* carries a vw, via --unit or
-// --unit-macro, and stays unregistered for the reason given at --vwx in
-// _base-tokens.scss.
-@if var.$spacing-approach != "coupled" {
-  @each $size, $factor in $_space-micro {
-    @property --space-#{$size} {
-      syntax: "<length>";
-      inherits: true;
-      initial-value: 4px;
-    }
-  }
+// Every fluid step lands on a whole pixel. Under independent that comes from
+// --unit-macro, which is rounded itself, so its multiples are too. --unit is
+// not: rounding it would move every step in the same single jump (4px to 5px
+// by default), so under coupled each step rounds its own product instead and
+// climbs in 1px steps.
+$_coupled: var.$spacing-approach == "coupled";
 
-  @for $i from 1 through var.$numeric-scale-micro-end {
-    @property --space-#{$i} {
+// Only the fixed steps are registered: they are static (--unit-micro). Every
+// --space-* carries a vw, via --unit or --unit-macro, and stays unregistered
+// for the reason given at --vwx in _base-tokens.scss.
+@each $size, $factor in $space-fixed-values {
+  @property --space-fixed-#{$size} {
+    syntax: "<length>";
+    inherits: true;
+    initial-value: 4px;
+  }
+}
+
+// Guarded rather than looped unconditionally: @for counts down when `through`
+// is below `from`, so an end of 0 would emit --space-*-1 and --space-*-0.
+@if $space-fixed-numeric-end > 0 {
+  @for $i from 1 through $space-fixed-numeric-end {
+    @property --space-fixed-#{$i} {
       syntax: "<length>";
       inherits: true;
       initial-value: 4px;
@@ -53,39 +77,43 @@ $_space-macro: () !default;
     // T-shirt Size Scale
     // ==========================================================================
 
-    /// Semantic spacing tokens using t-shirt sizes
+    /// Fluid spacing tokens using t-shirt sizes
     /// Usage: padding: var(--space-sm); gap: var(--space-lg);
-    @if var.$spacing-approach == "coupled" {
-      @each $size, $factor in $space-values {
-        --space-#{$size}: calc(var(--unit) * #{$factor});
-      }
-    } @else {
-      @each $size, $factor in $_space-micro {
-        --space-#{$size}: calc(var(--unit-micro) * #{$factor});
-      }
-
-      @each $size, $factor in $_space-macro {
+    @each $size, $factor in $space-values {
+      @if $_coupled {
+        --space-#{$size}: round(nearest, calc(var(--unit) * #{$factor}), 1px);
+      } @else {
         --space-#{$size}: calc(var(--unit-macro) * #{$factor});
       }
+    }
+
+    /// Fixed spacing tokens using t-shirt sizes, independent approach only
+    /// Usage: padding: var(--space-fixed-sm);
+    @each $size, $factor in $space-fixed-values {
+      --space-fixed-#{$size}: calc(var(--unit-micro) * #{$factor});
     }
 
     // ==========================================================================
     // Numeric Scale
     // ==========================================================================
 
-    /// Numeric spacing tokens for fine-grained control
+    /// Fluid numeric spacing tokens for fine-grained control
     /// Usage: margin-block: var(--space-5); padding-inline: var(--space-12);
-    @if var.$spacing-approach == "coupled" {
-      @for $i from 1 through var.$numeric-scale-end {
-        --space-#{$i}: calc(var(--unit) * #{$i});
+    @if $space-numeric-end > 0 {
+      @for $i from 1 through $space-numeric-end {
+        @if $_coupled {
+          --space-#{$i}: round(nearest, calc(var(--unit) * #{$i}), 1px);
+        } @else {
+          --space-#{$i}: calc(var(--unit-macro) * #{$i});
+        }
       }
-    } @else {
-      @for $i from 1 through var.$numeric-scale-micro-end {
-        --space-#{$i}: calc(var(--unit-micro) * #{$i});
-      }
+    }
 
-      @for $i from (var.$numeric-scale-micro-end + 1) through var.$numeric-scale-macro-end {
-        --space-#{$i}: calc(var(--unit-macro) * #{$i});
+    /// Fixed numeric spacing tokens, independent approach only
+    /// Usage: margin-block: var(--space-fixed-4);
+    @if $space-fixed-numeric-end > 0 {
+      @for $i from 1 through $space-fixed-numeric-end {
+        --space-fixed-#{$i}: calc(var(--unit-micro) * #{$i});
       }
     }
   }

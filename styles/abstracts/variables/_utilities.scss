@@ -13,6 +13,10 @@ $utilities-spacing-base: true !default;
 $utilities-spacing-tshirt: true !default;
 /// @type Boolean
 $utilities-spacing-numeric: true !default;
+/// The --space-fixed-* counterparts of the t-shirt and numeric classes.
+/// No effect under the coupled approach, which has no fixed scale.
+/// @type Boolean
+$utilities-spacing-fixed: true !default;
 
 /// @type Boolean
 $utilities-typography-trim: true !default;

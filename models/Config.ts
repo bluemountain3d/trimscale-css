@@ -279,18 +279,18 @@ export type DynamicLineHeight = {
 type TShirtScale = `${number}xs` | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | `${number}xl`
 
 /**
- * How `--space-*` tokens grow across viewport widths.
+ * How spacing tokens grow across viewport widths. `--space-*` is fluid under
+ * both approaches.
  * - `'coupled'` ties spacing to the fluid type scale: a single `--unit`
  *   (fluidScale's base font-size / `baseGridSize`) drives every step, so
  *   one `tShirtScale` map covers every named tier.
- * - `'independent'` keeps spacing on its own two-unit system instead:
- *   `--unit-micro` (static, fixed at `baseGridSize`) for small steps,
- *   `--unit-macro` (its own fluid clamp from `baseGridSize` up to
- *   `baseGridSize * macroRangeMultiplier`, endpoints unrelated to
- *   fluidScale but its viewport range still comes from fluidScale) for
- *   large steps — hence two separate tier maps
- *   (`tShirtScaleMicro`/`tShirtScaleMacro`) and two numeric-scale bounds
- *   (`numericScaleMicroEnd`/`numericScaleMacroEnd`).
+ * - `'independent'` keeps spacing on its own two-unit system instead, with
+ *   two token namespaces: `--space-*` on `--unit-macro` (its own fluid clamp
+ *   from `baseGridSize` up to `baseGridSize * macroRangeMultiplier`, viewport
+ *   range from fluidScale), from `tShirtScaleMacro`/`numericScaleMacroEnd`,
+ *   and the static `--space-fixed-*` on `--unit-micro` (`baseGridSize`), from
+ *   `tShirtScaleMicro`/`numericScaleMicroEnd`. The two maps may share keys:
+ *   `sm` in both gives a fluid `--space-sm` and a fixed `--space-fixed-sm`.
  */
 export type SpacingSetup = {
   /** The base spacing grid unit (px): `--unit-micro` under `'independent'`, or the divisor of `--unit` under `'coupled'`. @default 4 */
@@ -385,6 +385,8 @@ export type UtilitiesConfig = {
         tShirt?: boolean
         /** `.{m|p}{side?}-{1..numericScaleEnd}`. */
         numeric?: boolean
+        /** `.{m|p}{side?}-fixed-*`, for whichever of `tShirt`/`numeric` is on. No effect under `approach: 'coupled'`, which has no fixed scale. */
+        fixed?: boolean
       }
   typography?:
     | boolean

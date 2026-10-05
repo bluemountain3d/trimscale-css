@@ -5,6 +5,7 @@ export type ResolvedUtilityFlags = {
   spacingBase: boolean
   spacingTshirt: boolean
   spacingNumeric: boolean
+  spacingFixed: boolean
   typographyTrim: boolean
   typographyFamily: boolean
   typographySize: boolean
@@ -44,7 +45,7 @@ export const resolveUtilityFlags = (utilities: boolean | UtilitiesConfig | undef
   const spacingOn = spacing !== false
   const typographyOn = typography !== false
 
-  const spacingSub = (key: 'base' | 'tShirt' | 'numeric'): boolean =>
+  const spacingSub = (key: 'base' | 'tShirt' | 'numeric' | 'fixed'): boolean =>
     spacingOn && (typeof spacing === 'object' ? (spacing[key] ?? true) : true)
 
   const typographySub = (
@@ -64,6 +65,7 @@ export const resolveUtilityFlags = (utilities: boolean | UtilitiesConfig | undef
     spacingBase: spacingSub('base'),
     spacingTshirt: spacingSub('tShirt'),
     spacingNumeric: spacingSub('numeric'),
+    spacingFixed: spacingSub('fixed'),
     typographyTrim: typographySub('trim'),
     typographyFamily: typographySub('family'),
     typographySize: typographySub('size'),

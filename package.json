@@ -78,7 +78,7 @@
     "@storybook/addon-essentials": "^8.6.14",
     "@storybook/html-vite": "^10.4.2",
     "@types/node": "^26.2.0",
-    "sass-embedded": "^1.104.0",
+    "sass": "^1.105.1",
     "storybook": "^10.4.2",
     "typescript": "^7.0.2"
   },

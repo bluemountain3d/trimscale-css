@@ -46,7 +46,7 @@ Returns a `clamp()` value that spans between two grid levels. Same `$type: 'max'
 gap: fn.fluid-space-step(4, 8); // between grid level 4 and grid level 8
 ```
 
-It resolves both levels the way `spacingSetup`'s `'coupled'` approach does, as multiples of `fluidScale`'s base font-size. Under `'independent'`, which is the default, the `--space-*` tokens are built from `--unit-micro` (static) and `--unit-macro` (its own clamp) instead, so the value this returns does not correspond to any `--space-*` token. `fn.fluid-value` with explicit pixel endpoints is the one to reach for meanwhile.
+It resolves both levels the way `spacingSetup`'s `'coupled'` approach does, as multiples of `fluidScale`'s base font-size. Under `'independent'`, which is the default, the `--space-*` tokens are built from `--unit-macro` (its own clamp) instead, so the value this returns does not correspond to any `--space-*` token. `fn.fluid-value` with explicit pixel endpoints is the one to reach for meanwhile.
 
 For a plain multiple of the fluid base, no function is needed: `--fluid-base` is a token, so `calc(var(--fluid-base) * 3)` works anywhere, including in a project consuming the compiled CSS.
 

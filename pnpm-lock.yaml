@@ -219,19 +219,19 @@ importers:
         version: 2.5.10
       '@storybook/addon-docs':
         specifier: ^10.5.6
-        version: 10.5.10(@types/react@19.2.17)(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))
+        version: 10.5.10(@types/react@19.2.17)(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))
       '@storybook/addon-essentials':
         specifier: ^8.6.14
         version: 8.6.14(@types/react@19.2.17)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       '@storybook/html-vite':
         specifier: ^10.4.2
-        version: 10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))
+        version: 10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
-      sass-embedded:
-        specifier: ^1.104.0
-        version: 1.104.0
+      sass:
+        specifier: ^1.105.1
+        version: 1.105.1
       storybook:
         specifier: ^10.4.2
         version: 10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1735,6 +1735,11 @@ packages:
     engines: {node: '>=20.19.0'}
     hasBin: true
 
+  sass@1.105.1:
+    resolution: {integrity: sha512-1CnAWPyrrnVQzXGB/DUep1vYCKCm1CIBr+YxjjiW6wk9qtzemnGP4qicH56T2F9S4Hjtv/Ne3jDz8JqfdDU4oA==}
+    engines: {node: '>=20.19.0'}
+    hasBin: true
+
   scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
 
@@ -1953,7 +1958,8 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.10':
     optional: true
 
-  '@bufbuild/protobuf@2.14.1': {}
+  '@bufbuild/protobuf@2.14.1':
+    optional: true
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -2359,10 +2365,10 @@ snapshots:
       storybook: 10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       ts-dedent: 2.2.0
 
-  '@storybook/addon-docs@10.5.10(@types/react@19.2.17)(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))':
+  '@storybook/addon-docs@10.5.10(@types/react@19.2.17)(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))':
     dependencies:
       '@mdx-js/react': 3.1.1(@types/react@19.2.17)(react@19.2.7)
-      '@storybook/csf-plugin': 10.5.10(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))
+      '@storybook/csf-plugin': 10.5.10(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))
       '@storybook/icons': 2.0.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@storybook/react-dom-shim': 10.5.10(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       react: 19.2.7
@@ -2442,32 +2448,32 @@ snapshots:
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
 
-  '@storybook/builder-vite@10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))':
+  '@storybook/builder-vite@10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))':
     dependencies:
-      '@storybook/csf-plugin': 10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))
+      '@storybook/csf-plugin': 10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))
       storybook: 10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       ts-dedent: 2.2.0
-      vite: 8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0)
+      vite: 8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1)
     transitivePeerDependencies:
       - esbuild
       - rollup
       - webpack
 
-  '@storybook/csf-plugin@10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))':
+  '@storybook/csf-plugin@10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))':
     dependencies:
       storybook: 10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       unplugin: 2.3.11
     optionalDependencies:
       esbuild: 0.27.7
-      vite: 8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0)
+      vite: 8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1)
 
-  '@storybook/csf-plugin@10.5.10(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))':
+  '@storybook/csf-plugin@10.5.10(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))':
     dependencies:
       storybook: 10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       unplugin: 2.3.11
     optionalDependencies:
       esbuild: 0.27.7
-      vite: 8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0)
+      vite: 8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1)
 
   '@storybook/csf-plugin@8.6.14(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))':
     dependencies:
@@ -2476,12 +2482,12 @@ snapshots:
 
   '@storybook/global@5.0.0': {}
 
-  '@storybook/html-vite@10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))':
+  '@storybook/html-vite@10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))':
     dependencies:
-      '@storybook/builder-vite': 10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0))
+      '@storybook/builder-vite': 10.4.2(esbuild@0.27.7)(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1))
       '@storybook/html': 10.4.2(storybook@10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
       storybook: 10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      vite: 8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0)
+      vite: 8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1)
     transitivePeerDependencies:
       - esbuild
       - rollup
@@ -2700,11 +2706,11 @@ snapshots:
   chokidar@5.0.0:
     dependencies:
       readdirp: 5.1.1
-    optional: true
 
   clone@2.1.2: {}
 
-  colorjs.io@0.7.1: {}
+  colorjs.io@0.7.1:
+    optional: true
 
   css.escape@1.5.1: {}
 
@@ -2783,7 +2789,8 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  has-flag@4.0.0: {}
+  has-flag@4.0.0:
+    optional: true
 
   immutable@5.1.9: {}
 
@@ -2962,8 +2969,7 @@ snapshots:
 
   react@19.2.7: {}
 
-  readdirp@5.1.1:
-    optional: true
+  readdirp@5.1.1: {}
 
   recast@0.23.11:
     dependencies:
@@ -3006,6 +3012,7 @@ snapshots:
   rxjs@7.8.2:
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   sass-embedded-all-unknown@1.104.0:
     dependencies:
@@ -3093,6 +3100,7 @@ snapshots:
       sass-embedded-unknown-all: 1.104.0
       sass-embedded-win32-arm64: 1.104.0
       sass-embedded-win32-x64: 1.104.0
+    optional: true
 
   sass@1.104.0:
     dependencies:
@@ -3102,6 +3110,14 @@ snapshots:
     optionalDependencies:
       '@parcel/watcher': 2.6.0
     optional: true
+
+  sass@1.105.1:
+    dependencies:
+      chokidar: 5.0.0
+      immutable: 5.1.9
+      source-map-js: 1.2.1
+    optionalDependencies:
+      '@parcel/watcher': 2.6.0
 
   scheduler@0.27.0: {}
 
@@ -3144,12 +3160,15 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
+    optional: true
 
   sync-child-process@1.0.2:
     dependencies:
       sync-message-port: 1.2.0
+    optional: true
 
-  sync-message-port@1.2.0: {}
+  sync-message-port@1.2.0:
+    optional: true
 
   tiny-inflate@1.0.3: {}
 
@@ -3221,9 +3240,10 @@ snapshots:
 
   uuid@9.0.1: {}
 
-  varint@6.0.0: {}
+  varint@6.0.0:
+    optional: true
 
-  vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.104.0):
+  vite@8.0.16(@types/node@26.2.0)(esbuild@0.27.7)(sass-embedded@1.104.0)(sass@1.105.1):
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.4
@@ -3234,7 +3254,7 @@ snapshots:
       '@types/node': 26.2.0
       esbuild: 0.27.7
       fsevents: 2.3.3
-      sass: 1.104.0
+      sass: 1.105.1
       sass-embedded: 1.104.0
 
   webpack-virtual-modules@0.6.2: {}

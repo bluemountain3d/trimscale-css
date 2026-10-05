@@ -10,8 +10,8 @@ Every specific number in the tables below (px values, ratios, scale steps, tiers
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `--vwx`        | Adaptive viewport unit. `1vw`, capped at `2vh` on viewports at least 944px tall (`ultrawideAspectRatio` and `ultrawideHeightThresholdPx` in the config) to prevent runaway scaling                                                                                                                                                       |
 | `--fluid-base` | Base font size. Scales between `fluidScale.minFontSize` and `maxFontSize` (16px to 20px by default) using `clamp()`                                                                                                                                                                                                |
-| `--unit-micro` | Base spacing unit for small steps, fixed at `spacingSetup.baseGridSize` (default `4`), not fluid. Always a whole pixel                                                                                                                                                                                                       |
-| `--unit-macro` | Base spacing unit for large steps, an independent fluid clamp (`fluid-value(baseGridSize, baseGridSize × macroRangeMultiplier)`), rounded to the nearest pixel. Scales `baseGridSize` (default `4`) up to `baseGridSize × spacingSetup.macroRangeMultiplier` (multiplier default `2`, so `8` at the default base) across `fluidScale`'s viewport range (`minWidth`–`maxWidth`) |
+| `--unit-micro` | Base spacing unit for the fixed `--space-fixed-*` scale, fixed at `spacingSetup.baseGridSize` (default `4`), not fluid. Always a whole pixel                                                                                                                                                                                                       |
+| `--unit-macro` | Base spacing unit for the fluid `--space-*` scale, an independent fluid clamp (`fluid-value(baseGridSize, baseGridSize × macroRangeMultiplier)`), rounded to the nearest pixel. Scales `baseGridSize` (default `4`) up to `baseGridSize × spacingSetup.macroRangeMultiplier` (multiplier default `2`, so `8` at the default base) across `fluidScale`'s viewport range (`minWidth`–`maxWidth`) |
 
 **Why `--vwx` exists:** plain `vw`-based scaling grows with viewport width forever, on very wide (ultrawide) monitors that makes text and spacing balloon past what's readable. On a viewport at least `ultrawideHeightThresholdPx` tall, `--vwx` is `min(1vw, 2vh)`: it follows the width until the viewport is more than `ultrawideAspectRatio` (default `2`) times as wide as it is tall, and the height past that. The two sides are equal at that ratio, so sizes never jump when a window is resized across it. The height threshold keeps a short laptop window, which can be just as wide relative to its height, on plain `1vw`. Every fluid function defaults to the `'vwx'` unit key, so this one custom property fixes ultrawide scaling everywhere at once, no per-function changes needed.
 
@@ -19,29 +19,33 @@ Every specific number in the tables below (px values, ratios, scale steps, tiers
 
 ## Spacing Tokens
 
-Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro` is fixed, so sizes built from it are fixed too; `--unit-macro` is a fluid clamp, so sizes built from it scale with the viewport. Both units are `4px` at their minimum, so the table below is accurate for all sizes at the low end, only the macro-based sizes grow from there.
+Spacing comes in two scales. `--space-*` is fluid, multiples of `--unit-macro`, and grows with the viewport. `--space-fixed-*` is static, multiples of `--unit-micro`, and stays the same size everywhere. Both units are `4px` at their minimum, so a fluid step and its fixed counterpart (`--space-sm` and `--space-fixed-sm`) are equal at the low end, only the fluid one grows from there.
 
-**T-shirt sizes** (default config):
+**Fluid t-shirt sizes** (default config):
 
-| Token         | Unit            | Multiplier | Base value (360 px viewport) | Base value (1440 px viewport) |
-| ------------- | --------------- | ---------- | ----------------------------- | ------------------------------ |
-| `--space-3xs` | `--unit-micro`  | × 1        | 4 px                          | 4 px                           |
-| `--space-2xs` | `--unit-micro`  | × 2        | 8 px                          | 8 px                           |
-| `--space-xs`  | `--unit-micro`  | × 3        | 12 px                         | 12 px                          |
-| `--space-sm`  | `--unit-micro`  | × 4        | 16 px                         | 16 px                          |
-| `--space-md`  | `--unit-micro`  | × 5        | 20 px                         | 20 px                          |
-| `--space-lg`  | `--unit-micro`  | × 6        | 24 px                         | 24 px                          |
-| `--space-xl`  | `--unit-macro`  | × 6        | 24 px                         | 48 px                          |
-| `--space-2xl` | `--unit-macro`  | × 8        | 32 px                         | 64 px                          |
-| `--space-3xl` | `--unit-macro`  | × 10       | 40 px                         | 80 px                          |
-| `--space-4xl` | `--unit-macro`  | × 12       | 48 px                         | 96 px                          |
-| `--space-5xl` | `--unit-macro`  | × 16       | 64 px                         | 128 px                         |
-| `--space-6xl` | `--unit-macro`  | × 20       | 80 px                         | 160 px                         |
-| `--space-7xl` | `--unit-macro`  | × 24       | 96 px                         | 192 px                         |
-| `--space-8xl` | `--unit-macro`  | × 28       | 112 px                        | 224 px                         |
-| `--space-9xl` | `--unit-macro`  | × 32       | 128 px                        | 256 px                         |
+| Token         | Multiplier | 360 px viewport | 1440 px viewport |
+| ------------- | ---------- | --------------- | ---------------- |
+| `--space-3xs` | × 1        | 4 px            | 8 px             |
+| `--space-2xs` | × 2        | 8 px            | 16 px            |
+| `--space-xs`  | × 3        | 12 px           | 24 px            |
+| `--space-sm`  | × 4        | 16 px           | 32 px            |
+| `--space-md`  | × 5        | 20 px           | 40 px            |
+| `--space-lg`  | × 6        | 24 px           | 48 px            |
+| `--space-xl`  | × 8        | 32 px           | 64 px            |
+| `--space-2xl` | × 10       | 40 px           | 80 px            |
+| `--space-3xl` | × 12       | 48 px           | 96 px            |
+| `--space-4xl` | × 14       | 56 px           | 112 px           |
+| `--space-5xl` | × 16       | 64 px           | 128 px           |
+| `--space-6xl` | × 20       | 80 px           | 160 px           |
+| `--space-7xl` | × 24       | 96 px           | 192 px           |
+| `--space-8xl` | × 28       | 112 px          | 224 px           |
+| `--space-9xl` | × 32       | 128 px          | 256 px           |
 
-**Numeric scale:** `--space-1` through `--space-48` by default. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`. All of this is config driven, see [customizing-spacing.md](customizing-spacing.md) to change tiers, the numeric range, or switch growth model entirely.
+**Fixed t-shirt sizes** (default config): `--space-fixed-3xs` through `--space-fixed-xl`, with the same multipliers as their fluid namesakes (× 1 to × 8), so `4px` to `32px` at every viewport width.
+
+**Numeric scale:** `--space-1` through `--space-32` by default, each equal to `calc(var(--unit-macro) * N)`, and `--space-fixed-1` through `--space-fixed-8`, each equal to `calc(var(--unit-micro) * N)`.
+
+This is the default `'independent'` approach. Under `'coupled'`, every `--space-*` is a multiple of a single `--unit` instead, rounded to the nearest whole pixel, and there is no `--space-fixed-*`. All of it is config driven, see [customizing-spacing.md](customizing-spacing.md) to change tiers, the numeric ranges, or switch growth model entirely.
 
 ## Typography Tokens
 
@@ -138,7 +142,7 @@ Some tokens are registered with `@property`, some are not, and the split is deli
 
 | Registered | Unregistered |
 | --- | --- |
-| `--unit-micro` and the `--space-*` steps built on it, `--header-height`, `--font-weight-*`, `--line-height-*`, every color token | `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and `--text-*`, the fluid `--space-*` steps, `--line-height-dynamic`, `--avg-char-width-*`, `--font-family-*` |
+| `--unit-micro` and every `--space-fixed-*`, `--header-height`, `--font-weight-*`, `--line-height-*`, every color token | `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and `--text-*`, every `--space-*`, `--line-height-dynamic`, `--avg-char-width-*`, `--font-family-*` |
 
 A registered token transitions smoothly and reads back as a computed value, such as `16px`. An unregistered one jumps when transitioned, and reading it from `:root` returns its expression: `getComputedStyle(document.documentElement).getPropertyValue('--fs-600')` gives `clamp(...)`. To get a number, read a real property, such as `font-size`, off an element that uses the token.
 
