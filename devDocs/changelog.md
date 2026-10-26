@@ -181,6 +181,12 @@ All notable changes to this project are documented in this file.
   with the spec's root exemption rather than the Chromium bug, and
   `_leading-trim.scss` drops "unlike every other `<length>` token", which no
   longer held.
+- `MIN_REPORTED_TRIM_ERROR` in `scripts/fontData.ts` is `0.5 / 16` (0.031em,
+  half a pixel at 16px) instead of `0.01`. The error is in em, so a relative
+  tolerance is the same share of the text at any size. Measured over the
+  3814 Google Fonts files that pass the Latin coverage gate: warned files
+  492 → 441, families 213 → 194. Only the warning moves, generated CSS is
+  unchanged. `docs/adding-a-font.md` states the new threshold.
 
 ### Removed
 

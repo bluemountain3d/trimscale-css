@@ -210,7 +210,7 @@ The overrides can only go in an `@font-face` rule trimscale writes itself, which
 | `next/font/google` | No hook exists. Load the family's files yourself instead, see [using-with-nextjs.md](using-with-nextjs.md#nextfontgoogle), or [opt it out of the leading-trim fallback](#opting-out-of-the-leading-trim-fallback) |
 | `manual` | Not detectable, the file trimscale would have read isn't there. Add the overrides to whatever rule does load the font, or see [when trimmed text sits low in one browser but not another](#when-trimmed-text-sits-low-in-one-browser-but-not-another) if that rule isn't yours to edit, or [opt it out of the leading-trim fallback](#opting-out-of-the-leading-trim-fallback) |
 
-The warning stays silent below a hundredth of an em, which covers the large majority of fonts. It fires on the measured error, not on the flag: two thirds of the fonts that leave `USE_TYPO_METRICS` clear have tables that agree closely enough to cost nothing.
+The warning stays silent below half a pixel at 16px (0.031em, the same share of the text at any size), which covers the large majority of fonts. It fires on the measured error, not on the flag: two thirds of the fonts that leave `USE_TYPO_METRICS` clear have tables that agree closely enough to cost nothing.
 
 ### Opting out of the leading-trim fallback
 
