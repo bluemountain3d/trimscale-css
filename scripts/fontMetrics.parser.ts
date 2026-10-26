@@ -136,10 +136,13 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
 
   // What the browser would measure this font by if nothing overrides it. The
   // typo metrics above are only one of three candidates in the file, and the
-  // file itself doesn't get to pick: `USE_TYPO_METRICS` set means every engine
-  // reads them, clear means Windows reads `usWin` and macOS reads `hhea`. Both
-  // are measured because CSS can't branch per platform, so the override has to
-  // satisfy the worse of the two.
+  // file itself doesn't get to pick: with `USE_TYPO_METRICS` clear, Windows
+  // reads `usWin` and macOS reads `hhea`. Both are measured because CSS can't
+  // branch per platform, so the override has to satisfy the worse of the two.
+  // With the flag set, Firefox and Windows engines read the typo metrics and
+  // Safari and Chrome on macOS reportedly still read `hhea`. That case counts
+  // as zero: a font that sets the flag keeps `hhea` equal to its typo metrics,
+  // with only a handful of non-Latin exceptions across Google Fonts.
   const hhea = font.hhea
   const correctedAscender = upmAscender / upm
   const trimError = os2.fsSelection.useTypoMetrics
