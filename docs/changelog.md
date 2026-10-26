@@ -136,6 +136,8 @@ What it means: nothing at 2:1 and narrower, and nothing at 21:9 and wider, where
 
 → [design-tokens.md#base-tokens](design-tokens.md#base-tokens)
 
+**The leading-trim warning ignores errors under half a pixel.** `generate` warns about a family whose `@font-face` it can't write only when the trim would be off by more than 0.031em, half a pixel at 16px, instead of 0.01em. A family that warned with an error between the two goes quiet; nothing in the generated CSS changes.
+
 ### New
 
 - **Opt out of the leading-trim fallback.** `leadingTrimFallback: false` on a family trims it in browsers with native `text-box-trim` only, and leaves normal leading in the rest, for a family whose `@font-face` isn't trimscale's to write and whose fallback trim therefore lands off. `appFonts.leadingTrimFallbackDefault` sets it for every family, and a family's own `leadingTrimFallback` wins. Default `true`, so a config that sets neither gets the same trim as before. See [adding-a-font.md](adding-a-font.md#opting-out-of-the-leading-trim-fallback).

@@ -309,12 +309,12 @@ const warnIfFamilyNameUnverifiable = (
 }
 
 /**
- * Trim error small enough to stay quiet about, in em. Most fonts land at
- * zero and a few land above 0.05, with almost nothing in between, so this
- * number only has to sit somewhere in the empty middle — it isn't a tuning
- * knob and isn't worth making configurable.
+ * Trim error small enough to stay quiet about, in em: half a pixel at 16px.
+ * The error scales with font-size, so this is the same share of the text at
+ * any size. Most fonts land at zero and the rest mostly well above, so the
+ * exact value moves few fonts either way and isn't worth making configurable.
  */
-const MIN_REPORTED_TRIM_ERROR = 0.01
+const MIN_REPORTED_TRIM_ERROR = 0.5 / 16
 
 /**
  * Warns that a family's leading trim will be visibly off because its

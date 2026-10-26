@@ -81,11 +81,12 @@ export const correctedEmMetrics = (ascender: number, descender: number): { ascen
  * A and D are the corrected metrics, at any line-height, which is why the
  * assumption holds for most fonts and silently fails for the rest.
  *
- * Which A and D the browser picks isn't a property of the font: with OS/2
- * `fsSelection` bit 7 (`USE_TYPO_METRICS`) set it reads the typo metrics
- * everywhere, and with it clear Windows reads `usWin` while macOS reads
- * `hhea`. Callers compute both and take the worst, since CSS can't branch on
- * the platform.
+ * Which A and D the browser picks isn't a property of the font alone: with
+ * OS/2 `fsSelection` bit 7 (`USE_TYPO_METRICS`) clear, Windows reads `usWin`
+ * while macOS reads `hhea`, and with it set most engines read the typo
+ * metrics (Safari and Chrome on macOS reportedly keep reading `hhea`).
+ * Callers compute both and take the worst, since CSS can't branch on the
+ * platform.
  * @param browserAscender - Ascender the browser reads, in em
  * @param browserDescender - Descender the browser reads, in em (positive)
  * @param correctedAscender - Ascender the trim was calculated against, in em (see `correctedEmMetrics`)

@@ -192,7 +192,7 @@ Whether that edit is worth making depends on your traffic. The two tables it cor
 
 Every `@font-face` trimscale writes carries `ascent-override` and `descent-override`, pinning that font's content area to exactly 1em. This is automatic and has no config option: it's what makes leading trim land where it should.
 
-A font file declares its vertical size three separate times, in three tables, and the values often disagree. Which one a browser reads isn't up to the font: with the OS/2 `USE_TYPO_METRICS` flag set it reads the typographic metrics everywhere, and with the flag clear Windows reads `usWin` while macOS reads `hhea`. Leading trim is calculated from the typographic metrics, so on a font that leaves the flag clear and whose tables disagree, the browser and the trim measure the same font differently and the text sits low inside a correctly sized box. Measured across 3793 Google Fonts files, roughly one family in nine is affected, Roboto among them, by up to a fifth of an em. The overrides settle the question so the platform can't answer it differently.
+A font file declares its vertical size three separate times, in three tables, and the values often disagree. Which one a browser reads isn't up to the font: with the OS/2 `USE_TYPO_METRICS` flag clear, Windows reads `usWin` while macOS reads `hhea`, and with the flag set most engines read the typographic metrics. (Safari and Chrome on macOS reportedly read `hhea` regardless, which rarely matters: a font that sets the flag almost always keeps `hhea` equal to its typographic metrics.) Leading trim is calculated from the typographic metrics, so on a font that leaves the flag clear and whose tables disagree, the browser and the trim measure the same font differently and the text sits low inside a correctly sized box. Measured across 3793 Google Fonts files, roughly one family in nine is affected, Roboto among them, by up to a fifth of an em. The overrides settle the question so the platform can't answer it differently.
 
 Two consequences worth knowing:
 
@@ -210,7 +210,7 @@ The overrides can only go in an `@font-face` rule trimscale writes itself, which
 | `next/font/google` | No hook exists. Load the family's files yourself instead, see [using-with-nextjs.md](using-with-nextjs.md#nextfontgoogle), or [opt it out of the leading-trim fallback](#opting-out-of-the-leading-trim-fallback) |
 | `manual` | Not detectable, the file trimscale would have read isn't there. Add the overrides to whatever rule does load the font, or see [when trimmed text sits low in one browser but not another](#when-trimmed-text-sits-low-in-one-browser-but-not-another) if that rule isn't yours to edit, or [opt it out of the leading-trim fallback](#opting-out-of-the-leading-trim-fallback) |
 
-The warning stays silent below a hundredth of an em, which covers the large majority of fonts. It fires on the measured error, not on the flag: two thirds of the fonts that leave `USE_TYPO_METRICS` clear have tables that agree closely enough to cost nothing.
+The warning stays silent below half a pixel at 16px (0.031em, the same share of the text at any size), which covers the large majority of fonts. It fires on the measured error, not on the flag: two thirds of the fonts that leave `USE_TYPO_METRICS` clear have tables that agree closely enough to cost nothing.
 
 ### Opting out of the leading-trim fallback
 
