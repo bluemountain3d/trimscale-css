@@ -23,35 +23,27 @@ export const getBBoxHeight = (font: Font, chars: string[]): number => {
 }
 
 /**
- * Clips a font's ascender and descender so they sum to at most the em.
+ * Fits a font's ascender and descender to sum to exactly the em.
  *
- * A font is free to declare metrics that overflow its own em square, and most
- * do. The leading-trim fallback can't work with that: it removes
- * `(1lh - 1em) / 2`, which assumes the content area is exactly 1em, so the
- * values it trims against have to fit that assumption. The overshoot is split
- * evenly between the two ends, keeping the text centred in the box.
- *
- * Metrics that already fit are returned untouched, only made positive.
+ * A font is free to declare metrics that don't add up to its own em square,
+ * in either direction. The leading-trim fallback can't work with that: it
+ * removes `(1lh - 1em) / 2` at each end, which assumes the content area is
+ * exactly 1em, so the values it trims against have to fit that assumption.
+ * The difference is split evenly between the two ends, which is where the
+ * browser's half-leading puts it, so the trim lands right whether the browser
+ * reads these values through the overrides or the font's own typo metrics.
  * @param ascender - Ascender in font units (or em, see `correctedEmMetrics`)
  * @param descender - Descender, either sign
- * @param unitsPerEm - The em to fit within (`1` for values already in em)
- * @returns Both values positive, summing to at most `unitsPerEm`
+ * @param unitsPerEm - The em to fit to (`1` for values already in em)
+ * @returns Both values positive, summing to `unitsPerEm`
  */
 export const getCorrectedAscenderDescender = (ascender: number, descender: number, unitsPerEm: number) => {
   const absDescender = Math.abs(descender)
-  const totalHeight = ascender + absDescender
-
-  if (totalHeight > unitsPerEm) {
-    const overshoot = (totalHeight - unitsPerEm) / 2
-    return {
-      upmAscender: ascender - overshoot,
-      upmDescender: absDescender - overshoot,
-    }
-  }
+  const offset = (ascender + absDescender - unitsPerEm) / 2
 
   return {
-    upmAscender: ascender,
-    upmDescender: absDescender,
+    upmAscender: ascender - offset,
+    upmDescender: absDescender - offset,
   }
 }
 
@@ -61,7 +53,7 @@ export const getCorrectedAscenderDescender = (ascender: number, descender: numbe
  * so the two can't drift apart.
  * @param ascender - Ascender in em
  * @param descender - Descender in em (either sign)
- * @returns Both in em, summing to exactly 1 whenever the font's own metrics reach or exceed the em
+ * @returns Both in em, summing to exactly 1
  */
 export const correctedEmMetrics = (ascender: number, descender: number): { ascender: number; descender: number } => {
   const { upmAscender, upmDescender } = getCorrectedAscenderDescender(ascender, descender, 1)
@@ -111,7 +103,7 @@ export const capTopError = (browserAscender: number, browserDescender: number, c
  * quarter of a thousandth of an em either way, so this keeps the values
  * already published rather than trading them for a tidier expression.
  * @param capHeight - Cap height in font units
- * @param upmAscender - Ascender, already clipped by `getCorrectedAscenderDescender`
+ * @param upmAscender - Ascender, already fitted by `getCorrectedAscenderDescender`
  * @param upmDescender - Descender, likewise, positive
  * @param unitsPerEm - Font's units per em
  */
