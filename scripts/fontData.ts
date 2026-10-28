@@ -12,7 +12,7 @@ import type {
 import { correctedEmMetrics } from './fontMetrics.helpers.ts'
 import {
   fetchRemoteFont,
-  getFontExtension,
+  getFontFormat,
   listLocalFontDir,
   readLocalFont,
   resolveFamilyDirName,
@@ -198,8 +198,8 @@ export type FontFace = {
   family: string
   /** `src: url(...)` value: a root-relative path (leading `/`, relative to `process.cwd()`) for `local`, the CDN URL as-is for `cdn` */
   src: string
-  /** File extension, used as the `format(...)` hint (e.g. `woff2`) */
-  ext: string
+  /** `format(...)` hint (`truetype`, `opentype`, `woff`, `woff2`), or `undefined` to leave it out, see `getFontFormat` */
+  format: string | undefined
   /** A single weight for static fonts, or a `{min, max}` range for variable fonts (`font-weight: min max;`) */
   weight: number | { min: number; max: number }
   style: 'normal' | 'italic'
@@ -218,7 +218,7 @@ export type FontFace = {
 /** One `path`/`url` entry's extracted metrics plus what's needed to build its `@font-face`, kept until the family's best-metrics candidate is picked. */
 type ParsedEntry = {
   src: string
-  ext: string
+  format: string | undefined
   isItalic: boolean
   weightClass: number
   weightRange: { min: number; max: number } | null
@@ -442,7 +442,7 @@ const parseFamilyFiles = async (
 
       parsed.push({
         src: fontSource.source === 'local' ? buildLocalFontSrc(entry, publicDir) : entry,
-        ext: getFontExtension(entry),
+        format: getFontFormat(entry),
         isItalic: parsedFont.isItalic,
         weightClass: parsedFont.weightClass,
         weightRange: parsedFont.weightRange,
@@ -515,7 +515,7 @@ const buildFontFaces = (familyName: string, parsed: ParsedEntry[]): FontFace[] =
   parsed.map((entry) => ({
     family: familyName,
     src: entry.src,
-    ext: entry.ext,
+    format: entry.format,
     weight: entry.weightRange ?? entry.weightClass,
     style: entry.isItalic ? 'italic' : 'normal',
     ascentOverride: +(entry.corrected.ascender * 100).toFixed(3),

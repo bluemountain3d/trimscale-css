@@ -64,11 +64,24 @@ export const resolveFamilyDirName = async (fontsRoot: string, familyName: string
   return directories.find((entry) => entry.name.toLowerCase() === familyName.toLowerCase())?.name ?? null
 }
 
-/** File extension (no dot) for a local path or a remote URL, used as the `format(...)` hint in `@font-face`. */
+/** File extension (no dot) for a local path or a remote URL. */
 export const getFontExtension = (source: string): string => {
   const pathname = source.startsWith('http') ? new URL(source).pathname : source
   return pathname.substring(pathname.lastIndexOf('.') + 1)
 }
+
+/** The `format(...)` keyword CSS uses for each font file extension. */
+const FONT_FORMATS: Record<string, string> = { ttf: 'truetype', otf: 'opentype', woff: 'woff', woff2: 'woff2' }
+
+/**
+ * The `format(...)` hint for a font file's `@font-face` `src`. CSS names
+ * formats, not extensions, and a browser skips a `src` whose format it
+ * doesn't recognise, so `format("ttf")` silently drops the font. `undefined`
+ * for an extension that isn't one of the four (an extensionless CDN URL, say),
+ * where the hint is left out and the browser identifies the file itself.
+ */
+export const getFontFormat = (source: string): string | undefined =>
+  FONT_FORMATS[getFontExtension(source).toLowerCase()]
 
 /**
  * Fetches a font file's raw bytes over HTTP, caching the result under

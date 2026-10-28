@@ -201,6 +201,18 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- `@font-face` `format()` hint. `base/_fonts.scss` interpolated the file
+  extension (`getFontExtension`), so `.ttf`/`.otf` got `format("ttf")` /
+  `format("otf")`, which no browser recognises: the `src` was skipped and the
+  family silently fell back. woff/woff2 worked because extension and format
+  name coincide. Found while testing backlog point 28 in the sandbox (Gluten
+  and Ubuntu Mono rendered as Arial in Firefox; editing the live rule to
+  `format("truetype")` loaded them). `getFontFormat` in `fontMetrics.io.ts`
+  maps ttf → truetype, otf → opentype, woff, woff2, and the bridge's
+  `$font-faces` entries carry `format` instead of `ext`. Any other extension
+  yields no key and `_fonts.scss` writes `src: url(...)` without a hint, so a
+  bridge file from before the change (which has `ext`, not `format`) also
+  compiles to a working rule.
 - Numeric spacing loops are guarded with `@if $end > 0`. `@for $i from 1
   through 0` counts down in Sass, so an end of 0 emitted `--space-1` and
   `--space-0`, and the old macro loop (`from micro-end + 1`) did the same

@@ -9,7 +9,15 @@
 @each $face in var.$font-faces {
   @font-face {
     font-family: "#{map.get($face, "family")}";
-    src: url("#{map.get($face, "src")}") format("#{map.get($face, "ext")}");
+    // No "format" key means the extension isn't a known font format, and a
+    // bridge file generated before the key existed carries "ext" instead,
+    // which was the extension itself and broke .ttf/.otf. Either way the hint
+    // is left out and the browser identifies the file itself.
+    @if map.get($face, "format") {
+      src: url("#{map.get($face, "src")}") format("#{map.get($face, "format")}");
+    } @else {
+      src: url("#{map.get($face, "src")}");
+    }
     font-weight: #{map.get($face, "weight")};
     font-style: #{map.get($face, "style")};
 
