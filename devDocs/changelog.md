@@ -201,6 +201,19 @@ All notable changes to this project are documented in this file.
 
 ### Fixed
 
+- `getCorrectedAscenderDescender` fits the typo ascender and descender to
+  exactly 1em in both directions. It only clipped sums above 1em, so a font
+  summing below it kept its raw values, and the fallback's `(1lh - 1em) / 2`
+  per end left the box `1 - sum` em too tall, split evenly above the cap and
+  below the baseline. The emitted overrides came from the same values, so
+  they pinned the content area to the short sum rather than 1em. Measured in
+  Firefox at 200px before the fix: Gluten 11.8 / 11.8px, Ubuntu Mono 14.4 /
+  14.0px, Inter 0 / 0. 56 of the 3814 Latin-capable Google Fonts files sum
+  below 1em by more than 0.02em. Because the correction is symmetric, as the
+  browser's half-leading is, the trim is also right when the browser reads
+  the font's own typo metrics without any override, which covers `manual`,
+  `next/font` and `cdn` families with `USE_TYPO_METRICS` set. Sums of 1em
+  and above are unchanged.
 - `@font-face` `format()` hint. `base/_fonts.scss` interpolated the file
   extension (`getFontExtension`), so `.ttf`/`.otf` got `format("ttf")` /
   `format("otf")`, which no browser recognises: the `src` was skipped and the
