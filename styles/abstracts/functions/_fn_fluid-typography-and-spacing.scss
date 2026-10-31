@@ -4,7 +4,7 @@
 /// Uses linear interpolation (y = mx + b) between the min and max viewport
 /// widths in `$fluid-scale`. The two scale-aware functions are wrappers
 /// around `fluid-value`, so all three share one implementation, take the same
-/// `$unit-key` and `$type`, and round to `$fluid-scale`'s `precision`.
+/// `$unit-key`, and round to `$fluid-scale`'s `precision`.
 /// @link https://www.smashingmagazine.com/2022/01/modern-fluid-typography-css-clamp/
 /// ===========================================================================
 
@@ -15,6 +15,8 @@
 // Sass built-in modules - Only import what you actually use
 @use "sass:math";
 @use "sass:map";
+@use "sass:list";
+@use "sass:meta";
 
 // ============================================================================
 // Private Helper Functions
@@ -67,7 +69,7 @@
 // ============================================================================
 
 /// Interpolate linearly between two raw pixel sizes across the $fluid-scale
-/// viewport range. The primitive the three functions below are built on, and
+/// viewport range. The primitive the two functions below are built on, and
 /// the one to call for a one-off value that sits on neither the type scale nor
 /// the spacing grid. A plain multiple of the fluid base needs no function:
 /// `--fluid-base` is a token, so `calc(var(--fluid-base) * 3)` works in CSS.
@@ -133,21 +135,71 @@
   );
 }
 
-/// Generate fluid spacing between two different grid levels
+/// Resolve one key of the fluid spacing scale to its pixel value at
+/// $fluid-scale's min-width and max-width, under whichever spacing approach is
+/// configured. The values match the --space-* token of the same key at both
+/// ends: under coupled each token rounds to a whole pixel, so the endpoints
+/// round the same way, and under independent they are whole already.
+/// @access private
+/// @param {String | Number} $key - A t-shirt key ('sm') or a step of the numeric scale (12)
+/// @return {List} The pixel value at min-width and at max-width
+@function _space-endpoints($key) {
+  $coupled: var.$spacing-approach == "coupled";
+  $factor: null;
+
+  @if meta.type-of($key) == "number" {
+    $end: var.$numeric-scale-macro-end;
+    @if $coupled {
+      $end: var.$numeric-scale-end;
+    }
+
+    @if not math.is-unitless($key) or math.round($key) != $key or $key < 1 or $key > $end {
+      @error "#{$key} is not a step of the fluid numeric scale. Expected a whole number from 1 to #{$end}.";
+    }
+
+    $factor: $key;
+  } @else {
+    $scale: var.$t-shirt-scale-macro;
+    @if $coupled {
+      $scale: var.$t-shirt-scale;
+    }
+
+    $factor: map.get($scale, $key);
+    @if $factor == null {
+      @error "'#{$key}' is not a key of the fluid spacing scale. Expected one of #{map.keys($scale)}, or a step of the numeric scale as a number.";
+    }
+  }
+
+  @if $coupled {
+    @return (
+      math.round(math.div(map.get(var.$fluid-scale, "min-font-size") * $factor, var.$base-grid-size)),
+      math.round(math.div(map.get(var.$fluid-scale, "max-font-size") * $factor, var.$base-grid-size))
+    );
+  }
+
+  @return (var.$base-grid-size * $factor, var.$macro-range-max * $factor);
+}
+
+/// Interpolate between two steps of the fluid spacing scale: the value is
+/// what $from is worth at $fluid-scale's min-width and what $to is worth at
+/// its max-width. Resolved against the spacing approach in use, so the two
+/// ends always match the --space-* tokens of the same keys. A range only grows
+/// with the viewport.
 /// @access public
-/// @param {Number} $min-level [4] - Minimum grid level
-/// @param {Number} $max-level [12] - Maximum grid level
+/// @param {String | Number} $from - T-shirt key ('sm') or numeric step (4) at min-width
+/// @param {String | Number} $to - T-shirt key ('xl') or numeric step (12) at max-width
 /// @param {String} $unit-key ['vwx'] - Unit type: 'vwx', 'cqw', 'cqi', 'vw'
-/// @param {String} $type ['clamp'] - 'clamp' for an upper-bounded value, 'max' for one that keeps growing past max-width
-/// @return {String} CSS clamp() expression
+/// @return {String} CSS clamp() expression, or a flat rem value when both ends are equal
 /// @example
-///   .hero { margin-block: fluid-space-step(4, 12); } // sm to 2xl spacing
-///   .section { padding: fluid-space-step(8, 16); }   // md to 3xl spacing
-@function fluid-space-step($min-level: 4, $max-level: 12, $unit-key: "vwx", $type: "clamp") {
-  @return fluid-value(
-    map.get(var.$fluid-scale, "min-font-size") * math.div($min-level, var.$base-grid-size),
-    map.get(var.$fluid-scale, "max-font-size") * math.div($max-level, var.$base-grid-size),
-    $unit-key,
-    $type
-  );
+///   .hero { margin-block: fluid-space-range("sm", "2xl"); }
+///   .section { padding: fluid-space-range(4, 12); } // --space-4 to --space-12
+@function fluid-space-range($from, $to, $unit-key: "vwx") {
+  $min-size: list.nth(_space-endpoints($from), 1);
+  $max-size: list.nth(_space-endpoints($to), 2);
+
+  @if $min-size > $max-size {
+    @error "a range from #{meta.inspect($from)} to #{meta.inspect($to)} runs from #{$min-size}px down to #{$max-size}px. A range only grows with the viewport, so $from must be worth no more at min-width than $to is at max-width.";
+  }
+
+  @return fluid-value($min-size, $max-size, $unit-key);
 }

@@ -1,0 +1,45 @@
+
+@use "abstracts/variables" as var;
+@use "abstracts/functions" as fn;
+@use "sass:list";
+@use "sass:map";
+@use "sass:meta";
+
+/// @group Tokens
+/// @name Fluid Range Tokens
+/// @description Named fluid values from var.$fluid-ranges, each a
+/// fn.fluid-value between two pixel sizes, emitted as --{name}. The names are
+/// the project's own, with no prefix.
+///
+/// Forwarded last in tokens/_index.scss on purpose: a name that collides with
+/// a package token is declared after it, in the same layer and on the same
+/// selector, so the project's value wins. `generate` warns about such names.
+/// ===========================================================================
+
+// Without the guard an empty map still leaves an empty `@layer tokens {}`.
+@if list.length(var.$fluid-ranges) > 0 {
+  @layer tokens {
+    :root {
+      @each $name, $range in var.$fluid-ranges {
+        $from: map.get($range, "from");
+        $to: map.get($range, "to");
+
+        @if meta.type-of($from) != "number" or meta.type-of($to) != "number" {
+          @error "fluid range '#{$name}' needs two pixel sizes as numbers, got #{meta.inspect($from)} and #{meta.inspect($to)}.";
+        }
+
+        @if $from > $to {
+          @error "fluid range '#{$name}' runs from #{$from}px down to #{$to}px. A range only grows with the viewport, so `from` must not be larger than `to`.";
+        }
+
+        $value: fn.fluid-value($from, $to);
+
+        @if map.get($range, "round") == true {
+          --#{$name}: round(nearest, #{$value}, 1px);
+        } @else {
+          --#{$name}: #{$value};
+        }
+      }
+    }
+  }
+}

@@ -6,6 +6,7 @@ import { warnAboutClampedAliases, warnAboutFallbackColors } from './colorTokens.
 import { computeFontData } from './fontData.ts'
 import { rewriteFontFacesForCss, writeCssOutput } from './generateCss.ts'
 import { loadConfig, resolveOutDir } from './loadConfig.ts'
+import { warnAboutRangeCollisions } from './ranges.ts'
 import { buildResetRequirementsMarkdown } from './resetRequirementsDoc.ts'
 import { buildUtilityClassesMarkdown } from './utilityClassesDoc.ts'
 import { type ResolvedUtilityFlags, resolveUtilityFlags } from './utilityFlags.ts'
@@ -173,6 +174,7 @@ const utilityFlags = resolveUtilityFlags(cfg.output?.utilities)
 warnIfFontlessTypographyFlags(cfg, utilityFlags)
 warnAboutClampedAliases(cfg)
 warnAboutFallbackColors(cfg)
+warnAboutRangeCollisions(cfg)
 
 const fontData = await computeFontData(cfg)
 

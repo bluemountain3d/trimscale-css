@@ -12,9 +12,9 @@ Import via:
 
 ### `fn.fluid-value($min-size, $max-size, $unit-key, $type)`
 
-Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range. The three functions below are wrappers around it, so this is the one to call for a one-off value that sits on neither the type scale nor the spacing grid (a component's own min/max size, say). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`.
+Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range. The two functions below are wrappers around it, so this is the one to call for a one-off value that sits on neither the type scale nor the spacing grid (a component's own min/max size, say). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`. A value you use in more than one place is better as a [`fluidRanges`](full-config-reference.md#fluidranges) token, which is this same call under a name.
 
-`$type: 'max'` drops the upper bound, so the value keeps growing past `fluidScale.maxWidth` the way an uncapped type step does. `'clamp'` and `'max'` are the only accepted values, and all four fluid functions stop the build on anything else rather than returning an empty value. All four round their output to [`fluidScale.precision`](full-config-reference.md#fluidscale) decimal places.
+`$type: 'max'` drops the upper bound, so the value keeps growing past `fluidScale.maxWidth` the way an uncapped type step does. `'clamp'` and `'max'` are the only accepted values, and both functions that take `$type` stop the build on anything else rather than returning an empty value. All three fluid functions round their output to [`fluidScale.precision`](full-config-reference.md#fluidscale) decimal places.
 
 ```scss
 --custom-size: #{fn.fluid-value(4, 8)}; // clamp() between 4px and 8px
@@ -38,15 +38,16 @@ font-size: fn.fluid-font-size(
 ); // max() instead of clamp(), no upper bound
 ```
 
-### `fn.fluid-space-step($min-level, $max-level, $unit-key, $type)`
+### `fn.fluid-space-range($from, $to, $unit-key)`
 
-Returns a `clamp()` value that spans between two grid levels. Same `$type: 'max'` option as `fluid-font-size` above.
+Returns a `clamp()` value from one step of the fluid spacing scale to another: what `$from` is worth at `fluidScale.minWidth` to what `$to` is worth at `maxWidth`. Both ends are resolved against the `spacingSetup.approach` in use, so they always match the `--space-*` tokens of the same keys. This is what `spacingSetup.spaceRanges` emits its `--space-range-*` tokens with, see [customizing-spacing.md](customizing-spacing.md#named-ranges).
 
 ```scss
-gap: fn.fluid-space-step(4, 8); // between grid level 4 and grid level 8
+gap: fn.fluid-space-range('sm', 'xl'); // --space-sm on a narrow viewport, --space-xl on a wide one
+padding: fn.fluid-space-range(8, 24); // --space-8 to --space-24
 ```
 
-It resolves both levels the way `spacingSetup`'s `'coupled'` approach does, as multiples of `fluidScale`'s base font-size. Under `'independent'`, which is the default, the `--space-*` tokens are built from `--unit-macro` (its own clamp) instead, so the value this returns does not correspond to any `--space-*` token. `fn.fluid-value` with explicit pixel endpoints is the one to reach for meanwhile.
+A string is a t-shirt key, a number is a step of the numeric scale. Only the fluid scale counts, so a `--space-fixed-*` step isn't a valid end. A range only grows: a `$from` worth more at `minWidth` than `$to` is at `maxWidth` stops the build. There is no `$type`, since a range has an upper end by definition. The result isn't rounded; the `--space-range-*` tokens wrap it in `round(nearest, …, 1px)` unless the entry sets `round: false`.
 
 For a plain multiple of the fluid base, no function is needed: `--fluid-base` is a token, so `calc(var(--fluid-base) * 3)` works anywhere, including in a project consuming the compiled CSS.
 

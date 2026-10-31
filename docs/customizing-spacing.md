@@ -104,6 +104,40 @@ Both approaches share the same shape for their scale maps:
 
 ---
 
+## Named ranges
+
+Each `--space-*` step grows by its own fixed factor. When a value should start at one step and end at another, small on a phone and large on a desktop, `spacingSetup.spaceRanges` names it:
+
+```ts
+spacingSetup: {
+  // ...
+  spaceRanges: {
+    cardGap: { from: 'sm', to: 'xl' },               // --space-range-card-gap
+    sectionPadding: { from: '8', to: '24' },         // --space-range-section-padding
+    stackGap: { from: 'xs', to: 'lg', round: false },
+  },
+}
+```
+
+The token is worth what `from` is at `fluidScale.minWidth` and what `to` is at `maxWidth`, with a `clamp()` in between. `cardGap` above is exactly `--space-sm` on a narrow viewport and exactly `--space-xl` on a wide one, under either approach: the ends are resolved against the token model your config uses, so switching `approach` moves them along with the tokens.
+
+- **Endpoints** are steps of the fluid scale, always as strings: a t-shirt key from `tShirtScale`/`tShirtScaleMacro`, or a numeric step up to `numericScaleEnd`/`numericScaleMacroEnd` (`'12'` for `--space-12`). The `--space-fixed-*` steps aren't valid endpoints. For a range between two pixel sizes, use the top-level [`fluidRanges`](full-config-reference.md#fluidranges) instead.
+- **Ranges only grow.** A `from` worth more at `minWidth` than `to` is at `maxWidth` stops the build.
+- **Rounding** is on by default, the same whole-pixel rounding as every other `--space-*` token. `round: false` leaves the `clamp()` unrounded.
+- **Names** can be written in camelCase or kebab-case, they become kebab-case either way: `cardGap` and `card-gap` both give `--space-range-card-gap`. A number is split from a word (`gap2` → `gap-2`) but not from a single letter (`h1Gap` → `h1-gap`).
+
+Ranges get no utility classes. Use them with `var()`:
+
+```css
+.card-grid {
+  gap: var(--space-range-card-gap);
+}
+```
+
+In SCSS, the same calculation is `fn.fluid-space-range('sm', 'xl')`, see [abstracts.md](abstracts.md#fnfluid-space-rangefrom-to-unit-key).
+
+---
+
 ## Quick checklist
 
 - [ ] Picked `approach` deliberately, `'coupled'` and `'independent'` aren't interchangeable field-for-field

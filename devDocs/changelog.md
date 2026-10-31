@@ -42,8 +42,55 @@ All notable changes to this project are documented in this file.
   load-bearing: with the aspect-ratio condition gone from the media query,
   a ratio of 1 or less makes `min()` pick the height side on portrait
   viewports.
+- `spacingSetup.spaceRanges` and top-level `fluidRanges` (backlog point 22),
+  both optional `Record<string, ...>`. `spaceRanges` entries are
+  `{ from, to, round? }` with string endpoints (t-shirt key or numeric step as
+  `${number}`), emitted as `--space-range-{name}` in `_spacing-tokens.scss`
+  through `fn.fluid-space-range`, `round` default `true`. `fluidRanges`
+  entries are `{ from, to, round? }` in px, emitted as `--{name}` through
+  `fn.fluid-value` from a new `tokens/_fluid-range-tokens.scss`, `round`
+  default `false` so an entry is character-identical to the direct call. Two
+  fields because the token namespace differs (scale-anchored vs. structural),
+  and strings vs. numbers keep the endpoints unambiguous: a bare `96` would
+  be a numeric step or px depending on `numericScaleMacroEnd`. New
+  `scripts/ranges.ts` builds both maps (`$space-ranges`, `$fluid-ranges`,
+  added to `trimscale.scss`'s `show` list): every key goes through `toKebabCase`
+  like the rest of the config (`cardGap` and `card-gap` both give
+  `card-gap`); a name that still isn't kebab-case, or
+  two keys converting to the same name, throws. Numeric-step strings become
+  Sass numbers, which is how `fluid-space-range` tells the two key kinds
+  apart. `warnAboutRangeCollisions` (called from `generateBridge.ts`) warns
+  when a `fluidRanges` name hits a fixed base token, a package prefix
+  (`space-`, `font-weight-`, `line-height-`, `font-family-`,
+  `avg-char-width-`, `next-font-`), a type scale step (plus `-uncapped`), a
+  `semanticFontSizes` name or a color palette prefix. A warning, not an
+  error: `_fluid-range-tokens.scss` is forwarded last in `tokens/_index.scss`,
+  so the project's declaration wins in the same layer and on the same
+  selector. Both SCSS paths `@error` on a range that would shrink, and
+  `_fluid-range-tokens.scss` on non-number endpoints. `max()` is
+  deliberately absent: an uncapped value is not a range. No utility classes
+  yet. Verified by compiling both approaches: with no ranges the CSS is
+  byte-identical to dev, and in Chromium `{ from: 'sm', to: 'xl' }` measures
+  16px at 360 and 64px at 1440 under `independent` (16/40 under `coupled`),
+  equal to `--space-sm`/`--space-xl` there.
 
 ### Changed
+
+- **Breaking:** `fn.fluid-space-step($min-level, $max-level, $unit-key,
+  $type)` is replaced by `fn.fluid-space-range($from, $to, $unit-key)`. The
+  old one computed `fluidScale`'s font-size × level / `baseGridSize`, the
+  `coupled` model only, so under `independent` it matched no token (backlog
+  point 22 has the measurement). The new one resolves each key through a
+  private `_space-endpoints` against the approach in use: under
+  `independent` `baseGridSize × factor` and `$macro-range-max × factor`
+  (whole already), under `coupled` `fluidScale`'s min/max font-size × factor
+  / `baseGridSize`, rounded, because each coupled `--space-*` is rounded per
+  step. Keys validate against the fluid scale only (`$t-shirt-scale` or
+  `$t-shirt-scale-macro`, numeric end per approach), so `--space-fixed-*`
+  steps aren't valid ends. Renamed with the signature so old calls fail
+  instead of compiling with a new meaning; `$type` dropped since `max()`
+  makes it unbounded. Unrounded like the other fluid functions, the token
+  adds `round()`.
 
 - **Breaking:** `toKebabCase` (`scripts/helpers.ts`) splits a digit only
   from a run of two or more letters, `/([a-zA-Z]{2})(\d)/`, so `fs900` →

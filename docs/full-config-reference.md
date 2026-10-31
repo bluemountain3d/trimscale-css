@@ -236,8 +236,32 @@ How spacing tokens grow across viewport widths. `--space-*` is fluid under both 
 | `tShirtScaleMicro`                             | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `independent` | Tier → multiplier of `--unit-micro`, the fixed `--space-fixed-{tier}`. May share keys with `tShirtScaleMacro`. |
 | `numericScaleMacroEnd`                         | `number`                                                                                  |   Yes    | `independent` | Upper bound of the fluid `--space-1`..`N` scale.                                |
 | `numericScaleMicroEnd`                         | `number`                                                                                  |   Yes    | `independent` | Upper bound of the fixed `--space-fixed-1`..`N` scale.                          |
+| `spaceRanges`                                  | `Record<string, SpaceRange>`                                                              |    No    | Both          | Named ranges between two fluid steps, each a `--space-range-{name}`, see below. |
 
-→ Full guide: [customizing-spacing.md](customizing-spacing.md)
+`SpaceRange` is `{ from, to, round? }`. `from` and `to` are steps of the fluid scale as strings, a t-shirt key (`'sm'`) or a numeric step (`'12'`), never pixels. The token is worth what `from` is at `fluidScale.minWidth` and what `to` is at `maxWidth`, resolved against whichever `approach` the config uses, so both ends always match the `--space-*` tokens of the same keys. `round` defaults to `true`, like every other `--space-*`. A range only grows: a `from` worth more than `to` stops the build.
+
+Write the name in camelCase or kebab-case, it becomes kebab-case either way: `cardGap` and `card-gap` both give `--space-range-card-gap`. A number is split from a word (`gap2` → `gap-2`) but not from a single letter, so `h1Gap` gives `--space-range-h1-gap`.
+
+→ Full guide: [customizing-spacing.md](customizing-spacing.md#named-ranges)
+
+## `fluidRanges`
+
+Optional. Named fluid values between two pixel sizes, for anything that isn't on the spacing or type scale (a header height, an icon size). Each entry is `--{name}`, with no prefix, and is the same `clamp()` that [`fn.fluid-value(from, to)`](abstracts.md#fnfluid-valuemin-size-max-size-unit-key-type) returns, so a project consuming the compiled CSS gets it without Sass.
+
+| Property        | Type                                              | Required | Description                                                                                         |
+| --------------- | ------------------------------------------------- | :------: | --------------------------------------------------------------------------------------------------- |
+| `[name: string]` | `{ from: number, to: number, round?: boolean }` |    No    | `from` and `to` in px, at `fluidScale.minWidth` and `maxWidth`. `from` must not be larger than `to`. `round` defaults to `false`. |
+
+Names follow the same rule as `spaceRanges`: camelCase or kebab-case, emitted as kebab-case, so `fs900` gives `--fs-900` and `h1` gives `--h1`. `generate` warns when a name collides with a token the package already emits (`--fluid-base`, any `--space-*`, a type scale step, a color token). Range tokens are declared last, so yours wins, which is why it's a warning and not an error.
+
+```ts
+fluidRanges: {
+  mastheadHeight: { from: 56, to: 72 }, // --masthead-height
+  iconLg: { from: 24, to: 32, round: true }, // --icon-lg
+},
+```
+
+→ Full guide: [design-tokens.md#range-tokens](design-tokens.md#range-tokens)
 
 ## `colorSetup`
 
