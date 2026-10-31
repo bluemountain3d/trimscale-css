@@ -5,6 +5,7 @@ import { fluidScaleTree } from './fluidScale.ts'
 import type { FallbackFontFace, FontFace, FontMetricsMap } from './fontData.ts'
 import { fallbackFontFacesTree, fontFacesTree, metricsTree } from './fontMetrics.scss.ts'
 import { raw, setWithArg, toKebabCase } from './helpers.ts'
+import { fluidRangesTree, spaceRangesTree } from './ranges.ts'
 import {
   dynamicLineHeightTree,
   fontRolesTree,
@@ -23,8 +24,8 @@ export type FontData = {
 }
 
 /** Spacing has two mutually-exclusive shapes, see `models/Config.ts`'s `SpacingSetup` and `abstracts/variables/_spacing.scss`. */
-const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize: number): string[] =>
-  spacing.approach === 'coupled'
+const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize: number): string[] => [
+  ...(spacing.approach === 'coupled'
     ? [
         setWithArg('spacing-approach', 'coupled'),
         setWithArg('t-shirt-scale', { ...spacing.tShirtScale }),
@@ -37,7 +38,9 @@ const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize
         setWithArg('t-shirt-scale-macro', { ...spacing.tShirtScaleMacro }),
         setWithArg('numeric-scale-micro-end', spacing.numericScaleMicroEnd),
         setWithArg('numeric-scale-macro-end', spacing.numericScaleMacroEnd),
-      ]
+      ]),
+  setWithArg('space-ranges', spaceRangesTree(spacing.spaceRanges)),
+]
 
 /**
  * Builds the `@use "trimscale" with (...)` block that configures the
@@ -68,6 +71,7 @@ export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFl
     setWithArg('ultrawide-height-threshold-px', raw(`${cfg.ultrawideHeightThresholdPx ?? 944}px`)),
     setWithArg('ultrawide-aspect-ratio', raw(`${cfg.ultrawideAspectRatio ?? 2}`)),
     setWithArg('fluid-scale', fluidScaleTree(cfg.fluidScale)),
+    setWithArg('fluid-ranges', fluidRangesTree(cfg.fluidRanges)),
     setWithArg('font-metrics', metricsTree(fontData.metrics)),
     setWithArg('font-faces', fontFacesTree(fontData.fontFaces)),
     setWithArg('fallback-font-faces', fallbackFontFacesTree(fontData.fallbackFontFaces)),
@@ -93,11 +97,8 @@ export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFl
     setWithArg('base-grid-size', baseGridSize),
     ...buildSpacingArgs(spacing, baseGridSize),
     // Every flag's SCSS variable is `utilities-` plus the kebab-cased flag
-    // name, so the list is derived rather than repeated. `a11y` is the one
-    // exception: `toKebabCase` would split the digits off as `a-11y`.
-    ...Object.entries(flags).map(([flag, enabled]) =>
-      setWithArg(flag === 'a11y' ? 'utilities-a11y' : `utilities-${toKebabCase(flag)}`, enabled),
-    ),
+    // name, so the list is derived rather than repeated.
+    ...Object.entries(flags).map(([flag, enabled]) => setWithArg(`utilities-${toKebabCase(flag)}`, enabled)),
     setWithArg('output-reset', cfg.output?.reset ?? true),
   ].join('')
 

@@ -1,5 +1,7 @@
 
 @use "abstracts/variables" as var;
+@use "abstracts/functions" as fn;
+@use "sass:map";
 
 /// @group Tokens
 /// @name Spacing Tokens
@@ -114,6 +116,22 @@ $_coupled: var.$spacing-approach == "coupled";
     @if $space-fixed-numeric-end > 0 {
       @for $i from 1 through $space-fixed-numeric-end {
         --space-fixed-#{$i}: calc(var(--unit-micro) * #{$i});
+      }
+    }
+
+    // ==========================================================================
+    // Space Ranges
+    // ==========================================================================
+
+    /// Named ranges between two fluid steps, from var.$space-ranges
+    /// Usage: gap: var(--space-range-card-gap);
+    @each $name, $range in var.$space-ranges {
+      $value: fn.fluid-space-range(map.get($range, "from"), map.get($range, "to"));
+
+      @if map.get($range, "round") == false {
+        --space-range-#{$name}: #{$value};
+      } @else {
+        --space-range-#{$name}: round(nearest, #{$value}, 1px);
       }
     }
   }

@@ -86,3 +86,12 @@ $numeric-scale-micro-end: 8 !default;
 /// Independent approach only.
 /// @type Number
 $numeric-scale-macro-end: 32 !default;
+
+/// Named ranges between two steps of the fluid spacing scale, each emitted as
+/// --space-range-{name} through fn.fluid-space-range. `from` and `to` are
+/// t-shirt keys (strings) or numeric steps (numbers). `round` defaults to true,
+/// like every other --space-* token. Both approaches.
+/// @type Map
+/// @example
+///   $space-ranges: ("card-gap": ("from": "sm", "to": "xl", "round": true));
+$space-ranges: () !default;

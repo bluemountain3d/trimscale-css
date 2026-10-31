@@ -104,9 +104,9 @@ A percentage rather than px, so the root still scales with the reader's own brow
 | `fn.get-fluid-clamp`          | `fn.fluid-value` |
 | `$value-key` (third argument) | `$unit-key`      |
 
-Neither half of the old name describes it. `get-` reads as a lookup in Sass, and `fn.get-fluid-clamp(8, 16, 'vwx', 'max')` emits `max()`, not `clamp()`. The new name matches the other three fluid functions, which carry no prefix and take `$unit-key`.
+Neither half of the old name describes it. `get-` reads as a lookup in Sass, and `fn.get-fluid-clamp(8, 16, 'vwx', 'max')` emits `max()`, not `clamp()`. The new name matches the other two fluid functions, which carry no prefix and take `$unit-key`.
 
-What it means: rename the calls. The arguments, their order and the output are unchanged, so a call that passed the unit positionally needs nothing else. The three scale-aware functions are wrappers around it, which is what makes all four round identically: `fn.fluid-value` rounds its rem values where `fn.get-fluid-clamp` left them at full precision. In trimscale's own output that moves one number, `--unit-macro`'s `0.1666666667rem` to `0.1667rem`, which the token's `round(…, 1px)` absorbs. In your own code it shortens the result by a few characters and shifts nothing visible.
+What it means: rename the calls. The arguments, their order and the output are unchanged, so a call that passed the unit positionally needs nothing else. The two scale-aware functions are wrappers around it, which is what makes all three round identically: `fn.fluid-value` rounds its rem values where `fn.get-fluid-clamp` left them at full precision. In trimscale's own output that moves one number, `--unit-macro`'s `0.1666666667rem` to `0.1667rem`, which the token's `round(…, 1px)` absorbs. In your own code it shortens the result by a few characters and shifts nothing visible.
 
 → [abstracts.md](abstracts.md)
 
@@ -121,7 +121,20 @@ padding: calc(var(--fluid-base) * 3);
 
 The divisor is `spacingSetup.baseGridSize`, so a level of 12 on the default grid of 4 is three times the base. For a value that isn't a multiple of the base, use `fn.fluid-value` with the two pixel sizes you want.
 
-`fn.fluid-space-step` stays. It reads its levels the same way, so under `'independent'` its result matches no `--space-*` token either, and [abstracts.md](abstracts.md) now says so. It is kept because a named, scale-anchored range is coming to the config and needs exactly that function, rewritten against the token model your config actually uses.
+**`fn.fluid-space-step` is replaced by `fn.fluid-space-range`, which takes spacing keys.** `fluid-space-step` read grid levels as multiples of `fluidScale`'s base font-size, the same flaw as `fluid-spacing`: under `'independent'` its result matched no `--space-*` token. `fluid-space-range` takes two steps of the fluid scale instead, a t-shirt key as a string or a numeric step as a number, and resolves them against the approach your config uses, so both ends always match the tokens of the same keys:
+
+```scss
+/* was: gap: fn.fluid-space-step(4, 8); */
+gap: fn.fluid-space-range('sm', 'xl');
+```
+
+What it means: the old name no longer compiles, and the arguments mean something different, so translate each call rather than renaming it. `fluid-space-step(4, 8)` ran from 4 grid levels of the base font-size to 8; pick the two `--space-*` steps you want the value to start and end at. A range only grows, and there is no `$type` argument: `'max'` would make it unbounded, which is no longer a range. The result is unrounded, like the other fluid functions.
+
+→ [abstracts.md](abstracts.md#fnfluid-space-rangefrom-to-unit-key)
+
+**A number is no longer split from a single letter in config keys.** Keys become kebab-case token names, and a number used to be split from any letter before it. Now it's split only from a word of two or more letters: `fs900` still gives `--fs-900` and `heading1` still gives `--heading-1`, but `h1` gives `--h1` instead of `--h-1`, and `a11yFocus` gives `--a11y-focus` instead of `--a-11y-focus`.
+
+What it means: only a key with a single letter right before a number changes, in any field whose keys become names (type scale steps, semantic font sizes, color tokens and aliases, breakpoints, font families). Search your CSS for the old name and rename it.
 
 **Fluid tokens are no longer registered with `@property`.** That covers `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and every fluid `--space-*`. A registered length is computed where it is declared, on `:root`, and a `vw` there doesn't match the `vw` the rest of the page sees: the spec exempts the root from the scrollbar adjustment every other element gets. In Chromium 145 to 152 with classic scrollbars (the Windows default) the scrollbar was subtracted twice instead, so every fluid token came out 1-2 % small in its fluid part. Left unregistered, a token resolves on the element that uses it. See [design-tokens.md](design-tokens.md#registered-and-unregistered-tokens) for which tokens are registered and why. Static tokens (`--unit-micro`, every `--space-fixed-*`, `--header-height`, font weights, line heights) stay registered.
 
@@ -140,6 +153,7 @@ What it means: nothing at 2:1 and narrower, and nothing at 21:9 and wider, where
 
 ### New
 
+- **Named fluid values from the config.** `spacingSetup.spaceRanges` names a range between two steps of the fluid spacing scale, emitted as `--space-range-{name}`: `cardGap: { from: 'sm', to: 'xl' }` is `--space-sm` on a narrow viewport and `--space-xl` on a wide one, rounded to a whole pixel like every `--space-*`. The top-level `fluidRanges` names a value between two pixel sizes, emitted as `--{name}` with no prefix: `mastheadHeight: { from: 56, to: 72 }` is the same `clamp()` as `fn.fluid-value(56, 72)`. Both follow `fluidScale` and the ultrawide cap, which a hand-written `clamp()` in a project consuming the compiled CSS doesn't. Names can be written in camelCase or kebab-case and are emitted as kebab-case, and `generate` warns when a `fluidRanges` name collides with a token the package emits. Neither field gets utility classes. See [customizing-spacing.md](customizing-spacing.md#named-ranges) and [full-config-reference.md](full-config-reference.md#fluidranges).
 - **Opt out of the leading-trim fallback.** `leadingTrimFallback: false` on a family trims it in browsers with native `text-box-trim` only, and leaves normal leading in the rest, for a family whose `@font-face` isn't trimscale's to write and whose fallback trim therefore lands off. `appFonts.leadingTrimFallbackDefault` sets it for every family, and a family's own `leadingTrimFallback` wins. Default `true`, so a config that sets neither gets the same trim as before. See [adding-a-font.md](adding-a-font.md#opting-out-of-the-leading-trim-fallback).
 
 ### Fixed
@@ -147,7 +161,7 @@ What it means: nothing at 2:1 and narrower, and nothing at 21:9 and wider, where
 - Leading trim was off for fonts whose typographic ascender and descender add up to less than 1em, in browsers without native `text-box-trim`: the box came out too tall by the difference, with an equal gap above the cap height and below the baseline. Mostly display fonts are affected (Permanent Marker by 0.33em in total, Ubuntu Mono 0.14em); fonts that reach 1em are unchanged. Run `generate` again to pick up the corrected `topTrim`, `bottomTrim` and overrides.
 - `.ttf` and `.otf` fonts never loaded. The `@font-face` trimscale writes for a `local` family, or a `cdn` family with `generateFontFace: true`, gave the file extension as the format hint, `format("ttf")`, where CSS expects `format("truetype")` (and `"opentype"` for `.otf`). Browsers skip a `src` with a format they don't recognise, so the family fell back to its fallback stack without an error anywhere. `.woff` and `.woff2` were unaffected, since their extension and format name are the same. Run `generate` again to pick up the fix; a file with any other extension gets no format hint, and the browser identifies it itself.
 - A numeric spacing scale ending at `0` generated two steps instead of none. Sass's `@for` counts down when its end is below its start, so `numericScaleMicroEnd: 0` emitted `--space-1` and `--space-0`, plus their utility classes. An end of `0` now generates nothing for that scale.
-- `fluidScale.precision` had no effect on anything. It is required in the config, documented as the decimal places in generated `clamp()` values and written into the bridge file, but nothing read it: every fluid function rounded to a hardcoded 4. It governs all four now, so a config that set anything other than `4` gets different decimals after upgrading, and `--fs-*`, `--space-*` and `--unit-macro` move with it. `4` stays the default and the value to keep: rem at four decimals is already 0.0016px, and fewer decimals round the clamp endpoints rather than just the slope.
+- `fluidScale.precision` had no effect on anything. It is required in the config, documented as the decimal places in generated `clamp()` values and written into the bridge file, but nothing read it: every fluid function rounded to a hardcoded 4. It governs all of them now, so a config that set anything other than `4` gets different decimals after upgrading, and `--fs-*`, `--space-*` and `--unit-macro` move with it. `4` stays the default and the value to keep: rem at four decimals is already 0.0016px, and fewer decimals round the clamp endpoints rather than just the slope.
 
 ## 1.0.0-beta.5
 

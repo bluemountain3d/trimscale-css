@@ -47,6 +47,15 @@ Spacing comes in two scales. `--space-*` is fluid, multiples of `--unit-macro`, 
 
 This is the default `'independent'` approach. Under `'coupled'`, every `--space-*` is a multiple of a single `--unit` instead, rounded to the nearest whole pixel, and there is no `--space-fixed-*`. All of it is config driven, see [customizing-spacing.md](customizing-spacing.md) to change tiers, the numeric ranges, or switch growth model entirely.
 
+## Range Tokens
+
+Two config fields name fluid values of your own. The default config has neither, so there are no range tokens until you add some.
+
+- **`--space-range-*`**, from `spacingSetup.spaceRanges`, runs from one step of the fluid spacing scale to another. `{ from: 'sm', to: 'xl' }` is `--space-sm` at `fluidScale.minWidth` and `--space-xl` at `maxWidth`, which is 16px → 64px by default, and like every `--space-*` it lands on a whole pixel. See [customizing-spacing.md](customizing-spacing.md#named-ranges).
+- **`--{name}`**, from the top-level `fluidRanges`, runs between two pixel sizes and has no prefix: the name is yours. `{ from: 56, to: 72 }` is the same `clamp()` as `fn.fluid-value(56, 72)`. See [full-config-reference.md#fluidranges](full-config-reference.md#fluidranges).
+
+Both are `clamp()` values on `--vwx`, so they share the ultrawide cap with every other fluid token, and they follow `fluidScale` when its viewport range changes. A hand-written `clamp()` does neither.
+
 ## Typography Tokens
 
 **Modular scale levels,** all computed with `clamp()` from Minor Third at mobile to Perfect Fourth at desktop by default. Both the ratios and the underlying viewport/font-size range are set in `trimscale.config.ts`'s `fluidScale`, not fixed characteristics of trimscale-css. See [customizing-type-scale.md](customizing-type-scale.md).
@@ -142,7 +151,7 @@ Some tokens are registered with `@property`, some are not, and the split is deli
 
 | Registered | Unregistered |
 | --- | --- |
-| `--unit-micro` and every `--space-fixed-*`, `--header-height`, `--font-weight-*`, `--line-height-*`, every color token | `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and `--text-*`, every `--space-*`, `--line-height-dynamic`, `--avg-char-width-*`, `--font-family-*` |
+| `--unit-micro` and every `--space-fixed-*`, `--header-height`, `--font-weight-*`, `--line-height-*`, every color token | `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and `--text-*`, every `--space-*` including `--space-range-*`, every `fluidRanges` token, `--line-height-dynamic`, `--avg-char-width-*`, `--font-family-*` |
 
 A registered token transitions smoothly and reads back as a computed value, such as `16px`. An unregistered one jumps when transitioned, and reading it from `:root` returns its expression: `getComputedStyle(document.documentElement).getPropertyValue('--fs-600')` gives `clamp(...)`. To get a number, read a real property, such as `font-size`, off an element that uses the token.
 

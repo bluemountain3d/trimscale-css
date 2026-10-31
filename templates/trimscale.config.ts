@@ -301,6 +301,11 @@ const config: TrimscaleConfig = {
     },
     numericScaleMicroEnd: 8,
     numericScaleMacroEnd: 32,
+    // Named ranges between two fluid steps, each a --space-range-{name}
+    // (camelCase becomes kebab-case). → docs/customizing-spacing.md#named-ranges
+    // spaceRanges: {
+    //   cardGap: { from: 'sm', to: 'xl' }, // --space-sm at minWidth, --space-xl at maxWidth
+    // },
     // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
@@ -312,6 +317,15 @@ const config: TrimscaleConfig = {
     // },
     // numericScaleEnd: 32,
   },
+
+  /**
+   * Named fluid values between two pixel sizes, each a --{name} with no
+   * prefix (camelCase becomes kebab-case). Optional.
+   * → docs/full-config-reference.md#fluidranges
+   */
+  // fluidRanges: {
+  //   mastheadHeight: { from: 56, to: 72 }, // --masthead-height, 56px → 72px
+  // },
 
   /**
    * The color palette and everything derived from it. Optional as a whole:

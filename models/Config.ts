@@ -279,6 +279,27 @@ export type DynamicLineHeight = {
 type TShirtScale = `${number}xs` | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | `${number}xl`
 
 /**
+ * A fluid value between two steps of the fluid `--space-*` scale: what `from`
+ * is worth at `fluidScale.minWidth` to what `to` is worth at `maxWidth`. Both
+ * ends are strings, a t-shirt key (`'sm'`) or a numeric step (`'12'` for
+ * `--space-12`), never pixels. A range only grows with the viewport.
+ */
+export type SpaceRange = {
+  from: TShirtScale | `${number}`
+  to: TShirtScale | `${number}`
+  /** Round to a whole pixel, like every other `--space-*` token. @default true */
+  round?: boolean
+}
+
+/** A fluid value between two pixel sizes, at `fluidScale.minWidth` and `maxWidth`. `from` must not be larger than `to`. */
+export type FluidRange = {
+  from: number
+  to: number
+  /** Round to a whole pixel. Off by default, so the token is the same clamp() as `fn.fluid-value(from, to)`. @default false */
+  round?: boolean
+}
+
+/**
  * How spacing tokens grow across viewport widths. `--space-*` is fluid under
  * both approaches.
  * - `'coupled'` ties spacing to the fluid type scale: a single `--unit`
@@ -295,6 +316,14 @@ type TShirtScale = `${number}xs` | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | `${number}
 export type SpacingSetup = {
   /** The base spacing grid unit (px): `--unit-micro` under `'independent'`, or the divisor of `--unit` under `'coupled'`. @default 4 */
   baseGridSize?: 4 | 8
+  /**
+   * Named ranges between two steps of the fluid spacing scale, each emitted as
+   * `--space-range-{name}`. Write the name in camelCase or kebab-case, it
+   * becomes kebab-case either way (`cardGap` → `--space-range-card-gap`). A
+   * number is split from a word (`gap2` → `gap-2`) but not from a single
+   * letter (`h1Gap` → `h1-gap`).
+   */
+  spaceRanges?: Record<string, SpaceRange>
 } & (
   | {
       approach: 'coupled'
@@ -491,6 +520,16 @@ export type TrimscaleConfig = {
   dynamicLineHeight?: DynamicLineHeight
   /* Spacing */
   spacingSetup: SpacingSetup
+  /**
+   * Named fluid values between two pixel sizes, each emitted as `--{name}`
+   * with no prefix. Write the name in camelCase or kebab-case, it becomes
+   * kebab-case either way (`mastheadHeight` → `--masthead-height`). A number
+   * is split from a word (`fs900` → `--fs-900`) but not from a single letter
+   * (`h1` → `--h1`).
+   * `generate` warns when a name collides with a token the package emits;
+   * yours is declared last and wins.
+   */
+  fluidRanges?: Record<string, FluidRange>
   /**
    * The color palette and everything derived from it. Optional: a config
    * with no `colorSetup` gets nothing color-related in its output at all,
