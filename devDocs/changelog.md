@@ -45,6 +45,16 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+- **Breaking:** `toKebabCase` (`scripts/helpers.ts`) splits a digit only
+  from a run of two or more letters, `/([a-zA-Z]{2})(\d)/`, so `fs900` →
+  `fs-900` and `heading1` → `heading-1` as before, but `h1` → `h1` and
+  `a11yFocus` → `a11y-focus` (were `h-1`, `a-11y-focus`). Came up with
+  `fluidRanges`, where `h1Gap` → `h-1-gap` read wrong and no rule could tell
+  `fs900` from `h1` otherwise. Every config key that becomes a name goes
+  through it, so any single-letter-plus-digit key renames its token. The
+  `a11y` special case in `buildBridgeSource.ts`'s utility flag loop is gone,
+  since the helper now gives `a11y` itself.
+
 - **Breaking:** under `independent`, `--space-*` is the fluid namespace
   throughout and the `--unit-micro` steps move to `--space-fixed-*`
   (backlog point 24). `tShirtScaleMacro` and `numericScaleMacroEnd` drive

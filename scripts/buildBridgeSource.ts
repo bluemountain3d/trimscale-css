@@ -93,11 +93,8 @@ export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFl
     setWithArg('base-grid-size', baseGridSize),
     ...buildSpacingArgs(spacing, baseGridSize),
     // Every flag's SCSS variable is `utilities-` plus the kebab-cased flag
-    // name, so the list is derived rather than repeated. `a11y` is the one
-    // exception: `toKebabCase` would split the digits off as `a-11y`.
-    ...Object.entries(flags).map(([flag, enabled]) =>
-      setWithArg(flag === 'a11y' ? 'utilities-a11y' : `utilities-${toKebabCase(flag)}`, enabled),
-    ),
+    // name, so the list is derived rather than repeated.
+    ...Object.entries(flags).map(([flag, enabled]) => setWithArg(`utilities-${toKebabCase(flag)}`, enabled)),
     setWithArg('output-reset', cfg.output?.reset ?? true),
   ].join('')
 

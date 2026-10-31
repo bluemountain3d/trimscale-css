@@ -123,6 +123,10 @@ The divisor is `spacingSetup.baseGridSize`, so a level of 12 on the default grid
 
 `fn.fluid-space-step` stays. It reads its levels the same way, so under `'independent'` its result matches no `--space-*` token either, and [abstracts.md](abstracts.md) now says so. It is kept because a named, scale-anchored range is coming to the config and needs exactly that function, rewritten against the token model your config actually uses.
 
+**A number is no longer split from a single letter in config keys.** Keys become kebab-case token names, and a number used to be split from any letter before it. Now it's split only from a word of two or more letters: `fs900` still gives `--fs-900` and `heading1` still gives `--heading-1`, but `h1` gives `--h1` instead of `--h-1`, and `a11yFocus` gives `--a11y-focus` instead of `--a-11y-focus`.
+
+What it means: only a key with a single letter right before a number changes, in any field whose keys become names (type scale steps, semantic font sizes, color tokens and aliases, breakpoints, font families). Search your CSS for the old name and rename it.
+
 **Fluid tokens are no longer registered with `@property`.** That covers `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and every fluid `--space-*`. A registered length is computed where it is declared, on `:root`, and a `vw` there doesn't match the `vw` the rest of the page sees: the spec exempts the root from the scrollbar adjustment every other element gets. In Chromium 145 to 152 with classic scrollbars (the Windows default) the scrollbar was subtracted twice instead, so every fluid token came out 1-2 % small in its fluid part. Left unregistered, a token resolves on the element that uses it. See [design-tokens.md](design-tokens.md#registered-and-unregistered-tokens) for which tokens are registered and why. Static tokens (`--unit-micro`, every `--space-fixed-*`, `--header-height`, font weights, line heights) stay registered.
 
 What it means, in two places:
