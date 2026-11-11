@@ -117,7 +117,7 @@ trimscale-css/
     └── utilities/                   # Spacing and typography utility classes
 ```
 
-The `layouts` and `components` cascade layers are declared but stay empty: grids, page structure, and component classes are design decisions that belong in your project, not in a typography and spacing base. See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md) for recipes to copy in.
+The `layouts` and `components` cascade layers are declared but stay empty: grids, page structure, and component classes are design decisions that belong in your project, not in a typography and spacing base. `output.cascadeLayers` swaps them for layers of your own. See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md) for recipes to copy in.
 
 The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`, `abstracts/mixins/`, `base/`, `utilities/`, `styles/trimscale.scss`, and `models/Config.ts`, the exact set exposed via `package.json`'s `exports` field for the [`pkg:` importer](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#configure-your-scss-compiler). Anything else under `styles/` is an implementation detail, not covered by semver.
 

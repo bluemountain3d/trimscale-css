@@ -1,5 +1,6 @@
 import type { TrimscaleConfig } from '../models/Config.ts'
 import { breakpointsTree } from './breakpoints.ts'
+import { cascadeLayersTree } from './cascadeLayers.ts'
 import { colorTokensMapTree, customColorTokensTree, semanticColorAliasDefsTree } from './colorTokens.ts'
 import { fluidScaleTree } from './fluidScale.ts'
 import type { FallbackFontFace, FontFace, FontMetricsMap } from './fontData.ts'
@@ -100,6 +101,7 @@ export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFl
     // name, so the list is derived rather than repeated.
     ...Object.entries(flags).map(([flag, enabled]) => setWithArg(`utilities-${toKebabCase(flag)}`, enabled)),
     setWithArg('output-reset', cfg.output?.reset ?? true),
+    setWithArg('cascade-layers', cascadeLayersTree(cfg.output?.cascadeLayers)),
   ].join('')
 
   return `@use "trimscale" with (

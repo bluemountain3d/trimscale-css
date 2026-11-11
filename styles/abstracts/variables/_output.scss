@@ -9,3 +9,10 @@
 /// Whether the package's own `@layer reset` block is emitted.
 /// @type Boolean
 $output-reset: true !default;
+
+/// The project's own cascade layers, declared between `trim` and `utilities`
+/// in `_layer.scss`. The package ships nothing into any of them. Replacing
+/// the list replaces `layouts` and `components` too, so keep them in it if
+/// you still use them.
+/// @type List
+$cascade-layers: (layouts, components) !default;

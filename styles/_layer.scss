@@ -1,1 +1,26 @@
-@layer reset, tokens, functions, trim-defaults, base, trim, layouts, components, utilities;
+@use "abstracts/variables" as var;
+@use "sass:list";
+
+/// @group Globals
+/// @name Layer Order
+/// @description Declares every cascade layer, lowest priority first. Only the
+/// window between `trim` and `utilities` is configurable, through
+/// var.$cascade-layers: `trim` has to sit above `base`, and `utilities` has to
+/// win over everything, see docs/cascade-layers.md.
+/// ===========================================================================
+
+$-below: (reset, tokens, functions, trim-defaults, base, trim);
+$-above: (utilities);
+
+$-seen: ();
+@each $name in var.$cascade-layers {
+  @if list.index(list.join($-below, $-above), $name) {
+    @error "$cascade-layers can't contain `#{$name}`, the package declares that layer itself. A second declaration would leave it where the package put it, not where your list says.";
+  }
+  @if list.index($-seen, $name) {
+    @error "$cascade-layers lists `#{$name}` twice. A layer's position is set by its first mention, so the second one does nothing.";
+  }
+  $-seen: list.append($-seen, $name);
+}
+
+@layer #{list.join(list.join($-below, var.$cascade-layers, comma), $-above, comma)};
