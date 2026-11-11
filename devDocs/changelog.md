@@ -73,6 +73,21 @@ All notable changes to this project are documented in this file.
   byte-identical to dev, and in Chromium `{ from: 'sm', to: 'xl' }` measures
   16px at 360 and 64px at 1440 under `independent` (16/40 under `coupled`),
   equal to `--space-sm`/`--space-xl` there.
+- `appFonts.urlPrefix` (backlog point 23, optional `string`, default `''`):
+  prepended by `buildLocalFontSrc` after `publicDir` is stripped, threaded
+  through `computeFontData` → `parseFamilyFiles` the same way as
+  `publicDir`. Trailing slashes are dropped, and `computeFontData` throws
+  unless the prefix starts with `/`: `rewriteFontFacesForCss` only rebases a
+  `src` starting with `/`, so an absolute URL would also bypass
+  `output.css.fontUrlBase` in the bundle. Measured before implementing, in
+  the Next.js sandbox with `basePath: '/sub'` and Next 16: the built CSS
+  chunk kept `url(/fonts/inter/...)` unchanged. Vite rewrites to `base`
+  (tested 2026-09-30), so the field is documented as Next-only in practice.
+  Verified: unset gives a byte-identical bridge to dev; `'/sub'`, `'/sub/'`
+  and `'/sub//'` all give `/sub/fonts/...`; the CSS bundle still uses
+  `fontUrlBase`. End to end in the sandbox (`next build` + `next start`,
+  Inter on `nextFont: false` and removed from `localFont`):
+  `GET /sub/fonts/inter/Inter-Variable-100-900_subset.woff2` → 200.
 - `output.cascadeLayers` (backlog point 15, optional `string[]`, default
   `['layouts', 'components']`): the project's own layers, declared between
   `trim` and `utilities`. Reaches the bridge as `$cascade-layers` (new in

@@ -155,6 +155,17 @@ export type AppFonts = {
    * @default 'public'
    */
   publicDir?: string
+  /**
+   * Prepended to every `local` font's generated `@font-face` `src`, after
+   * `publicDir` is stripped: `'/docs'` turns `/fonts/a.woff2` into
+   * `/docs/fonts/a.woff2`. For a site served under a base path by a bundler
+   * that doesn't rewrite `url()` itself, such as Next.js with `basePath`.
+   * Vite does, so set `base` there instead. Must start with `/`, and a
+   * trailing `/` is ignored. The `output.css` bundle uses
+   * `output.css.fontUrlBase` instead.
+   * @default ''
+   */
+  urlPrefix?: string
   /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `families` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
   nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted

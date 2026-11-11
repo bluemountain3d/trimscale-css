@@ -64,8 +64,12 @@ const FALLBACK_CHAINS: Record<MatchableFallbackChain, MatchableFallbackFamily[]>
  * in the URL (Vite's `public/`, SvelteKit's `static/`, etc.). A file
  * outside `publicDir` still gets a root-relative path (works in dev, not
  * guaranteed after a production build, see `AppFonts.publicDir`).
+ *
+ * `urlPrefix` goes in front, for a bundler that serves the site under a base
+ * path without rewriting `url()` to match (Next.js `basePath`). It arrives
+ * already stripped of trailing slashes, so `/sub/` can't produce `//fonts`.
  */
-const buildLocalFontSrc = (entry: string, publicDir: string): string => {
+const buildLocalFontSrc = (entry: string, publicDir: string, urlPrefix: string): string => {
   const normalizedEntry = entry
     .replace(/^\.[\\/]/, '')
     .split(path.sep)
@@ -80,7 +84,7 @@ const buildLocalFontSrc = (entry: string, publicDir: string): string => {
     ? normalizedEntry.slice(normalizedPublicDir.length + 1)
     : normalizedEntry
 
-  return `/${withoutPublicDir}`
+  return `${urlPrefix}/${withoutPublicDir}`
 }
 
 /** Resolves a `{ matched }` fallback value (single family, explicit array, or named chain) to a flat `MatchableFallbackFamily[]`. */
@@ -424,6 +428,7 @@ const parseFamilyFiles = async (
   familyName: string,
   fontSource: FileBackedFontSource,
   publicDir: string,
+  urlPrefix: string,
 ): Promise<ParsedEntry[]> => {
   const entries =
     fontSource.source === 'local' ? await resolveLocalFontPaths(appFonts, familyName, fontSource) : fontSource.url
@@ -441,7 +446,7 @@ const parseFamilyFiles = async (
       const parsedFont = await parseFontBuffer(buffer, `${familyName} (${entry})`)
 
       parsed.push({
-        src: fontSource.source === 'local' ? buildLocalFontSrc(entry, publicDir) : entry,
+        src: fontSource.source === 'local' ? buildLocalFontSrc(entry, publicDir, urlPrefix) : entry,
         format: getFontFormat(entry),
         isItalic: parsedFont.isItalic,
         weightClass: parsedFont.weightClass,
@@ -552,6 +557,15 @@ export const computeFontData = async (
   }
   const appFonts = cfg.appFonts
   const publicDir = appFonts.publicDir ?? 'public'
+  const urlPrefix = (appFonts.urlPrefix ?? '').replace(/\/+$/, '')
+  // A base path, never a URL: `rewriteFontFacesForCss` only rebases a `src`
+  // that starts with `/`, so an absolute prefix would also slip past
+  // `output.css.fontUrlBase` in the standalone bundle.
+  if (urlPrefix && !urlPrefix.startsWith('/')) {
+    throw new Error(
+      `\`appFonts.urlPrefix\` is "${appFonts.urlPrefix}". It must be a path starting with "/", the same as your bundler's base path (for example "/docs").`,
+    )
+  }
 
   const metrics: FontMetricsMap = {}
   const fontFaces: FontFace[] = []
@@ -578,7 +592,7 @@ export const computeFontData = async (
       continue
     }
 
-    const parsed = await parseFamilyFiles(appFonts, familyName, fontSource, publicDir)
+    const parsed = await parseFamilyFiles(appFonts, familyName, fontSource, publicDir, urlPrefix)
     const best = pickMetricsSource(parsed)
 
     const resolved = resolveFamilyFallback(appFonts, familyName, fontSource, best.raw, usesNextFont)

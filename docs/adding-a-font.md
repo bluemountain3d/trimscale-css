@@ -56,6 +56,24 @@ appFonts: {
 
 `path`/`localFontsPath` are the location trimscale reads the file from (for metrics extraction), relative to `trimscale.config.ts`. `publicDir` only affects the generated `src`, stripping that leading segment when present. A font file that lives outside `publicDir` still gets a root-relative `src`, which resolves correctly in dev but isn't guaranteed to after a production build. Move it under `publicDir` for that.
 
+### Sites served under a base path
+
+A root-relative `src` points at the domain root. When the site is served from a subpath, say `https://example.com/docs/`, the font lives at `/docs/fonts/...` instead.
+
+**Vite** (and tools built on it) handles this itself: with `base: '/docs/'`, a root-relative `url()` to a file in `public/` is rewritten to `/docs/fonts/...` at build time. There is nothing to configure in trimscale.
+
+**Next.js** doesn't. `basePath` leaves the `url()` exactly as written, so the font is requested from `/fonts/...` and fails with a 404. Set `appFonts.urlPrefix` to the same value:
+
+```ts
+// next.config.ts: basePath: '/docs'
+appFonts: {
+  urlPrefix: '/docs', // → src: url("/docs/fonts/Roboto-Regular.woff2")
+  families: { /* ... */ },
+},
+```
+
+`urlPrefix` must start with `/`. It only applies to `local` families whose `@font-face` trimscale writes. A family loaded through `next/font` gets its URL from Next, and the [`output.css`](getting-started.md#standalone-css-output) bundle uses `output.css.fontUrlBase` instead.
+
 ### Auto-discovery via `localFontsPath`
 
 `path` is optional. If `appFonts.localFontsPath` is set (a folder relative to `trimscale.config.ts`), any `local` family that omits `path` looks for its files under `localFontsPath/<the config key>/` instead, non-recursive. Every font file found there (`.ttf`/`.otf`/`.woff`/`.woff2`) is picked up, same as if you'd listed them in `path`:
