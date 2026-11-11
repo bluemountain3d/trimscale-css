@@ -73,6 +73,22 @@ All notable changes to this project are documented in this file.
   byte-identical to dev, and in Chromium `{ from: 'sm', to: 'xl' }` measures
   16px at 360 and 64px at 1440 under `independent` (16/40 under `coupled`),
   equal to `--space-sm`/`--space-xl` there.
+- `output.cascadeLayers` (backlog point 15, optional `string[]`, default
+  `['layouts', 'components']`): the project's own layers, declared between
+  `trim` and `utilities`. Reaches the bridge as `$cascade-layers` (new in
+  `_output.scss` and in `trimscale.scss`'s `show` list) through
+  `scripts/cascadeLayers.ts`, as unquoted names that skip `toKebabCase`,
+  since a layer has to be called exactly what the project's `@layer` blocks
+  say. `_layer.scss` builds the statement with `list.join` rather than
+  interpolating the list mid-statement, so an empty list gives
+  `trim, utilities` instead of `trim, , utilities`. Both sides reject a
+  package layer name and a duplicate (the TS side names the config field,
+  the SCSS side covers `@use ... with` without `generate`); only the TS side
+  checks the identifier syntax, and dotted sub-layer names are rejected
+  there. `output.css` compiles the same bridge source, so it follows without
+  changes. Verified: the default config's CSS is byte-identical to dev, a
+  reordered list compiles to the matching statement, and in Chromium a
+  layer listed earlier loses to a later one regardless of source order.
 
 ### Changed
 

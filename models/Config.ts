@@ -447,7 +447,7 @@ export type UtilitiesConfig = {
 // Output
 // ============================================================================
 
-/** Where and what `generate` writes: the output directory, the SCSS bridge file, an optional standalone CSS file, which utility-class groups to include (shared by both targets), and whether to emit the package's own reset. */
+/** Where and what `generate` writes: the output directory, the SCSS bridge file, an optional standalone CSS file, which utility-class groups to include (shared by both targets), whether to emit the package's own reset, and the project's own cascade layers. */
 export type OutputConfig = {
   /**
    * Where `trimscale-css generate` writes this project's generated output
@@ -475,6 +475,14 @@ export type OutputConfig = {
   utilities?: boolean | UtilitiesConfig
   /** Emit the package's own `@layer reset` block. @default true */
   reset?: boolean
+  /**
+   * The project's own cascade layers, lowest priority first, declared
+   * between the package's `trim` and `utilities`. The package ships nothing
+   * into them. Replaces the default list, so keep `layouts` and
+   * `components` in it if you use them. See docs/cascade-layers.md.
+   * @default ['layouts', 'components']
+   */
+  cascadeLayers?: string[]
 }
 
 // ============================================================================

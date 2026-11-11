@@ -1,10 +1,12 @@
 # Cascade Layers
 
-The layer order is declared once, in `_layer.scss`:
+The layer order is declared once, in `_layer.scss`. With the default config it is:
 
 ```scss
 @layer reset, tokens, functions, trim-defaults, base, trim, layouts, components, utilities;
 ```
+
+`layouts` and `components` are the project's own layers, and the list between `trim` and `utilities` can be replaced, see [Your own layers](#your-own-layers).
 
 Layers are listed lowest to highest priority, a later layer always beats an earlier one, regardless of selector specificity (short of `!important`). This is what lets utility classes and `font-setup`-authored component styles override the framework's own defaults with zero specificity management:
 
@@ -16,11 +18,40 @@ Layers are listed lowest to highest priority, a later layer always beats an earl
 | `trim-defaults` | `%text-baseline`: the bare font-size/line-height baseline the trim system falls back to                                     |
 | `base`          | HTML element defaults (`body`, headings, etc.)                                                                              |
 | `trim`          | `%text-geometry`, the font-role placeholders, and `.trim-text-*`: leading-trim metrics, margins, pseudo-elements, font-family |
-| `layouts`       | Yours: grids, page structure, containers. The package ships nothing here                                                    |
-| `components`    | Yours: component classes. The package ships nothing here either, see [examples.md](examples.md)                             |
+| `layouts`       | Yours: grids, page structure, containers. The package ships nothing here. Replaceable, see [Your own layers](#your-own-layers) |
+| `components`    | Yours: component classes. The package ships nothing here either, see [examples.md](examples.md). Replaceable too             |
 | `utilities`     | Spacing, typography, and accessibility utility classes, except `.trim-text-*` (highest priority)                            |
 
-`layouts` and `components` are declared and left empty on purpose, and stay that way. Grids, page structure, and component classes are design decisions, and trimscale-css is a typography and spacing base, not a component library. Declaring the layers anyway means your own rules land in the right place in the cascade without you having to extend the layer list.
+`layouts` and `components` are declared and left empty on purpose. Grids, page structure, and component classes are design decisions, and trimscale-css is a typography and spacing base, not a component library. Declaring the layers anyway means your own rules land in the right place in the cascade without you having to write the layer list yourself.
+
+## Your own layers
+
+`output.cascadeLayers` replaces `layouts` and `components` with a list of your own, lowest priority first. Each name is declared between `trim` and `utilities`:
+
+```ts
+// trimscale.config.ts
+output: {
+  cascadeLayers: ['layouts', 'widgets', 'components'],
+},
+```
+
+```scss
+@layer reset, tokens, functions, trim-defaults, base, trim, layouts, widgets, components, utilities;
+```
+
+The list replaces the default rather than adding to it, so keep `layouts` and `components` in it if you use them. An empty list declares none.
+
+Only that window is configurable. `trim` has to stay above `base` (see [below](#why-the-trim-system-straddles-base)), and `utilities` has to win over everything, so neither moves, and nothing can go below `trim`. `generate` stops with an error on a name the package declares itself, a name listed twice, or a name that isn't a plain CSS identifier. A dotted sub-layer such as `widgets.cards` is not accepted in the list. Declare it in your own CSS instead, inside a layer from the list.
+
+The same list reaches the `output.css` bundle, so both targets declare the same order.
+
+Without the config, the list is the `$cascade-layers` variable, and the same names are rejected at compile time:
+
+```scss
+@use 'trimscale' with ($cascade-layers: (layouts, widgets, components));
+```
+
+Declaring the whole order yourself, before trimscale loads, also works, because the first `@layer` statement fixes the order. It means copying the package's own layer names, though, and a copy breaks silently if those ever change. The config doesn't.
 
 ## Why the trim system straddles `base`
 
@@ -53,4 +84,4 @@ Nothing fails to compile if these are missing, spacing just looks subtly wrong: 
 
 With the [global import](getting-started.md#global-import) (`@use 'trimscale'`), the layer order above is always guaranteed, `_layer.scss` is the first thing that entry point forwards.
 
-If you only ever use [component-scoped import](getting-started.md#component-scoped-import) and never load the global entry point anywhere in your build, the layer order doesn't exist on its own, add `@use 'layer';` once at your app's own entry point too. Otherwise layers fall back to first-seen-in-source order, which may not match the stack above.
+If you only ever use [component-scoped import](getting-started.md#component-scoped-import) and never load the global entry point anywhere in your build, the layer order doesn't exist on its own, add `@use 'layer';` once at your app's own entry point too. Otherwise layers fall back to first-seen-in-source order, which may not match the stack above. `@use 'layer'` on its own declares the default `layouts, components`. With your own list, configure it there as well: `@use 'abstracts/variables' with ($cascade-layers: (...))` before it.

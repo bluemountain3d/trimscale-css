@@ -13,6 +13,7 @@ Optional. Where and what `trimscale-css generate` writes: the output directory (
 | `output.css`         | `boolean` or object  |    No    | Emit a standalone, pre-compiled `.css` file. Default `false`. See below.                |
 | `output.utilities`   | `boolean` or object  |    No    | Which utility-class groups to generate, shared by every output target. See below.       |
 | `output.reset`       | `boolean`            |    No    | Emit the package's own `@layer reset` block. Default `true`. Not about size, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset) for what you take on by turning it off. |
+| `output.cascadeLayers` | `string[]`         |    No    | Your own cascade layers, lowest priority first, declared between `trim` and `utilities`. Replaces the default `['layouts', 'components']`. See [cascade-layers.md](cascade-layers.md#your-own-layers). |
 
 `output.scss` and `output.css` can both be `true` at once (the normal case while migrating from one to the other, or during development of this package itself), but not both `false`, `loadConfig` throws if so, since there would be nothing to generate.
 
