@@ -21,6 +21,9 @@ const publishedVersion = async (): Promise<string> => {
 const version = await publishedVersion()
 
 export default defineConfig({
+  // The path the site is served under. GitHub Pages serves a project site at
+  // /<repo>/, so the deploy workflow sets STYLEGUIDE_BASE; locally it's /.
+  base: process.env.STYLEGUIDE_BASE ?? '/',
   plugins: [
     tokenTables(trimscaleConfig),
     highlightCode(),
