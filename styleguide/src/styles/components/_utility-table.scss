@@ -41,4 +41,26 @@
     }
   }
 
+  // The breakpoint the viewport is in, marked by src/breakpoints.ts
+  .breakpoint-table tr[aria-current] {
+    th,
+    td {
+      color: var(--color-accent);
+    }
+
+    th::after {
+      content: "current";
+      margin-inline-start: var(--space-fixed-2);
+      color: var(--color-text-secondary);
+      font-size: 0.75em;
+      font-weight: var(--font-weight-normal);
+      text-transform: uppercase;
+    }
+  }
+
+  // The project's own window in the layer order
+  .layer-table__own th {
+    color: var(--color-accent);
+  }
+
 }

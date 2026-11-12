@@ -121,8 +121,18 @@
             </li>
 
             <li class="sidebar__item">
+              <a href="#breakpoints" class="sidebar__link">Breakpoints</a>
+            </li>
+
+            <li class="sidebar__item">
               <a href="#utility-classes" class="sidebar__link"
                 >Utility classes</a
+              >
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#cascade-layers" class="sidebar__link"
+                >Cascade layers</a
               >
             </li>
 
@@ -1043,6 +1053,93 @@ fluidRanges: {
             </figure>
           </section>
 
+          <section id="breakpoints" class="content__section">
+            <h2 class="content__title">Breakpoints</h2>
+            <p class="content__paragraph">
+              Breakpoints are a named map in the config, not a set of
+              variables. <code>generate</code> converts each one from px to rem
+              against <code>rootFontSize</code>, so a reader who raises their
+              browser's text size gets the narrower layout as well as the
+              larger text. These are this page's, and the highlighted row is
+              the one your window is in.
+            </p>
+            <div data-tokens="breakpoints"></div>
+
+            <h3 class="content__subtitle">Five mixins</h3>
+            <p class="content__paragraph">
+              Your SCSS never reads the map directly. A mixin takes a name, or
+              a plain number in px, and writes the media query. Keep the map
+              sorted smallest to largest: <code>and-down</code> and
+              <code>only</code> look up the next name after the one you pass.
+            </p>
+            <div class="utility-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Mixin</th>
+                    <th scope="col">Matches</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row"><code>mx.and-up($bp)</code></th>
+                    <td>At the breakpoint and wider</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>mx.up-to($bp)</code></th>
+                    <td>Narrower than the breakpoint</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>mx.and-down($bp)</code></th>
+                    <td>Narrower than the next breakpoint</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>mx.between($min, $max)</code></th>
+                    <td>From <code>$min</code> up to, not including, <code>$max</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>mx.only($bp)</code></th>
+                    <td>From the breakpoint up to the next one</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block">
+              <pre><code data-lang="scss">@use 'abstracts/mixins' as mx;
+
+.sidebar {
+  display: none;
+
+  @include mx.and-up('tablet') {
+    display: block;
+  }
+}
+
+// Compiles to
+// @media (width >= 45rem) { .sidebar { display: block; } }</code></pre>
+            </div>
+
+            <h3 class="content__subtitle">Container queries</h3>
+            <p class="content__paragraph">
+              Every mixin takes a last <code>$container</code> argument.
+              <code>true</code> queries the nearest ancestor with a
+              <code>container-type</code>, a string queries a named container.
+              The same breakpoint names then follow the component's own width
+              instead of the window's.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="scss">.card-list {
+  container-type: inline-size;
+}
+
+.card {
+  @include mx.and-up('phablet', $container: true) {
+    grid-template-columns: 1fr 2fr;
+  }
+}</code></pre>
+            </div>
+          </section>
+
           <section id="utility-classes" class="content__section">
             <h2 class="content__title">Utility Classes</h2>
             <p class="content__paragraph">
@@ -1252,6 +1349,54 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
               folder: <code>generate</code> writes
               <code>utility-classes.md</code> next to the generated styles.
             </p>
+          </section>
+
+          <section id="cascade-layers" class="content__section">
+            <h2 class="content__title">Cascade Layers</h2>
+            <p class="content__paragraph">
+              Everything TrimScale writes sits in a cascade layer, declared once
+              in a fixed order. A later layer beats an earlier one whatever the
+              selector's specificity, so a utility class wins over a component
+              without <code>!important</code>, and a component wins over the
+              element defaults without a longer selector.
+            </p>
+            <div data-tokens="layers"></div>
+
+            <h3 class="content__subtitle">Your own layers</h3>
+            <p class="content__paragraph">
+              The package ships nothing in <code>layouts</code> and
+              <code>components</code>. They are there so your own rules land in
+              the right place without you writing the layer list yourself. To
+              name them differently, or add more, list them in
+              <code>output.cascadeLayers</code>, lowest priority first. They
+              replace the two defaults, between <code>trim</code> and
+              <code>utilities</code>, and the CSS bundle declares the same
+              order.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="ts">// trimscale.config.ts
+output: {
+  cascadeLayers: ['layouts', 'widgets', 'components'],
+},</code></pre>
+            </div>
+            <div class="code-block">
+              <pre><code data-lang="scss">@layer components {
+  .card {
+    padding: var(--space-md);
+  }
+}</code></pre>
+            </div>
+            <aside class="content__note">
+              <h4 class="content__note-title">Why trim is split in two</h4>
+              <p class="content__note-paragraph">
+                <code>trim-defaults</code> sits below <code>base</code>, so an
+                element default like <code>small { font-size: 0.875em }</code>
+                still applies to trimmed text. <code>trim</code> sits above it,
+                so the trim metrics always stay paired with the typeface they
+                were measured from, even on a <code>&lt;code&gt;</code> element
+                that <code>base</code> gives a monospace font.
+              </p>
+            </aside>
           </section>
 
           <section id="the-method" class="content__section">

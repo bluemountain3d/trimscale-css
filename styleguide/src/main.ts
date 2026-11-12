@@ -1,3 +1,4 @@
+import { breakpointMarker } from './breakpoints';
 import { codeBlocks } from './codeBlocks';
 import { fluidValueChart, fontSizeChart, lineHeightChart } from './fluidCharts';
 import { scrollSpy } from './scrollSpy';
@@ -31,6 +32,10 @@ tokenValues()
 // light/dark switch on the color swatches
 const colorTokens = document.querySelector<HTMLElement>('.color-tokens')
 if (colorTokens) schemeToggle(colorTokens)
+
+// current row in the breakpoint table
+const breakpointTable = document.querySelector<HTMLElement>('.breakpoint-table')
+if (breakpointTable) breakpointMarker(breakpointTable)
 
 // fluid function charts
 const fluidValueFigure = document.querySelector<HTMLElement>('.fluid-chart--fluid-value')

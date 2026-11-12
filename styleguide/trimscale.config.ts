@@ -35,7 +35,12 @@ const config: TrimscaleConfig = {
    * './trimscale-generated').
    * → docs/getting-started.md
    */
-  output: { dir: './src/styles/trimscale', utilities: { spacing: false } },
+  output: {
+    dir: './src/styles/trimscale',
+    utilities: { spacing: false },
+    // The default, written out so the Cascade layers section has it to show
+    cascadeLayers: ['layouts', 'components'],
+  },
   rootFontSize: 16,
   /**
    * Font sources (local file, CDN URL, or hand-entered metrics), keyed by

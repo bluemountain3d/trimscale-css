@@ -231,6 +231,92 @@ function colorTokens(config: TrimscaleConfig) {
 }
 
 // ============================================================================
+// Breakpoints
+// ============================================================================
+
+// One row per breakpoint, in config order. src/breakpoints.ts marks the
+// rows the current viewport is at or past, from each row's data-min.
+function breakpoints(config: TrimscaleConfig) {
+  const root = config.rootFontSize ?? 16
+
+  const rows = Object.entries(config.breakpoints ?? {}).flatMap(([name, px]) => {
+    if (px === undefined) return []
+    return `
+      <tr data-breakpoint data-min="${px}">
+        <th scope="row">${code(kebab(name))}</th>
+        <td>${px}px</td>
+        <td>${round(px / root)}rem</td>
+      </tr>`
+  })
+
+  return `
+    <div class="utility-table breakpoint-table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">px</th>
+            <th scope="col">rem</th>
+          </tr>
+        </thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>`
+}
+
+const round = (value: number) => Math.round(value * 10000) / 10000
+
+// ============================================================================
+// Cascade layers
+// ============================================================================
+
+// The full layer order, lowest priority first, with the project's own window
+// from output.cascadeLayers in the middle
+function layers(config: TrimscaleConfig) {
+  const own = config.output?.cascadeLayers ?? ['layouts', 'components']
+
+  const before: [string, string][] = [
+    ['reset', 'Browser-default reset'],
+    ['tokens', 'Custom properties on <code>:root</code>'],
+    ['functions', 'Reserved'],
+    ['trim-defaults', 'The bare size and line-height baseline trim falls back to'],
+    ['base', 'Element defaults: <code>body</code>, headings, <code>code</code>'],
+    ['trim', 'Trim metrics, font roles and <code>.trim-text-*</code>'],
+  ]
+  const after: [string, string][] = [['utilities', 'Utility classes, highest priority']]
+
+  const row = (name: string, contents: string, owner: string) => `
+    <tr${owner === 'Yours' ? ' class="layer-table__own"' : ''}>
+      <th scope="row">${code(name)}</th>
+      <td>${contents}</td>
+      <td>${owner}</td>
+    </tr>`
+
+  const rows = [
+    ...before.map(([name, contents]) => row(name, contents, 'Package')),
+    ...own.map((name) => row(name, 'From <code>output.cascadeLayers</code>', 'Yours')),
+    ...after.map(([name, contents]) => row(name, contents, 'Package')),
+  ]
+
+  return `
+    <div class="code-block">
+      <pre><code data-lang="scss">${escapeHtml(`@layer ${[...before.map(([n]) => n), ...own, ...after.map(([n]) => n)].join(', ')};`)}</code></pre>
+    </div>
+    <div class="utility-table layer-table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Layer</th>
+            <th scope="col">Holds</th>
+            <th scope="col">Owner</th>
+          </tr>
+        </thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>`
+}
+
+// ============================================================================
 // Plugin
 // ============================================================================
 
@@ -240,6 +326,8 @@ const sections: Record<string, (config: TrimscaleConfig) => string> = {
   'font-weights': fontWeights,
   'space-scale': spaceScale,
   ranges,
+  breakpoints,
+  layers,
   'color-tokens': colorTokens,
 }
 
