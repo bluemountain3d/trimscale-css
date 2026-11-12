@@ -6,6 +6,13 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "styleguide", "run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "styleguide-pages-preview",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "styleguide", "run", "preview", "--", "--base", "/trimscale-css/", "--port", "4173"],
+      "port": 4173,
+      "url": "http://localhost:4173"
     }
   ]
 }
