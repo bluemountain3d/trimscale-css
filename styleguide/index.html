@@ -2,16 +2,1507 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>styleguide</title>
+    <meta name="theme-color" content="#0C0D10" />
+
+    <title>TrimScale CSS</title>
+
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
   </head>
-  <body>
-    <div class="page-wrapper">
-      <header class="header"></header>
-      <main class="main"></main>
-      <footer class="footer"></footer>
-    </div>
+  <body class="body">
+    <!-- HEADER START -->
+    <header class="header">
+      <div class="header__inner wrapper wrapper--overshoot">
+        <div class="header__brand"></div>
+        <nav class="nav" aria-label="Project links">
+          <ul class="nav__menu">
+            <li class="nav__item">
+              <a
+                href="https://www.npmjs.com/package/trimscale-css"
+                target="_blank"
+                rel="noreferrer"
+                class="nav__link"
+                >npm</a
+              >
+            </li>
+
+            <li class="nav__item">
+              <a
+                href="https://github.com/bluemountain3d/trimscale-css"
+                target="_blank"
+                rel="noreferrer"
+                class="nav__link"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="header-trigger"></div>
+    <!-- HEADER END -->
+
+    <!-- PAGE CONTENT START -->
+    <main class="main wrapper">
+      <!-- HERO SECTION START -->
+      <section class="hero wrapper wrapper--boxed">
+        <div class="hero__title-wrapper">
+          <h1 class="hero__title">
+            <span class="hero__title-text">TrimScale CSS</span>
+            <span class="hero__title-corners" aria-hidden="true"></span>
+          </h1>
+          <span class="hero__title-lines" aria-hidden="true"></span>
+        </div>
+        <p class="hero__subtitle">You're looking at it.</p>
+
+        <p class="hero__byline">
+          Every heading, paragraph and gap on this page is set with TrimScale
+          CSS. Resize the window, inspect the spacing, and see how the type
+          lines up.
+        </p>
+
+        <div class="hero__cta-row">
+          <a
+            href="https://github.com/bluemountain3d/trimscale-css"
+            target="_blank"
+            rel="noreferrer"
+            class="button button--primary">
+            <span class="button__text">GitHub repo</span>
+          </a>
+
+          <a
+            href="https://www.npmjs.com/package/trimscale-css"
+            target="_blank"
+            rel="noreferrer"
+            class="button button--link">
+            <span class="button__text">
+              <code>npm install -D trimscale-css</code>
+            </span>
+          </a>
+        </div>
+      </section>
+      <!-- HERO SECTION END -->
+
+      <div class="content-row wrapper wrapper--overshoot">
+        <!-- CONTENT SIDEBAR MENU START -->
+        <aside class="sidebar">
+          <p class="sidebar__title">On this page</p>
+          <ul class="sidebar__list">
+            <li class="sidebar__item">
+              <a href="#why-trimscale-css" class="sidebar__link"
+                >Why TrimScale CSS?</a
+              >
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#leading-trim" class="sidebar__link">Leading Trim</a>
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#getting-started" class="sidebar__link"
+                >Getting started</a
+              >
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#design-tokens" class="sidebar__link">Design tokens</a>
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#fluid-functions" class="sidebar__link"
+                >Fluid functions</a
+              >
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#breakpoints" class="sidebar__link">Breakpoints</a>
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#utility-classes" class="sidebar__link"
+                >Utility classes</a
+              >
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#cascade-layers" class="sidebar__link"
+                >Cascade layers</a
+              >
+            </li>
+
+            <li class="sidebar__item">
+              <a href="#the-method" class="sidebar__link">The method</a>
+            </li>
+          </ul>
+        </aside>
+        <!-- CONTENT SIDEBAR MENU END -->
+
+        <!-- CONTENT START -->
+        <article class="content">
+          <section id="why-trimscale-css" class="content__section">
+            <h2 class="content__title">Why TrimScale CSS?</h2>
+
+            <p class="content__paragraph">
+              In print, leading is the space between lines, and nothing else.
+              CSS sees it differently. Every line box splits its extra
+              line-height above and below the text, and adds whatever room the
+              font designer left above the capitals and below the baseline. The
+              result is a heading that never quite sits flush with the image
+              next to it, and a 24px gap that is really 24px plus whatever the
+              font felt like that day.
+            </p>
+
+            <p class="content__paragraph">
+              The project started with a photography website, built by hand
+              rather than in a drag-and-drop editor, from a background in design
+              and 3D visualization where a two-pixel misalignment counts as a
+              bug. Tutorials showed how to space text, rarely why it behaved the
+              way it did. The usual answer was a magic number per font, which
+              holds up right until someone changes the font.
+            </p>
+
+            <p class="content__paragraph">
+              Chasing the why turned into a degree project, Precision Typography
+              Toolkit: a polyfill for <code>text-box-trim</code> and an
+              interactive tool for extracting the font metrics it needs. A few
+              months later that work became TrimScale CSS, and then a
+              config-driven npm package that works with the fonts a project
+              actually uses, not just the ones it was tested on.
+            </p>
+
+            <p class="content__paragraph">
+              It reads your font files at build time and handles three things
+              magic numbers can't: leading-trim that removes the space above
+              caps and below the baseline, side-bearing adjustment that aligns
+              text with its edges horizontally too, and a line height that
+              recalculates itself for any font size. All from one config file.
+            </p>
+
+            <p class="content__paragraph">
+              Around that sits the rest of a base system. A fluid type scale
+              that stretches smoothly between viewports instead of jumping at
+              breakpoints, spacing that can follow the type scale or stand on
+              its own, OKLCH color tokens with automatic fallbacks for older
+              browsers, and metric-matched fallback fonts so nothing shifts when
+              the web font loads. Tokens, utility classes and cascade layers are
+              all generated from one config file, as SCSS or as plain CSS.
+            </p>
+          </section>
+
+          <section id="leading-trim" class="content__section">
+            <h2 class="content__title">Leading Trim</h2>
+
+            <p class="content__paragraph">
+              Leading trim removes the space CSS adds above the capitals and
+              below the baseline, so a text box starts at the cap height and
+              ends at the baseline. The spacing you write is then the spacing
+              you see.
+            </p>
+
+            <p class="content__paragraph">
+              Both columns below have the same visible space between blocks. The
+              blue stripes show the gap each one needed to get there.
+            </p>
+
+            <div class="leading-trim-demo">
+              <div class="leading-trim-demo__no-trim">
+                <h3>Without trim</h3>
+
+                <p>
+                  This box includes the line height (half-leading) above and
+                  below the text.
+                </p>
+
+                <p>
+                  The gap above this paragraph is 1em, and the line height adds
+                  to what you see.
+                </p>
+              </div>
+              <div class="leading-trim-demo__trim">
+                <h3 class="trim-text-heading">With trim</h3>
+
+                <p class="trim-text-body">
+                  This box starts at the top of the first line's capitals and
+                  ends on the last line's baseline.
+                </p>
+
+                <p class="trim-text-body">
+                  The gap above this paragraph is 1.5em, and so is the space you
+                  see.
+                </p>
+              </div>
+            </div>
+
+            <p class="content__paragraph">
+              Without trim, a 1em gap looks more like 1.5em, because each line
+              box brings its own share of hidden space. How much depends on the
+              font and the line height, so the number in your CSS never quite
+              matches the page. With trim, the gap is 1.5em and it looks like
+              1.5em.
+            </p>
+
+            <p class="content__paragraph">
+              Every font role in your config gets a trim class, like
+              <code>.trim-text-heading</code> or <code>.trim-text-body</code>,
+              and the <code>font-setup</code> mixin does the same inside your
+              own components. Browsers with native
+              <code>text-box-trim</code> use it directly. Older ones get a
+              fallback built from the font metrics TrimScale reads at build
+              time.
+            </p>
+          </section>
+
+          <section id="getting-started" class="content__section">
+            <h2 class="content__title">Getting Started</h2>
+
+            <p class="content__paragraph">
+              One install, one config file, one generate command. Everything
+              runs at build time, so nothing from the package ends up in your
+              JavaScript bundle.
+            </p>
+
+            <aside class="content__note">
+              <h3 class="content__note-title">Requirements</h3>
+              <ul class="content__note-list">
+                <li>Node.js 22.18</li>
+                <li>Sass 1.95</li>
+              </ul>
+            </aside>
+
+            <ol class="steps">
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span>Install
+                </h3>
+
+                <p class="content__paragraph">
+                  Add the package as a dev dependency.
+                </p>
+
+                <div class="tabs">
+                  <div
+                    class="tabs__list"
+                    role="tablist"
+                    aria-label="Install using">
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="install-tap-npm"
+                      aria-controls="install-tab-panel-npm">
+                      npm
+                    </button>
+
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="install-tap-pnpm"
+                      aria-controls="install-tab-panel-pnpm">
+                      pnpm
+                    </button>
+
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="install-tap-yarn"
+                      aria-controls="install-tab-panel-yarn">
+                      yarn
+                    </button>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="install-tab-panel-npm"
+                    aria-labelledby="install-tap-npm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">npm install -D trimscale-css</code></pre>
+                    </div>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="install-tab-panel-pnpm"
+                    aria-labelledby="install-tap-pnpm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">pnpm add -D trimscale-css</code></pre>
+                    </div>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="install-tab-panel-yarn"
+                    aria-labelledby="install-tap-yarn">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">yarn add -D trimscale-css</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span
+                  >Initialize
+                </h3>
+
+                <p class="content__paragraph">
+                  Copies <code>trimscale.config.ts</code> into your project root
+                  and adds a <code>trimscale:generate</code> script to your
+                  <code>package.json</code>.
+                </p>
+
+                <div class="tabs">
+                  <div
+                    class="tabs__list"
+                    role="tablist"
+                    aria-label="Initialize using">
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="initialize-tab-npm"
+                      aria-controls="initialize-tab-panel-npm">
+                      npm
+                    </button>
+
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="initialize-tab-pnpm"
+                      aria-controls="initialize-tab-panel-pnpm">
+                      pnpm
+                    </button>
+
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="initialize-tab-yarn"
+                      aria-controls="initialize-tab-panel-yarn">
+                      yarn
+                    </button>
+                  </div>
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="initialize-tab-panel-npm"
+                    aria-labelledby="initialize-tab-npm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">npx trimscale-css init</code></pre>
+                    </div>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="initialize-tab-panel-pnpm"
+                    aria-labelledby="initialize-tab-pnpm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">pnpm dlx trimscale-css init</code></pre>
+                    </div>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="initialize-tab-panel-yarn"
+                    aria-labelledby="initialize-tab-yarn">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">yarn dlx trimscale-css init</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span
+                  >Configure
+                </h3>
+
+                <p class="content__paragraph">
+                  Fonts, type scale, breakpoints, spacing and colors all live in
+                  <code>trimscale.config.ts</code>. This is the font setup
+                  behind the page you're reading:
+                </p>
+
+                <div class="code-block">
+                  <pre><code data-lang="ts">appFonts: {
+  localFontsPath: 'public/fonts',
+  families: {
+    'roboto': {
+      source: 'local',
+      fallback: { matched: 'sans-serif' },
+    },
+    'roboto-serif': {
+      source: 'local',
+      fallback: { matched: 'serif' },
+    },
+    'roboto-mono': {
+      source: 'local',
+      fallback: { matched: 'monospace' },
+    },
+  },
+  fontRoles: {
+    primary: 'roboto-serif',
+    heading: 'roboto-serif',
+    body: 'roboto',
+    code: 'roboto-mono',
+  },
+},</code></pre>
+                </div>
+
+                <p class="content__paragraph">
+                  Every role gets its own trim class and font token, so
+                  <code>heading</code> above becomes
+                  <code>.trim-text-heading</code>. Fonts are optional: without
+                  <code>appFonts</code> you still get the type scale, spacing
+                  and colors, just no leading trim.
+                  <a
+                    href="https://github.com/bluemountain3d/trimscale-css/blob/main/styleguide/trimscale.config.ts"
+                    target="_blank"
+                    rel="noreferrer"
+                    >See this page's full config</a
+                  >.
+                </p>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span>Generate
+                </h3>
+
+                <p class="content__paragraph">
+                  Reads your config and font files and writes the result into
+                  <code>./trimscale-generated</code>, inside your own project.
+                  Run it again whenever the config changes.
+                </p>
+
+                <div class="tabs">
+                  <div
+                    class="tabs__list"
+                    role="tablist"
+                    aria-label="generate using">
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="generate-tab-npm"
+                      aria-controls="generate-tab-panel-npm">
+                      npm
+                    </button>
+
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="generate-tab-pnpm"
+                      aria-controls="generate-tab-panel-pnpm">
+                      pnpm
+                    </button>
+
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="generate-tab-yarn"
+                      aria-controls="generate-tab-panel-yarn">
+                      yarn
+                    </button>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="generate-tab-panel-npm"
+                    aria-labelledby="generate-tab-npm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">npm run trimscale:generate</code></pre>
+                    </div>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="generate-tab-panel-pnpm"
+                    aria-labelledby="generate-tab-pnpm">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">pnpm trimscale:generate</code></pre>
+                    </div>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="generate-tab-panel-yarn"
+                    aria-labelledby="generate-tab-yarn">
+                    <div class="code-block">
+                      <pre><code data-lang="bash">yarn trimscale:generate</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span>Import
+                </h3>
+
+                <p class="content__paragraph">
+                  Use it as SCSS, or as a vanilla CSS file with no Sass setup at
+                  all.
+                </p>
+
+                <div class="tabs">
+                  <div
+                    class="tabs__list"
+                    role="tablist"
+                    aria-label="Output format">
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="import-tab-scss"
+                      aria-controls="import-panel-scss">
+                      SCSS
+                    </button>
+
+                    <button
+                      class="tabs__tab"
+                      type="button"
+                      role="tab"
+                      id="import-tab-css"
+                      aria-controls="import-panel-css">
+                      Vanilla CSS
+                    </button>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="import-panel-scss"
+                    aria-labelledby="import-tab-scss">
+                    <p class="content__paragraph">
+                      Point Sass at the package, then load the generated files
+                      once at your entry point.
+                    </p>
+
+                    <div class="code-block">
+                      <pre><code data-lang="ts">// vite.config.ts
+export default {
+  css: {
+    preprocessorOptions: {
+      scss: {
+        loadPaths: ['node_modules/trimscale-css/styles'],
+      },
+    },
+  },
+};</code></pre>
+                    </div>
+                    <div class="code-block">
+                      <pre><code data-lang="scss">// main.scss
+@use './trimscale-generated';</code></pre>
+                    </div>
+                  </div>
+
+                  <div
+                    class="tabs__panel"
+                    role="tabpanel"
+                    id="import-panel-css"
+                    aria-labelledby="import-tab-css">
+                    <p class="content__paragraph">
+                      Turn on the CSS output, generate again, and link the
+                      bundle. You get the same tokens and utility classes,
+                      without the SCSS mixins.
+                    </p>
+
+                    <div class="code-block">
+                      <pre><code data-lang="ts">// trimscale.config.ts
+output: { css: true },</code></pre>
+                    </div>
+                    <div class="code-block">
+                      <pre><code data-lang="html">&lt;link
+  rel="stylesheet"
+  href="/trimscale-generated/trimscale.bundle.min.css"
+/&gt;</code></pre>
+                    </div>
+                  </div>
+                </div>
+              </li>
+
+              <li class="steps__item">
+                <h3 class="steps__title">
+                  <span class="steps__number" aria-hidden="true"></span>Trim
+                  your first heading
+                </h3>
+
+                <p class="content__paragraph">
+                  Add a trim class in your markup, or use the
+                  <code>font-setup</code> mixin in your own components.
+                </p>
+
+                <div class="code-block">
+                  <pre><code data-lang="html">&lt;h2 class="trim-text-heading"&gt;Flush with the grid&lt;/h2&gt;</code></pre>
+                </div>
+
+                <div class="code-block">
+                  <pre><code data-lang="scss">@use 'abstracts/mixins' as mx;
+
+.card__title {
+  @include mx.font-setup(
+    $font: 'heading',
+    $font-size: var(--heading-3)
+  );
+}</code></pre>
+                </div>
+              </li>
+            </ol>
+
+            <p class="content__paragraph">
+              Fonts on a site served under a base path are covered in
+              <a
+                href="https://github.com/bluemountain3d/trimscale-css/blob/main/docs/adding-a-font.md#sites-served-under-a-base-path"
+                target="_blank"
+                rel="noreferrer"
+                >adding a font</a
+              >. Next.js, the <code>pkg:</code> importer and the rest of the
+              setup details are in the
+              <a
+                href="https://github.com/bluemountain3d/trimscale-css/blob/main/docs/getting-started.md"
+                target="_blank"
+                rel="noreferrer"
+                >full getting started guide</a
+              >.
+            </p>
+          </section>
+
+          <section id="design-tokens" class="content__section">
+            <h2 class="content__title">Design Tokens</h2>
+            <p class="content__paragraph">
+              Every token is a CSS custom property, generated from
+              <code>trimscale.config.ts</code>. The values below are this page's
+              own, measured live. Resize the window and watch the fluid ones
+              change.
+            </p>
+
+            <h3 class="content__subtitle">Type scale</h3>
+            <p class="content__paragraph">
+              Semantic sizes on top of a fluid modular scale. Each one is a
+              <code>clamp()</code> between a mobile and a desktop ratio, or a
+              fixed fraction of another size.
+            </p>
+            <div data-tokens="type-scale"></div>
+
+            <h3 class="content__subtitle">Font families</h3>
+            <p class="content__paragraph">
+              Each family is used by one or more roles, and every role gets a
+              <code>--font-family-*</code> token of its own.
+            </p>
+            <div data-tokens="font-families"></div>
+
+            <h3 class="content__subtitle">Font weights</h3>
+            <div data-tokens="font-weights"></div>
+            <p class="content__paragraph">
+              Line heights work the same way, from
+              <code>--line-height-100</code> to
+              <code>--line-height-200</code> in increments of 5. Most text never
+              needs them: it gets <code>--line-height-dynamic</code>, which
+              recalculates itself for any font size.
+            </p>
+
+            <h3 class="content__subtitle">Spacing</h3>
+            <p class="content__paragraph">
+              Two scales from the same steps. <code>--space-*</code> grows
+              with the viewport, from its base size at the narrowest width to
+              twice that at the widest. <code>--space-fixed-*</code> stays at
+              the base size. Both have a numeric scale too,
+              <code>--space-1</code> and <code>--space-fixed-1</code> and up,
+              alongside the named sizes.
+            </p>
+            <div data-tokens="space-scale"></div>
+
+            <h3 class="content__subtitle">Named ranges</h3>
+            <p class="content__paragraph">
+              Each spacing step grows by the same factor. When a value should
+              start at one size and end at another, small on a phone and large
+              on a desktop, give it a name in the config.
+              <code>spaceRanges</code> runs between two steps of the fluid
+              scale, <code>fluidRanges</code> between two pixel sizes. Both
+              follow <code>fluidScale</code> and the ultrawide cap, which a
+              hand-written <code>clamp()</code> doesn't. This page's grid gap is
+              one of them.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="ts">// trimscale.config.ts
+spacingSetup: {
+  spaceRanges: {
+    cardGap: { from: 'sm', to: 'xl' }, // --space-range-card-gap
+  },
+},
+fluidRanges: {
+  gridGap: { from: 20, to: 40 }, // --grid-gap
+},</code></pre>
+            </div>
+            <div data-tokens="ranges"></div>
+
+            <h3 class="content__subtitle">Colors</h3>
+            <p class="content__paragraph">
+              OKLCH tokens with <code>light-dark()</code> switching and a hex
+              fallback for older browsers. Semantic aliases reference a base
+              token and adjust it, instead of adding another hand-picked pair.
+            </p>
+            <aside class="content__note">
+              <h4 class="content__note-title">Forcing a scheme</h4>
+              <p class="content__note-paragraph">
+                Tokens follow the system setting. Add
+                <code>.theme-light</code> or <code>.theme-dark</code> to
+                <code>:root</code> to force one. To give part of the page its
+                own scheme, add <code>.app-theme-container</code>
+                to any element and put the theme class on it.
+              </p>
+              <p class="content__note-paragraph">
+                Nothing in the package reads a color token, so the whole palette
+                is optional. Leave out <code>colorSetup</code> and the output
+                has no colors at all.
+              </p>
+            </aside>
+            <div data-tokens="color-tokens"></div>
+          </section>
+
+          <section id="fluid-functions" class="content__section">
+            <h2 class="content__title">Fluid Functions</h2>
+            <p class="content__paragraph">
+              Fluid values scale linearly with the viewport between the two
+              widths in <code>fluidScale</code>, and hold still outside them.
+              On a tall viewport, 944px and up, they also stop growing once
+              the window is more than twice as wide as it is tall, so an
+              ultrawide monitor doesn't blow the type up. Both numbers are
+              <code>ultrawideHeightThresholdPx</code> and
+              <code>ultrawideAspectRatio</code> in the config.
+              Every fluid token on this page comes from the functions below.
+              They are SCSS functions, so calling them yourself needs the SCSS
+              setup; the plain CSS bundle ships their results as tokens instead.
+            </p>
+
+            <aside class="content__note">
+              <h4 class="content__note-title">$fluid-scale</h4>
+              <p class="content__note-paragraph">
+                The viewport range every fluid function interpolates across,
+                generated from <code>fluidScale</code> in the config. This
+                page's values:
+              </p>
+              <div class="code-block">
+                <pre><code data-lang="scss">$fluid-scale: (
+  "min-width": 360,
+  "max-width": 1440,
+  "min-font-size": 16,
+  "max-font-size": 20,
+  "min-type-scale": 1.2,
+  "max-type-scale": 1.333,
+  "precision": 4,
+);</code></pre>
+              </div>
+            </aside>
+
+            <h3 class="content__subtitle">Fluid values</h3>
+            <p class="content__paragraph">
+              <code>fn.fluid-value</code> takes a size for the narrowest
+              viewport and one for the widest, and returns the
+              <code>clamp()</code> between them. Reach for it when a value
+              belongs on neither the type scale nor the spacing scale, like an
+              icon size or a component's own padding. With
+              <code>$type: 'max'</code> there is no ceiling, and the value keeps
+              growing past the widest viewport instead of stopping there.
+            </p>
+
+            <p class="content__paragraph">
+              The line is the formula. The dot is an element on this page that
+              uses it, measured live, so it follows when you resize the window.
+              Tick Simulate to drag a width instead.
+            </p>
+
+            <figure class="fluid-chart fluid-chart--fluid-value">
+              <div
+                class="fluid-chart__controls"
+                role="group"
+                aria-label="Function type">
+                <button
+                  class="fluid-chart__type"
+                  type="button"
+                  data-type="clamp"
+                  aria-pressed="true">
+                  clamp
+                </button>
+                <button
+                  class="fluid-chart__type"
+                  type="button"
+                  data-type="max"
+                  aria-pressed="false">
+                  max
+                </button>
+              </div>
+              <svg class="fluid-chart__svg" role="img"></svg>
+              <div class="fluid-chart__controls">
+                <span class="fluid-chart__toggle">
+                  <input
+                    id="fluid-value-simulate"
+                    type="checkbox"
+                    data-simulate />
+                  <label for="fluid-value-simulate">Simulate</label>
+                </span>
+                <input
+                  type="range"
+                  aria-label="Simulated viewport width"
+                  data-simulate />
+              </div>
+              <figcaption>
+                <output class="fluid-chart__readout"></output>
+              </figcaption>
+              <div class="code-block" data-code="clamp">
+                <pre><code data-lang="scss">@use 'abstracts/functions' as fn;
+
+.title {
+  font-size: fn.fluid-value(16, 32);
+}
+
+// Compiles to
+// clamp(1rem, 0.6667rem + 1.4815 * var(--vwx), 2rem)</code></pre>
+              </div>
+              <div class="code-block" data-code="max" hidden>
+                <pre><code data-lang="scss">@use 'abstracts/functions' as fn;
+
+.title {
+  font-size: fn.fluid-value(16, 32, $type: 'max');
+}
+
+// Compiles to
+// max(1rem, 0.6667rem + 1.4815 * var(--vwx))</code></pre>
+              </div>
+              <span
+                class="fluid-chart__probe fluid-chart__probe--clamp"
+                data-probe="clamp"
+                aria-hidden="true"
+                >x</span
+              >
+              <span
+                class="fluid-chart__probe fluid-chart__probe--max"
+                data-probe="max"
+                aria-hidden="true"
+                >x</span
+              >
+              <span
+                class="fluid-chart__probe fluid-chart__probe--viewport"
+                data-probe="viewport"
+                aria-hidden="true"></span>
+              <span
+                class="fluid-chart__probe fluid-chart__probe--vwx"
+                data-probe="vwx"
+                aria-hidden="true"></span>
+              <div class="fluid-chart__sim" data-sim aria-hidden="true">
+                <span
+                  class="fluid-chart__probe fluid-chart__probe--clamp-sim"
+                  data-probe="clamp-sim"
+                  >x</span
+                >
+                <span
+                  class="fluid-chart__probe fluid-chart__probe--max-sim"
+                  data-probe="max-sim"
+                  >x</span
+                >
+              </div>
+            </figure>
+
+            <h3 class="content__subtitle">Fluid font sizes</h3>
+            <p class="content__paragraph">
+              <code>fn.fluid-font-size</code> takes a step on the modular scale
+              instead of two sizes. Both ends come from
+              <code>$fluid-scale</code>: the base size times the mobile ratio at
+              the narrowest viewport, times the desktop ratio at the widest. The
+              desktop ratio is the larger one, so the scale spreads as the
+              screen grows. Body text barely moves, display sizes more than
+              double. Every whole step of the scale is one of these lines.
+            </p>
+            <p class="content__paragraph">
+              The chart's height is logarithmic, so an even ratio between steps
+              shows as an even gap.
+            </p>
+            <figure class="fluid-chart fluid-chart--font-size">
+              <svg class="fluid-chart__svg" role="img"></svg>
+              <div class="fluid-chart__controls">
+                <span class="fluid-chart__toggle">
+                  <input
+                    id="font-size-simulate"
+                    type="checkbox"
+                    data-simulate />
+                  <label for="font-size-simulate">Simulate</label>
+                </span>
+                <input
+                  type="range"
+                  aria-label="Simulated viewport width"
+                  data-simulate />
+              </div>
+              <figcaption>
+                <output class="fluid-chart__readout"></output>
+              </figcaption>
+              <div class="code-block">
+                <pre><code data-lang="scss">@use 'abstracts/functions' as fn;
+
+.title {
+  font-size: fn.fluid-font-size(3);
+}
+
+// Compiles to
+// clamp(1.728rem, 1.3171rem + 1.8263 * var(--vwx), 2.9607rem)</code></pre>
+              </div>
+              <span
+                class="fluid-chart__probe fluid-chart__probe--viewport"
+                data-probe="viewport"
+                aria-hidden="true"></span>
+              <span
+                class="fluid-chart__probe fluid-chart__probe--vwx"
+                data-probe="vwx"
+                aria-hidden="true"></span>
+              <div class="fluid-chart__sim" data-sim aria-hidden="true"></div>
+            </figure>
+
+            <h3 class="content__subtitle">Fluid space ranges</h3>
+            <p class="content__paragraph">
+              <code>fn.fluid-space-range</code> takes two steps of the fluid
+              spacing scale, a t-shirt key or a number, and returns the
+              <code>clamp()</code> from the first at the narrowest viewport to
+              the second at the widest. Both ends always match the
+              <code>--space-*</code> tokens of the same keys. It's what
+              <code>spaceRanges</code> is built on, for a one-off range that
+              doesn't need a name.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="scss">@use 'abstracts/functions' as fn;
+
+.card-grid {
+  gap: fn.fluid-space-range('sm', 'xl');
+}
+
+// Compiles to
+// clamp(1rem, 0rem + 4.4444 * var(--vwx), 4rem)</code></pre>
+            </div>
+
+            <h3 class="content__subtitle">Dynamic line height</h3>
+            <aside class="content__note">
+              <h4 class="content__note-title">$dynamic-line-height</h4>
+              <p class="content__note-paragraph">
+                The two pinned points and the cap the curve is drawn from,
+                generated from <code>dynamicLineHeight</code> in the config.
+                This page uses the defaults:
+              </p>
+              <div class="code-block">
+                <pre><code data-lang="scss">$dynamic-line-height: (
+  "fs-base": 16,
+  "ratio-base": 1.5,
+  "fs-ceil": 64,
+  "ratio-ceil": 1.05,
+  "ratio-cap": 1.6,
+);</code></pre>
+              </div>
+              <p class="content__note-paragraph">
+                <strong>Keep it unregistered.</strong>
+                <code>--line-height-dynamic</code> only works as an unregistered
+                custom property. Registered with <code>@property</code>, it
+                resolves once at the root, and every element inherits the same
+                number.
+              </p>
+            </aside>
+            <p class="content__paragraph">
+              A line height that suits body text is far too loose on a large
+              heading. <code>fn.dynamic-line-height</code> tightens it as the
+              font size grows, between the two points in the note, and caps it
+              for small text. It resolves per element when the page renders,
+              against that element's own font size, so one declaration covers
+              every size on the page, including sizes that aren't on the type
+              scale.
+            </p>
+            <figure class="fluid-chart fluid-chart--line-height">
+              <svg class="fluid-chart__svg" role="img"></svg>
+              <div class="fluid-chart__controls">
+                <label for="line-height-size">Font size</label>
+                <input id="line-height-size" type="range" step="0.5" />
+              </div>
+              <figcaption>
+                <output
+                  class="fluid-chart__readout"
+                  for="line-height-size"></output>
+              </figcaption>
+              <p class="fluid-chart__sample" data-sample>
+                Sphinx of black quartz, judge my vow
+              </p>
+              <div class="code-block">
+                <pre><code data-lang="scss">.sample {
+  line-height: var(--line-height-dynamic);
+}
+
+// --line-height-dynamic is fn.dynamic-line-height()
+// with the config's dynamicLineHeight values,
+// and compiles to
+// clamp(1.05, 0.9 + tan(atan2(9.6px, 1em)), 1.6)</code></pre>
+              </div>
+            </figure>
+          </section>
+
+          <section id="breakpoints" class="content__section">
+            <h2 class="content__title">Breakpoints</h2>
+            <p class="content__paragraph">
+              Breakpoints are a named map in the config, not a set of
+              variables. <code>generate</code> converts each one from px to rem
+              against <code>rootFontSize</code>, so a reader who raises their
+              browser's text size gets the narrower layout as well as the
+              larger text. These are this page's, and the highlighted row is
+              the one your window is in.
+            </p>
+            <div data-tokens="breakpoints"></div>
+
+            <h3 class="content__subtitle">Five mixins</h3>
+            <p class="content__paragraph">
+              Your SCSS never reads the map directly. A mixin takes a name, or
+              a plain number in px, and writes the media query. Keep the map
+              sorted smallest to largest: <code>and-down</code> and
+              <code>only</code> look up the next name after the one you pass.
+            </p>
+            <div class="utility-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Mixin</th>
+                    <th scope="col">Matches</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row"><code>mx.and-up($bp)</code></th>
+                    <td>At the breakpoint and wider</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>mx.up-to($bp)</code></th>
+                    <td>Narrower than the breakpoint</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>mx.and-down($bp)</code></th>
+                    <td>Narrower than the next breakpoint</td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>mx.between($min, $max)</code></th>
+                    <td>From <code>$min</code> up to, not including, <code>$max</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row"><code>mx.only($bp)</code></th>
+                    <td>From the breakpoint up to the next one</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="code-block">
+              <pre><code data-lang="scss">@use 'abstracts/mixins' as mx;
+
+.sidebar {
+  display: none;
+
+  @include mx.and-up('tablet') {
+    display: block;
+  }
+}
+
+// Compiles to
+// @media (width >= 45rem) { .sidebar { display: block; } }</code></pre>
+            </div>
+
+            <h3 class="content__subtitle">Container queries</h3>
+            <p class="content__paragraph">
+              Every mixin takes a last <code>$container</code> argument.
+              <code>true</code> queries the nearest ancestor with a
+              <code>container-type</code>, a string queries a named container.
+              The same breakpoint names then follow the component's own width
+              instead of the window's.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="scss">.card-list {
+  container-type: inline-size;
+}
+
+.card {
+  @include mx.and-up('phablet', $container: true) {
+    grid-template-columns: 1fr 2fr;
+  }
+}</code></pre>
+            </div>
+          </section>
+
+          <section id="utility-classes" class="content__section">
+            <h2 class="content__title">Utility Classes</h2>
+            <p class="content__paragraph">
+              Utility classes put the tokens straight into your markup. Each one
+              sets a single thing from the scale, like a size, a weight or a
+              padding, so you can compose text and spacing without writing any
+              SCSS. They sit in <code>@layer utilities</code>, the last layer,
+              so they win over base styles and your components.
+            </p>
+
+            <h3 class="content__subtitle">Take only what you use</h3>
+            <p class="content__paragraph">
+              Every group is on by default, and every group can be turned off in
+              <code>output.utilities</code>. Turn off everything, a whole
+              section, or a single group inside one. This page writes its layout
+              in SCSS, so it turns off the spacing classes.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="ts">// trimscale.config.ts
+
+// No utility classes at all
+output: { utilities: false },
+
+// A whole section, like this page does
+output: { utilities: { spacing: false } },
+
+// A single group inside a section
+output: { utilities: { spacing: { numeric: false } } },</code></pre>
+            </div>
+            <p class="content__paragraph">
+              It's a question of whether you want the classes, not of file size.
+              If you style through the tokens in your own SCSS, the classes are
+              just unused CSS. If you already have your own set, you don't want
+              two competing in the cascade.
+            </p>
+
+            <h3 class="content__subtitle">The groups</h3>
+            <aside class="content__note">
+              <h4 class="content__note-title">Trim in the CSS bundle</h4>
+              <p class="content__note-paragraph">
+                Keep <code>typography.trim</code> on if you use the vanilla CSS
+                bundle. There, <code>.trim-text-*</code> is the only way to
+                leading trim: the trim metrics ship inside those classes, so
+                turning them off removes trim from the file entirely. The SCSS
+                setup keeps <code>font-setup</code> either way.
+              </p>
+            </aside>
+            <p class="content__paragraph">
+              One row per group you can turn off. The flag is its key inside the
+              section, under <code>output.utilities</code>. The accessibility
+              classes go as one, since several of them extend
+              <code>.sr-only</code>.
+            </p>
+            <div class="utility-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Group</th>
+                    <th scope="col">Classes</th>
+                    <th scope="col">Flag</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="utility-table__section">
+                    <th scope="colgroup" colspan="3"><code>spacing</code></th>
+                  </tr>
+                  <tr>
+                    <th scope="row">Fixed</th>
+                    <td><code>.m-none</code>, <code>.mx-auto</code>, …</td>
+                    <td><code>base</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">T-shirt sizes</th>
+                    <td><code>.{m|p}{side?}-{size}</code></td>
+                    <td><code>tShirt</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Numeric sizes</th>
+                    <td><code>.{m|p}{side?}-{step}</code></td>
+                    <td><code>numeric</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Fixed sizes</th>
+                    <td><code>.{m|p}{side?}-fixed-{size}</code></td>
+                    <td><code>fixed</code></td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr class="utility-table__section">
+                    <th scope="colgroup" colspan="3">
+                      <code>typography</code>
+                    </th>
+                  </tr>
+                  <tr>
+                    <th scope="row">Trim text</th>
+                    <td><code>.trim-text-{role}</code></td>
+                    <td><code>trim</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Font family</th>
+                    <td><code>.font-family-{role}</code></td>
+                    <td><code>family</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Font size</th>
+                    <td><code>.font-size-{step}</code></td>
+                    <td><code>size</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Line height</th>
+                    <td><code>.line-height-{step}</code></td>
+                    <td><code>lineHeight</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Font weight</th>
+                    <td><code>.font-weight-{weight}</code></td>
+                    <td><code>weight</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Font style</th>
+                    <td><code>.font-style-{style}</code></td>
+                    <td><code>style</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Text transform</th>
+                    <td><code>.text-transform-{value}</code></td>
+                    <td><code>textTransform</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Text align</th>
+                    <td><code>.text-align-{side}</code></td>
+                    <td><code>textAlign</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Numeric figures</th>
+                    <td><code>.num-{figures}-{width}</code></td>
+                    <td><code>numericFigures</code></td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr class="utility-table__section">
+                    <th scope="colgroup" colspan="3"><code>a11y</code></th>
+                  </tr>
+                  <tr>
+                    <th scope="row" class="utility-table__wrap">
+                      Screen reader and focus
+                    </th>
+                    <td>
+                      <code>.sr-only</code>, <code>.skip-link</code>,
+                      <code>.focus-visible</code>, …
+                    </td>
+                    <td><code>a11y: false</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="content__paragraph">
+              The role and size classes follow your config: every font role you
+              define gets a <code>.trim-text-*</code> and a
+              <code>.font-family-*</code>, and every step on your type scale
+              gets a <code>.font-size-*</code>.
+            </p>
+
+            <h3 class="content__subtitle">Composing in markup</h3>
+            <p class="content__paragraph">
+              A trim class sets the typeface and the trim, and the other classes
+              add to it. The spacing between the lines below comes from this
+              page's SCSS, since its spacing classes are off.
+            </p>
+            <figure class="utility-demo">
+              <div class="utility-demo__preview">
+                <p
+                  class="trim-text-ui font-size-text-xs font-weight-medium text-transform-uppercase">
+                  Release notes
+                </p>
+                <p
+                  class="trim-text-heading font-size-heading-3 font-weight-medium">
+                  Flush with the grid
+                </p>
+                <p class="trim-text-body font-size-text-base">
+                  Every line starts at the cap height and ends on the baseline,
+                  with no class written for either.
+                </p>
+              </div>
+              <div class="code-block">
+                <pre><code data-lang="html">&lt;p class="trim-text-ui font-size-text-xs font-weight-medium text-transform-uppercase"&gt;
+  Release notes
+&lt;/p&gt;
+&lt;p class="trim-text-heading font-size-heading-3 font-weight-medium"&gt;
+  Flush with the grid
+&lt;/p&gt;
+&lt;p class="trim-text-body font-size-text-base"&gt;…&lt;/p&gt;</code></pre>
+              </div>
+            </figure>
+            <p class="content__paragraph">
+              An element with its own <code>::before</code>,
+              <code>::after</code> or <code>display</code> takes the trim class
+              on a nested <code>&lt;span&gt;</code> instead. The
+              <a
+                href="https://github.com/bluemountain3d/trimscale-css/blob/main/docs/utility-classes.md"
+                target="_blank"
+                rel="noreferrer"
+                >utility classes guide</a
+              >
+              explains why.
+            </p>
+            <p class="content__paragraph">
+              For the exact list your config produces, look in your output
+              folder: <code>generate</code> writes
+              <code>utility-classes.md</code> next to the generated styles.
+            </p>
+          </section>
+
+          <section id="cascade-layers" class="content__section">
+            <h2 class="content__title">Cascade Layers</h2>
+            <p class="content__paragraph">
+              Everything TrimScale writes sits in a cascade layer, declared once
+              in a fixed order. A later layer beats an earlier one whatever the
+              selector's specificity, so a utility class wins over a component
+              without <code>!important</code>, and a component wins over the
+              element defaults without a longer selector.
+            </p>
+            <div data-tokens="layers"></div>
+
+            <h3 class="content__subtitle">Your own layers</h3>
+            <p class="content__paragraph">
+              The package ships nothing in <code>layouts</code> and
+              <code>components</code>. They are there so your own rules land in
+              the right place without you writing the layer list yourself. To
+              name them differently, or add more, list them in
+              <code>output.cascadeLayers</code>, lowest priority first. They
+              replace the two defaults, between <code>trim</code> and
+              <code>utilities</code>, and the CSS bundle declares the same
+              order.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="ts">// trimscale.config.ts
+output: {
+  cascadeLayers: ['layouts', 'widgets', 'components'],
+},</code></pre>
+            </div>
+            <div class="code-block">
+              <pre><code data-lang="scss">@layer components {
+  .card {
+    padding: var(--space-md);
+  }
+}</code></pre>
+            </div>
+            <aside class="content__note">
+              <h4 class="content__note-title">Why trim is split in two</h4>
+              <p class="content__note-paragraph">
+                <code>trim-defaults</code> sits below <code>base</code>, so an
+                element default like <code>small { font-size: 0.875em }</code>
+                still applies to trimmed text. <code>trim</code> sits above it,
+                so the trim metrics always stay paired with the typeface they
+                were measured from, even on a <code>&lt;code&gt;</code> element
+                that <code>base</code> gives a monospace font.
+              </p>
+            </aside>
+          </section>
+
+          <section id="the-method" class="content__section">
+            <h2 class="content__title">The Method Behind the Metrics</h2>
+            <p class="content__paragraph">
+              The trim values come from a thesis project on font metrics, and
+              <a
+                href="https://precisionspec.dev"
+                target="_blank"
+                rel="noreferrer"
+                >PrecisionSpec</a
+              >
+              is where that work lives. Drop a font file in and see its metrics
+              as diagrams: where the cap height sits, how much space the line
+              box adds, and how far the glyphs sit from their edges.
+            </p>
+            <p class="content__paragraph">
+              Two articles walk through the math.
+              <a
+                href="https://precisionspec.dev/learn/font-metrics-article"
+                target="_blank"
+                rel="noreferrer"
+                >Why line-height is lying to you</a
+              >
+              covers the vertical trim, and
+              <a
+                href="https://precisionspec.dev/learn/precision-alignment-article"
+                target="_blank"
+                rel="noreferrer"
+                >Precision Alignment</a
+              >
+              covers the side bearings that line text up with its edges
+              horizontally.
+            </p>
+            <p class="content__paragraph">
+              It's also where to measure a font TrimScale can't read itself,
+              like one served only from a CDN, and enter its values with
+              <code>source: 'manual'</code>. TrimScale doesn't write the
+              <code>@font-face</code> for such a font, so the fallback trim in
+              browsers without <code>text-box-trim</code> can land slightly
+              off. <code>leadingTrimFallback: false</code> on the family trims
+              it natively only, and leaves normal leading everywhere else.
+            </p>
+          </section>
+        </article>
+        <!-- CONTENT END -->
+      </div>
+    </main>
+    <!-- PAGE CONTENT END -->
+
+    <!-- Footer START -->
+    <footer class="footer">
+      <div class="footer__inner wrapper wrapper--boxed">
+        <div class="footer__brand">
+          <p class="footer__name">TrimScale CSS</p>
+          <p class="footer__meta">v%TRIMSCALE_VERSION% · MIT</p>
+        </div>
+        <ul class="footer__links">
+          <li>
+            <a
+              href="https://www.npmjs.com/package/trimscale-css"
+              target="_blank"
+              rel="noreferrer"
+              class="footer__link"
+              >npm</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://github.com/bluemountain3d/trimscale-css"
+              target="_blank"
+              rel="noreferrer"
+              class="footer__link"
+              >GitHub</a
+            >
+          </li>
+          <li>
+            <a
+              href="https://precisionspec.dev"
+              target="_blank"
+              rel="noreferrer"
+              class="footer__link"
+              >PrecisionSpec</a
+            >
+          </li>
+        </ul>
+        <p class="footer__credit">
+          Made by
+          <a
+            href="https://portfolio.egileskilsson.se"
+            target="_blank"
+            rel="noreferrer"
+            >Egil Eskilsson</a
+          >
+        </p>
+      </div>
+    </footer>
+    <!-- Footer END -->
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

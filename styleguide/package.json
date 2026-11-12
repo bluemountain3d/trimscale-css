@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "trimscale:generate": "trimscale-css generate"
   },
   "devDependencies": {
     "@types/node": "^25.9.1",
-    "sass": "^1.105.1",
+    "sass": "^1.108.2",
+    "shiki": "^4.4.3",
+    "trimscale-css": "workspace:*",
     "typescript": "~6.0.2",
     "vite": "^8.0.12"
   }

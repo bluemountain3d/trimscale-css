@@ -1,0 +1,6 @@
+// --grid-gap comes from fluidRanges in trimscale.config.ts
+@layer layouts {
+  :root {
+    --grid-columns: 8;
+  }
+}

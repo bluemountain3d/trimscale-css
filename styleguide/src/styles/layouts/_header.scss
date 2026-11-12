@@ -1,0 +1,95 @@
+@use "abstracts/functions" as fn;
+@use "abstracts/mixins" as mx;
+
+@property --header-height {
+  syntax: "<length>";
+  initial-value: 0px;
+  inherits: true;
+}
+
+@property --_header-padding {
+  syntax: "<length>";
+  initial-value: 0px;
+  inherits: true;
+}
+
+:root {
+  timeline-scope: --header-trigger;
+  --header-height-max: #{fn.fluid-value(48, 80)};
+  --header-height: var(--header-height-max);
+
+  animation: shrink-header linear both;
+  animation-timeline: --header-trigger;
+  animation-range: exit 0% exit 100%;
+}
+
+@layer layouts {
+
+  .header-trigger {
+    height: var(--header-height-max);
+    view-timeline-name: --header-trigger;
+  }
+
+  .header {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    inset-inline: 0;
+    height: var(--header-height);
+    padding-block: var(--_header-padding);
+    
+    gap: var(--space-7);
+    background-color: var(--color-header-background);
+    backdrop-filter: blur(8px);
+
+    &__inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &__brand {
+
+      > svg {
+        height: calc(var(--header-height) - 2 * var(--_header-padding));
+        width: auto;
+      }
+    }
+  }
+
+  .nav {
+    &__menu {
+      display: flex;
+      gap: var(--space-5);
+      list-style: none;
+    }
+
+    &__link {
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+      @include mx.font-setup(
+        $font: "ui",
+        $font-size: var(--text-sm),
+        $font-weight: var(--font-weight-medium)
+      );
+
+      &:hover {
+        color: var(--color-text-primary);
+      }
+    }
+  }
+
+  @keyframes shrink-header {
+    0% {
+      --header-height: var(--header-height-max);
+      --_header-padding: calc(var(--space-fixed-2) * 2);
+    }
+  
+    100% {
+      --header-height: #{fn.fluid-value(40, 64)};
+      --_header-padding: var(--space-fixed-2);
+    }
+  }
+
+}

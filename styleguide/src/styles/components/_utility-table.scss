@@ -1,0 +1,72 @@
+@layer components {
+
+  .utility-table {
+    margin-block-start: 1.5em;
+    overflow-x: auto;
+
+    table {
+      inline-size: 100%;
+      border-collapse: collapse;
+      // No font-setup: its display: flow-root would stop this being a table
+      font-size: var(--text-sm);
+    }
+
+    th,
+    td {
+      padding-block: var(--space-fixed-3);
+      padding-inline-end: var(--space-4);
+      border-block-end: 1px solid var(--color-details);
+      text-align: start;
+      vertical-align: top;
+    }
+
+    thead th {
+      color: var(--color-text-secondary);
+      font-weight: var(--font-weight-medium);
+    }
+
+    tbody th {
+      font-weight: var(--font-weight-medium);
+      white-space: nowrap;
+
+      // A row header long enough to set the column's width on its own. It
+      // wraps instead, so the column fits the next-longest header.
+      &.utility-table__wrap {
+        white-space: normal;
+      }
+    }
+
+    &__section th {
+      padding-block-start: var(--space-5);
+      color: var(--color-accent);
+    }
+
+    code {
+      font-size: 0.875em;
+      white-space: nowrap;
+    }
+  }
+
+  // The breakpoint the viewport is in, marked by src/breakpoints.ts
+  .breakpoint-table tr[aria-current] {
+    th,
+    td {
+      color: var(--color-accent);
+    }
+
+    th::after {
+      content: "current";
+      margin-inline-start: var(--space-fixed-2);
+      color: var(--color-text-secondary);
+      font-size: 0.75em;
+      font-weight: var(--font-weight-normal);
+      text-transform: uppercase;
+    }
+  }
+
+  // The project's own window in the layer order
+  .layer-table__own th {
+    color: var(--color-accent);
+  }
+
+}
