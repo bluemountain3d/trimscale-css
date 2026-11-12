@@ -5,6 +5,8 @@
 
 A framework-agnostic SCSS toolkit for fluid typography, leading-trim, and OKLCH tokens.
 
+**[See it in action](https://bluemountain3d.github.io/trimscale-css/)**: the styleguide is set entirely with trimscale-css, and its token tables, charts and breakpoints are read live from its own config.
+
 ---
 
 ## Overview
