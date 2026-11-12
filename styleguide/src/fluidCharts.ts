@@ -34,10 +34,11 @@ const onResize = (callback: () => void) => {
 // against cqi instead of vwx, so the dot is still the browser's number.
 function viewportSource(figure: HTMLElement, maxWidth: number, onChange: () => void) {
   const liveProbe = figure.querySelector<HTMLElement>('[data-probe="viewport"]')
+  const vwxProbe = figure.querySelector<HTMLElement>('[data-probe="vwx"]')
   const container = figure.querySelector<HTMLElement>('[data-sim]')
   const toggle = figure.querySelector<HTMLInputElement>('input[type="checkbox"][data-simulate]')
   const slider = figure.querySelector<HTMLInputElement>('input[type="range"][data-simulate]')
-  if (!liveProbe || !container || !toggle || !slider) return null
+  if (!liveProbe || !vwxProbe || !container || !toggle || !slider) return null
 
   slider.min = '320'
   slider.max = String(Math.round(maxWidth * 1.4))
@@ -54,17 +55,35 @@ function viewportSource(figure: HTMLElement, maxWidth: number, onChange: () => v
     read() {
       // Measured, not innerWidth: whether 100vw counts the scrollbar depends
       // on the root's scrollbar-gutter, which is stable here
-      const live = round(liveProbe.getBoundingClientRect().width, 1)
+      const viewport = round(liveProbe.getBoundingClientRect().width, 1)
+      // The width the formulas see, 100 × --vwx. Narrower than the viewport
+      // only when --vwx caps a wide, tall one, and then the curve's x is this.
+      const live = round(vwxProbe.getBoundingClientRect().width, 1)
+      const capped = viewport - live >= 1
       if (!toggle.checked) {
         slider.value = String(live)
-        return { width: live, live, simulated: false }
+        return { width: live, live, viewport, capped, simulated: false }
       }
       const width = slider.valueAsNumber
       container.style.inlineSize = `${width}px`
-      return { width, live, simulated: true }
+      return { width, live, viewport, capped, simulated: true }
     },
   }
 }
+
+// The marker label and the readout's opening, shared by both viewport charts
+function viewportText({ width, viewport, capped, simulated }: ReturnType<ViewportSource['read']>) {
+  if (simulated) return { label: 'simulated', readout: `Viewport ${Math.round(width)}px` }
+  if (capped) {
+    return {
+      label: 'your viewport, capped',
+      readout: `Viewport ${Math.round(viewport)}px, capped to ${Math.round(width)}px`,
+    }
+  }
+  return { label: 'your viewport', readout: `Viewport ${Math.round(width)}px` }
+}
+
+type ViewportSource = NonNullable<ReturnType<typeof viewportSource>>
 
 // Clears the svg and sizes its viewBox to its real pixel width, so labels
 // keep their CSS size instead of shrinking with a scaled viewBox on mobile.
@@ -214,7 +233,9 @@ export function fluidValueChart(figure: HTMLElement) {
   )
 
   const draw = () => {
-    const { width: viewport, live, simulated } = source.read()
+    const view = source.read()
+    const { width: viewport, live, simulated } = view
+    const text = viewportText(view)
     // From the live width only, so dragging the slider never rescales the axis
     const xMax = Math.max(maxWidth * 1.4, live * 1.05)
     const chart = plot(svg, [0, xMax], [0, linear(xMax) * 1.1])
@@ -251,8 +272,8 @@ export function fluidValueChart(figure: HTMLElement) {
 
     const probe = simulated ? (type === 'clamp' ? clampSim : maxSim) : type === 'clamp' ? clamp : max
     const measured = parseFloat(getComputedStyle(probe).fontSize)
-    chart.dot(viewport, measured, simulated ? 'simulated' : 'your viewport')
-    output.textContent = `Viewport ${Math.round(viewport)}px · formula ${expected[type](viewport).toFixed(2)}px · measured ${measured.toFixed(2)}px`
+    chart.dot(viewport, measured, text.label)
+    output.textContent = `${text.readout} · formula ${expected[type](viewport).toFixed(2)}px · measured ${measured.toFixed(2)}px`
   }
 
   for (const button of buttons) {
@@ -332,7 +353,9 @@ export function fontSizeChart(figure: HTMLElement) {
   )
 
   const draw = () => {
-    const { width: viewport, live, simulated } = source.read()
+    const view = source.read()
+    const { width: viewport, live, simulated } = view
+    const text = viewportText(view)
     // From the live width only, so dragging the slider never rescales the axis
     const xMax = Math.max(maxWidth * 1.4, live * 1.05)
     const yMin = value(bottom, 0) * 0.85
@@ -362,14 +385,14 @@ export function fontSizeChart(figure: HTMLElement) {
     }
     chart.endLabels(steps.map((s) => ({ y: value(s, xMax), text: s.name })))
 
-    chart.marker(viewport, simulated ? 'simulated' : 'your viewport')
+    chart.marker(viewport, text.label)
     const measured = new Map(
       steps.map((s) => [s, parseFloat(getComputedStyle(simulated ? s.simulated : s.live).fontSize)]),
     )
     for (const size of measured.values()) chart.point(viewport, size, 3.5)
 
     const spread = (measured.get(top) ?? 0) / (measured.get(base) ?? 1)
-    output.textContent = `Viewport ${Math.round(viewport)}px · ${top.name} is ${spread.toFixed(2)} × ${base.name}`
+    output.textContent = `${text.readout} · ${top.name} is ${spread.toFixed(2)} × ${base.name}`
   }
 
   onResize(draw)

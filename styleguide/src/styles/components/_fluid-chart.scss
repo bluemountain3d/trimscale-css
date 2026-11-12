@@ -254,6 +254,15 @@ $font-size-steps: ();
         block-size: 0;
       }
 
+      // The width the fluid functions actually see: 100vw, unless --vwx caps
+      // it on a wide, tall viewport
+      &--vwx {
+        position: fixed;
+        inset-inline-start: 0;
+        inline-size: calc(var(--vwx) * 100);
+        block-size: 0;
+      }
+
       // The same functions against cqi, measured inside __sim at the
       // slider's width
       &--clamp-sim {

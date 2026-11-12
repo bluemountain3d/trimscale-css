@@ -745,6 +745,11 @@ output: { css: true },</code></pre>
             <p class="content__paragraph">
               Fluid values scale linearly with the viewport between the two
               widths in <code>fluidScale</code>, and hold still outside them.
+              On a tall viewport, 944px and up, they also stop growing once
+              the window is more than twice as wide as it is tall, so an
+              ultrawide monitor doesn't blow the type up. Both numbers are
+              <code>ultrawideHeightThresholdPx</code> and
+              <code>ultrawideAspectRatio</code> in the config.
               Every fluid token on this page comes from the functions below.
               They are SCSS functions, so calling them yourself needs the SCSS
               setup; the plain CSS bundle ships their results as tokens instead.
@@ -860,6 +865,10 @@ output: { css: true },</code></pre>
                 class="fluid-chart__probe fluid-chart__probe--viewport"
                 data-probe="viewport"
                 aria-hidden="true"></span>
+              <span
+                class="fluid-chart__probe fluid-chart__probe--vwx"
+                data-probe="vwx"
+                aria-hidden="true"></span>
               <div class="fluid-chart__sim" data-sim aria-hidden="true">
                 <span
                   class="fluid-chart__probe fluid-chart__probe--clamp-sim"
@@ -919,6 +928,10 @@ output: { css: true },</code></pre>
               <span
                 class="fluid-chart__probe fluid-chart__probe--viewport"
                 data-probe="viewport"
+                aria-hidden="true"></span>
+              <span
+                class="fluid-chart__probe fluid-chart__probe--vwx"
+                data-probe="vwx"
                 aria-hidden="true"></span>
               <div class="fluid-chart__sim" data-sim aria-hidden="true"></div>
             </figure>
