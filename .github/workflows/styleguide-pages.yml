@@ -1,0 +1,66 @@
+name: Styleguide to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'styleguide/**'
+      - 'styles/**'
+      - 'models/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/styleguide-pages.yml'
+  # Run by hand after an npm publish: the footer shows the npm `latest`
+  # dist-tag, read at build time, so a release needs a rebuild to show up
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time, and never cancel one that is already publishing
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      # The bridge in src/styles/trimscale is committed, so no generate step.
+      # base_path is /<repo> for a project site, Vite wants the trailing slash.
+      - name: Build
+        working-directory: styleguide
+        run: pnpm build
+        env:
+          STYLEGUIDE_BASE: ${{ steps.pages.outputs.base_path }}/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: styleguide/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
