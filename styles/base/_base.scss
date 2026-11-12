@@ -1,3 +1,6 @@
+@use "abstracts/variables" as var;
+@use "sass:math";
+
 /// @group Base
 /// @name Base Styles
 /// Absolute minimum
@@ -15,5 +18,19 @@
   html {
     scrollbar-gutter: stable;
     color-interpolation-filters: sRGB;
+
+    /// The root size $root-font-size describes, expressed as a percentage so
+    /// it scales with the reader's own browser text-size setting. A px value
+    /// here would override that setting instead.
+    ///
+    /// The 16px below is a third base, distinct from $root-font-size and from
+    /// $fluid-scale's min-font-size: it is the browser default that a
+    /// percentage is measured against. Keep it literal.
+    ///
+    /// Emitted only when the two differ, so a project on the default root
+    /// gets no declaration at all.
+    @if var.$root-font-size != 16px {
+      font-size: math.div(var.$root-font-size, 16px) * 100%;
+    }
   }
 }

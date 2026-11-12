@@ -1,0 +1,83 @@
+@use "abstracts/mixins" as mx;
+
+@layer components {
+
+  .space-scale {
+    margin-block-start: 1.5em;
+
+    &__title {
+      @include mx.font-setup(
+        $font: "ui",
+        $font-size: var(--text-sm),
+        $font-weight: var(--font-weight-medium)
+      );
+    }
+
+    &__note {
+      margin-inline-start: var(--space-fixed-2);
+      color: var(--color-text-secondary);
+      font-weight: var(--font-weight-normal);
+    }
+
+    &__list {
+      display: grid;
+      gap: var(--space-4);
+      margin-block-start: var(--space-5);
+      padding: 0;
+      list-style: none;
+    }
+
+    &__row {
+      display: grid;
+      grid-template-columns: 14ch 6ch minmax(0, 1fr);
+      grid-template-areas:
+        "token token token"
+        "source value bar";
+      align-items: center;
+      gap: var(--space-fixed-1) var(--space-fixed-3);
+      font-family: var(--font-family-code);
+      font-size: var(--text-xs);
+
+      @include mx.and-up("phablet") {
+        grid-template-columns: 20ch 12ch 6ch minmax(0, 1fr);
+        grid-template-areas: "token source value bar";
+      }
+
+      > code {
+        grid-area: token;
+        justify-self: start;
+      }
+    }
+
+    &__source {
+      display: block;
+      grid-area: source;
+      color: var(--color-text-secondary);
+    }
+
+    // Clips an oversized bar at the column edge while the bar keeps its real
+    // width, which tokenValues measures. The fade grows with the clipped
+    // amount, up to 2rem, so a bar that fits gets none.
+    &__track {
+      --_fade: clamp(0px, var(--_bar) - 100%, 2rem);
+
+      grid-area: bar;
+      overflow-x: clip;
+      mask-image: linear-gradient(to right, #000 calc(100% - var(--_fade)), transparent);
+    }
+
+    &__bar {
+      display: block;
+      inline-size: var(--_bar);
+      block-size: 0.75rem;
+      border-radius: 2px;
+      background-color: var(--color-accent);
+    }
+
+    .token-value {
+      grid-area: value;
+      text-align: end;
+    }
+  }
+
+}

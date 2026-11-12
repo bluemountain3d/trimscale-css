@@ -1,0 +1,48 @@
+@use 'abstracts/variables' as var;
+@use 'abstracts/functions' as fn;
+@use "sass:map";
+
+@layer components {
+  .wrapper {
+    --_max-content-width: #{fn.px-to-rem(map.get(var.$fluid-scale, "max-width"))};
+    position: relative;
+    width: 100%;
+    margin-inline: auto;
+
+    &--full-height {
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    &--stack {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &--overshoot {
+      max-width: var(--_max-content-width);
+      padding-inline: round(
+        nearest, 
+        #{fn.fluid-value(15, 60)},
+        2px
+      );
+    }
+
+    &--boxed {
+      max-width: var(--_max-content-width);
+      padding-inline: round(
+        nearest,
+        #{fn.fluid-value(20, 120)},
+        2px
+      );
+    }
+
+    &--narrow {
+      max-width: round(
+        nearest,
+        #{fn.fluid-value(300, 600)},
+        2px
+      );
+    }
+  }
+}

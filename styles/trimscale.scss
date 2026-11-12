@@ -10,18 +10,20 @@
 /// 3. Utilities — utility classes available globally
 /// 4. Base — HTML element defaults, reset, and typography
 ///
-/// The package ships nothing into the `layouts` and `components` layers.
-/// Both are declared in _layer.scss and left empty by design: grids, page
-/// structure and component classes are design decisions that belong in the
-/// consumer's project, not in a typography and spacing base. See
-/// docs/examples.md for recipes to copy.
+/// The package ships nothing into the project's own layers, declared in
+/// _layer.scss from $cascade-layers (`layouts` and `components` by default):
+/// grids, page structure and component classes are design decisions that
+/// belong in the consumer's project, not in a typography and spacing base.
+/// See docs/examples.md for recipes to copy.
 /// ===========================================================================
 
 // Configuration surface — see trimscale.config.ts / docs/getting-started.md.
 // Every var shown here can be overridden via `@use 'trimscale-css' with (...)`.
 @forward './abstracts/variables' show
+  $root-font-size,
   $breakpoints,
   $fluid-scale,
+  $fluid-ranges,
   $font-metrics,
   $font-faces,
   $fallback-font-faces,
@@ -43,11 +45,14 @@
   $numeric-scale-end,
   $numeric-scale-micro-end,
   $numeric-scale-macro-end,
+  $space-ranges,
   $base-grid-size,
   $ultrawide-height-threshold-px,
+  $ultrawide-aspect-ratio,
   $utilities-spacing-base,
   $utilities-spacing-tshirt,
   $utilities-spacing-numeric,
+  $utilities-spacing-fixed,
   $utilities-typography-trim,
   $utilities-typography-family,
   $utilities-typography-size,
@@ -58,7 +63,8 @@
   $utilities-typography-text-align,
   $utilities-typography-numeric-figures,
   $utilities-a11y,
-  $output-reset;
+  $output-reset,
+  $cascade-layers;
 
 // Layer — Define CSS Layers specificity order
 @forward './layer';
@@ -72,4 +78,4 @@
 // Base - Global HTML element styling
 @forward 'base/';
 
-// Layouts and Components - none shipped, both layers are the consumer's own
+// The $cascade-layers layers - none shipped, all of them are the consumer's own

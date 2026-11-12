@@ -2,6 +2,169 @@
 
 Written for upgrading: what changed, and what it means for a project already on the previous version. Entries that need nothing from you are still listed, so you can tell the difference between "my output changed because of this" and "something is wrong".
 
+## 1.0.0-beta.6
+
+Re-run `generate` after upgrading, as after any version bump: a release can change which config fields exist, and this is what tells you.
+
+```bash
+npx trimscale-css generate
+```
+
+### Fields that moved
+
+| Was                    | Now                               |
+| ---------------------- | --------------------------------- |
+| `defaultScheme`        | `colorSetup.defaultScheme`        |
+| `baseColorTokens`      | `colorSetup.baseColorTokens`      |
+| `customColorTokens`    | `colorSetup.customColorTokens`    |
+| `semanticColorAliases` | `colorSetup.semanticColorAliases` |
+
+Four keys moving one level in, nothing else about them changes. Color was the last axis still spread across the top level while every other one (`appFonts`, `fluidScale`, `spacingSetup`, `output`) was grouped. `generate` stops and names the new path for each, one at a time, so you can work through it without this table:
+
+```ts
+colorSetup: {
+  defaultScheme: 'light',
+  baseColorTokens: {
+    /* unchanged */
+  },
+},
+```
+
+### Changes worth a look
+
+**`--space-*` is always fluid, and the fixed steps are `--space-fixed-*`.** Under the default `'independent'` approach, every spacing step used to be either fixed or fluid, never both: `tShirtScaleMicro` and `--space-1` up to `numericScaleMicroEnd` sat on the static `--unit-micro`, the rest on the fluid `--unit-macro`, all under `--space-*`. A value like 16px → 32px had no name when `sm` was a fixed tier. Now `--space-*` is the fluid scale throughout (`tShirtScaleMacro`, and `--space-1` up to `numericScaleMacroEnd`), the same meaning it has under `'coupled'`, and the fixed steps get their own namespace: `--space-fixed-{tier}` from `tShirtScaleMicro` and `--space-fixed-1` up to `numericScaleMicroEnd`. The two maps may share keys, `sm` in both gives a fluid `--space-sm` and a fixed `--space-fixed-sm`. Each fixed step has utility classes too, `.p-fixed-sm`, `.mt-fixed-4` and so on, and `output.utilities.spacing.fixed` turns them off.
+
+What it means for a config you don't change. Its `tShirtScaleMicro` tiers move to the new names, and nothing fails to compile:
+
+- `--space-3xs` to `--space-lg` (the old default micro tiers) no longer exist, and neither do `.p-sm` and the other classes built on them. A `var()` pointing at one resolves to nothing, so look for padding and margins that collapsed to zero.
+- `--space-1` to `--space-6` exist still, but grow with the viewport where they were fixed: the same size at `fluidScale.minWidth`, up to twice it at `maxWidth`. This is the one change you can't see in the output's token list.
+- Your `tShirtScaleMacro` tiers and the numeric steps above `numericScaleMicroEnd` are unchanged.
+
+To keep exactly what you had, rename: `--space-sm` → `--space-fixed-sm`, `--space-4` → `--space-fixed-4`, `.p-sm` → `.p-fixed-sm`. To adopt the new defaults instead, where every tier exists in both forms, copy `spacingSetup` from the template:
+
+```ts
+tShirtScaleMicro: {
+  '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+},
+tShirtScaleMacro: {
+  '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+  '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+  '7xl': 24, '8xl': 28, '9xl': 32,
+},
+numericScaleMicroEnd: 8,
+numericScaleMacroEnd: 32,
+```
+
+Note that this also changes `--space-xl` to `--space-4xl` (new multipliers 8, 10, 12, 14 where they were 6, 8, 10, 12) and drops `--space-33` to `--space-48`. The default numeric scale ends at 32, since steps past it are rarely needed and `calc()` covers them.
+
+`'coupled'` configs keep their names: `tShirtScale` was already fluid `--space-*`, and there is no fixed scale. What changes is that each `--space-*` rounds to the nearest whole pixel, `round(nearest, calc(var(--unit) * N), 1px)`, the way `'independent'` steps already did through `--unit-macro`. A step moves by less than a pixel at most, so expect no visible change beyond sharper alignment where horizontal padding used to land between pixels. The template's commented-out coupled example uses the same 15 multipliers and end of 32 as the new independent fluid scale. In SCSS, `$space-values` holds only the fluid map (it was the merge of both), and `$space-fixed-values`, `$space-numeric-end` and `$space-fixed-numeric-end` are new.
+
+→ [customizing-spacing.md](customizing-spacing.md#independent-default)
+
+**Colors are optional now.** Omit `colorSetup` entirely and the output holds nothing color-related: no `--{prefix}-*` custom properties, no `color-scheme` declaration, and no `.theme-light`/`.theme-dark` rules. For a project whose colors come from somewhere else, that was previously a palette you had to fill in to get `generate` to run at all, and then had to ignore.
+
+Two things become yours when you leave it out. Declare `color-scheme` on `:root` yourself, matching the palette you do ship: it governs how the browser renders form controls, scrollbars and the canvas, so a `light dark` left behind over a light-only palette renders dark controls on light surfaces. And the theme switch goes with it, since `.theme-light`/`.theme-dark` only ever forced `color-scheme` for trimscale's own `light-dark()` tokens.
+
+The rest of the system is unchanged either way: type scale, spacing, breakpoints, leading trim and every utility class work without a single color token.
+
+→ [design-tokens.md#turning-colors-off](design-tokens.md#turning-colors-off)
+
+**`.skip-link` is black on white, in literal values.** It read `var(--color-surface-base, #fff)` and `var(--color-text-primary, #000)`, which only ever resolved for a config that happened to use those two token names, and a project is free to name its tokens anything. If your palette does use them and you want the link themed, restyle the class in your own CSS:
+
+```css
+.skip-link {
+  background: var(--color-surface-base);
+  color: var(--color-text-primary);
+}
+```
+
+**`rootFontSize`, for projects whose root font size isn't the browser's 16px.** Every px value in the config is converted to rem against this number: the breakpoint map, `fluidScale`'s font sizes, the spacing grid, and `fn.px-to-rem` / `fn.rem-to-px` when you call them yourself.
+
+What it means: nothing at all unless you set it. The default is `16`, and a config that leaves it alone gets exactly the CSS it got before.
+
+Setting anything else also emits `html { font-size }` in `@layer base`, as the percentage that produces the root you asked for:
+
+```css
+/* rootFontSize: 10 */
+@layer base {
+  html {
+    font-size: 62.5%;
+  }
+}
+```
+
+A percentage rather than px, so the root still scales with the reader's own browser text-size setting. If your application already sets the root itself, its rule wins, since `@layer base` loses to unlayered CSS and to every layer above it. Keep the two in agreement: `rootFontSize` is what the px to rem conversion reads.
+
+→ [full-config-reference.md#rootfontsize](full-config-reference.md#rootfontsize)
+
+**The one-off fluid function is called `fn.fluid-value`.**
+
+| Was                           | Now              |
+| ----------------------------- | ---------------- |
+| `fn.get-fluid-clamp`          | `fn.fluid-value` |
+| `$value-key` (third argument) | `$unit-key`      |
+
+Neither half of the old name describes it. `get-` reads as a lookup in Sass, and `fn.get-fluid-clamp(8, 16, 'vwx', 'max')` emits `max()`, not `clamp()`. The new name matches the other two fluid functions, which carry no prefix and take `$unit-key`.
+
+What it means: rename the calls. The arguments, their order and the output are unchanged, so a call that passed the unit positionally needs nothing else. The two scale-aware functions are wrappers around it, which is what makes all three round identically: `fn.fluid-value` rounds its rem values where `fn.get-fluid-clamp` left them at full precision. In trimscale's own output that moves one number, `--unit-macro`'s `0.1666666667rem` to `0.1667rem`, which the token's `round(…, 1px)` absorbs. In your own code it shortens the result by a few characters and shifts nothing visible.
+
+→ [abstracts.md](abstracts.md)
+
+**`fn.fluid-spacing` is gone, and a token replaces it.** It returned a fluid multiple of `fluidScale`'s base font-size, which is what `spacingSetup`'s `'coupled'` approach builds `--space-*` from. Under `'independent'`, the default, the tokens come from `--unit-micro` and `--unit-macro` instead, so the function's result matched no token in your output: `fn.fluid-spacing(4)` ran 16px to 20px, where `--space-4` runs 16px to 32px and `--space-fixed-4` is a static 16px.
+
+What it means: write the multiple in CSS instead. `--fluid-base` is a token, so this needs no Sass and works the same in a project consuming the compiled CSS:
+
+```css
+/* was: padding: fn.fluid-spacing(12); */
+padding: calc(var(--fluid-base) * 3);
+```
+
+The divisor is `spacingSetup.baseGridSize`, so a level of 12 on the default grid of 4 is three times the base. For a value that isn't a multiple of the base, use `fn.fluid-value` with the two pixel sizes you want.
+
+**`fn.fluid-space-step` is replaced by `fn.fluid-space-range`, which takes spacing keys.** `fluid-space-step` read grid levels as multiples of `fluidScale`'s base font-size, the same flaw as `fluid-spacing`: under `'independent'` its result matched no `--space-*` token. `fluid-space-range` takes two steps of the fluid scale instead, a t-shirt key as a string or a numeric step as a number, and resolves them against the approach your config uses, so both ends always match the tokens of the same keys:
+
+```scss
+/* was: gap: fn.fluid-space-step(4, 8); */
+gap: fn.fluid-space-range('sm', 'xl');
+```
+
+What it means: the old name no longer compiles, and the arguments mean something different, so translate each call rather than renaming it. `fluid-space-step(4, 8)` ran from 4 grid levels of the base font-size to 8; pick the two `--space-*` steps you want the value to start and end at. A range only grows, and there is no `$type` argument: `'max'` would make it unbounded, which is no longer a range. The result is unrounded, like the other fluid functions.
+
+→ [abstracts.md](abstracts.md#fnfluid-space-rangefrom-to-unit-key)
+
+**A number is no longer split from a single letter in config keys.** Keys become kebab-case token names, and a number used to be split from any letter before it. Now it's split only from a word of two or more letters: `fs900` still gives `--fs-900` and `heading1` still gives `--heading-1`, but `h1` gives `--h1` instead of `--h-1`, and `a11yFocus` gives `--a11y-focus` instead of `--a-11y-focus`.
+
+What it means: only a key with a single letter right before a number changes, in any field whose keys become names (type scale steps, semantic font sizes, color tokens and aliases, breakpoints, font families). Search your CSS for the old name and rename it.
+
+**Fluid tokens are no longer registered with `@property`.** That covers `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and every fluid `--space-*`. A registered length is computed where it is declared, on `:root`, and a `vw` there doesn't match the `vw` the rest of the page sees: the spec exempts the root from the scrollbar adjustment every other element gets. In Chromium 145 to 152 with classic scrollbars (the Windows default) the scrollbar was subtracted twice instead, so every fluid token came out 1-2 % small in its fluid part. Left unregistered, a token resolves on the element that uses it. See [design-tokens.md](design-tokens.md#registered-and-unregistered-tokens) for which tokens are registered and why. Static tokens (`--unit-micro`, every `--space-fixed-*`, `--header-height`, font weights, line heights) stay registered.
+
+What it means, in two places:
+
+- A `transition` on a fluid token jumps instead of animating, since only registered properties interpolate.
+- Reading a fluid token from `:root` in JavaScript returns its expression, not px: `getComputedStyle(document.documentElement).getPropertyValue('--fs-600')` gives `clamp(...)`. Read a real property off an element that uses the token instead, for example its `font-size`.
+
+**`--vwx` caps smoothly on wide screens.** On a viewport at least `ultrawideHeightThresholdPx` tall (default `944`), `--vwx` is `min(1vw, 2vh)`. It used to switch from `1vw` to `2vh` at a 21:9 aspect ratio, and because the two differ by 14 % at that ratio, fluid sizes dropped in one step when a window was dragged across it.
+
+What it means: nothing at 2:1 and narrower, and nothing at 21:9 and wider, where the output is the same as before. Between the two, fluid sizes are capped where they weren't, by up to 14 % just below 21:9. In a default config only the uncapped tokens (`--fs-800-uncapped`, `--fs-900-uncapped`) are affected, since everything clamped has already reached its max at those widths. The ratio is the new `ultrawideAspectRatio` key (default `2`, must be greater than 1).
+
+→ [design-tokens.md#base-tokens](design-tokens.md#base-tokens)
+
+**The leading-trim warning ignores errors under half a pixel.** `generate` warns about a family whose `@font-face` it can't write only when the trim would be off by more than 0.031em, half a pixel at 16px, instead of 0.01em. A family that warned with an error between the two goes quiet; nothing in the generated CSS changes.
+
+### New
+
+- **Named fluid values from the config.** `spacingSetup.spaceRanges` names a range between two steps of the fluid spacing scale, emitted as `--space-range-{name}`: `cardGap: { from: 'sm', to: 'xl' }` is `--space-sm` on a narrow viewport and `--space-xl` on a wide one, rounded to a whole pixel like every `--space-*`. The top-level `fluidRanges` names a value between two pixel sizes, emitted as `--{name}` with no prefix: `mastheadHeight: { from: 56, to: 72 }` is the same `clamp()` as `fn.fluid-value(56, 72)`. Both follow `fluidScale` and the ultrawide cap, which a hand-written `clamp()` in a project consuming the compiled CSS doesn't. Names can be written in camelCase or kebab-case and are emitted as kebab-case, and `generate` warns when a `fluidRanges` name collides with a token the package emits. Neither field gets utility classes. See [customizing-spacing.md](customizing-spacing.md#named-ranges) and [full-config-reference.md](full-config-reference.md#fluidranges).
+- **Local fonts under a base path.** `appFonts.urlPrefix` puts a base path in front of every `local` font's generated `@font-face` `src`. Next.js `basePath` doesn't rewrite `url()` in CSS, so a site served under `/docs` requested its fonts from `/fonts/...` and got a 404; `urlPrefix: '/docs'` makes it `/docs/fonts/...`. Vite rewrites these URLs itself when `base` is set, so a Vite project needs nothing. See [adding-a-font.md](adding-a-font.md#sites-served-under-a-base-path).
+- **Your own cascade layers.** `output.cascadeLayers` replaces the empty `layouts` and `components` layers with a list of your own, declared between `trim` and `utilities` in the order you give. Leave it out and the layer order is the same as before. See [cascade-layers.md](cascade-layers.md#your-own-layers).
+- **Opt out of the leading-trim fallback.** `leadingTrimFallback: false` on a family trims it in browsers with native `text-box-trim` only, and leaves normal leading in the rest, for a family whose `@font-face` isn't trimscale's to write and whose fallback trim therefore lands off. `appFonts.leadingTrimFallbackDefault` sets it for every family, and a family's own `leadingTrimFallback` wins. Default `true`, so a config that sets neither gets the same trim as before. See [adding-a-font.md](adding-a-font.md#opting-out-of-the-leading-trim-fallback).
+
+### Fixed
+
+- Leading trim was off for fonts whose typographic ascender and descender add up to less than 1em, in browsers without native `text-box-trim`: the box came out too tall by the difference, with an equal gap above the cap height and below the baseline. Mostly display fonts are affected (Permanent Marker by 0.33em in total, Ubuntu Mono 0.14em); fonts that reach 1em are unchanged. Run `generate` again to pick up the corrected `topTrim`, `bottomTrim` and overrides.
+- `.ttf` and `.otf` fonts never loaded. The `@font-face` trimscale writes for a `local` family, or a `cdn` family with `generateFontFace: true`, gave the file extension as the format hint, `format("ttf")`, where CSS expects `format("truetype")` (and `"opentype"` for `.otf`). Browsers skip a `src` with a format they don't recognise, so the family fell back to its fallback stack without an error anywhere. `.woff` and `.woff2` were unaffected, since their extension and format name are the same. Run `generate` again to pick up the fix; a file with any other extension gets no format hint, and the browser identifies it itself.
+- A numeric spacing scale ending at `0` generated two steps instead of none. Sass's `@for` counts down when its end is below its start, so `numericScaleMicroEnd: 0` emitted `--space-1` and `--space-0`, plus their utility classes. An end of `0` now generates nothing for that scale.
+- `fluidScale.precision` had no effect on anything. It is required in the config, documented as the decimal places in generated `clamp()` values and written into the bridge file, but nothing read it: every fluid function rounded to a hardcoded 4. It governs all of them now, so a config that set anything other than `4` gets different decimals after upgrading, and `--fs-*`, `--space-*` and `--unit-macro` move with it. `4` stays the default and the value to keep: rem at four decimals is already 0.0016px, and fewer decimals round the clamp endpoints rather than just the slope.
+
 ## 1.0.0-beta.5
 
 Most of the breaking changes are config fields that moved, and `generate` stops with the new name for every one of them. Start by running it.

@@ -1,0 +1,65 @@
+@use "abstracts/mixins" as mx;
+
+@layer layouts {
+  .sidebar {
+    position: fixed;
+    inset-block: calc(var(--header-height-max) + var(--space-6)) 0;
+    inset-inline-start: 0;
+    width: min(20rem, 85vw);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+
+    &[data-open='true'] {
+      transform: translateX(0);
+    }
+
+    &__title {
+      @include mx.font-setup(
+        $font: 'heading',
+        $font-size: var(--text-md),
+        $font-weight: var(--font-weight-medium)
+      );
+    }
+
+    &__list {
+      list-style: none;
+      scroll-target-group: auto;
+      margin-block-start: 1.5em;
+      margin-inline-start: 0.25em;
+    }
+
+    &__item {}
+
+    &__link {
+      @include mx.font-setup(
+        $font: 'body',
+        $font-size: var(--text-sm),
+      );
+      padding: 0.5em 0 0.5em 1em;
+      border-left: 2px solid var(--color-surface-elevated);
+      text-decoration: none;
+      color: var(--color-text-secondary);
+
+      &:hover {
+        border-color: var(--color-details);
+        color: var(--color-text-primary);
+      }
+
+      &:is(:target-current, [aria-current='location']) {
+        border-color: var(--color-accent);
+        color: var(--color-text-primary);
+        font-weight: var(--font-weight-medium);
+      }
+    }
+
+
+    @include mx.and-up('tablet') {
+      position: sticky;
+      top: calc(var(--header-height-max) + var(--space-6));
+      height: calc(100dvh - var(--header-height));
+      width: auto;
+      transform: none;
+      transition: none;
+    }
+  }
+}

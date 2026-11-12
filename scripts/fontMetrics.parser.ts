@@ -3,9 +3,9 @@ import * as fontkit from 'fontkit'
 import type { RawFontMetrics } from '../models/Config.ts'
 import {
   calculateTrimValues,
+  capTopError,
   getAverageSideBearings,
   getAvgAdvanceWidth,
-  capTopError,
   getBBoxHeight,
   getCorrectedAscenderDescender,
   getSampleCoverage,
@@ -65,30 +65,34 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
     font = fontOrCollection
   }
 
-  // Cache the original font's OS/2 table up front — works around an internal fontkit crash otherwise
-  const f = font as any
-  const os2 = f['OS/2']
+  // Cache the original font's OS/2 table up front, which works around an
+  // internal fontkit crash otherwise. The table is typed as always present,
+  // but a file that lacks it reaches here as undefined, so it is checked.
+  const os2 = font['OS/2']
 
   if (!os2) {
     throw new Error(`Could not find the OS/2 table in font: ${label}`)
   }
 
-  const isVariable = !!f.variationAxes?.wght
+  // Captured once rather than re-read at each use: `variationAxes` is a
+  // partial record, so a single binding is what narrows the axis from
+  // "possibly absent" to "present" for the branches below.
+  const wghtAxis = font.variationAxes.wght
   let activeFont = font
 
-  if (isVariable) {
-    const defaultWeight = f.variationAxes.wght.default
+  if (wghtAxis) {
+    const defaultWeight = wghtAxis.default
 
     if (defaultWeight !== TARGET_WEIGHT) {
       try {
-        const instance = f.getVariation({ wght: TARGET_WEIGHT })
+        const instance = font.getVariation({ wght: TARGET_WEIGHT })
 
         // Instancing is lazy, so force a glyph read to trigger any crash here,
         // where we can catch it cleanly
         instance.glyphForCodePoint(65) // 'A'
 
         activeFont = instance
-      } catch (e) {
+      } catch {
         console.warn(
           `Could not instance wght ${TARGET_WEIGHT} for ${label} (fontkit's getVariation() is unreliable for WOFF2). Metrics may be inaccurate, falling back to default weight (${defaultWeight}).`,
         )
@@ -132,11 +136,14 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
 
   // What the browser would measure this font by if nothing overrides it. The
   // typo metrics above are only one of three candidates in the file, and the
-  // file itself doesn't get to pick: `USE_TYPO_METRICS` set means every engine
-  // reads them, clear means Windows reads `usWin` and macOS reads `hhea`. Both
-  // are measured because CSS can't branch per platform, so the override has to
-  // satisfy the worse of the two.
-  const hhea = f.hhea
+  // file itself doesn't get to pick: with `USE_TYPO_METRICS` clear, Windows
+  // reads `usWin` and macOS reads `hhea`. Both are measured because CSS can't
+  // branch per platform, so the override has to satisfy the worse of the two.
+  // With the flag set, Firefox and Windows engines read the typo metrics and
+  // Safari and Chrome on macOS reportedly still read `hhea`. That case counts
+  // as zero: a font that sets the flag keeps `hhea` equal to its typo metrics,
+  // with only a handful of non-Latin exceptions across Google Fonts.
+  const hhea = font.hhea
   const correctedAscender = upmAscender / upm
   const trimError = os2.fsSelection.useTypoMetrics
     ? 0
@@ -155,7 +162,7 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
   // the getVariation() crash risk for no loss of accuracy.
   const isItalic = os2.fsSelection.italic
   const weightClass = os2.usWeightClass
-  const weightRange = isVariable ? { min: f.variationAxes.wght.min, max: f.variationAxes.wght.max } : null
+  const weightRange = wghtAxis ? { min: wghtAxis.min, max: wghtAxis.max } : null
 
   return {
     metrics: {
@@ -165,9 +172,9 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
       lsbAdjust: +((lsb / upm) * -1).toFixed(4),
       rsbAdjust: +((rsb / upm) * -1).toFixed(4),
       // Raw (uncorrected) OS/2 typo metrics, not upmAscender/upmDescender:
-      // those are clipped to fit unitsPerEm for leading-trim's cap-height
-      // math, but ascent-override/descent-override/line-gap-override need
-      // the font's true declared metrics, overshoot and all.
+      // those are fitted to unitsPerEm for leading-trim's cap-height math,
+      // but ascent-override/descent-override/line-gap-override need the
+      // font's true declared metrics, exactly as declared.
       ascender: +(os2.typoAscender / upm).toFixed(3),
       descender: +(Math.abs(os2.typoDescender) / upm).toFixed(3),
       lineGap: +(os2.typoLineGap / upm).toFixed(3),

@@ -13,7 +13,9 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  *   → docs/adding-a-font.md
  * - breakpoints
  *   → docs/customizing-breakpoints.md
- * - ultrawideHeightThresholdPx
+ * - rootFontSize
+ *   → docs/full-config-reference.md#rootfontsize
+ * - ultrawideHeightThresholdPx, ultrawideAspectRatio
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
@@ -21,7 +23,8 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  *   → docs/design-tokens.md#typography-tokens
  * - spacingSetup
  *   → docs/customizing-spacing.md
- * - defaultScheme, baseColorTokens, customColorTokens, semanticColorAliases
+ * - colorSetup (defaultScheme, baseColorTokens, customColorTokens,
+ *   semanticColorAliases)
  *   → docs/design-tokens.md#color-tokens
  *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
@@ -46,6 +49,7 @@ const config: TrimscaleConfig = {
     nextFontDefault: false, // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font', // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
     defaultFallback: 'sans-serif', // used when a families entry below has no `fallback` of its own
+    leadingTrimFallbackDefault: true, // false = leading trim only in browsers with native text-box-trim
     families: {
       // Placeholder so `generate` produces working output before you've set
       // up a real font. Replace it, see docs/adding-a-font.md.
@@ -138,11 +142,21 @@ const config: TrimscaleConfig = {
   },
 
   /**
-   * Viewport height (px) threshold for the --vwx ultrawide switch-over
-   * (paired with a >= 21:9 aspect ratio check). Optional, defaults to 944.
+   * Root font size (px) that this project's rem values are calculated against.
+   * Optional, defaults to 16. Anything else also emits html { font-size } as
+   * the matching percentage, which your own rule still overrides.
+   * → docs/full-config-reference.md#rootfontsize
+   */
+  // rootFontSize: 16,
+
+  /**
+   * Past this viewport height (px), --vwx is capped at ultrawideAspectRatio
+   * times 1vh, so fluid sizes stop growing on very wide screens. Optional,
+   * defaults to 944 and 2.
    * → docs/design-tokens.md#base-tokens
    */
   // ultrawideHeightThresholdPx: 944,
+  // ultrawideAspectRatio: 2,
 
   /**
    * Fluid clamp() boundaries: base font-size and modular-scale ratio at the min/max viewport widths.
@@ -278,80 +292,92 @@ const config: TrimscaleConfig = {
     approach: 'independent',
     macroRangeMultiplier: 2,
     tShirtScaleMicro: {
-      '3xs': 1,
-      '2xs': 2,
-      xs: 3,
-      sm: 4,
-      md: 5,
-      lg: 6,
+      '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
     },
     tShirtScaleMacro: {
-      xl: 6,
-      '2xl': 8,
-      '3xl': 10,
-      '4xl': 12,
-      '5xl': 16,
-      '6xl': 20,
-      '7xl': 24,
-      '8xl': 28,
-      '9xl': 32,
+      '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+      '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+      '7xl': 24, '8xl': 28, '9xl': 32,
     },
-    numericScaleMicroEnd: 6,
-    numericScaleMacroEnd: 48,
+    numericScaleMicroEnd: 8,
+    numericScaleMacroEnd: 32,
+    // Named ranges between two fluid steps, each a --space-range-{name}
+    // (camelCase becomes kebab-case). → docs/customizing-spacing.md#named-ranges
+    // spaceRanges: {
+    //   cardGap: { from: 'sm', to: 'xl' }, // --space-sm at minWidth, --space-xl at maxWidth
+    // },
     // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',
     // tShirtScale: {
-    //   '3xs': 1, '2xs': 2, 'xs': 3, 'sm': 4, 'md': 5, 'lg': 6,
-    //   'xl': 8, '2xl': 12, '3xl': 16, '4xl': 20,
-    //   '5xl': 24, '6xl': 28, '7xl': 32, '8xl': 40, '9xl': 48,
+    //   '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+    //   '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+    //   '7xl': 24, '8xl': 28, '9xl': 32,
     // },
-    // numericScaleEnd: 48,
+    // numericScaleEnd: 32,
   },
 
   /**
-   * Which scheme (light/dark) backs the static fallback tier for browsers
-   * without oklch()/light-dark() support.
-   * → docs/full-config-reference.md#defaultscheme
+   * Named fluid values between two pixel sizes, each a --{name} with no
+   * prefix (camelCase becomes kebab-case). Optional.
+   * → docs/full-config-reference.md#fluidranges
    */
-  defaultScheme: 'light',
+  // fluidRanges: {
+  //   mastheadHeight: { from: 56, to: 72 }, // --masthead-height, 56px → 72px
+  // },
 
   /**
-   * Base color palette. Each token generates a CSS custom property
-   * (--{prefix}-{name}) with light/dark oklch/hex values and an optional
-   * shared opacity. Referenced by name in semanticColorAliases.
-   * → docs/full-config-reference.md#basecolortokens
+   * The color palette and everything derived from it. Optional as a whole:
+   * remove colorSetup and the output holds nothing color-related, not even
+   * color-scheme, which you then declare yourself to match whichever palette
+   * you use instead.
+   * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#colorsetup
    */
-  baseColorTokens: {
-    prefix: 'color',
-    tokens: {
-      // Placeholder palette, replace with your own.
-      surfaceBase: {
-        light: { oklch: 'oklch(0.973 0.003 264)', hex: '#f5f6f8' },
-        dark: { oklch: 'oklch(0.214 0.008 274)', hex: '#18191d' },
-      },
-      textPrimary: {
-        light: { oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23' },
-        dark: { oklch: 'oklch(0.943 0 0)', hex: '#ececec' },
+  colorSetup: {
+    /**
+     * Which scheme (light/dark) backs the static fallback tier for browsers
+     * without oklch()/light-dark() support.
+     * → docs/full-config-reference.md#colorsetup
+     */
+    defaultScheme: 'light',
+
+    /**
+     * Base color palette. Each token generates a CSS custom property
+     * (--{prefix}-{name}) with light/dark oklch/hex values and an optional
+     * shared opacity. Referenced by name in semanticColorAliases.
+     * → docs/full-config-reference.md#colorsetupbasecolortokens
+     */
+    baseColorTokens: {
+      prefix: 'color',
+      tokens: {
+        // Placeholder palette, replace with your own.
+        surfaceBase: {
+          light: { oklch: 'oklch(0.973 0.003 264)', hex: '#f5f6f8' },
+          dark: { oklch: 'oklch(0.214 0.008 274)', hex: '#18191d' },
+        },
+        textPrimary: {
+          light: { oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23' },
+          dark: { oklch: 'oklch(0.943 0 0)', hex: '#ececec' },
+        },
       },
     },
-  },
 
-  /**
-   * Optional. Semantic names (e.g. "text-muted") that alias a token from
-   * baseColorTokens or a tokenMap, with an optional absolute opacity plus
-   * optional lightness/chroma MULTIPLIERS (not absolute values) applied to
-   * the aliased token's existing channels (single value, or per light/dark).
-   * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#semanticcoloraliases
-   */
-  // semanticColorAliases: {
-  //   textMuted: {
-  //     token: 'textPrimary',
-  //     tokenMap: 'baseColorTokens',
-  //     opacity: 0.7,
-  //   },
-  // },
+    /**
+     * Optional. Semantic names (e.g. "text-muted") that alias a token from
+     * baseColorTokens or a tokenMap, with an optional absolute opacity plus
+     * optional lightness/chroma MULTIPLIERS (not absolute values) applied to
+     * the aliased token's existing channels (single value, or per light/dark).
+     * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#colorsetupsemanticcoloraliases
+     */
+    // semanticColorAliases: {
+    //   textMuted: {
+    //     token: 'textPrimary',
+    //     tokenMap: 'baseColorTokens',
+    //     opacity: 0.7,
+    //   },
+    // },
+  },
 }
 
 export default config

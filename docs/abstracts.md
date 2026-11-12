@@ -10,23 +10,23 @@ Import via:
 @use 'abstracts/functions' as fn;
 ```
 
-### `fn.get-fluid-clamp($min-size, $max-size, $value-key, $type)`
+### `fn.fluid-value($min-size, $max-size, $unit-key, $type)`
 
-Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range, the general-purpose building block the other fluid functions below are built on. Unlike `fluid-spacing`/`fluid-space-step`, it isn't pinned to the spacing grid, so it's useful for one-off fluid values (e.g. a component's own min/max size). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`.
+Returns a `clamp()` value that interpolates linearly between two raw pixel sizes across the `$fluid-scale` viewport range. The two functions below are wrappers around it, so this is the one to call for a one-off value that sits on neither the type scale nor the spacing grid (a component's own min/max size, say). Falls back to a flat `rem` value when `$min-size == $max-size`, instead of emitting a pointless `clamp()`. A value you use in more than one place is better as a [`fluidRanges`](full-config-reference.md#fluidranges) token, which is this same call under a name.
 
-Takes the same `$type` as `fn.fluid-font-size` below: `'max'` drops the upper bound, so a one-off value can keep growing past `fluidScale.maxWidth` the way an uncapped type step does.
+`$type: 'max'` drops the upper bound, so the value keeps growing past `fluidScale.maxWidth` the way an uncapped type step does. `'clamp'` and `'max'` are the only accepted values, and both functions that take `$type` stop the build on anything else rather than returning an empty value. All three fluid functions round their output to [`fluidScale.precision`](full-config-reference.md#fluidscale) decimal places.
 
 ```scss
---custom-size: #{fn.get-fluid-clamp(4, 8)}; // clamp() between 4px and 8px
---icon-size: #{fn.get-fluid-clamp(24, 32, 'vw')}; // same, using plain vw
---gutter: #{fn.get-fluid-clamp(8, 16, 'vwx', 'max')}; // max(), no upper bound
+--custom-size: #{fn.fluid-value(4, 8)}; // clamp() between 4px and 8px
+--icon-size: #{fn.fluid-value(24, 32, 'vw')}; // same, using plain vw
+--gutter: #{fn.fluid-value(8, 16, 'vwx', 'max')}; // max(), no upper bound
 ```
 
 This is also what the `--unit-macro` spacing token is built from, see [design-tokens.md](design-tokens.md).
 
 ### `fn.fluid-font-size($level, $unit-key, $type)`
 
-Returns a `clamp()` value for a type step on the modular scale. Pass `$type: 'max'` to drop the upper bound instead, so the value keeps growing linearly past `fluidScale.maxWidth` rather than capping there (used for the `uncapped` option in `modularTypographicScale`, see [customizing-type-scale.md](customizing-type-scale.md)). `'clamp'` and `'max'` are the only accepted values, and all four fluid functions stop the build on anything else rather than returning an empty value.
+Returns a `clamp()` value for a type step on the modular scale. Pass `$type: 'max'` to drop the upper bound instead, so the value keeps growing linearly past `fluidScale.maxWidth` rather than capping there (used for the `uncapped` option in `modularTypographicScale`, see [customizing-type-scale.md](customizing-type-scale.md)).
 
 ```scss
 font-size: fn.fluid-font-size(2); // 2 steps up from base, uses vwx unit
@@ -38,25 +38,22 @@ font-size: fn.fluid-font-size(
 ); // max() instead of clamp(), no upper bound
 ```
 
-### `fn.fluid-spacing($level, $unit-key, $type)`
+### `fn.fluid-space-range($from, $to, $unit-key)`
 
-Returns a `clamp()` value for a spacing multiplier on the base grid (independent of the `--unit-micro`/`--unit-macro` split, it computes its own clamp directly from `min-font-size`/`max-font-size`, not from the CSS custom properties). Same `$type: 'max'` option as `fluid-font-size` above.
-
-```scss
-padding: fn.fluid-spacing(6); // grid level × 6
-```
-
-### `fn.fluid-space-step($min-level, $max-level, $unit-key, $type)`
-
-Returns a `clamp()` value that spans between two grid levels. Same `$type: 'max'` option as `fluid-font-size` above.
+Returns a `clamp()` value from one step of the fluid spacing scale to another: what `$from` is worth at `fluidScale.minWidth` to what `$to` is worth at `maxWidth`. Both ends are resolved against the `spacingSetup.approach` in use, so they always match the `--space-*` tokens of the same keys. This is what `spacingSetup.spaceRanges` emits its `--space-range-*` tokens with, see [customizing-spacing.md](customizing-spacing.md#named-ranges).
 
 ```scss
-gap: fn.fluid-space-step(4, 8); // between grid level 4 and grid level 8
+gap: fn.fluid-space-range('sm', 'xl'); // --space-sm on a narrow viewport, --space-xl on a wide one
+padding: fn.fluid-space-range(8, 24); // --space-8 to --space-24
 ```
+
+A string is a t-shirt key, a number is a step of the numeric scale. Only the fluid scale counts, so a `--space-fixed-*` step isn't a valid end. A range only grows: a `$from` worth more at `minWidth` than `$to` is at `maxWidth` stops the build. There is no `$type`, since a range has an upper end by definition. The result isn't rounded; the `--space-range-*` tokens wrap it in `round(nearest, …, 1px)` unless the entry sets `round: false`.
+
+For a plain multiple of the fluid base, no function is needed: `--fluid-base` is a token, so `calc(var(--fluid-base) * 3)` works anywhere, including in a project consuming the compiled CSS.
 
 ### `fn.px-to-rem($px, $base)`
 
-Converts a pixel value to rem. `$base` defaults to `16px`. Unitless input is treated as px.
+Converts a pixel value to rem. `$base` defaults to the project's [`rootFontSize`](full-config-reference.md#rootfontsize), which is `16px` unless the config sets it. Unitless input is treated as px.
 
 ```scss
 margin: fn.px-to-rem(24); // → 1.5rem
@@ -68,7 +65,7 @@ Small utilities the fluid functions above are built on. They're forwarded from `
 
 | Function                              | Returns                                                                                              |
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `fn.rem-to-px($rem, $base)`           | The inverse of `px-to-rem`. `$base` defaults to `16px`; unitless input is treated as rem             |
+| `fn.rem-to-px($rem, $base)`           | The inverse of `px-to-rem`. `$base` defaults to the project's `rootFontSize`; unitless input is treated as rem |
 | `fn.strip-unit($value)`               | The number without its unit (`16px` → `16`). Already-unitless input passes through                   |
 | `fn.round($number, $decimals)`        | `$number` rounded to `$decimals` places, default `4`. Sass-side rounding, unrelated to CSS `round()` |
 | `fn.precision($number, $decimals)`    | Alias of `fn.round`, same signature and behavior                                                     |
@@ -96,7 +93,7 @@ There are three ways to land on a line-height, and only the last one involves ca
 
 ### `fn.get-color-token($token, $tokens, $opacity, $lightness-multiplier, $chroma-multiplier)`
 
-Looks up a color token by name and returns its `(light: (oklch:, hex:), dark: (oklch:, hex:))` structure, optionally adjusted via `color.change()` without mutating the original entry in `$tokens`. This is what `semanticColorAliases` in `trimscale.config.ts` uses under the hood: deriving a near-duplicate color (e.g. a muted text variant) from an existing token instead of hand-picking a whole new OKLCH value (see [Color Tokens](design-tokens.md#color-tokens)).
+Looks up a color token by name and returns its `(light: (oklch:, hex:), dark: (oklch:, hex:))` structure, optionally adjusted via `color.change()` without mutating the original entry in `$tokens`. This is what `colorSetup.semanticColorAliases` in `trimscale.config.ts` uses under the hood: deriving a near-duplicate color (e.g. a muted text variant) from an existing token instead of hand-picking a whole new OKLCH value (see [Color Tokens](design-tokens.md#color-tokens)).
 
 ```scss
 fn.get-color-token('bg-canvas', $tokens: var.$base-color-tokens, $opacity: 0.5);
@@ -115,7 +112,7 @@ Parameters:
 
 `$lightness-multiplier`/`$chroma-multiplier` multiply the token's _existing_ channel value, they don't set an absolute target (unlike `$opacity`), and accept a `(light:, dark:)` map because the light/dark base values aren't perceptual mirrors of each other, a flat multiplier can land differently in each mode. The return value is shaped like a single `$tokens` entry, so it feeds straight into `semanticColorAliases` or your own `mx.generate-color-tokens` call.
 
-Both multipliers are clamped to what OKLCH can hold: lightness to 0-100%, chroma to 0 and up. A multiplier that overshoots lands on white, black, or gray rather than on an unrepresentable color, and `generate` warns which `semanticColorAliases` field caused it. The returned `hex` entry is the plain-color tier, gamut-mapped into sRGB and rounded to 8-bit channels so it works in browsers with no `oklch()` support; the `oklch` entry keeps the full precision and the wide-gamut value.
+Both multipliers are clamped to what OKLCH can hold: lightness to 0-100%, chroma to 0 and up. A multiplier that overshoots lands on white, black, or gray rather than on an unrepresentable color, and `generate` warns which `colorSetup.semanticColorAliases` field caused it. The returned `hex` entry is the plain-color tier, gamut-mapped into sRGB and rounded to 8-bit channels so it works in browsers with no `oklch()` support; the `oklch` entry keeps the full precision and the wide-gamut value.
 
 ## Mixins
 

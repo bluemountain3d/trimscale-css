@@ -1,9 +1,10 @@
 /// @group Tokens
 /// @name Tokens Index
 /// @description Entry point for all design tokens.
-/// Forwards base, spacing, leading trim, typography, and color tokens.
-/// Import order matters — base-tokens must come first as other tokens depend
-/// on --unit-micro/--unit-macro and --fluid-base.
+/// Forwards base, spacing, leading trim, typography, color and fluid range
+/// tokens. Import order matters — base-tokens must come first as other tokens
+/// depend on --unit-micro/--unit-macro and --fluid-base, and fluid-range-tokens
+/// last so a project's own name wins over a package token it collides with.
 /// ===========================================================================
 
 @forward "./base-tokens";
@@ -11,3 +12,4 @@
 @forward "./leading-trim";
 @forward "./typography-tokens";
 @forward "./color-tokens";
+@forward "./fluid-range-tokens";

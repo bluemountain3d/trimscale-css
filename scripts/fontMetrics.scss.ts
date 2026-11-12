@@ -1,5 +1,5 @@
 import type { FallbackFontFace, FontFace, FontMetricsMap } from './fontData.ts'
-import { type ScssTree, kebabKeys, raw } from './helpers.ts'
+import { kebabKeys, raw, type ScssTree } from './helpers.ts'
 
 /**
  * Builds the `$font-metrics` map, for use as a `@use 'trimscale-css' with
@@ -31,7 +31,7 @@ export const fontFacesTree = (fontFaces: FontFace[]): ScssTree =>
   fontFaces.map((face) => ({
     family: face.family,
     src: face.src,
-    ext: face.ext,
+    format: face.format,
     weight: formatWeight(face.weight),
     style: face.style,
     'ascent-override': face.ascentOverride,

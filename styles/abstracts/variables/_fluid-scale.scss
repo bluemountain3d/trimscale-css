@@ -36,3 +36,11 @@ $fluid-scale: (
   "max-type-scale": 1.333,
   "precision": 4,
 ) !default;
+
+/// Named fluid values between two pixel sizes, each emitted as --{name}
+/// through fn.fluid-value. `round` defaults to false, so an entry is the same
+/// clamp() a direct fn.fluid-value(from, to) call returns.
+/// @type Map
+/// @example
+///   $fluid-ranges: ("masthead-height": ("from": 56, "to": 72, "round": false));
+$fluid-ranges: () !default;

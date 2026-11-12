@@ -113,6 +113,8 @@ export type FontSource =
       fallback?: FontFallback
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `false` here if most of your fonts go through `next/font` but this particular one doesn't. */
       nextFont?: boolean
+      /** Overrides `AppFonts.leadingTrimFallbackDefault` for this family only. */
+      leadingTrimFallback?: boolean
     }
   | {
       source: 'cdn'
@@ -124,6 +126,8 @@ export type FontSource =
       generateFontFace?: boolean
       /** Overrides `AppFonts.nextFontDefault` for this family only. Set `true` here for a `next/font/google` font when most of your other fonts *aren't* going through `next/font`, or `false` if this one isn't even though most are. */
       nextFont?: boolean
+      /** Overrides `AppFonts.leadingTrimFallbackDefault` for this family only. */
+      leadingTrimFallback?: boolean
     }
   | {
       source: 'manual'
@@ -133,6 +137,8 @@ export type FontSource =
       metrics: RawFontMetrics
       /** Overrides `AppFonts.nextFontDefault` for this family only. */
       nextFont?: boolean
+      /** Overrides `AppFonts.leadingTrimFallbackDefault` for this family only. The usual reason to set it `false`: a `manual` family's @font-face isn't trimscale's, so nothing guarantees the browser measures it as 1em tall. */
+      leadingTrimFallback?: boolean
     }
 
 /** Font sources (local, CDN, or manually-entered metrics) keyed by family name. See `nextFontDefault`/`nextFontPrefix` for Next.js `next/font` integration. */
@@ -149,9 +155,31 @@ export type AppFonts = {
    * @default 'public'
    */
   publicDir?: string
+  /**
+   * Prepended to every `local` font's generated `@font-face` `src`, after
+   * `publicDir` is stripped: `'/docs'` turns `/fonts/a.woff2` into
+   * `/docs/fonts/a.woff2`. For a site served under a base path by a bundler
+   * that doesn't rewrite `url()` itself, such as Next.js with `basePath`.
+   * Vite does, so set `base` there instead. Must start with `/`, and a
+   * trailing `/` is ignored. The `output.css` bundle uses
+   * `output.css.fontUrlBase` instead.
+   * @default ''
+   */
+  urlPrefix?: string
   /** Whether `family` values are built around a `next/font` CSS variable instead of a plain quoted name, and (for `local`) whether trimscale skips writing its own `@font-face`. Applies to every family in `families` unless a family sets its own `nextFont`, which wins for that family only — most projects only ever set this here. */
   nextFontDefault?: boolean
   nextFontPrefix?: string // defaults to 'next-font' if omitted
+  /**
+   * Whether leading trim also applies in browsers without native
+   * `text-box-trim`. The fallback there is exact only if the browser measures
+   * the font as exactly 1em tall, which trimscale guarantees for the
+   * `@font-face` rules it writes itself and nothing else. `false` trims in
+   * native engines only and leaves the rest with normal leading. A family's
+   * own `leadingTrimFallback` wins for that family. See
+   * docs/adding-a-font.md#opting-out-of-the-leading-trim-fallback.
+   * @default true
+   */
+  leadingTrimFallbackDefault?: boolean
   /** The `fallback` used by families that don't set their own. Generic keywords only: a metric-matched fallback has to suit the font's own category, so it's chosen per family. */
   defaultFallback: FontFallbacks
 }
@@ -262,22 +290,51 @@ export type DynamicLineHeight = {
 type TShirtScale = `${number}xs` | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | `${number}xl`
 
 /**
- * How `--space-*` tokens grow across viewport widths.
+ * A fluid value between two steps of the fluid `--space-*` scale: what `from`
+ * is worth at `fluidScale.minWidth` to what `to` is worth at `maxWidth`. Both
+ * ends are strings, a t-shirt key (`'sm'`) or a numeric step (`'12'` for
+ * `--space-12`), never pixels. A range only grows with the viewport.
+ */
+export type SpaceRange = {
+  from: TShirtScale | `${number}`
+  to: TShirtScale | `${number}`
+  /** Round to a whole pixel, like every other `--space-*` token. @default true */
+  round?: boolean
+}
+
+/** A fluid value between two pixel sizes, at `fluidScale.minWidth` and `maxWidth`. `from` must not be larger than `to`. */
+export type FluidRange = {
+  from: number
+  to: number
+  /** Round to a whole pixel. Off by default, so the token is the same clamp() as `fn.fluid-value(from, to)`. @default false */
+  round?: boolean
+}
+
+/**
+ * How spacing tokens grow across viewport widths. `--space-*` is fluid under
+ * both approaches.
  * - `'coupled'` ties spacing to the fluid type scale: a single `--unit`
  *   (fluidScale's base font-size / `baseGridSize`) drives every step, so
  *   one `tShirtScale` map covers every named tier.
- * - `'independent'` keeps spacing on its own two-unit system instead:
- *   `--unit-micro` (static, fixed at `baseGridSize`) for small steps,
- *   `--unit-macro` (its own fluid clamp from `baseGridSize` up to
- *   `baseGridSize * macroRangeMultiplier`, endpoints unrelated to
- *   fluidScale but its viewport range still comes from fluidScale) for
- *   large steps — hence two separate tier maps
- *   (`tShirtScaleMicro`/`tShirtScaleMacro`) and two numeric-scale bounds
- *   (`numericScaleMicroEnd`/`numericScaleMacroEnd`).
+ * - `'independent'` keeps spacing on its own two-unit system instead, with
+ *   two token namespaces: `--space-*` on `--unit-macro` (its own fluid clamp
+ *   from `baseGridSize` up to `baseGridSize * macroRangeMultiplier`, viewport
+ *   range from fluidScale), from `tShirtScaleMacro`/`numericScaleMacroEnd`,
+ *   and the static `--space-fixed-*` on `--unit-micro` (`baseGridSize`), from
+ *   `tShirtScaleMicro`/`numericScaleMicroEnd`. The two maps may share keys:
+ *   `sm` in both gives a fluid `--space-sm` and a fixed `--space-fixed-sm`.
  */
 export type SpacingSetup = {
   /** The base spacing grid unit (px): `--unit-micro` under `'independent'`, or the divisor of `--unit` under `'coupled'`. @default 4 */
   baseGridSize?: 4 | 8
+  /**
+   * Named ranges between two steps of the fluid spacing scale, each emitted as
+   * `--space-range-{name}`. Write the name in camelCase or kebab-case, it
+   * becomes kebab-case either way (`cardGap` → `--space-range-card-gap`). A
+   * number is split from a word (`gap2` → `gap-2`) but not from a single
+   * letter (`h1Gap` → `h1-gap`).
+   */
+  spaceRanges?: Record<string, SpaceRange>
 } & (
   | {
       approach: 'coupled'
@@ -343,6 +400,20 @@ export type SemanticAlias = {
 /** Map of semantic alias name to its `SemanticAlias` definition. */
 export type SemanticColorAliases = Record<string, SemanticAlias>
 
+/**
+ * The whole color axis: which scheme backs the static fallback tier, the
+ * base palette, any extra palettes, and the semantic aliases derived from
+ * them. See `TrimscaleConfig.colorSetup` for what omitting it means.
+ */
+export type ColorSetup = {
+  defaultScheme: DefaultScheme
+  // colorUtilityClasses?: ColorUtilityProperty[]
+  baseColorTokens: ColorTokensMap
+  /** Additional named palettes beyond `baseColorTokens` (e.g. a `campaign` palette), keyed by whatever name you like. Each gets its own `@include mx.generate-color-tokens(...)` alongside the base tokens. */
+  customColorTokens?: Record<string, ColorTokensMap>
+  semanticColorAliases?: SemanticColorAliases
+}
+
 /** Opt-out toggles for the config-driven utility-class groups in `styles/utilities/`. A `false` at the top level of a section also drops that section's fixed, non-looped classes (e.g. spacing's `.m-none`/`.mx-auto`), not just its scale loops. */
 export type UtilitiesConfig = {
   spacing?:
@@ -354,6 +425,8 @@ export type UtilitiesConfig = {
         tShirt?: boolean
         /** `.{m|p}{side?}-{1..numericScaleEnd}`. */
         numeric?: boolean
+        /** `.{m|p}{side?}-fixed-*`, for whichever of `tShirt`/`numeric` is on. No effect under `approach: 'coupled'`, which has no fixed scale. */
+        fixed?: boolean
       }
   typography?:
     | boolean
@@ -385,7 +458,7 @@ export type UtilitiesConfig = {
 // Output
 // ============================================================================
 
-/** Where and what `generate` writes: the output directory, the SCSS bridge file, an optional standalone CSS file, which utility-class groups to include (shared by both targets), and whether to emit the package's own reset. */
+/** Where and what `generate` writes: the output directory, the SCSS bridge file, an optional standalone CSS file, which utility-class groups to include (shared by both targets), whether to emit the package's own reset, and the project's own cascade layers. */
 export type OutputConfig = {
   /**
    * Where `trimscale-css generate` writes this project's generated output
@@ -413,6 +486,14 @@ export type OutputConfig = {
   utilities?: boolean | UtilitiesConfig
   /** Emit the package's own `@layer reset` block. @default true */
   reset?: boolean
+  /**
+   * The project's own cascade layers, lowest priority first, declared
+   * between the package's `trim` and `utilities`. The package ships nothing
+   * into them. Replaces the default list, so keep `layouts` and
+   * `components` in it if you use them. See docs/cascade-layers.md.
+   * @default ['layouts', 'components']
+   */
+  cascadeLayers?: string[]
 }
 
 // ============================================================================
@@ -429,14 +510,27 @@ export type TrimscaleConfig = {
    */
   appFonts?: AppFonts
   fluidScale: FluidScale
+  /**
+   * Root font size (px) that this project's rem values are calculated
+   * against. Anything other than 16 also emits `html { font-size }` in
+   * `@layer base` as the matching percentage, which the host application's
+   * own rule still overrides. @default 16
+   */
+  rootFontSize?: number
   breakpoints: Breakpoints
   /**
-   * Viewport height (px) threshold for the `--vwx` ultrawide switch-over:
-   * past this height (combined with a ≥ 21:9 aspect ratio), `--vwx` switches
-   * from `1vw` to `2vh` to stop fluid sizes from growing unbounded on very
-   * wide monitors. @default 944
+   * Viewport height (px) past which `--vwx` is capped by
+   * `ultrawideAspectRatio`, so fluid sizes stop growing on very wide
+   * monitors. @default 944
    */
   ultrawideHeightThresholdPx?: number
+  /**
+   * Widest aspect ratio `--vwx` scales for, past `ultrawideHeightThresholdPx`:
+   * `--vwx` is `min(1vw, <ratio>vh)`, so fluid sizes never grow as if the
+   * viewport were wider than this many times its height. Must be greater
+   * than 1. @default 2
+   */
+  ultrawideAspectRatio?: number
   modularTypographicScale: ModularTypographicScale
   semanticFontSizes: SemanticFontSizes
   fontWeights: FontWeights
@@ -445,13 +539,25 @@ export type TrimscaleConfig = {
   dynamicLineHeight?: DynamicLineHeight
   /* Spacing */
   spacingSetup: SpacingSetup
-  /* Color */
-  defaultScheme: DefaultScheme
-  // colorUtilityClasses?: ColorUtilityProperty[]
-  baseColorTokens: ColorTokensMap
-  /** Additional named palettes beyond `baseColorTokens` (e.g. a `campaign` palette), keyed by whatever name you like. Each gets its own `@include mx.generate-color-tokens(...)` alongside the base tokens. */
-  customColorTokens?: Record<string, ColorTokensMap>
-  semanticColorAliases?: SemanticColorAliases
+  /**
+   * Named fluid values between two pixel sizes, each emitted as `--{name}`
+   * with no prefix. Write the name in camelCase or kebab-case, it becomes
+   * kebab-case either way (`mastheadHeight` → `--masthead-height`). A number
+   * is split from a word (`fs900` → `--fs-900`) but not from a single letter
+   * (`h1` → `--h1`).
+   * `generate` warns when a name collides with a token the package emits;
+   * yours is declared last and wins.
+   */
+  fluidRanges?: Record<string, FluidRange>
+  /**
+   * The color palette and everything derived from it. Optional: a config
+   * with no `colorSetup` gets nothing color-related in its output at all,
+   * no `--{prefix}-*` custom properties, no `color-scheme` declaration and
+   * no `.theme-light`/`.theme-dark` switch, while the rest of the system is
+   * unchanged. Declare `color-scheme` yourself in that case, to match
+   * whichever palette the project uses instead.
+   */
+  colorSetup?: ColorSetup
   /** Where and what `generate` writes — output directory, SCSS/CSS targets, utility-class groups, and the reset block. */
   output?: OutputConfig
 }

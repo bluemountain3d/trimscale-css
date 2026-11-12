@@ -1,10 +1,12 @@
 import type { TrimscaleConfig } from '../models/Config.ts'
 import { breakpointsTree } from './breakpoints.ts'
+import { cascadeLayersTree } from './cascadeLayers.ts'
 import { colorTokensMapTree, customColorTokensTree, semanticColorAliasDefsTree } from './colorTokens.ts'
 import { fluidScaleTree } from './fluidScale.ts'
 import type { FallbackFontFace, FontFace, FontMetricsMap } from './fontData.ts'
 import { fallbackFontFacesTree, fontFacesTree, metricsTree } from './fontMetrics.scss.ts'
 import { raw, setWithArg, toKebabCase } from './helpers.ts'
+import { fluidRangesTree, spaceRangesTree } from './ranges.ts'
 import {
   dynamicLineHeightTree,
   fontRolesTree,
@@ -23,8 +25,8 @@ export type FontData = {
 }
 
 /** Spacing has two mutually-exclusive shapes, see `models/Config.ts`'s `SpacingSetup` and `abstracts/variables/_spacing.scss`. */
-const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize: number): string[] =>
-  spacing.approach === 'coupled'
+const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize: number): string[] => [
+  ...(spacing.approach === 'coupled'
     ? [
         setWithArg('spacing-approach', 'coupled'),
         setWithArg('t-shirt-scale', { ...spacing.tShirtScale }),
@@ -37,7 +39,9 @@ const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize
         setWithArg('t-shirt-scale-macro', { ...spacing.tShirtScaleMacro }),
         setWithArg('numeric-scale-micro-end', spacing.numericScaleMicroEnd),
         setWithArg('numeric-scale-macro-end', spacing.numericScaleMacroEnd),
-      ]
+      ]),
+  setWithArg('space-ranges', spaceRangesTree(spacing.spaceRanges)),
+]
 
 /**
  * Builds the `@use "trimscale" with (...)` block that configures the
@@ -60,11 +64,15 @@ const buildSpacingArgs = (spacing: TrimscaleConfig['spacingSetup'], baseGridSize
 export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFlags, fontData: FontData): string => {
   const spacing = cfg.spacingSetup
   const baseGridSize = spacing.baseGridSize ?? 4
+  const rootFontSize = cfg.rootFontSize ?? 16
 
   const withArgs = [
-    setWithArg('breakpoints', breakpointsTree(cfg.breakpoints)),
+    setWithArg('root-font-size', raw(`${rootFontSize}px`)),
+    setWithArg('breakpoints', breakpointsTree(cfg.breakpoints, rootFontSize)),
     setWithArg('ultrawide-height-threshold-px', raw(`${cfg.ultrawideHeightThresholdPx ?? 944}px`)),
+    setWithArg('ultrawide-aspect-ratio', raw(`${cfg.ultrawideAspectRatio ?? 2}`)),
     setWithArg('fluid-scale', fluidScaleTree(cfg.fluidScale)),
+    setWithArg('fluid-ranges', fluidRangesTree(cfg.fluidRanges)),
     setWithArg('font-metrics', metricsTree(fontData.metrics)),
     setWithArg('font-faces', fontFacesTree(fontData.fontFaces)),
     setWithArg('fallback-font-faces', fallbackFontFacesTree(fontData.fallbackFontFaces)),
@@ -74,21 +82,26 @@ export const buildBridgeSource = (cfg: TrimscaleConfig, flags: ResolvedUtilityFl
     setWithArg('font-weights', fontWeightsTree(cfg.fontWeights)),
     setWithArg('line-heights', lineHeightsTree(cfg.lineHeights)),
     setWithArg('dynamic-line-height', dynamicLineHeightTree(cfg.dynamicLineHeight)),
-    // Unquoted: `_color-tokens.scss` compares this against the bare idents
-    // `light`/`dark`, and a quoted "light" is not equal to either in Sass.
-    setWithArg('default-scheme', raw(cfg.defaultScheme)),
-    setWithArg('base-color-tokens', colorTokensMapTree(cfg.baseColorTokens)),
-    setWithArg('custom-color-tokens', customColorTokensTree(cfg.customColorTokens)),
-    setWithArg('semantic-color-alias-defs', semanticColorAliasDefsTree(cfg.semanticColorAliases)),
+    // Always emitted, empty palette and all: `abstracts/variables/_colors.scss`
+    // declares a placeholder palette as its `!default`, so leaving these out
+    // for a config without `colorSetup` would emit that palette instead of
+    // nothing. Empty maps are also what `$color-tokens-enabled` reads to
+    // decide that color is off, so this is the whole off switch.
+    //
+    // Unquoted scheme: `_color-tokens.scss` compares it against the bare
+    // idents `light`/`dark`, and a quoted "light" is not equal to either in
+    // Sass.
+    setWithArg('default-scheme', raw(cfg.colorSetup?.defaultScheme ?? 'light')),
+    setWithArg('base-color-tokens', colorTokensMapTree(cfg.colorSetup?.baseColorTokens)),
+    setWithArg('custom-color-tokens', customColorTokensTree(cfg.colorSetup?.customColorTokens)),
+    setWithArg('semantic-color-alias-defs', semanticColorAliasDefsTree(cfg.colorSetup?.semanticColorAliases)),
     setWithArg('base-grid-size', baseGridSize),
     ...buildSpacingArgs(spacing, baseGridSize),
     // Every flag's SCSS variable is `utilities-` plus the kebab-cased flag
-    // name, so the list is derived rather than repeated. `a11y` is the one
-    // exception: `toKebabCase` would split the digits off as `a-11y`.
-    ...Object.entries(flags).map(([flag, enabled]) =>
-      setWithArg(flag === 'a11y' ? 'utilities-a11y' : `utilities-${toKebabCase(flag)}`, enabled),
-    ),
+    // name, so the list is derived rather than repeated.
+    ...Object.entries(flags).map(([flag, enabled]) => setWithArg(`utilities-${toKebabCase(flag)}`, enabled)),
     setWithArg('output-reset', cfg.output?.reset ?? true),
+    setWithArg('cascade-layers', cascadeLayersTree(cfg.output?.cascadeLayers)),
   ].join('')
 
   return `@use "trimscale" with (

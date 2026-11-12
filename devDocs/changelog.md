@@ -4,6 +4,368 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+## [1.0.0-beta.6]
+
+### Added
+
+- `rootFontSize` (optional, `number`, default `16`): the root font size in px
+  the project's rem values are calculated against. Reaches the bridge as
+  `$root-font-size` and is read by `px-to-rem`/`rem-to-px` as their `$base`
+  default, and by `breakpoints.ts` when it converts the breakpoint map at
+  generate time. A value other than 16 also emits `html { font-size }` in
+  `@layer base` as the matching percentage; 16 emits nothing, so a default
+  config's output is unchanged. `loadConfig` throws on a non-positive value
+  and warns outside 8-32px.
+- `appFonts.leadingTrimFallbackDefault` (optional, `boolean`, default `true`)
+  and a per-family `leadingTrimFallback` on all three `FontSource` shapes,
+  resolved as `leadingTrimFallback ?? leadingTrimFallbackDefault ?? true`, the
+  same relation as `nextFont`/`nextFontDefault`. The resolved value reaches the
+  bridge as a `"leading-trim-fallback"` entry on the family's `$font-metrics`
+  map, so the global flag needs no SCSS variable of its own. Named for the
+  feature rather than as `trimFallback`, which reads as "trim the fallback
+  font" next to `fallback`. `_leading-trim.scss` moves the
+  `@supports not` block out of `%text-geometry` into a new
+  `%text-trim-fallback`, which each `%{role}-text` extends unless its family's
+  entry is `false`; a missing entry counts as `true`, so hand-written
+  `$font-metrics` maps are unaffected. Opted-in roles still share one grouped
+  rule, and when every role opts out no `@supports not` rule is emitted at
+  all. Opted-out roles also skip `--_top-trim`/`--_bottom-trim`, which only
+  the fallback reads; side-bearing margins and `display: flow-root` stay on
+  every role. `warnIfTrimUncorrectable` is skipped for an opted-out family
+  and names `leadingTrimFallback: false` as a way out otherwise, and the
+  `manual` clause of `warnIfFamilyNameUnverifiable` is dropped for one.
+- `ultrawideAspectRatio` (optional, `number`, default `2`), a sibling of
+  `ultrawideHeightThresholdPx` with the same plumbing: `Config.ts`, both
+  config files, `buildBridgeSource.ts`, `$ultrawide-aspect-ratio` in
+  `_breakpoints.scss` and `trimscale.scss`'s `show` list. `_base-tokens.scss`
+  raises an `@error` unless it is a unitless number above 1. The check is
+  load-bearing: with the aspect-ratio condition gone from the media query,
+  a ratio of 1 or less makes `min()` pick the height side on portrait
+  viewports.
+- `spacingSetup.spaceRanges` and top-level `fluidRanges` (backlog point 22),
+  both optional `Record<string, ...>`. `spaceRanges` entries are
+  `{ from, to, round? }` with string endpoints (t-shirt key or numeric step as
+  `${number}`), emitted as `--space-range-{name}` in `_spacing-tokens.scss`
+  through `fn.fluid-space-range`, `round` default `true`. `fluidRanges`
+  entries are `{ from, to, round? }` in px, emitted as `--{name}` through
+  `fn.fluid-value` from a new `tokens/_fluid-range-tokens.scss`, `round`
+  default `false` so an entry is character-identical to the direct call. Two
+  fields because the token namespace differs (scale-anchored vs. structural),
+  and strings vs. numbers keep the endpoints unambiguous: a bare `96` would
+  be a numeric step or px depending on `numericScaleMacroEnd`. New
+  `scripts/ranges.ts` builds both maps (`$space-ranges`, `$fluid-ranges`,
+  added to `trimscale.scss`'s `show` list): every key goes through `toKebabCase`
+  like the rest of the config (`cardGap` and `card-gap` both give
+  `card-gap`); a name that still isn't kebab-case, or
+  two keys converting to the same name, throws. Numeric-step strings become
+  Sass numbers, which is how `fluid-space-range` tells the two key kinds
+  apart. `warnAboutRangeCollisions` (called from `generateBridge.ts`) warns
+  when a `fluidRanges` name hits a fixed base token, a package prefix
+  (`space-`, `font-weight-`, `line-height-`, `font-family-`,
+  `avg-char-width-`, `next-font-`), a type scale step (plus `-uncapped`), a
+  `semanticFontSizes` name or a color palette prefix. A warning, not an
+  error: `_fluid-range-tokens.scss` is forwarded last in `tokens/_index.scss`,
+  so the project's declaration wins in the same layer and on the same
+  selector. Both SCSS paths `@error` on a range that would shrink, and
+  `_fluid-range-tokens.scss` on non-number endpoints. `max()` is
+  deliberately absent: an uncapped value is not a range. No utility classes
+  yet. Verified by compiling both approaches: with no ranges the CSS is
+  byte-identical to dev, and in Chromium `{ from: 'sm', to: 'xl' }` measures
+  16px at 360 and 64px at 1440 under `independent` (16/40 under `coupled`),
+  equal to `--space-sm`/`--space-xl` there.
+- `appFonts.urlPrefix` (backlog point 23, optional `string`, default `''`):
+  prepended by `buildLocalFontSrc` after `publicDir` is stripped, threaded
+  through `computeFontData` → `parseFamilyFiles` the same way as
+  `publicDir`. Trailing slashes are dropped, and `computeFontData` throws
+  unless the prefix starts with `/`: `rewriteFontFacesForCss` only rebases a
+  `src` starting with `/`, so an absolute URL would also bypass
+  `output.css.fontUrlBase` in the bundle. Measured before implementing, in
+  the Next.js sandbox with `basePath: '/sub'` and Next 16: the built CSS
+  chunk kept `url(/fonts/inter/...)` unchanged. Vite rewrites to `base`
+  (tested 2026-09-30), so the field is documented as Next-only in practice.
+  Verified: unset gives a byte-identical bridge to dev; `'/sub'`, `'/sub/'`
+  and `'/sub//'` all give `/sub/fonts/...`; the CSS bundle still uses
+  `fontUrlBase`. End to end in the sandbox (`next build` + `next start`,
+  Inter on `nextFont: false` and removed from `localFont`):
+  `GET /sub/fonts/inter/Inter-Variable-100-900_subset.woff2` → 200.
+- `output.cascadeLayers` (backlog point 15, optional `string[]`, default
+  `['layouts', 'components']`): the project's own layers, declared between
+  `trim` and `utilities`. Reaches the bridge as `$cascade-layers` (new in
+  `_output.scss` and in `trimscale.scss`'s `show` list) through
+  `scripts/cascadeLayers.ts`, as unquoted names that skip `toKebabCase`,
+  since a layer has to be called exactly what the project's `@layer` blocks
+  say. `_layer.scss` builds the statement with `list.join` rather than
+  interpolating the list mid-statement, so an empty list gives
+  `trim, utilities` instead of `trim, , utilities`. Both sides reject a
+  package layer name and a duplicate (the TS side names the config field,
+  the SCSS side covers `@use ... with` without `generate`); only the TS side
+  checks the identifier syntax, and dotted sub-layer names are rejected
+  there. `output.css` compiles the same bridge source, so it follows without
+  changes. Verified: the default config's CSS is byte-identical to dev, a
+  reordered list compiles to the matching statement, and in Chromium a
+  layer listed earlier loses to a later one regardless of source order.
+
+### Changed
+
+- **Breaking:** `fn.fluid-space-step($min-level, $max-level, $unit-key,
+  $type)` is replaced by `fn.fluid-space-range($from, $to, $unit-key)`. The
+  old one computed `fluidScale`'s font-size × level / `baseGridSize`, the
+  `coupled` model only, so under `independent` it matched no token (backlog
+  point 22 has the measurement). The new one resolves each key through a
+  private `_space-endpoints` against the approach in use: under
+  `independent` `baseGridSize × factor` and `$macro-range-max × factor`
+  (whole already), under `coupled` `fluidScale`'s min/max font-size × factor
+  / `baseGridSize`, rounded, because each coupled `--space-*` is rounded per
+  step. Keys validate against the fluid scale only (`$t-shirt-scale` or
+  `$t-shirt-scale-macro`, numeric end per approach), so `--space-fixed-*`
+  steps aren't valid ends. Renamed with the signature so old calls fail
+  instead of compiling with a new meaning; `$type` dropped since `max()`
+  makes it unbounded. Unrounded like the other fluid functions, the token
+  adds `round()`.
+
+- **Breaking:** `toKebabCase` (`scripts/helpers.ts`) splits a digit only
+  from a run of two or more letters, `/([a-zA-Z]{2})(\d)/`, so `fs900` →
+  `fs-900` and `heading1` → `heading-1` as before, but `h1` → `h1` and
+  `a11yFocus` → `a11y-focus` (were `h-1`, `a-11y-focus`). Came up with
+  `fluidRanges`, where `h1Gap` → `h-1-gap` read wrong and no rule could tell
+  `fs900` from `h1` otherwise. Every config key that becomes a name goes
+  through it, so any single-letter-plus-digit key renames its token. The
+  `a11y` special case in `buildBridgeSource.ts`'s utility flag loop is gone,
+  since the helper now gives `a11y` itself.
+
+- **Breaking:** under `independent`, `--space-*` is the fluid namespace
+  throughout and the `--unit-micro` steps move to `--space-fixed-*`
+  (backlog point 24). `tShirtScaleMacro` and `numericScaleMacroEnd` drive
+  `--space-*`, the numeric macro loop starts at 1 instead of
+  `numericScaleMicroEnd + 1`; `tShirtScaleMicro` and `numericScaleMicroEnd`
+  drive `--space-fixed-*`. Overlapping keys are intended: `$space-values`
+  was `map.merge(micro, macro)` and `:root` emitted a shared key twice with
+  macro silently winning, it is now the fluid map alone, beside new
+  `$space-fixed-values`. The fluid name stays unprefixed so it means the same
+  under both approaches and `coupled` → `independent` only adds names;
+  `--space-fluid-*` with fixed unprefixed was weighed and dropped since it
+  would rename `coupled` too. Config fields keep `Micro`/`Macro`, they name
+  the units. `@property` registration follows the fixed scale. Defaults:
+  fluid `3xs`–`9xl` (1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32) and
+  `1`–`32`, fixed `3xs`–`xl` and `1`–`8`, both ending at 32px; the `coupled`
+  `$t-shirt-scale` default and template example get the same 15 multipliers
+  and `numericScaleEnd: 32`. The map fields are required, so an upgrader's
+  config keeps its own values: old-default micro tiers vanish from
+  `--space-*` (visible), `--space-1`–`6` turn fluid (silent).
+- Under `coupled`, every `--space-*` is `round(nearest, calc(var(--unit) *
+  N), 1px)`. Rounded per step, not on `--unit`: `--unit` spans 4px → 5px by
+  default, so rounding it would move every step in one jump at the midpoint,
+  per step climbs in 1px increments. `--unit-macro` already rounds, so
+  `independent` needs nothing. Motivation is horizontal spacing (fractional
+  `padding-inline` offsets text); vertical rhythm is fractional anyway via
+  `line-height`, which is also why `--fs-*` stays unrounded. Coupled output
+  vs dev differs in exactly the 63 `--space-*` declarations (15 + 48).
+- `$space-numeric-end` and `$space-fixed-numeric-end` are public in
+  `tokens/_spacing-tokens.scss` and `_spacing-utilities.scss` reads them
+  instead of recomputing its own `if(coupled …)` end, so the two can't drift.
+  The 14 hand-written classes per step become a `_spacing-classes` mixin over
+  a property map in the old emission order, so `coupled` output is unchanged.
+- `output.utilities.spacing.fixed` (default `true`): `.{m|p}{side?}-fixed-*`,
+  an axis orthogonal to `tShirt`/`numeric` (fixed t-shirt classes need
+  `tShirt && fixed`). No effect under `coupled`, documented rather than
+  typed, since `UtilitiesConfig` sits under `output` and not in the
+  `SpacingSetup` union. Reaches SCSS as `$utilities-spacing-fixed`, added to
+  `trimscale.scss`'s `@forward ... show` list. `utility-classes.md` gets a
+  separate fixed section, and the base classes' heading is "Spacing (base)"
+  so "fixed" doesn't mean two things there.
+- Dev dependency `sass-embedded` → `sass` (root and styleguide). Windows
+  Smart App Control blocks the unsigned `dart.exe` in `sass-embedded`
+  (`spawn UNKNOWN`). `generateCss.ts` already accepts either. The styleguide
+  needs `pnpm install --ignore-workspace`, plain `pnpm install` there walks up
+  to the root `pnpm-workspace.yaml`.
+- **Breaking:** `defaultScheme`, `baseColorTokens`, `customColorTokens` and
+  `semanticColorAliases` move from the top level of `TrimscaleConfig` into a
+  new `colorSetup` group, the last axis that was still spread across the top
+  level. `colorSetup` is optional in full, on the `appFonts` model: a config
+  that omits it gets no color output at all rather than fewer tokens. The
+  four old paths are in `LEGACY_TOP_LEVEL_FIELDS`, which now carries a
+  release per field instead of hardcoding beta.5 in the message.
+  `loadConfig`'s `normalizeConfig` also collapses a `colorSetup` holding no
+  token in any palette to `undefined`, so nothing downstream has to check
+  both spellings of "no colors". SCSS-side names (`$base-color-tokens`,
+  `mx.generate-color-tokens`) are untouched, they have nothing to do with
+  how the config groups its keys.
+- The bridge emits the four color `with()` arguments unconditionally, with
+  empty maps when `colorSetup` is absent, because
+  `abstracts/variables/_colors.scss` declares a placeholder palette as its
+  `!default`: omitting the arguments would emit that palette rather than
+  nothing. Those empty maps are also the off switch itself. A new derived
+  `$color-tokens-enabled` in `_colors.scss` (no `!default`, absent from
+  `trimscale.scss`'s `show` list, so internal) is true as soon as one palette
+  holds a token, and `tokens/_color-tokens.scss` is skipped in full when it
+  is false. That takes `color-scheme` and the `.theme-light`/`.theme-dark`
+  block with it, which is the point: the declaration has to match the palette
+  in use, and a project supplying its own declares it itself. Deriving it
+  rather than passing a flag keeps it from ever disagreeing with the maps it
+  describes.
+- **Breaking:** `.skip-link` sets `background: #fff` and `color: #000` as
+  literals instead of `var(--color-surface-base, #fff)` /
+  `var(--color-text-primary, #000)`. Token names come from the project's own
+  `colorSetup`, so the old values resolved only for a config that happened to
+  use those two names, the same guess the absent `.text-color-*` classes
+  exist to avoid. It was also the one place left that put `--color-` in the
+  output of a config with no colors at all.
+- `$base-font-size` is renamed `$root-font-size` and moves from
+  `abstracts/variables/_breakpoints.scss` to a new leaf module,
+  `abstracts/variables/_root.scss`, which must never gain a `@use`:
+  `_breakpoints.scss` reads `fn_unit-utils`, so letting `fn_unit-utils` read
+  `abstracts/variables` back is a module loop Sass rejects
+  (`Module loop: this module is already being loaded`, verified). The old
+  name was absent from `trimscale.scss`'s `show` list, so it was unreachable
+  from a config and this renames nothing a consumer could have set.
+  `$base-grid-size` stays in `_breakpoints.scss`: its only function-side
+  reader, `_fn_fluid-typography-and-spacing.scss`, already depends on the
+  whole variables index and is not on the cycle.
+- `breakpointsTree` takes the root size as a second argument and cuts its
+  quotient to 10 decimals, matching where Sass cuts its own, so a breakpoint
+  written as a map key and the same value passed bare to a breakpoint mixin
+  print the same rem string under any root size.
+- `_mx_breakpoints.scss` drops the explicit second argument to `px-to-rem`,
+  which is now the same value as the default.
+- **Breaking:** `get-fluid-clamp` is renamed `fluid-value`, and its
+  `$value-key` argument `$unit-key`, matching the others. They share one
+  implementation: `fluid-value` holds the interpolation, the redundancy check,
+  the px-to-rem conversion and the rounding, and the scale-aware wrappers
+  compute their own min/max pixel pair and delegate.
+  `_fn_fluid-typography-and-spacing.scss` goes from 128 to 73 lines of code.
+  The wrappers are byte-identical across eleven call shapes (levels 2/0/-1,
+  `vw`/`cqw` units, `'max'`, and a degenerate pair that returns a flat value);
+  the only diff in the package's own output is `--unit-macro`'s intercept,
+  `0.1666666667rem` → `0.1667rem`, absorbed by the token's
+  `round(nearest, …, 1px)`.
+- `_validate-fluid-type` drops its `$fn` parameter. It existed to name the
+  calling function in the message, which Sass's stack trace already does: an
+  invalid `$type` on `fluid-space-step` prints a `fluid-value()` frame and a
+  `fluid-space-step()` frame above the root stylesheet. With validation in one
+  place a new fluid function cannot forget it.
+- `fluid-value`'s redundant-input branch returns a Sass number instead of an
+  interpolated string, which is what `get-fluid-clamp` did and the wrappers did
+  not. It prints identically and survives arithmetic.
+- `abstracts.md` states what `fluid-space-step` resolves against. It reads its
+  two levels as multiples of `fluidScale`'s base font-size, which is what
+  `spacingSetup`'s `'coupled'` approach does, so under the default
+  `'independent'` its result corresponds to no `--space-*` token. The function
+  is meant to be rewritten against the active token model rather than removed,
+  since a config-side named range needs exactly that resolver, but the gap is
+  real until then and now says so.
+- `--vwx` is `min(1vw, #{$ultrawide-aspect-ratio}vh)` behind the height gate
+  alone, replacing `@media (aspect-ratio >= 21/9) and (height >= …)` with a
+  flat `2vh`. `1vw` and `2vh` are equal at 2:1, not at 21:9, so the old gate
+  dropped `--vwx` by 14 % in one step (`--fs-900-uncapped` 164.4px → 145.6px
+  at 2330 → 2340 × 1000, measured in Chromium). `min()` does the ratio check
+  itself and is continuous by construction. Default 2 keeps the cap value:
+  at 3440×1440 `--fs-900` is 112.2px before and after. The only change is
+  the band between 2:1 and 21:9, which is now capped.
+- `docs/design-tokens.md` gains "Registered and unregistered tokens": which
+  tokens carry `@property`, what that changes for `transition` and for
+  reading a token from JS, and the rule behind the split (register only
+  values that compute the same on any element: `px`, `rem`, numbers,
+  colors). The `--vwx` comment in `_base-tokens.scss` links to it and leads
+  with the spec's root exemption rather than the Chromium bug, and
+  `_leading-trim.scss` drops "unlike every other `<length>` token", which no
+  longer held.
+- `MIN_REPORTED_TRIM_ERROR` in `scripts/fontData.ts` is `0.5 / 16` (0.031em,
+  half a pixel at 16px) instead of `0.01`. The error is in em, so a relative
+  tolerance is the same share of the text at any size. Measured over the
+  3814 Google Fonts files that pass the Latin coverage gate: warned files
+  492 → 441, families 213 → 194. Only the warning moves, generated CSS is
+  unchanged. `docs/adding-a-font.md` states the new threshold.
+
+### Removed
+
+- **Breaking:** `fluid-spacing`. It carried the same coupled-model assumption
+  as `fluid-space-step`, one grid level at a time: `fluid-spacing(4)` runs 16px
+  to 20px while `--space-4` is a static 16px, and `fluid-spacing(12)` runs 48px
+  to 60px while `--space-12` runs 48px to 96px. Unlike `fluid-space-step` it
+  has no capability worth keeping, because it is by definition
+  `--fluid-base × level / baseGridSize` and `--fluid-base` is a token: any
+  project, Sass or not, writes `calc(var(--fluid-base) * 3)` instead. Zero call
+  sites in the package, and the output is byte-identical without it.
+
+### Fixed
+
+- `getCorrectedAscenderDescender` fits the typo ascender and descender to
+  exactly 1em in both directions. It only clipped sums above 1em, so a font
+  summing below it kept its raw values, and the fallback's `(1lh - 1em) / 2`
+  per end left the box `1 - sum` em too tall, split evenly above the cap and
+  below the baseline. The emitted overrides came from the same values, so
+  they pinned the content area to the short sum rather than 1em. Measured in
+  Firefox at 200px before the fix: Gluten 11.8 / 11.8px, Ubuntu Mono 14.4 /
+  14.0px, Inter 0 / 0. 56 of the 3814 Latin-capable Google Fonts files sum
+  below 1em by more than 0.02em. Because the correction is symmetric, as the
+  browser's half-leading is, the trim is also right when the browser reads
+  the font's own typo metrics without any override, which covers `manual`,
+  `next/font` and `cdn` families with `USE_TYPO_METRICS` set. Sums of 1em
+  and above are unchanged.
+- `@font-face` `format()` hint. `base/_fonts.scss` interpolated the file
+  extension (`getFontExtension`), so `.ttf`/`.otf` got `format("ttf")` /
+  `format("otf")`, which no browser recognises: the `src` was skipped and the
+  family silently fell back. woff/woff2 worked because extension and format
+  name coincide. Found while testing backlog point 28 in the sandbox (Gluten
+  and Ubuntu Mono rendered as Arial in Firefox; editing the live rule to
+  `format("truetype")` loaded them). `getFontFormat` in `fontMetrics.io.ts`
+  maps ttf → truetype, otf → opentype, woff, woff2, and the bridge's
+  `$font-faces` entries carry `format` instead of `ext`. Any other extension
+  yields no key and `_fonts.scss` writes `src: url(...)` without a hint, so a
+  bridge file from before the change (which has `ext`, not `format`) also
+  compiles to a working rule.
+- Numeric spacing loops are guarded with `@if $end > 0`. `@for $i from 1
+  through 0` counts down in Sass, so an end of 0 emitted `--space-1` and
+  `--space-0`, and the old macro loop (`from micro-end + 1`) did the same
+  whenever `numericScaleMacroEnd <= numericScaleMicroEnd`. Applies to the
+  tokens, their `@property` blocks and the utility classes.
+- `fluidScale.precision` was read by nothing. `fluidScaleTree` is
+  `kebabKeys(data)`, so the key rode into `$fluid-scale` with the rest of the
+  map and looked wired, while all four functions used `round()`'s hardcoded
+  default of 4. `fluid-value` reads it once per call. Confirmed by compiling
+  `tokens` through an entry that configures `abstracts/variables/fluid-scale`:
+  byte-identical at precision 4 and 2 before, 19356 vs 19264 bytes after.
+  Compiling `@use "tokens"` on its own tests the `!default` map and not the
+  bridge, since nothing inside `styles/` loads `styles/generated/_index.scss`.
+- Every `vw`-dependent token loses its `@property` registration: `--vwx`,
+  `--fluid-base`, `--unit`, `--unit-macro`, all `--fs-*` (scale,
+  `-uncapped` and semantic aliases) and every `--space-*` built on `--unit`
+  or `--unit-macro`. With `html { scrollbar-gutter: stable }`, a registered
+  `<length>` holding `vw` on `:root` gets the scrollbar subtracted twice in
+  Chromium 145 to 152 (minimal repro in 152: `100vw` on `:root` computes to
+  609px where `100vw` on an element is 624px, innerWidth 639). The same
+  property on an element is correct, as is `scrollbar-gutter: auto`. No crbug
+  report existed, and none was filed: the same repro is correct in Chrome
+  154 and a current Brave, so it was fixed upstream in between. CSSWG #6026
+  also exempts `vw` on the root from the scrollbar
+  adjustment, so a registered `vw` on `:root` is off even per spec, and
+  waiting for a Chromium fix wouldn't be enough. Unregistered, the tokens
+  substitute into the `var()` call site and resolve there, which is where
+  they were before beta.5 fixed the rejected `initial-value`s. Under
+  `independent`, the micro steps and `--unit-micro` stay registered: the
+  `--space-*` loops in `_spacing-tokens.scss` are split so only
+  `$_space-micro` and `1..$numeric-scale-micro-end` register. Nothing
+  validates that `tShirtScaleMicro` and `tShirtScaleMacro` have disjoint
+  keys; a shared key would register and then get the fluid value.
+
+### Internal
+
+- `devScripts/measure/configs.ts` gains a `no colors` variant (the repo
+  config minus `colorSetup`), so the on/off difference is measurable with
+  `pnpm measure` rather than argued about. Compiled expanded, the repo's own
+  palette accounts for 6851 B.
+- `biome check` is clean across all 40 files; `check` and `format` had
+  disagreed on nine. Import sorting, `biome.json` glob normalisation and
+  `'path'` → `'node:path'` are mechanical. Two are not:
+  `noApproximativeNumericConstant` on `'Augmented Fourth': 1.414` is
+  suppressed, since `Math.SQRT2` would move the sixth scale step from
+  159.86px to 160.00px at a 20px base, and `noExplicitAny` is resolved by
+  deleting `const f = font as any` from `fontMetrics.parser.ts` entirely:
+  `@types/fontkit` declares `"OS/2"`, `hhea`, `variationAxes` and
+  `getVariation()`, which covers all six uses. `variationAxes` being a
+  partial record, the axis is captured once as `wghtAxis`, and `isVariable`
+  folds into it.
+
 ## [1.0.0-beta.5]
 
 ### Added

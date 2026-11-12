@@ -67,7 +67,7 @@ $font-metrics: (
 /// @type List
 /// @prop {String} family - font-family value (the family's config key)
 /// @prop {String} src - src: url(...) value
-/// @prop {String} ext - file extension, used as the format(...) hint (e.g. "woff2")
+/// @prop {String} [format] - format(...) hint: "truetype", "opentype", "woff" or "woff2"; absent for any other extension, and the hint is left out
 /// @prop {String} weight - font-weight value, e.g. "700" or "100 900" (variable fonts)
 /// @prop {String} style - "normal" | "italic"
 $font-faces: () !default;

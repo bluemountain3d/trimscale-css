@@ -33,6 +33,8 @@ fluidScale: {
 },
 ```
 
+`precision` sets how many decimal places the generated values carry. Four is exact to 0.0016px, and lower settings round the clamp endpoints themselves: at `1`, the base size's upper bound reads `1.3rem` instead of `1.25rem`. The whole `1`–`6` range spans about 230 bytes of uncompressed CSS in a default config, so it is not a size lever.
+
 `minTypeScale` and `maxTypeScale` accept either a custom numeric ratio directly, or one of the named presets below:
 
 **Named Scale Ratios**

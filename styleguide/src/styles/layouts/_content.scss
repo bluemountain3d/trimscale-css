@@ -1,0 +1,12 @@
+@use "abstracts/mixins" as mx;
+
+@layer layouts {
+  .content-row {
+
+    @include mx.and-up("tablet") {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      column-gap: var(--grid-gap);
+    }
+  }
+}

@@ -8,40 +8,53 @@ Every specific number in the tables below (px values, ratios, scale steps, tiers
 
 | Token          | Description                                                                                                                                                                                                                                                                                                        |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--vwx`        | Adaptive viewport unit. `1vw` normally; switches to `2vh` on ultrawide screens (≥ 21:9 ratio + ≥ 944 px height by default, `ultrawideHeightThresholdPx` in the config) to prevent runaway scaling                                                                                                                                       |
+| `--vwx`        | Adaptive viewport unit. `1vw`, capped at `2vh` on viewports at least 944px tall (`ultrawideAspectRatio` and `ultrawideHeightThresholdPx` in the config) to prevent runaway scaling                                                                                                                                                       |
 | `--fluid-base` | Base font size. Scales between `fluidScale.minFontSize` and `maxFontSize` (16px to 20px by default) using `clamp()`                                                                                                                                                                                                |
-| `--unit-micro` | Base spacing unit for small steps, fixed at `spacingSetup.baseGridSize` (default `4`), not fluid. Always a whole pixel                                                                                                                                                                                                       |
-| `--unit-macro` | Base spacing unit for large steps, an independent fluid clamp (`get-fluid-clamp(baseGridSize, baseGridSize × macroRangeMultiplier)`), rounded to the nearest pixel. Scales `baseGridSize` (default `4`) up to `baseGridSize × spacingSetup.macroRangeMultiplier` (multiplier default `2`, so `8` at the default base) across `fluidScale`'s viewport range (`minWidth`–`maxWidth`) |
+| `--unit-micro` | Base spacing unit for the fixed `--space-fixed-*` scale, fixed at `spacingSetup.baseGridSize` (default `4`), not fluid. Always a whole pixel                                                                                                                                                                                                       |
+| `--unit-macro` | Base spacing unit for the fluid `--space-*` scale, an independent fluid clamp (`fluid-value(baseGridSize, baseGridSize × macroRangeMultiplier)`), rounded to the nearest pixel. Scales `baseGridSize` (default `4`) up to `baseGridSize × spacingSetup.macroRangeMultiplier` (multiplier default `2`, so `8` at the default base) across `fluidScale`'s viewport range (`minWidth`–`maxWidth`) |
 
-**Why `--vwx` exists:** plain `vw`-based scaling grows with viewport width forever, on very wide (ultrawide) monitors that makes text and spacing balloon past what's readable. Past a threshold, `--vwx` switches from `1vw` to `2vh`, capping growth against height instead. Every fluid function defaults to the `'vwx'` unit key, so this one custom property fixes ultrawide scaling everywhere at once, no per-function changes needed.
+**Why `--vwx` exists:** plain `vw`-based scaling grows with viewport width forever, on very wide (ultrawide) monitors that makes text and spacing balloon past what's readable. On a viewport at least `ultrawideHeightThresholdPx` tall, `--vwx` is `min(1vw, 2vh)`: it follows the width until the viewport is more than `ultrawideAspectRatio` (default `2`) times as wide as it is tall, and the height past that. The two sides are equal at that ratio, so sizes never jump when a window is resized across it. The height threshold keeps a short laptop window, which can be just as wide relative to its height, on plain `1vw`. Every fluid function defaults to the `'vwx'` unit key, so this one custom property fixes ultrawide scaling everywhere at once, no per-function changes needed.
 
 `--unit-micro` and `--unit-macro` only exist under the `'independent'` spacing approach. See [customizing-spacing.md](customizing-spacing.md) for the `'coupled'` alternative, which generates a single `--unit` instead.
 
 ## Spacing Tokens
 
-Spacing tokens are multiples of `--unit-micro` or `--unit-macro`. `--unit-micro` is fixed, so sizes built from it are fixed too; `--unit-macro` is a fluid clamp, so sizes built from it scale with the viewport. Both units are `4px` at their minimum, so the table below is accurate for all sizes at the low end, only the macro-based sizes grow from there.
+Spacing comes in two scales. `--space-*` is fluid, multiples of `--unit-macro`, and grows with the viewport. `--space-fixed-*` is static, multiples of `--unit-micro`, and stays the same size everywhere. Both units are `4px` at their minimum, so a fluid step and its fixed counterpart (`--space-sm` and `--space-fixed-sm`) are equal at the low end, only the fluid one grows from there.
 
-**T-shirt sizes** (default config):
+**Fluid t-shirt sizes** (default config):
 
-| Token         | Unit            | Multiplier | Base value (360 px viewport) | Base value (1440 px viewport) |
-| ------------- | --------------- | ---------- | ----------------------------- | ------------------------------ |
-| `--space-3xs` | `--unit-micro`  | × 1        | 4 px                          | 4 px                           |
-| `--space-2xs` | `--unit-micro`  | × 2        | 8 px                          | 8 px                           |
-| `--space-xs`  | `--unit-micro`  | × 3        | 12 px                         | 12 px                          |
-| `--space-sm`  | `--unit-micro`  | × 4        | 16 px                         | 16 px                          |
-| `--space-md`  | `--unit-micro`  | × 5        | 20 px                         | 20 px                          |
-| `--space-lg`  | `--unit-micro`  | × 6        | 24 px                         | 24 px                          |
-| `--space-xl`  | `--unit-macro`  | × 6        | 24 px                         | 48 px                          |
-| `--space-2xl` | `--unit-macro`  | × 8        | 32 px                         | 64 px                          |
-| `--space-3xl` | `--unit-macro`  | × 10       | 40 px                         | 80 px                          |
-| `--space-4xl` | `--unit-macro`  | × 12       | 48 px                         | 96 px                          |
-| `--space-5xl` | `--unit-macro`  | × 16       | 64 px                         | 128 px                         |
-| `--space-6xl` | `--unit-macro`  | × 20       | 80 px                         | 160 px                         |
-| `--space-7xl` | `--unit-macro`  | × 24       | 96 px                         | 192 px                         |
-| `--space-8xl` | `--unit-macro`  | × 28       | 112 px                        | 224 px                         |
-| `--space-9xl` | `--unit-macro`  | × 32       | 128 px                        | 256 px                         |
+| Token         | Multiplier | 360 px viewport | 1440 px viewport |
+| ------------- | ---------- | --------------- | ---------------- |
+| `--space-3xs` | × 1        | 4 px            | 8 px             |
+| `--space-2xs` | × 2        | 8 px            | 16 px            |
+| `--space-xs`  | × 3        | 12 px           | 24 px            |
+| `--space-sm`  | × 4        | 16 px           | 32 px            |
+| `--space-md`  | × 5        | 20 px           | 40 px            |
+| `--space-lg`  | × 6        | 24 px           | 48 px            |
+| `--space-xl`  | × 8        | 32 px           | 64 px            |
+| `--space-2xl` | × 10       | 40 px           | 80 px            |
+| `--space-3xl` | × 12       | 48 px           | 96 px            |
+| `--space-4xl` | × 14       | 56 px           | 112 px           |
+| `--space-5xl` | × 16       | 64 px           | 128 px           |
+| `--space-6xl` | × 20       | 80 px           | 160 px           |
+| `--space-7xl` | × 24       | 96 px           | 192 px           |
+| `--space-8xl` | × 28       | 112 px          | 224 px           |
+| `--space-9xl` | × 32       | 128 px          | 256 px           |
 
-**Numeric scale:** `--space-1` through `--space-48` by default. `--space-1` through `--space-6` equal `calc(var(--unit-micro) * N)`; `--space-7` through `--space-48` equal `calc(var(--unit-macro) * N)`. All of this is config driven, see [customizing-spacing.md](customizing-spacing.md) to change tiers, the numeric range, or switch growth model entirely.
+**Fixed t-shirt sizes** (default config): `--space-fixed-3xs` through `--space-fixed-xl`, with the same multipliers as their fluid namesakes (× 1 to × 8), so `4px` to `32px` at every viewport width.
+
+**Numeric scale:** `--space-1` through `--space-32` by default, each equal to `calc(var(--unit-macro) * N)`, and `--space-fixed-1` through `--space-fixed-8`, each equal to `calc(var(--unit-micro) * N)`.
+
+This is the default `'independent'` approach. Under `'coupled'`, every `--space-*` is a multiple of a single `--unit` instead, rounded to the nearest whole pixel, and there is no `--space-fixed-*`. All of it is config driven, see [customizing-spacing.md](customizing-spacing.md) to change tiers, the numeric ranges, or switch growth model entirely.
+
+## Range Tokens
+
+Two config fields name fluid values of your own. The default config has neither, so there are no range tokens until you add some.
+
+- **`--space-range-*`**, from `spacingSetup.spaceRanges`, runs from one step of the fluid spacing scale to another. `{ from: 'sm', to: 'xl' }` is `--space-sm` at `fluidScale.minWidth` and `--space-xl` at `maxWidth`, which is 16px → 64px by default, and like every `--space-*` it lands on a whole pixel. See [customizing-spacing.md](customizing-spacing.md#named-ranges).
+- **`--{name}`**, from the top-level `fluidRanges`, runs between two pixel sizes and has no prefix: the name is yours. `{ from: 56, to: 72 }` is the same `clamp()` as `fn.fluid-value(56, 72)`. See [full-config-reference.md#fluidranges](full-config-reference.md#fluidranges).
+
+Both are `clamp()` values on `--vwx`, so they share the ultrawide cap with every other fluid token, and they follow `fluidScale` when its viewport range changes. A hand-written `clamp()` does neither.
 
 ## Typography Tokens
 
@@ -92,13 +105,13 @@ These static tokens are opt-in. By default, text styled through `font-setup` or 
 
 ## Color Tokens
 
-The token _names_ below (`surface-base`, `accent`, `text-muted`, etc.) come from `baseColorTokens`, `customColorTokens` (an optional field, not present in the starter template, for extra palettes such as a `campaign` palette), and `semanticColorAliases` in `trimscale.config.ts`. The starter palette shipped in the default config is meant to be replaced with your own values, not treated as fixed brand colors.
+The token _names_ below (`surface-base`, `accent`, `text-muted`, etc.) come from `colorSetup`'s three palettes in `trimscale.config.ts`: `baseColorTokens`, `customColorTokens` (an optional field, not present in the starter template, for extra palettes such as a `campaign` palette), and `semanticColorAliases`. The starter palette shipped in the default config is meant to be replaced with your own values, not treated as fixed brand colors.
 
 Each `baseColorTokens`/`customColorTokens` entry is a hand-picked `{ oklch, hex }` pair per light/dark mode, there's no build step deriving them from a single source color. [oklch.com](https://oklch.com/) is a convenient picker for choosing the OKLCH values and reading off the matching hex.
 
 `semanticColorAliases` entries don't need their own hand-picked pair: instead of duplicating oklch math for a near-duplicate color, they reference an existing token by name and can adjust its `opacity` (absolute) and `lightnessMultiplier`/`chromaMultiplier` (multipliers, not absolute values), via the `get-color-token()` function (see [abstracts.md](abstracts.md)) under the hood.
 
-**`body`'s text color reads `--color-text-primary`, with a `#000` fallback** (`styles/base/_typography.scss`), same pattern as `font-size`/`--text-base` above. The starter config ships a `textPrimary` entry in `baseColorTokens`, so `body` resolves through `light-dark()` out of the box; the `#000` fallback only ever applies if you remove that entry without replacing it.
+**Nothing in the package reads a color token.** The reset, the base element styles and the utility classes all get by without one, `body` included: it sets `font-family` and `font-size`, not `color`. Color tokens exist for your own CSS to use, which is also what makes the whole axis optional, see [Turning colors off](#turning-colors-off) below.
 
 Colors use `light-dark()` for automatic theme switching driven by `prefers-color-scheme`. You can override the automatic detection by adding a class to `:root`:
 
@@ -120,3 +133,31 @@ Colors use `light-dark()` for automatic theme switching driven by `prefers-color
 ```
 
 Every token gets a triple-layered fallback (plain hex → static `oklch()` → `light-dark(oklch(), oklch())`) so the palette degrades gracefully on older browsers, plus a typed `@property` registration so invalid overrides fail safe to the fallback color instead of silently breaking the cascade. This is generated by `mx.generate-color-tokens` under the hood, see [abstracts.md](abstracts.md) for the mixin itself and how to add your own token map alongside the config-driven defaults.
+
+### Turning colors off
+
+A project whose colors live somewhere else (a design-token pipeline, a component library, a Tailwind theme) omits `colorSetup` from its config entirely. The output then contains nothing color-related at all: no `--{prefix}-*` custom properties, no `color-scheme`, and no `.theme-light`/`.theme-dark` rules. Everything above this section is unaffected, as is the type scale, spacing, leading trim and every utility class.
+
+Two things move to your side of the line when you do that:
+
+- **Declare `color-scheme` yourself**, on `:root`, to match the palette you actually ship. It is what tells the browser which way to render form controls, scrollbars and the default canvas, so a `light dark` left behind by trimscale over a light-only palette would render dark form controls on light surfaces. A light-only palette declares `color-scheme: light`, a palette with both declares `light dark`.
+- **The theme switch is yours too.** `.theme-light`/`.theme-dark` only ever forced `color-scheme` for trimscale's own `light-dark()` tokens, so they have nothing left to switch.
+
+Everything else keeps working as documented, including `mx.generate-color-tokens` if you want to run your own palette through the same three-tier fallback from your own SCSS.
+
+## Registered and unregistered tokens
+
+Some tokens are registered with `@property`, some are not, and the split is deliberate. It decides two things you can observe: whether a `transition` on the token animates, and what JavaScript reads back from `:root`.
+
+| Registered | Unregistered |
+| --- | --- |
+| `--unit-micro` and every `--space-fixed-*`, `--header-height`, `--font-weight-*`, `--line-height-*`, every color token | `--vwx`, `--fluid-base`, `--unit`, `--unit-macro`, every `--fs-*` and `--text-*`, every `--space-*` including `--space-range-*`, every `fluidRanges` token, `--line-height-dynamic`, `--avg-char-width-*`, `--font-family-*` |
+
+A registered token transitions smoothly and reads back as a computed value, such as `16px`. An unregistered one jumps when transitioned, and reading it from `:root` returns its expression: `getComputedStyle(document.documentElement).getPropertyValue('--fs-600')` gives `clamp(...)`. To get a number, read a real property, such as `font-size`, off an element that uses the token.
+
+The reason for the split is where each kind of token resolves. A registered property is computed **where it is declared**, and every token here is declared on `:root`. From there, descendants inherit the finished value. An unregistered property is substituted as text at each `var()` and computed **on the element that uses it**. So a token is registered only when it comes out the same wherever it is computed:
+
+- **Safe to register:** `px`, `rem`, plain numbers, colors.
+- **Keep unregistered:** anything that depends on the element or on where it sits. `em` and `lh` resolve against the root's font size, so every element inherits the root's ratio. `%` and container units resolve against the root's box. `vw` on the root is exempt from the scrollbar adjustment that `vw` elsewhere gets (CSSWG [#6026](https://github.com/w3c/csswg-drafts/issues/6026)), and Chromium 145 to 152 subtracted the scrollbar twice there instead.
+
+The same applies to tokens you add in your own CSS. One more trap when you do register: an `@property` whose `initial-value` isn't computationally independent (`1em`, `1rem`, a `var()`) is dropped entirely by the browser, with no warning.

@@ -13,7 +13,9 @@ import type { TrimscaleConfig } from './models/Config.ts'
  *   → docs/adding-a-font.md
  * - breakpoints
  *   → docs/customizing-breakpoints.md
- * - ultrawideHeightThresholdPx
+ * - rootFontSize
+ *   → docs/full-config-reference.md#rootfontsize
+ * - ultrawideHeightThresholdPx, ultrawideAspectRatio
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
@@ -21,7 +23,8 @@ import type { TrimscaleConfig } from './models/Config.ts'
  *   → docs/design-tokens.md#typography-tokens
  * - spacingSetup
  *   → docs/customizing-spacing.md
- * - defaultScheme, baseColorTokens, customColorTokens, semanticColorAliases
+ * - colorSetup (defaultScheme, baseColorTokens, customColorTokens,
+ *   semanticColorAliases)
  *   → docs/design-tokens.md#color-tokens
  *     (semanticColorAliases' derivation logic: docs/abstracts.md)
  */
@@ -136,11 +139,21 @@ const config: TrimscaleConfig = {
   },
 
   /**
-   * Viewport height (px) threshold for the --vwx ultrawide switch-over
-   * (paired with a >= 21:9 aspect ratio check). Optional, defaults to 944.
+   * Root font size (px) that this project's rem values are calculated against.
+   * Optional, defaults to 16. Anything else also emits html { font-size } as
+   * the matching percentage, which your own rule still overrides.
+   * → docs/full-config-reference.md#rootfontsize
+   */
+  // rootFontSize: 16,
+
+  /**
+   * Past this viewport height (px), --vwx is capped at ultrawideAspectRatio
+   * times 1vh, so fluid sizes stop growing on very wide screens. Optional,
+   * defaults to 944 and 2.
    * → docs/design-tokens.md#base-tokens
    */
   // ultrawideHeightThresholdPx: 944,
+  // ultrawideAspectRatio: 2,
 
   /**
    * Fluid clamp() boundaries: base font-size and modular-scale ratio at the min/max viewport widths.
@@ -275,178 +288,176 @@ const config: TrimscaleConfig = {
     approach: 'independent',
     macroRangeMultiplier: 2,
     tShirtScaleMicro: {
-      '3xs': 1,
-      '2xs': 2,
-      xs: 3,
-      sm: 4,
-      md: 5,
-      lg: 6,
+      '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
     },
     tShirtScaleMacro: {
-      xl: 6,
-      '2xl': 8,
-      '3xl': 10,
-      '4xl': 12,
-      '5xl': 16,
-      '6xl': 20,
-      '7xl': 24,
-      '8xl': 28,
-      '9xl': 32,
+      '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+      '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+      '7xl': 24, '8xl': 28, '9xl': 32,
     },
-    numericScaleMicroEnd: 6,
-    numericScaleMacroEnd: 48,
+    numericScaleMicroEnd: 8,
+    numericScaleMacroEnd: 32,
     // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',
     // tShirtScale: {
-    //   '3xs': 1, '2xs': 2, 'xs': 3, 'sm': 4, 'md': 5, 'lg': 6,
-    //   'xl': 8, '2xl': 12, '3xl': 16, '4xl': 20,
-    //   '5xl': 24, '6xl': 28, '7xl': 32, '8xl': 40, '9xl': 48,
+    //   '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+    //   '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+    //   '7xl': 24, '8xl': 28, '9xl': 32,
     // },
-    // numericScaleEnd: 48,
+    // numericScaleEnd: 32,
   },
 
   /**
-   * Which scheme (light/dark) backs the static fallback tier for browsers
-   * without oklch()/light-dark() support.
-   * → docs/full-config-reference.md#defaultscheme
+   * The color palette and everything derived from it. Optional as a whole: a
+   * config without colorSetup gets nothing color-related in its output, not
+   * even color-scheme, and declares color-scheme itself to match whichever
+   * palette it uses instead.
+   * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#colorsetup
    */
-  defaultScheme: 'light',
+  colorSetup: {
+    /**
+     * Which scheme (light/dark) backs the static fallback tier for browsers
+     * without oklch()/light-dark() support.
+     * → docs/full-config-reference.md#colorsetup
+     */
+    defaultScheme: 'light',
 
-  /**
-   * Base color palette. Each token generates a CSS custom property
-   * (--{prefix}-{name}) with light/dark oklch/hex values and an optional
-   * shared opacity. Referenced by name in semanticColorAliases.
-   * → docs/full-config-reference.md#basecolortokens
-   */
-  baseColorTokens: {
-    // Examples
-    prefix: 'color',
-    tokens: {
-      surfaceBase: {
-        light: { oklch: 'oklch(0.973 0.003 264)', hex: '#f5f6f8' },
-        dark: { oklch: 'oklch(0.214 0.008 274)', hex: '#18191d' },
-        // opacity: 0.8,
-      },
-      surfaceElevated: {
-        light: { oklch: 'oklch(1 0 0)', hex: '#ffffff' },
-        dark: { oklch: 'oklch(0.29 0.021 270)', hex: '#272B36' },
-        // opacity: 0.8,
-      },
-      surfaceMid: {
-        light: { oklch: 'oklch(0.949 0.008 271)', hex: '#eceef4' },
-        dark: { oklch: 'oklch(0.253 0.015 274)', hex: '#20222a' },
-        // opacity: 0.8,
-      },
-      goldLight: {
-        light: { oklch: 'oklch(0.921 0.07 100)', hex: '#efe7b1' },
-        dark: { oklch: 'oklch(0.921 0.07 100)', hex: '#efe7b1' },
-        // opacity: 0.8,
-      },
-      goldDark: {
-        light: { oklch: 'oklch(0.551 0.099 81)', hex: '#8F6B22' },
-        dark: { oklch: 'oklch(0.351 0.037 48)', hex: '#4b352a' },
-        // opacity: 0.8,
-      },
-      accent: {
-        light: { oklch: 'oklch(0.543 0.102 272)', hex: '#5B6BAB' },
-        dark: { oklch: 'oklch(0.733 0.045 74)', hex: '#baa58a' },
-      },
-      action: {
-        light: { oklch: 'oklch(0.485 0.105 271)', hex: '#495a9a' },
-        dark: { oklch: 'oklch(0.66 0.057 270)', hex: '#8491b6' },
-        // opacity: 0.8,
-      },
-      actionHover: {
-        light: { oklch: 'oklch(0.651 0.085 270)', hex: '#7b8dc4' },
-        dark: { oklch: 'oklch(0.78 0.067 270)', hex: '#a6b6e3' },
-        // opacity: 0.8,
-      },
-      actionMuted: {
-        light: { oklch: 'oklch(0.734 0.0543 269)', hex: '#9ba8cc' },
-        dark: { oklch: 'oklch(0.559 0.048 270)', hex: '#697391' },
-        // opacity: 0.8,
-      },
-      textPrimary: {
-        light: { oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23' },
-        dark: { oklch: 'oklch(0.943 0 0)', hex: '#ececec' },
-      },
-      textMuted: {
-        light: { oklch: 'oklch(0.39 0 0)', hex: '#454545' },
-        dark: { oklch: 'oklch(0.783 0 0)', hex: '#b8b8b8' },
-      },
-      textContrast: {
-        light: { oklch: 'oklch(0 0 0)', hex: '#000000' },
-        dark: { oklch: 'oklch(1 0 0)', hex: '#ffffff' },
-      },
-      a11yFocus: {
-        light: { oklch: 'oklch(0.526 0.135 251)', hex: '#1f6db5' },
-        dark: { oklch: 'oklch(0.68 0.106 246)', hex: '#5e9ed6' },
-      },
-    },
-  },
-
-  /**
-   * Optional. Extra color maps alongside baseColorTokens, keyed by whatever
-   * name you like (e.g. `campaign`). Referenced from semanticColorAliases
-   * via `tokenMap`.
-   * → docs/full-config-reference.md#customcolortokens
-   */
-  customColorTokens: {
-    campaign: {
-      prefix: 'campaign',
+    /**
+     * Base color palette. Each token generates a CSS custom property
+     * (--{prefix}-{name}) with light/dark oklch/hex values and an optional
+     * shared opacity. Referenced by name in semanticColorAliases.
+     * → docs/full-config-reference.md#colorsetupbasecolortokens
+     */
+    baseColorTokens: {
+      // Examples
+      prefix: 'color',
       tokens: {
-        goldLight: {
-          light: { oklch: 'oklch(0.949 0.0877 104.44)', hex: '#f7f2ad' },
-          dark: { oklch: 'oklch(0.949 0.0877 104.44)', hex: '#f7f2ad' },
+        surfaceBase: {
+          light: { oklch: 'oklch(0.973 0.003 264)', hex: '#f5f6f8' },
+          dark: { oklch: 'oklch(0.214 0.008 274)', hex: '#18191d' },
           // opacity: 0.8,
         },
-        goldMid: {
-          light: { oklch: 'oklch(0.7598 0.1258 88.23)', hex: '#d2ac47' },
-          dark: { oklch: 'oklch(0.7598 0.1258 88.23)', hex: '#d2ac47' },
+        surfaceElevated: {
+          light: { oklch: 'oklch(1 0 0)', hex: '#ffffff' },
+          dark: { oklch: 'oklch(0.29 0.021 270)', hex: '#272B36' },
+          // opacity: 0.8,
+        },
+        surfaceMid: {
+          light: { oklch: 'oklch(0.949 0.008 271)', hex: '#eceef4' },
+          dark: { oklch: 'oklch(0.253 0.015 274)', hex: '#20222a' },
+          // opacity: 0.8,
+        },
+        goldLight: {
+          light: { oklch: 'oklch(0.921 0.07 100)', hex: '#efe7b1' },
+          dark: { oklch: 'oklch(0.921 0.07 100)', hex: '#efe7b1' },
           // opacity: 0.8,
         },
         goldDark: {
-          light: { oklch: 'oklch(0.642 0.119 84.75)', hex: '#ae8625' },
-          dark: { oklch: 'oklch(0.642 0.119 84.75)', hex: '#ae8625' },
+          light: { oklch: 'oklch(0.551 0.099 81)', hex: '#8F6B22' },
+          dark: { oklch: 'oklch(0.351 0.037 48)', hex: '#4b352a' },
           // opacity: 0.8,
+        },
+        accent: {
+          light: { oklch: 'oklch(0.543 0.102 272)', hex: '#5B6BAB' },
+          dark: { oklch: 'oklch(0.733 0.045 74)', hex: '#baa58a' },
+        },
+        action: {
+          light: { oklch: 'oklch(0.485 0.105 271)', hex: '#495a9a' },
+          dark: { oklch: 'oklch(0.66 0.057 270)', hex: '#8491b6' },
+          // opacity: 0.8,
+        },
+        actionHover: {
+          light: { oklch: 'oklch(0.651 0.085 270)', hex: '#7b8dc4' },
+          dark: { oklch: 'oklch(0.78 0.067 270)', hex: '#a6b6e3' },
+          // opacity: 0.8,
+        },
+        actionMuted: {
+          light: { oklch: 'oklch(0.734 0.0543 269)', hex: '#9ba8cc' },
+          dark: { oklch: 'oklch(0.559 0.048 270)', hex: '#697391' },
+          // opacity: 0.8,
+        },
+        textPrimary: {
+          light: { oklch: 'oklch(0.228 0.014 273)', hex: '#1a1c23' },
+          dark: { oklch: 'oklch(0.943 0 0)', hex: '#ececec' },
+        },
+        textMuted: {
+          light: { oklch: 'oklch(0.39 0 0)', hex: '#454545' },
+          dark: { oklch: 'oklch(0.783 0 0)', hex: '#b8b8b8' },
+        },
+        textContrast: {
+          light: { oklch: 'oklch(0 0 0)', hex: '#000000' },
+          dark: { oklch: 'oklch(1 0 0)', hex: '#ffffff' },
+        },
+        a11yFocus: {
+          light: { oklch: 'oklch(0.526 0.135 251)', hex: '#1f6db5' },
+          dark: { oklch: 'oklch(0.68 0.106 246)', hex: '#5e9ed6' },
         },
       },
     },
-  },
 
-  /**
-   * Optional. Semantic names (e.g. "text-muted") that alias a token from
-   * baseColorTokens or a tokenMap, with an optional absolute opacity plus
-   * optional lightness/chroma MULTIPLIERS (not absolute values) applied to
-   * the aliased token's existing channels (single value, or per light/dark).
-   * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#semanticcoloraliases
-   */
-  semanticColorAliases: {
-    scrollThumb: {
-      token: 'action',
-      tokenMap: 'baseColorTokens',
-      opacity: 1,
-      chromaMultiplier: { light: 0.8, dark: 1.25 },
+    /**
+     * Optional. Extra color maps alongside baseColorTokens, keyed by whatever
+     * name you like (e.g. `campaign`). Referenced from semanticColorAliases
+     * via `tokenMap`.
+     * → docs/full-config-reference.md#colorsetupcustomcolortokens
+     */
+    customColorTokens: {
+      campaign: {
+        prefix: 'campaign',
+        tokens: {
+          goldLight: {
+            light: { oklch: 'oklch(0.949 0.0877 104.44)', hex: '#f7f2ad' },
+            dark: { oklch: 'oklch(0.949 0.0877 104.44)', hex: '#f7f2ad' },
+            // opacity: 0.8,
+          },
+          goldMid: {
+            light: { oklch: 'oklch(0.7598 0.1258 88.23)', hex: '#d2ac47' },
+            dark: { oklch: 'oklch(0.7598 0.1258 88.23)', hex: '#d2ac47' },
+            // opacity: 0.8,
+          },
+          goldDark: {
+            light: { oklch: 'oklch(0.642 0.119 84.75)', hex: '#ae8625' },
+            dark: { oklch: 'oklch(0.642 0.119 84.75)', hex: '#ae8625' },
+            // opacity: 0.8,
+          },
+        },
+      },
     },
-    scrollThumbHover: {
-      token: 'action',
-      tokenMap: 'baseColorTokens',
-      opacity: 1,
-      chromaMultiplier: { light: 0.8, dark: 1.25 },
-      lightnessMultiplier: { light: 0.9, dark: 1.1 },
-    },
-    scrollThumbActive: {
-      token: 'action',
-      tokenMap: 'baseColorTokens',
-      opacity: 1,
-      chromaMultiplier: { light: 0.8, dark: 1.25 },
-      lightnessMultiplier: { light: 1.1, dark: 0.9 },
-    },
-    scrollBackground: {
-      token: 'surfaceBase',
-      tokenMap: 'baseColorTokens',
+
+    /**
+     * Optional. Semantic names (e.g. "text-muted") that alias a token from
+     * baseColorTokens or a tokenMap, with an optional absolute opacity plus
+     * optional lightness/chroma MULTIPLIERS (not absolute values) applied to
+     * the aliased token's existing channels (single value, or per light/dark).
+     * → docs/design-tokens.md#color-tokens · docs/full-config-reference.md#colorsetupsemanticcoloraliases
+     */
+    semanticColorAliases: {
+      scrollThumb: {
+        token: 'action',
+        tokenMap: 'baseColorTokens',
+        opacity: 1,
+        chromaMultiplier: { light: 0.8, dark: 1.25 },
+      },
+      scrollThumbHover: {
+        token: 'action',
+        tokenMap: 'baseColorTokens',
+        opacity: 1,
+        chromaMultiplier: { light: 0.8, dark: 1.25 },
+        lightnessMultiplier: { light: 0.9, dark: 1.1 },
+      },
+      scrollThumbActive: {
+        token: 'action',
+        tokenMap: 'baseColorTokens',
+        opacity: 1,
+        chromaMultiplier: { light: 0.8, dark: 1.25 },
+        lightnessMultiplier: { light: 1.1, dark: 0.9 },
+      },
+      scrollBackground: {
+        token: 'surfaceBase',
+        tokenMap: 'baseColorTokens',
+      },
     },
   },
 }

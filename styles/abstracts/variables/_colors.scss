@@ -1,4 +1,6 @@
 
+@use "sass:map";
+
 /// @group Abstracts/Variables
 /// @name Colors
 /// @description Generated from trimscale.config.ts — see there for the source palette.
@@ -196,4 +198,29 @@ $semantic-color-alias-defs: (
     "chroma-multiplier": (light: 0.8, dark: 1.25),
   ),
 ) !default;
+
+
+// ============================================================================
+// Derived
+// ============================================================================
+
+/// @group Abstracts/Variables
+/// @name Color Tokens Enabled
+/// @type Bool
+/// @description Whether this project has a color axis at all: true as soon as
+/// one palette above holds a token. Derived from the maps rather than
+/// configured alongside them, so the two can't disagree. `colorSetup` in
+/// trimscale.config.ts is what fills them; a config that omits it passes
+/// empty maps, and every color-related rule in the package is skipped,
+/// including `color-scheme` and the `.theme-light`/`.theme-dark` switch.
+/// Aliases are not counted: an alias resolves against a token, so it can't
+/// be the only thing a palette consists of.
+/// @see tokens/_color-tokens.scss
+$color-tokens-enabled: map.get($base-color-tokens, "tokens") != ();
+
+@each $_palette-name, $_palette in $custom-color-tokens {
+  @if map.get($_palette, "tokens") != () {
+    $color-tokens-enabled: true;
+  }
+}
 
