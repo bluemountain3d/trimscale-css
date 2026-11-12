@@ -13,7 +13,7 @@ emitting it:
 ```ts
 output: {
   utilities: {
-    spacing: { numeric: false }, // keep t-shirt sizes, drop the 1-48 numeric scale
+    spacing: { numeric: false }, // keep t-shirt sizes, drop the 1-32 numeric scale
     typography: false,           // drop every typography utility class
     a11y: false,                 // you have your own sr-only/skip-link/etc.
   },
@@ -25,7 +25,7 @@ same result as turning all three sections off by hand. Tokens, the reset and
 the base element styles are unaffected.
 
 `spacing`/`typography` each accept `true`/`false` for the whole section, or
-an object turning off individual groups (`base`, `tShirt`, `numeric` for
+an object turning off individual groups (`base`, `tShirt`, `numeric`, `fixed` for
 spacing; `trim`, `family`, `size`, `lineHeight`, `weight`, `style`,
 `textTransform`, `textAlign`, `numericFigures` for typography). Turning off
 a section's top level also drops its small fixed classes, e.g.
@@ -47,7 +47,8 @@ Pattern: `.{property}-{side?}-{size}`
 
 - **Properties:** `m` (margin), `p` (padding)
 - **Sides:** `t` (top), `r` (right), `b` (bottom), `l` (left), `x` (horizontal), `y` (vertical)
-- **Sizes:** t-shirt (`3xs` to `9xl`) and numeric (`1` to `numericScaleEnd`/`numericScaleMacroEnd`, `48` by default), see [design-tokens.md](design-tokens.md#spacing-tokens)
+- **Sizes:** t-shirt (`3xs` to `9xl`) and numeric (`1` to `numericScaleEnd`/`numericScaleMacroEnd`, `32` by default), on the fluid `--space-*` tokens, see [design-tokens.md](design-tokens.md#spacing-tokens)
+- **Fixed sizes:** the same pattern with a `fixed-` infix, `.{property}-{side?}-fixed-{size}`, on the static `--space-fixed-*` tokens: t-shirt (`3xs` to `xl` by default) and numeric (`1` to `numericScaleMicroEnd`, `8` by default). Only under the `'independent'` spacing approach, and off with `spacing: { fixed: false }`
 - **Special:** `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`
 
 All directional sides map to **logical properties**, not physical ones: `t`/`b` use `margin-block-start`/`-end`, and `l`/`r` use `margin-inline-start`/`-end` (same for padding). In a left-to-right document this behaves like top/right/bottom/left, but `l`/`r` flip automatically in `dir="rtl"` content since they follow inline flow direction rather than a fixed side.
@@ -55,6 +56,7 @@ All directional sides map to **logical properties**, not physical ones: `t`/`b` 
 ```html
 <div class="p-md mt-lg mx-auto">…</div>
 <div class="pt-3xl pb-xl px-md">…</div>
+<div class="p-fixed-sm">…</div> <!-- 16px at every viewport width -->
 ```
 
 ## Typography

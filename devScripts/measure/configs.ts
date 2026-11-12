@@ -54,7 +54,7 @@ export const variants: Variant[] = [
   },
   {
     name: 'full',
-    note: 'every group on, 3 families, 11 roles, numeric spacing to 48',
+    note: 'every group on, 3 families, 11 roles, numeric spacing to 32',
     config: repoConfig,
   },
   {
@@ -139,7 +139,7 @@ const withOneFilePerFamily = (): TrimscaleConfig => {
 }
 
 export const axes: Axis[] = [
-  { name: 'one numeric spacing step (14 classes)', units: 24, config: withNumericMacroEnd(24) },
+  { name: 'one numeric spacing step (14 classes)', units: 16, config: withNumericMacroEnd(16) },
   { name: 'one font role (.trim-text-*, .font-family-*, tokens)', units: 9, config: withTwoRoles() },
   { name: 'one color token (light + dark, oklch + hex)', units: 2, config: withFewerCustomColors(1) },
   { name: 'one @font-face rule (one file, one weight or style)', units: 3, config: withOneFilePerFamily() },

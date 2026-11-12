@@ -127,24 +127,24 @@ Every time `generate` writes CSS it prints the size of each file, including the 
 
 | config | | raw | minified | min + gzip | min + brotli |
 | --- | --- | --- | --- | --- | --- |
-| `init` default | `trimscale.config.ts` as `init` writes it | 72.9 kB | 55.6 kB | 8.7 kB | 4.5 kB |
-| full | every group on, 3 families, 11 roles, numeric spacing to 48 | 84.3 kB | 65.3 kB | 10.1 kB | 5.8 kB |
-| trim only | fonts and `.trim-text-*`, no other utility group | 31.9 kB | 26.6 kB | 4.2 kB | 3.4 kB |
-| no colors | everything else on, no `colorSetup` | 77.4 kB | 59.6 kB | 9.1 kB | 4.9 kB |
-| floor | no `appFonts`, no utility classes: tokens, reset and base only | 25.4 kB | 21.0 kB | 3.4 kB | 2.7 kB |
+| `init` default | `trimscale.config.ts` as `init` writes it | 68.1 kB | 52.2 kB | 8.5 kB | 4.7 kB |
+| full | every group on, 3 families, 11 roles, numeric spacing to 32 | 79.5 kB | 61.9 kB | 9.9 kB | 5.8 kB |
+| trim only | fonts and `.trim-text-*`, no other utility group | 25.5 kB | 21.4 kB | 3.9 kB | 3.3 kB |
+| no colors | everything else on, no `colorSetup` | 72.7 kB | 56.2 kB | 8.9 kB | 5.0 kB |
+| floor | no `appFonts`, no utility classes: tokens, reset and base only | 19.1 kB | 15.8 kB | 3.1 kB | 2.6 kB |
 
-Everything compresses to roughly an eighth of its raw size, so the raw figure is the one that misleads. The utility classes compress a little better than the tokens do, being the same few declarations repeated with one value changed, but only a little: turning off every group but trim saves 52 kB raw and 6 kB gzipped.
+Everything compresses to roughly an eighth of its raw size, so the raw figure is the one that misleads. The utility classes compress a little better than the tokens do, being the same few declarations repeated with one value changed, but only a little: turning off every group but trim saves 54 kB raw and 6 kB gzipped.
 
 What moves the number is easier to read per unit:
 
 | one more… | raw | minified | min + gzip |
 | --- | --- | --- | --- |
-| numeric spacing step (14 classes) | 872 B | 655 B | 89 B |
+| numeric spacing step (14 classes) | 785 B | 584 B | 85 B |
 | font role (`.trim-text-*`, `.font-family-*`, tokens) | 455 B | 392 B | 48 B |
-| color token (light + dark, oklch + hex) | 298 B | 253 B | 42 B |
+| color token (light + dark, oklch + hex) | 298 B | 253 B | 43 B |
 | `@font-face` rule (one file, one weight or style) | 259 B | 227 B | 11 B |
 
-The numeric spacing scale is the single largest item at its default end of 48, on the order of 4 of the full config's 10.1 kB, and it's one number in the config rather than a flag anyone thinks about. Fonts are the cheapest axis by a wide margin: two or three families with a few static weights each is a rounding error, whether they're static or variable. Colors are the axis without a ceiling. Twenty tokens is under a kilobyte, but a tonal palette of ten steps across a dozen hues passes the spacing scale on its own. The `no colors` row is the other end of that: a config with no `colorSetup` at all, which is what a project keeping its colors elsewhere writes (see [design-tokens.md](design-tokens.md#turning-colors-off)).
+The numeric spacing scale is the single largest item at its default end of 32, on the order of 3 of the full config's 9.9 kB, and it's one number in the config rather than a flag anyone thinks about. Fonts are the cheapest axis by a wide margin: two or three families with a few static weights each is a rounding error, whether they're static or variable. Colors are the axis without a ceiling. Twenty tokens is under a kilobyte, but a tonal palette of ten steps across a dozen hues passes the spacing scale on its own. The `no colors` row is the other end of that: a config with no `colorSetup` at all, which is what a project keeping its colors elsewhere writes (see [design-tokens.md](design-tokens.md#turning-colors-off)).
 
 **There's no purge step, by design.** Tailwind and friends scan your markup to know which classes survive. trimscale-css generates from your config and never reads your source files, so it has no way to know which classes you use. Run [PurgeCSS](https://purgecss.com) against the generated file if you want one, it works fine.
 

@@ -136,10 +136,13 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
 
   // What the browser would measure this font by if nothing overrides it. The
   // typo metrics above are only one of three candidates in the file, and the
-  // file itself doesn't get to pick: `USE_TYPO_METRICS` set means every engine
-  // reads them, clear means Windows reads `usWin` and macOS reads `hhea`. Both
-  // are measured because CSS can't branch per platform, so the override has to
-  // satisfy the worse of the two.
+  // file itself doesn't get to pick: with `USE_TYPO_METRICS` clear, Windows
+  // reads `usWin` and macOS reads `hhea`. Both are measured because CSS can't
+  // branch per platform, so the override has to satisfy the worse of the two.
+  // With the flag set, Firefox and Windows engines read the typo metrics and
+  // Safari and Chrome on macOS reportedly still read `hhea`. That case counts
+  // as zero: a font that sets the flag keeps `hhea` equal to its typo metrics,
+  // with only a handful of non-Latin exceptions across Google Fonts.
   const hhea = font.hhea
   const correctedAscender = upmAscender / upm
   const trimError = os2.fsSelection.useTypoMetrics
@@ -169,9 +172,9 @@ export const parseFontBuffer = async (buffer: Buffer, label: string): Promise<Pa
       lsbAdjust: +((lsb / upm) * -1).toFixed(4),
       rsbAdjust: +((rsb / upm) * -1).toFixed(4),
       // Raw (uncorrected) OS/2 typo metrics, not upmAscender/upmDescender:
-      // those are clipped to fit unitsPerEm for leading-trim's cap-height
-      // math, but ascent-override/descent-override/line-gap-override need
-      // the font's true declared metrics, overshoot and all.
+      // those are fitted to unitsPerEm for leading-trim's cap-height math,
+      // but ascent-override/descent-override/line-gap-override need the
+      // font's true declared metrics, exactly as declared.
       ascender: +(os2.typoAscender / upm).toFixed(3),
       descender: +(Math.abs(os2.typoDescender) / upm).toFixed(3),
       lineGap: +(os2.typoLineGap / upm).toFixed(3),

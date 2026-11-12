@@ -15,7 +15,7 @@ import type { TrimscaleConfig } from 'trimscale-css/models/Config.ts'
  *   → docs/customizing-breakpoints.md
  * - rootFontSize
  *   → docs/full-config-reference.md#rootfontsize
- * - ultrawideHeightThresholdPx
+ * - ultrawideHeightThresholdPx, ultrawideAspectRatio
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
@@ -49,6 +49,7 @@ const config: TrimscaleConfig = {
     nextFontDefault: false, // if using Next.js `next/font` (local or google)
     nextFontPrefix: 'next-font', // if using Next.js, font `variable` must be `--{prefix}-{family-name}`
     defaultFallback: 'sans-serif', // used when a families entry below has no `fallback` of its own
+    leadingTrimFallbackDefault: true, // false = leading trim only in browsers with native text-box-trim
     families: {
       // Placeholder so `generate` produces working output before you've set
       // up a real font. Replace it, see docs/adding-a-font.md.
@@ -149,11 +150,13 @@ const config: TrimscaleConfig = {
   // rootFontSize: 16,
 
   /**
-   * Viewport height (px) threshold for the --vwx ultrawide switch-over
-   * (paired with a >= 21:9 aspect ratio check). Optional, defaults to 944.
+   * Past this viewport height (px), --vwx is capped at ultrawideAspectRatio
+   * times 1vh, so fluid sizes stop growing on very wide screens. Optional,
+   * defaults to 944 and 2.
    * → docs/design-tokens.md#base-tokens
    */
   // ultrawideHeightThresholdPx: 944,
+  // ultrawideAspectRatio: 2,
 
   /**
    * Fluid clamp() boundaries: base font-size and modular-scale ratio at the min/max viewport widths.
@@ -289,37 +292,40 @@ const config: TrimscaleConfig = {
     approach: 'independent',
     macroRangeMultiplier: 2,
     tShirtScaleMicro: {
-      '3xs': 1,
-      '2xs': 2,
-      xs: 3,
-      sm: 4,
-      md: 5,
-      lg: 6,
+      '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
     },
     tShirtScaleMacro: {
-      xl: 6,
-      '2xl': 8,
-      '3xl': 10,
-      '4xl': 12,
-      '5xl': 16,
-      '6xl': 20,
-      '7xl': 24,
-      '8xl': 28,
-      '9xl': 32,
+      '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+      '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+      '7xl': 24, '8xl': 28, '9xl': 32,
     },
-    numericScaleMicroEnd: 6,
-    numericScaleMacroEnd: 48,
+    numericScaleMicroEnd: 8,
+    numericScaleMacroEnd: 32,
+    // Named ranges between two fluid steps, each a --space-range-{name}
+    // (camelCase becomes kebab-case). → docs/customizing-spacing.md#named-ranges
+    // spaceRanges: {
+    //   cardGap: { from: 'sm', to: 'xl' }, // --space-sm at minWidth, --space-xl at maxWidth
+    // },
     // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',
     // tShirtScale: {
-    //   '3xs': 1, '2xs': 2, 'xs': 3, 'sm': 4, 'md': 5, 'lg': 6,
-    //   'xl': 8, '2xl': 12, '3xl': 16, '4xl': 20,
-    //   '5xl': 24, '6xl': 28, '7xl': 32, '8xl': 40, '9xl': 48,
+    //   '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+    //   '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+    //   '7xl': 24, '8xl': 28, '9xl': 32,
     // },
-    // numericScaleEnd: 48,
+    // numericScaleEnd: 32,
   },
+
+  /**
+   * Named fluid values between two pixel sizes, each a --{name} with no
+   * prefix (camelCase becomes kebab-case). Optional.
+   * → docs/full-config-reference.md#fluidranges
+   */
+  // fluidRanges: {
+  //   mastheadHeight: { from: 56, to: 72 }, // --masthead-height, 56px → 72px
+  // },
 
   /**
    * The color palette and everything derived from it. Optional as a whole:

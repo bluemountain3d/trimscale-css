@@ -65,13 +65,13 @@ typography, spacing, and color primitives most design systems build by hand.
 ## Features
 
 - Fluid typography using a modular scale, Minor Third (1.2×) at 360 px expanding to Perfect Fourth (1.333×) at 1440 px by default, tunable per project
-- Spacing on a fixed `--unit-micro` grid step plus a `--unit-macro` grid that scales 4 px to 8 px with the viewport, both snapped to whole pixels (or a single coupled `--unit`, your choice)
+- Spacing in two scales under the default approach: fluid `--space-*` on `--unit-macro`, which scales 4 px to 8 px with the viewport in whole-pixel steps, and fixed `--space-fixed-*` on a static 4 px `--unit-micro`. Or a single `--unit` that follows the type scale instead, your choice. Every spacing token lands on a whole pixel either way
 - Leading-trim via CSS pseudo-elements, with a progressive enhancement to native `text-box-trim` where supported
 - Font metrics, `@font-face` rules, and role assignment generated automatically from your actual font files
 - OKLCH color system with semantic tokens for surfaces, text, accent, and action states
 - Light/dark mode via `prefers-color-scheme`, no JavaScript required
 - Modern responsive breakpoints using CSS range syntax (`width <`, `width >=`)
-- Semantic (t-shirt sizes) and numeric (1–48) spacing scales
+- Semantic (t-shirt sizes) and numeric (1–32) spacing scales
 - Framework-agnostic, works with any JS framework or plain HTML for the web
 
 ---
@@ -117,7 +117,7 @@ trimscale-css/
     └── utilities/                   # Spacing and typography utility classes
 ```
 
-The `layouts` and `components` cascade layers are declared but stay empty: grids, page structure, and component classes are design decisions that belong in your project, not in a typography and spacing base. See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md) for recipes to copy in.
+The `layouts` and `components` cascade layers are declared but stay empty: grids, page structure, and component classes are design decisions that belong in your project, not in a typography and spacing base. `output.cascadeLayers` swaps them for layers of your own. See [examples.md](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/examples.md) for recipes to copy in.
 
 The public surface is `tokens/`, `abstracts/variables/`, `abstracts/functions/`, `abstracts/mixins/`, `base/`, `utilities/`, `styles/trimscale.scss`, and `models/Config.ts`, the exact set exposed via `package.json`'s `exports` field for the [`pkg:` importer](https://github.com/bluemountain3d/trimscale-css/blob/HEAD/docs/getting-started.md#configure-your-scss-compiler). Anything else under `styles/` is an implementation detail, not covered by semver.
 

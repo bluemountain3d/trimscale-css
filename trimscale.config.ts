@@ -15,7 +15,7 @@ import type { TrimscaleConfig } from './models/Config.ts'
  *   → docs/customizing-breakpoints.md
  * - rootFontSize
  *   → docs/full-config-reference.md#rootfontsize
- * - ultrawideHeightThresholdPx
+ * - ultrawideHeightThresholdPx, ultrawideAspectRatio
  *   → docs/design-tokens.md#base-tokens
  * - fluidScale, modularTypographicScale, semanticFontSizes
  *   → docs/customizing-type-scale.md
@@ -147,11 +147,13 @@ const config: TrimscaleConfig = {
   // rootFontSize: 16,
 
   /**
-   * Viewport height (px) threshold for the --vwx ultrawide switch-over
-   * (paired with a >= 21:9 aspect ratio check). Optional, defaults to 944.
+   * Past this viewport height (px), --vwx is capped at ultrawideAspectRatio
+   * times 1vh, so fluid sizes stop growing on very wide screens. Optional,
+   * defaults to 944 and 2.
    * → docs/design-tokens.md#base-tokens
    */
   // ultrawideHeightThresholdPx: 944,
+  // ultrawideAspectRatio: 2,
 
   /**
    * Fluid clamp() boundaries: base font-size and modular-scale ratio at the min/max viewport widths.
@@ -286,36 +288,25 @@ const config: TrimscaleConfig = {
     approach: 'independent',
     macroRangeMultiplier: 2,
     tShirtScaleMicro: {
-      '3xs': 1,
-      '2xs': 2,
-      xs: 3,
-      sm: 4,
-      md: 5,
-      lg: 6,
+      '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
     },
     tShirtScaleMacro: {
-      xl: 6,
-      '2xl': 8,
-      '3xl': 10,
-      '4xl': 12,
-      '5xl': 16,
-      '6xl': 20,
-      '7xl': 24,
-      '8xl': 28,
-      '9xl': 32,
+      '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+      '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+      '7xl': 24, '8xl': 28, '9xl': 32,
     },
-    numericScaleMicroEnd: 6,
-    numericScaleMacroEnd: 48,
+    numericScaleMicroEnd: 8,
+    numericScaleMacroEnd: 32,
     // Coupled example, remove/comment the independent-only fields above
     // (macroRangeMultiplier, tShirtScaleMicro, tShirtScaleMacro, numericScaleMicroEnd,
     // numericScaleMacroEnd) if you uncomment this, the two shapes can't coexist:
     // approach: 'coupled',
     // tShirtScale: {
-    //   '3xs': 1, '2xs': 2, 'xs': 3, 'sm': 4, 'md': 5, 'lg': 6,
-    //   'xl': 8, '2xl': 12, '3xl': 16, '4xl': 20,
-    //   '5xl': 24, '6xl': 28, '7xl': 32, '8xl': 40, '9xl': 48,
+    //   '3xs': 1, '2xs': 2, xs: 3, sm: 4, md: 5, lg: 6, xl: 8,
+    //   '2xl': 10, '3xl': 12, '4xl': 14, '5xl': 16, '6xl': 20,
+    //   '7xl': 24, '8xl': 28, '9xl': 32,
     // },
-    // numericScaleEnd: 48,
+    // numericScaleEnd: 32,
   },
 
   /**

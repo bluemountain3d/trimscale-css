@@ -29,7 +29,14 @@ $breakpoints: (
   "desktop": fn.px-to-rem(1440),
 ) !default;
 
-/// Viewport height threshold for the ultrawide aspect-ratio check
+/// Viewport height past which --vwx is capped by $ultrawide-aspect-ratio
 /// @type Number
 /// @see styles/tokens/_base-tokens.scss
 $ultrawide-height-threshold-px: 944px !default;
+
+/// Widest aspect ratio --vwx scales for: past the height threshold, fluid
+/// sizes never grow as if the viewport were wider than this many times its
+/// height. Unitless, greater than 1.
+/// @type Number
+/// @see styles/tokens/_base-tokens.scss
+$ultrawide-aspect-ratio: 2 !default;

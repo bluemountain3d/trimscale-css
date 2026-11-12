@@ -13,6 +13,7 @@ Optional. Where and what `trimscale-css generate` writes: the output directory (
 | `output.css`         | `boolean` or object  |    No    | Emit a standalone, pre-compiled `.css` file. Default `false`. See below.                |
 | `output.utilities`   | `boolean` or object  |    No    | Which utility-class groups to generate, shared by every output target. See below.       |
 | `output.reset`       | `boolean`            |    No    | Emit the package's own `@layer reset` block. Default `true`. Not about size, see [cascade-layers.md](cascade-layers.md#turning-off-the-built-in-reset) for what you take on by turning it off. |
+| `output.cascadeLayers` | `string[]`         |    No    | Your own cascade layers, lowest priority first, declared between `trim` and `utilities`. Replaces the default `['layouts', 'components']`. See [cascade-layers.md](cascade-layers.md#your-own-layers). |
 
 `output.scss` and `output.css` can both be `true` at once (the normal case while migrating from one to the other, or during development of this package itself), but not both `false`, `loadConfig` throws if so, since there would be nothing to generate.
 
@@ -37,6 +38,7 @@ Optional. Opt-out toggles for the config-driven utility-class groups in `styles/
 | `output.utilities.spacing.base`           | `boolean` |    No    | `.m-none`, `.p-none`, `.mx-auto`, `.my-auto`, `.ml-auto`, `.mr-auto`. |
 | `output.utilities.spacing.tShirt`         | `boolean` |    No    | `.{m\|p}{side?}-{3xs..9xl}`.                                        |
 | `output.utilities.spacing.numeric`        | `boolean` |    No    | `.{m\|p}{side?}-{1..numericScaleEnd}`.                               |
+| `output.utilities.spacing.fixed`          | `boolean` |    No    | `.{m\|p}{side?}-fixed-*`, for whichever of `tShirt`/`numeric` is on. No effect under `approach: 'coupled'`. |
 | `output.utilities.typography`             | `boolean` or object |    No    | `true`/`false` for the whole group, or an object to toggle sub-groups individually (see below). |
 | `output.utilities.typography.trim`        | `boolean` |    No    | `.trim-text-*`.                                                     |
 | `output.utilities.typography.family`      | `boolean` |    No    | `.font-family-*`.                                                   |
@@ -63,8 +65,10 @@ Optional. Font sources (local file, CDN URL, or hand-entered metrics) keyed by f
 | `fontRoles`       | `FontRoles`                  |   Yes    | Maps semantic roles to a family name from `families`. See table below.                                                                                       |
 | `localFontsPath`  | `string`                     |    No    | Base folder, relative to this config file. A `local` family that omits `path` looks for its files under `localFontsPath/<family key>/` instead.             |
 | `publicDir`       | `string`                     |    No    | Your bundler's static-passthrough folder (Vite/CRA/Astro: `'public'`, SvelteKit: `'static'`). Stripped as a leading segment from a `local` family's generated `@font-face` `src`. Default `'public'`.  |
+| `urlPrefix`       | `string`                     |    No    | Base path put in front of a `local` family's generated `@font-face` `src`, for Next.js `basePath` and other setups that don't rewrite `url()`. Must start with `/`. Vite doesn't need it, see [adding-a-font.md](adding-a-font.md#sites-served-under-a-base-path). Default `''`. |
 | `nextFontDefault` | `boolean`                    |    No    | Whether `family` values build around a `next/font` CSS variable by default. A family's own `nextFont` overrides this for just that family. Default `false`. |
 | `nextFontPrefix`  | `string`                     |    No    | Prefix half of the `next/font` CSS variable name (`--{prefix}-{family}`). Default `'next-font'`.                                                            |
+| `leadingTrimFallbackDefault` | `boolean`                |    No    | Whether leading trim also applies in browsers without native `text-box-trim`. `false` trims in native engines only. A family's own `leadingTrimFallback` overrides this for just that family. Default `true`. See [adding-a-font.md](adding-a-font.md#opting-out-of-the-leading-trim-fallback). |
 | `defaultFallback` | `FontFallbacks`              |   Yes    | Fallback stack used when a family has no `fallback` of its own. One of `'sans-serif'`, `'serif'`, `'monospace'`, `'system-ui'`, or `'cursive'`.             |
 
 → Full guide: [adding-a-font.md](adding-a-font.md) (sources, `@font-face` rules) · [using-with-nextjs.md](using-with-nextjs.md) (`next/font` integration)
@@ -76,6 +80,7 @@ Optional. Font sources (local file, CDN URL, or hand-entered metrics) keyed by f
 | `source`           | `'local'` \| `'cdn'` \| `'manual'`                                              |   Yes    | All        | Picks the shape below.                                                                                             |
 | `fallback`         | `FontFallback`                                                                  |    No    | All        | A generic keyword, or `{ matched: ... }` for a metric-matched `@font-face` override that cuts layout shift (CLS) during font-swap. Alternatives, not layers: `{ matched }` emits no generic. Defaults to `appFonts.defaultFallback`. |
 | `nextFont`         | `boolean`                                                                       |    No    | All        | Overrides `appFonts.nextFontDefault` for this family only.                                                        |
+| `leadingTrimFallback`     | `boolean`                                                                       |    No    | All        | Overrides `appFonts.leadingTrimFallbackDefault` for this family only.                                                    |
 | `path`             | `string[]`                                                                      |    No    | `local`    | Font file path(s), relative to this config file. Omit to use the `appFonts.localFontsPath` convention instead.   |
 | `url`              | `string[]`                                                                      |   Yes    | `cdn`      | Direct font file URL(s), not a CSS-generating endpoint (e.g. not Google Fonts' `css2?family=...`).                |
 | `generateFontFace` | `boolean`                                                                       |    No    | `cdn`      | Write `@font-face` rules pointing at `url` directly (self-hosting). Default `false`.                              |
@@ -137,13 +142,14 @@ Named viewport breakpoints (px), converted to rem for the `$breakpoints` SCSS ma
 
 → Full guide: [customizing-breakpoints.md](customizing-breakpoints.md)
 
-## `ultrawideHeightThresholdPx`
+## `ultrawideHeightThresholdPx`, `ultrawideAspectRatio`
 
-Viewport height (px) threshold for the `--vwx` ultrawide switch-over, paired with a fixed ≥ 21:9 aspect-ratio check.
+Together they cap `--vwx` on very wide screens: past the height threshold, `--vwx` is `min(1vw, <ratio>vh)`.
 
-| Property                     | Type     | Required | Description                                                      |
-| ---------------------------- | -------- | :------: | ---------------------------------------------------------------- |
-| `ultrawideHeightThresholdPx` | `number` |    No    | Height (px) past which `--vwx` switches to `2vh`. Default `944`. |
+| Property                     | Type     | Required | Description                                                                                                                                                  |
+| ---------------------------- | -------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ultrawideHeightThresholdPx` | `number` |    No    | Viewport height (px) past which the cap applies. Default `944`.                                                                                             |
+| `ultrawideAspectRatio`       | `number` |    No    | Widest aspect ratio fluid sizes scale for. Past it, `--vwx` follows the viewport height instead of the width. Must be greater than 1. Default `2`. |
 
 → Full guide: [design-tokens.md#base-tokens](design-tokens.md#base-tokens)
 
@@ -219,7 +225,7 @@ Optional. Curve for the self-scaling `--line-height-dynamic` token. Every field 
 
 ## `spacingSetup`
 
-How `--space-*` tokens grow across viewport widths. A discriminated union on `approach`, the two shapes aren't combinable.
+How spacing tokens grow across viewport widths. `--space-*` is fluid under both approaches, and `'independent'` adds the static `--space-fixed-*`. A discriminated union on `approach`, the two shapes aren't combinable.
 
 | Property                                       | Type                                                                                      | Required | Applies to    | Description                                                                     |
 | ---------------------------------------------- | ----------------------------------------------------------------------------------------- | :------: | ------------- | ------------------------------------------------------------------------------- |
@@ -228,10 +234,36 @@ How `--space-*` tokens grow across viewport widths. A discriminated union on `ap
 | `tShirtScale`                                  | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `coupled`     | Tier → multiplier of `--unit`.                                                  |
 | `numericScaleEnd`                              | `number`                                                                                  |   Yes    | `coupled`     | Upper bound of the numbered `--space-1`..`N` scale.                             |
 | `macroRangeMultiplier`                         | one of `1.25`, `1.5`, `1.75`, `2`, `2.25`, `2.5`, `2.75`, `3`, `3.25`, `3.5`, `3.75`, `4` |    No    | `independent` | Multiplier of `baseGridSize` giving `--unit-macro`'s ceiling (px). Default `2`. |
-| `tShirtScaleMicro`, `tShirtScaleMacro`         | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `independent` | Tier → multiplier of `--unit-micro`/`--unit-macro` respectively.                |
-| `numericScaleMicroEnd`, `numericScaleMacroEnd` | `number`                                                                                  |   Yes    | `independent` | Upper bounds of the micro/macro segments of the numbered scale.                 |
+| `tShirtScaleMacro`                             | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `independent` | Tier → multiplier of `--unit-macro`, the fluid `--space-{tier}`.                |
+| `tShirtScaleMicro`                             | `Partial<Record<TShirtScale, number>>`                                                    |   Yes    | `independent` | Tier → multiplier of `--unit-micro`, the fixed `--space-fixed-{tier}`. May share keys with `tShirtScaleMacro`. |
+| `numericScaleMacroEnd`                         | `number`                                                                                  |   Yes    | `independent` | Upper bound of the fluid `--space-1`..`N` scale.                                |
+| `numericScaleMicroEnd`                         | `number`                                                                                  |   Yes    | `independent` | Upper bound of the fixed `--space-fixed-1`..`N` scale.                          |
+| `spaceRanges`                                  | `Record<string, SpaceRange>`                                                              |    No    | Both          | Named ranges between two fluid steps, each a `--space-range-{name}`, see below. |
 
-→ Full guide: [customizing-spacing.md](customizing-spacing.md)
+`SpaceRange` is `{ from, to, round? }`. `from` and `to` are steps of the fluid scale as strings, a t-shirt key (`'sm'`) or a numeric step (`'12'`), never pixels. The token is worth what `from` is at `fluidScale.minWidth` and what `to` is at `maxWidth`, resolved against whichever `approach` the config uses, so both ends always match the `--space-*` tokens of the same keys. `round` defaults to `true`, like every other `--space-*`. A range only grows: a `from` worth more than `to` stops the build.
+
+Write the name in camelCase or kebab-case, it becomes kebab-case either way: `cardGap` and `card-gap` both give `--space-range-card-gap`. A number is split from a word (`gap2` → `gap-2`) but not from a single letter, so `h1Gap` gives `--space-range-h1-gap`.
+
+→ Full guide: [customizing-spacing.md](customizing-spacing.md#named-ranges)
+
+## `fluidRanges`
+
+Optional. Named fluid values between two pixel sizes, for anything that isn't on the spacing or type scale (a header height, an icon size). Each entry is `--{name}`, with no prefix, and is the same `clamp()` that [`fn.fluid-value(from, to)`](abstracts.md#fnfluid-valuemin-size-max-size-unit-key-type) returns, so a project consuming the compiled CSS gets it without Sass.
+
+| Property        | Type                                              | Required | Description                                                                                         |
+| --------------- | ------------------------------------------------- | :------: | --------------------------------------------------------------------------------------------------- |
+| `[name: string]` | `{ from: number, to: number, round?: boolean }` |    No    | `from` and `to` in px, at `fluidScale.minWidth` and `maxWidth`. `from` must not be larger than `to`. `round` defaults to `false`. |
+
+Names follow the same rule as `spaceRanges`: camelCase or kebab-case, emitted as kebab-case, so `fs900` gives `--fs-900` and `h1` gives `--h1`. `generate` warns when a name collides with a token the package already emits (`--fluid-base`, any `--space-*`, a type scale step, a color token). Range tokens are declared last, so yours wins, which is why it's a warning and not an error.
+
+```ts
+fluidRanges: {
+  mastheadHeight: { from: 56, to: 72 }, // --masthead-height
+  iconLg: { from: 24, to: 32, round: true }, // --icon-lg
+},
+```
+
+→ Full guide: [design-tokens.md#range-tokens](design-tokens.md#range-tokens)
 
 ## `colorSetup`
 

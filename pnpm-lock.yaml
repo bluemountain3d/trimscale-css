@@ -229,9 +229,9 @@ importers:
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
-      sass-embedded:
-        specifier: ^1.104.0
-        version: 1.104.0
+      sass:
+        specifier: ^1.105.1
+        version: 1.108.2
       storybook:
         specifier: ^10.4.2
         version: 10.4.2(@testing-library/dom@10.4.1)(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -2130,7 +2130,8 @@ snapshots:
   '@biomejs/cli-win32-x64@2.5.10':
     optional: true
 
-  '@bufbuild/protobuf@2.14.1': {}
+  '@bufbuild/protobuf@2.14.1':
+    optional: true
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -2942,7 +2943,8 @@ snapshots:
 
   clone@2.1.2: {}
 
-  colorjs.io@0.7.1: {}
+  colorjs.io@0.7.1:
+    optional: true
 
   comma-separated-tokens@2.0.3: {}
 
@@ -3027,7 +3029,8 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  has-flag@4.0.0: {}
+  has-flag@4.0.0:
+    optional: true
 
   hast-util-to-html@9.0.5:
     dependencies:
@@ -3318,6 +3321,7 @@ snapshots:
   rxjs@7.8.2:
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   sass-embedded-all-unknown@1.104.0:
     dependencies:
@@ -3405,6 +3409,7 @@ snapshots:
       sass-embedded-unknown-all: 1.104.0
       sass-embedded-win32-arm64: 1.104.0
       sass-embedded-win32-x64: 1.104.0
+    optional: true
 
   sass@1.104.0:
     dependencies:
@@ -3482,12 +3487,15 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
+    optional: true
 
   sync-child-process@1.0.2:
     dependencies:
       sync-message-port: 1.2.0
+    optional: true
 
-  sync-message-port@1.2.0: {}
+  sync-message-port@1.2.0:
+    optional: true
 
   tiny-inflate@1.0.3: {}
 
@@ -3588,7 +3596,8 @@ snapshots:
 
   uuid@9.0.1: {}
 
-  varint@6.0.0: {}
+  varint@6.0.0:
+    optional: true
 
   vfile-message@4.0.3:
     dependencies:

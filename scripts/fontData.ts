@@ -12,7 +12,7 @@ import type {
 import { correctedEmMetrics } from './fontMetrics.helpers.ts'
 import {
   fetchRemoteFont,
-  getFontExtension,
+  getFontFormat,
   listLocalFontDir,
   readLocalFont,
   resolveFamilyDirName,
@@ -64,8 +64,12 @@ const FALLBACK_CHAINS: Record<MatchableFallbackChain, MatchableFallbackFamily[]>
  * in the URL (Vite's `public/`, SvelteKit's `static/`, etc.). A file
  * outside `publicDir` still gets a root-relative path (works in dev, not
  * guaranteed after a production build, see `AppFonts.publicDir`).
+ *
+ * `urlPrefix` goes in front, for a bundler that serves the site under a base
+ * path without rewriting `url()` to match (Next.js `basePath`). It arrives
+ * already stripped of trailing slashes, so `/sub/` can't produce `//fonts`.
  */
-const buildLocalFontSrc = (entry: string, publicDir: string): string => {
+const buildLocalFontSrc = (entry: string, publicDir: string, urlPrefix: string): string => {
   const normalizedEntry = entry
     .replace(/^\.[\\/]/, '')
     .split(path.sep)
@@ -80,7 +84,7 @@ const buildLocalFontSrc = (entry: string, publicDir: string): string => {
     ? normalizedEntry.slice(normalizedPublicDir.length + 1)
     : normalizedEntry
 
-  return `/${withoutPublicDir}`
+  return `${urlPrefix}/${withoutPublicDir}`
 }
 
 /** Resolves a `{ matched }` fallback value (single family, explicit array, or named chain) to a flat `MatchableFallbackFamily[]`. */
@@ -198,8 +202,8 @@ export type FontFace = {
   family: string
   /** `src: url(...)` value: a root-relative path (leading `/`, relative to `process.cwd()`) for `local`, the CDN URL as-is for `cdn` */
   src: string
-  /** File extension, used as the `format(...)` hint (e.g. `woff2`) */
-  ext: string
+  /** `format(...)` hint (`truetype`, `opentype`, `woff`, `woff2`), or `undefined` to leave it out, see `getFontFormat` */
+  format: string | undefined
   /** A single weight for static fonts, or a `{min, max}` range for variable fonts (`font-weight: min max;`) */
   weight: number | { min: number; max: number }
   style: 'normal' | 'italic'
@@ -218,7 +222,7 @@ export type FontFace = {
 /** One `path`/`url` entry's extracted metrics plus what's needed to build its `@font-face`, kept until the family's best-metrics candidate is picked. */
 type ParsedEntry = {
   src: string
-  ext: string
+  format: string | undefined
   isItalic: boolean
   weightClass: number
   weightRange: { min: number; max: number } | null
@@ -230,8 +234,8 @@ type ParsedEntry = {
 /** A `local` or `cdn` family: the two whose files trimscale reads itself, as opposed to `manual`, whose metrics arrive already measured. */
 type FileBackedFontSource = Extract<FontSource, { source: 'local' | 'cdn' }>
 
-/** One family's full metrics entry: the raw extracted/manual metrics plus its resolved SCSS-ready `family` string. */
-export type FamilyFontMetrics = RawFontMetrics & { family: string }
+/** One family's full metrics entry: the raw extracted/manual metrics plus its resolved SCSS-ready `family` string and `leadingTrimFallback` flag. */
+export type FamilyFontMetrics = RawFontMetrics & { family: string; leadingTrimFallback: boolean }
 
 /** Map of resolved font family name to its extracted metrics */
 export type FontMetricsMap = Record<string, FamilyFontMetrics>
@@ -290,11 +294,17 @@ const resolveLocalFontPaths = async (
  * describe whichever file the consumer measured, not the one the CDN serves,
  * and those differ in practice (see devDocs/font-vertical-metrics.md). So the
  * most that can honestly be said is where to look if the symptom appears.
+ * The clause is dropped when the family has opted out of the fallback trim,
+ * since the fallback is the only path it concerns.
  */
-const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cdn'): void => {
+const warnIfFamilyNameUnverifiable = (
+  familyName: string,
+  source: 'manual' | 'cdn',
+  leadingTrimFallback: boolean,
+): void => {
   const trimNote =
-    source === 'manual'
-      ? ' Its leading trim is unverified for the same reason: no @font-face means no `ascent-override` pinning the content area to 1em. If trimmed text sits low in one browser but not another, see docs/adding-a-font.md#when-trimmed-text-sits-low-in-one-browser-but-not-another'
+    source === 'manual' && leadingTrimFallback
+      ? ' Its leading trim is unverified for the same reason: no @font-face means no `ascent-override` pinning the content area to 1em. If trimmed text sits low in one browser but not another, see docs/adding-a-font.md#when-trimmed-text-sits-low-in-one-browser-but-not-another, or set `leadingTrimFallback: false` to trim in native engines only.'
       : ''
 
   console.warn(
@@ -303,18 +313,19 @@ const warnIfFamilyNameUnverifiable = (familyName: string, source: 'manual' | 'cd
 }
 
 /**
- * Trim error small enough to stay quiet about, in em. Most fonts land at
- * zero and a few land above 0.05, with almost nothing in between, so this
- * number only has to sit somewhere in the empty middle — it isn't a tuning
- * knob and isn't worth making configurable.
+ * Trim error small enough to stay quiet about, in em: half a pixel at 16px.
+ * The error scales with font-size, so this is the same share of the text at
+ * any size. Most fonts land at zero and the rest mostly well above, so the
+ * exact value moves few fonts either way and isn't worth making configurable.
  */
-const MIN_REPORTED_TRIM_ERROR = 0.01
+const MIN_REPORTED_TRIM_ERROR = 0.5 / 16
 
 /**
  * Warns that a family's leading trim will be visibly off because its
  * `@font-face` belongs to someone else, so the metric overrides that would
  * pin its content area to 1em can't be written (see `FontFace.ascentOverride`).
- * Silent below `MIN_REPORTED_TRIM_ERROR`, which covers most fonts.
+ * Silent below `MIN_REPORTED_TRIM_ERROR`, which covers most fonts, and not
+ * called at all for a family with `leadingTrimFallback: false`, the other way out.
  *
  * The message carries the two values and the one edit that applies them,
  * rather than the reasoning: a `generate` run is the wrong place to explain
@@ -336,7 +347,7 @@ const warnIfTrimUncorrectable = (
     : 'Set `generateFontFace: true` and trimscale writes the rule, overrides included.'
 
   console.warn(
-    `⚠ "${familyName}" needs \`ascent-override: ${(best.corrected.ascender * 100).toFixed(1)}%\` and \`descent-override: ${(best.corrected.descender * 100).toFixed(1)}%\` for its leading trim to land right, and its @font-face is written by ${owner}, so trimscale can't add them. Without them the trim sits ${best.trimError.toFixed(3)}em off (${(best.trimError * 16).toFixed(1)}px at 16px) in browsers with no native text-box-trim. ${fix} Why: docs/adding-a-font.md#font-metric-overrides`,
+    `⚠ "${familyName}" needs \`ascent-override: ${(best.corrected.ascender * 100).toFixed(1)}%\` and \`descent-override: ${(best.corrected.descender * 100).toFixed(1)}%\` for its leading trim to land right, and its @font-face is written by ${owner}, so trimscale can't add them. Without them the trim sits ${best.trimError.toFixed(3)}em off (${(best.trimError * 16).toFixed(1)}px at 16px) in browsers with no native text-box-trim. ${fix} Or set \`leadingTrimFallback: false\` on the family to trim in native engines only. Why: docs/adding-a-font.md#font-metric-overrides`,
   )
 }
 
@@ -417,6 +428,7 @@ const parseFamilyFiles = async (
   familyName: string,
   fontSource: FileBackedFontSource,
   publicDir: string,
+  urlPrefix: string,
 ): Promise<ParsedEntry[]> => {
   const entries =
     fontSource.source === 'local' ? await resolveLocalFontPaths(appFonts, familyName, fontSource) : fontSource.url
@@ -434,8 +446,8 @@ const parseFamilyFiles = async (
       const parsedFont = await parseFontBuffer(buffer, `${familyName} (${entry})`)
 
       parsed.push({
-        src: fontSource.source === 'local' ? buildLocalFontSrc(entry, publicDir) : entry,
-        ext: getFontExtension(entry),
+        src: fontSource.source === 'local' ? buildLocalFontSrc(entry, publicDir, urlPrefix) : entry,
+        format: getFontFormat(entry),
         isItalic: parsedFont.isItalic,
         weightClass: parsedFont.weightClass,
         weightRange: parsedFont.weightRange,
@@ -508,7 +520,7 @@ const buildFontFaces = (familyName: string, parsed: ParsedEntry[]): FontFace[] =
   parsed.map((entry) => ({
     family: familyName,
     src: entry.src,
-    ext: entry.ext,
+    format: entry.format,
     weight: entry.weightRange ?? entry.weightClass,
     style: entry.isItalic ? 'italic' : 'normal',
     ascentOverride: +(entry.corrected.ascender * 100).toFixed(3),
@@ -545,6 +557,15 @@ export const computeFontData = async (
   }
   const appFonts = cfg.appFonts
   const publicDir = appFonts.publicDir ?? 'public'
+  const urlPrefix = (appFonts.urlPrefix ?? '').replace(/\/+$/, '')
+  // A base path, never a URL: `rewriteFontFacesForCss` only rebases a `src`
+  // that starts with `/`, so an absolute prefix would also slip past
+  // `output.css.fontUrlBase` in the standalone bundle.
+  if (urlPrefix && !urlPrefix.startsWith('/')) {
+    throw new Error(
+      `\`appFonts.urlPrefix\` is "${appFonts.urlPrefix}". It must be a path starting with "/", the same as your bundler's base path (for example "/docs").`,
+    )
+  }
 
   const metrics: FontMetricsMap = {}
   const fontFaces: FontFace[] = []
@@ -552,6 +573,7 @@ export const computeFontData = async (
 
   for (const [familyName, fontSource] of Object.entries(appFonts.families)) {
     const usesNextFont = fontSource.nextFont ?? appFonts.nextFontDefault ?? false
+    const leadingTrimFallback = fontSource.leadingTrimFallback ?? appFonts.leadingTrimFallbackDefault ?? true
 
     if (usesNextFont) {
       console.log(
@@ -562,32 +584,32 @@ export const computeFontData = async (
     // `manual` skips every step below that reads a file, and takes the
     // config's metrics as its own. Everything after that is shared.
     if (fontSource.source === 'manual') {
-      warnIfFamilyNameUnverifiable(familyName, 'manual')
+      warnIfFamilyNameUnverifiable(familyName, 'manual', leadingTrimFallback)
 
       const resolved = resolveFamilyFallback(appFonts, familyName, fontSource, fontSource.metrics, usesNextFont)
       fallbackFontFaces.push(...resolved.fallbackFaces)
-      metrics[familyName] = { ...fontSource.metrics, family: resolved.family }
+      metrics[familyName] = { ...fontSource.metrics, family: resolved.family, leadingTrimFallback }
       continue
     }
 
-    const parsed = await parseFamilyFiles(appFonts, familyName, fontSource, publicDir)
+    const parsed = await parseFamilyFiles(appFonts, familyName, fontSource, publicDir, urlPrefix)
     const best = pickMetricsSource(parsed)
 
     const resolved = resolveFamilyFallback(appFonts, familyName, fontSource, best.raw, usesNextFont)
     fallbackFontFaces.push(...resolved.fallbackFaces)
-    metrics[familyName] = { ...best.raw, family: resolved.family }
+    metrics[familyName] = { ...best.raw, family: resolved.family, leadingTrimFallback }
 
     // A `local` family's rule is trimscale's to write unless next/font is
     // writing it instead; a `cdn` family's is opt-in.
     const writesFontFace = fontSource.source === 'local' ? !usesNextFont : (fontSource.generateFontFace ?? false)
 
     if (fontSource.source === 'cdn' && !writesFontFace) {
-      warnIfFamilyNameUnverifiable(familyName, 'cdn')
+      warnIfFamilyNameUnverifiable(familyName, 'cdn', leadingTrimFallback)
     }
 
     if (writesFontFace) {
       fontFaces.push(...buildFontFaces(familyName, parsed))
-    } else {
+    } else if (leadingTrimFallback) {
       warnIfTrimUncorrectable(familyName, best, usesNextFont, fontSource.source)
     }
   }

@@ -31,7 +31,7 @@ export const fontFacesTree = (fontFaces: FontFace[]): ScssTree =>
   fontFaces.map((face) => ({
     family: face.family,
     src: face.src,
-    ext: face.ext,
+    format: face.format,
     weight: formatWeight(face.weight),
     style: face.style,
     'ascent-override': face.ascentOverride,
