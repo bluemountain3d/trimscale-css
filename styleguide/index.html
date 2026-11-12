@@ -660,8 +660,9 @@ output: { css: true },</code></pre>
             </ol>
 
             <p class="content__paragraph">
-              Next.js, the <code>pkg:</code> importer and the rest of the setup
-              details are in the
+              Next.js, sites served under a base path, the
+              <code>pkg:</code> importer and the rest of the setup details are
+              in the
               <a
                 href="https://github.com/bluemountain3d/trimscale-css/blob/main/docs/getting-started.md"
                 target="_blank"
@@ -715,6 +716,30 @@ output: { css: true },</code></pre>
               alongside the named sizes.
             </p>
             <div data-tokens="space-scale"></div>
+
+            <h3 class="content__subtitle">Named ranges</h3>
+            <p class="content__paragraph">
+              Each spacing step grows by the same factor. When a value should
+              start at one size and end at another, small on a phone and large
+              on a desktop, give it a name in the config.
+              <code>spaceRanges</code> runs between two steps of the fluid
+              scale, <code>fluidRanges</code> between two pixel sizes. Both
+              follow <code>fluidScale</code> and the ultrawide cap, which a
+              hand-written <code>clamp()</code> doesn't. This page's grid gap is
+              one of them.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="ts">// trimscale.config.ts
+spacingSetup: {
+  spaceRanges: {
+    cardGap: { from: 'sm', to: 'xl' }, // --space-range-card-gap
+  },
+},
+fluidRanges: {
+  gridGap: { from: 20, to: 40 }, // --grid-gap
+},</code></pre>
+            </div>
+            <div data-tokens="ranges"></div>
 
             <h3 class="content__subtitle">Colors</h3>
             <p class="content__paragraph">
@@ -936,6 +961,27 @@ output: { css: true },</code></pre>
               <div class="fluid-chart__sim" data-sim aria-hidden="true"></div>
             </figure>
 
+            <h3 class="content__subtitle">Fluid space ranges</h3>
+            <p class="content__paragraph">
+              <code>fn.fluid-space-range</code> takes two steps of the fluid
+              spacing scale, a t-shirt key or a number, and returns the
+              <code>clamp()</code> from the first at the narrowest viewport to
+              the second at the widest. Both ends always match the
+              <code>--space-*</code> tokens of the same keys. It's what
+              <code>spaceRanges</code> is built on, for a one-off range that
+              doesn't need a name.
+            </p>
+            <div class="code-block">
+              <pre><code data-lang="scss">@use 'abstracts/functions' as fn;
+
+.card-grid {
+  gap: fn.fluid-space-range('sm', 'xl');
+}
+
+// Compiles to
+// clamp(1rem, 0rem + 4.4444 * var(--vwx), 4rem)</code></pre>
+            </div>
+
             <h3 class="content__subtitle">Dynamic line height</h3>
             <aside class="content__note">
               <h4 class="content__note-title">$dynamic-line-height</h4>
@@ -1046,7 +1092,9 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
             </aside>
             <p class="content__paragraph">
               One row per group you can turn off. The flag is its key inside the
-              section, under <code>output.utilities</code>.
+              section, under <code>output.utilities</code>. The accessibility
+              classes go as one, since several of them extend
+              <code>.sr-only</code>.
             </p>
             <div class="utility-table">
               <table>
@@ -1075,6 +1123,11 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
                     <th scope="row">Numeric sizes</th>
                     <td><code>.{m|p}{side?}-{step}</code></td>
                     <td><code>numeric</code></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">Fixed sizes</th>
+                    <td><code>.{m|p}{side?}-fixed-{size|step}</code></td>
+                    <td><code>fixed</code></td>
                   </tr>
                 </tbody>
                 <tbody>
@@ -1127,6 +1180,19 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
                     <th scope="row">Numeric figures</th>
                     <td><code>.num-{figures}-{width}</code></td>
                     <td><code>numericFigures</code></td>
+                  </tr>
+                </tbody>
+                <tbody>
+                  <tr class="utility-table__section">
+                    <th scope="colgroup" colspan="3"><code>a11y</code></th>
+                  </tr>
+                  <tr>
+                    <th scope="row">Screen reader and focus</th>
+                    <td>
+                      <code>.sr-only</code>, <code>.skip-link</code>,
+                      <code>.focus-visible</code>, …
+                    </td>
+                    <td><code>a11y: false</code></td>
                   </tr>
                 </tbody>
               </table>
@@ -1223,7 +1289,11 @@ output: { utilities: { spacing: { numeric: false } } },</code></pre>
             <p class="content__paragraph">
               It's also where to measure a font TrimScale can't read itself,
               like one served only from a CDN, and enter its values with
-              <code>source: 'manual'</code>.
+              <code>source: 'manual'</code>. TrimScale doesn't write the
+              <code>@font-face</code> for such a font, so the fallback trim in
+              browsers without <code>text-box-trim</code> can land slightly
+              off. <code>leadingTrimFallback: false</code> on the family trims
+              it natively only, and leaves normal leading everywhere else.
             </p>
           </section>
         </article>

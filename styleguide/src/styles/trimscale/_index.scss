@@ -26,6 +26,11 @@
     "precision": 4,
   ),
   $fluid-ranges: (
+    "grid-gap": (
+      "from": 20,
+      "to": 40,
+      "round": false,
+    ),
   ),
   $font-metrics: (
     "roboto": (
@@ -537,6 +542,11 @@
   $numeric-scale-micro-end: 8,
   $numeric-scale-macro-end: 32,
   $space-ranges: (
+    "card-gap": (
+      "from": "sm",
+      "to": "xl",
+      "round": true,
+    ),
   ),
   $utilities-spacing-base: false,
   $utilities-spacing-tshirt: false,

@@ -133,6 +133,48 @@ function spaceScale(config: TrimscaleConfig) {
     .join('')
 }
 
+// Named ranges: spacingSetup.spaceRanges between two fluid steps, and the
+// top-level fluidRanges between two pixel sizes
+function ranges(config: TrimscaleConfig) {
+  const row = (token: string, source: string) => `
+    <li class="space-scale__row" data-token>
+      ${code(`--${token}`)}
+      <span class="space-scale__source">${source}</span>
+      <span class="space-scale__track" style="--_bar: var(--${token})">
+        <span class="space-scale__bar" data-measure="inline-size"></span>
+      </span>
+      ${liveValue}
+    </li>`
+
+  const groups = [
+    {
+      title: 'Space ranges',
+      note: 'Between two steps',
+      rows: Object.entries(config.spacingSetup?.spaceRanges ?? {}).map(([name, range]) =>
+        row(`space-range-${kebab(name)}`, `${range.from} → ${range.to}`),
+      ),
+    },
+    {
+      title: 'Fluid ranges',
+      note: 'Between two sizes',
+      rows: Object.entries(config.fluidRanges ?? {}).map(([name, range]) =>
+        row(kebab(name), `${range.from}px → ${range.to}px`),
+      ),
+    },
+  ]
+
+  return groups
+    .filter(({ rows }) => rows.length > 0)
+    .map(
+      ({ title, note, rows }) => `
+        <div class="space-scale">
+          <h4 class="space-scale__title">${title} <span class="space-scale__note">${note}</span></h4>
+          <ul class="space-scale__list">${rows.join('')}</ul>
+        </div>`,
+    )
+    .join('')
+}
+
 // ============================================================================
 // Colors
 // ============================================================================
@@ -197,6 +239,7 @@ const sections: Record<string, (config: TrimscaleConfig) => string> = {
   'font-families': fontFamilies,
   'font-weights': fontWeights,
   'space-scale': spaceScale,
+  ranges,
   'color-tokens': colorTokens,
 }
 
