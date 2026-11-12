@@ -40,11 +40,11 @@
     &__roles {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--space-2);
+      gap: var(--space-fixed-2);
 
       > code {
-        padding-inline: var(--space-1);
-        border-radius: var(--space-1);
+        padding-inline: var(--space-fixed-1);
+        border-radius: var(--space-fixed-1);
         background-color: var(--color-inline-code);
         font-family: var(--font-family-code);
         font-size: var(--text-xs);
@@ -59,14 +59,14 @@
     &__item {
       display: grid;
       justify-items: start;
-      gap: var(--space-2);
+      gap: var(--space-fixed-2);
       color: var(--color-text-secondary);
       font-family: var(--font-family-code);
       font-size: var(--text-xs);
     }
 
     &__sample {
-      margin-block-end: var(--space-2);
+      margin-block-end: var(--space-fixed-2);
       color: var(--color-text-primary);
       font-size: var(--heading-2);
       line-height: 1;

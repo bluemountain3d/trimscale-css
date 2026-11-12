@@ -707,9 +707,11 @@ output: { css: true },</code></pre>
 
             <h3 class="content__subtitle">Spacing</h3>
             <p class="content__paragraph">
-              Two units. Small steps build on a fixed micro unit and stay put,
-              large steps build on a fluid macro unit and grow with the
-              viewport. A numeric scale, <code>--space-1</code> and up, sits
+              Two scales from the same steps. <code>--space-*</code> grows
+              with the viewport, from its base size at the narrowest width to
+              twice that at the widest. <code>--space-fixed-*</code> stays at
+              the base size. Both have a numeric scale too,
+              <code>--space-1</code> and <code>--space-fixed-1</code> and up,
               alongside the named sizes.
             </p>
             <div data-tokens="space-scale"></div>

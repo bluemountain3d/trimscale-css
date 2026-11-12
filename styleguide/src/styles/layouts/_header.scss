@@ -83,12 +83,12 @@
   @keyframes shrink-header {
     0% {
       --header-height: var(--header-height-max);
-      --_header-padding: calc(var(--space-2) * 2);
+      --_header-padding: calc(var(--space-fixed-2) * 2);
     }
   
     100% {
       --header-height: #{fn.fluid-value(40, 64)};
-      --_header-padding: var(--space-2);
+      --_header-padding: var(--space-fixed-2);
     }
   }
 

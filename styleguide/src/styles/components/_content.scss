@@ -14,8 +14,8 @@
     }
 
     :is(p, li) > code {
-      padding-inline: var(--space-1);
-      border-radius: var(--space-1);
+      padding-inline: var(--space-fixed-1);
+      border-radius: var(--space-fixed-1);
       white-space: nowrap;
       font-size: 0.875em;
       background-color: var(--color-inline-code);
@@ -82,7 +82,7 @@
     &__list {
       padding-inline-start: var(--space-5);
       display: grid;
-      row-gap: var(--space-1);
+      row-gap: var(--space-fixed-1);
     }
 
     &__note {
@@ -91,7 +91,7 @@
       max-width: 40rem;
       margin-block: 2em;
       padding: 1.5em 1em 1em;
-      border-radius: 0 var(--space-3);
+      border-radius: 0 var(--space-fixed-3);
       background-color: var(--color-surface-elevated);
 
       @include mx.and-up("phablet") {
@@ -152,7 +152,7 @@
     &__note-list {
       padding-inline-start: #{fn.fluid-value(16, 24)};
       display: grid;
-      row-gap: var(--space-1);
+      row-gap: var(--space-fixed-1);
     }
 
   }

@@ -5,7 +5,7 @@
   .code-block {
     position: relative;
     margin-block-start: 1.5em;
-    border-radius: 0 var(--space-3);
+    border-radius: 0 var(--space-fixed-3);
     background-color: var(--color-code-background);
 
     // Not after a hidden one: a block that swaps with a sibling, like the
@@ -32,7 +32,7 @@
       overflow-x: auto;
       scrollbar-width: thin;
       // scrollbar-color: var(--color-details) var(--color-surface-elevated);
-      padding: calc(var(--space-2) * 2); // var(--space-3) var(--space-3);
+      padding: calc(var(--space-fixed-2) * 2); // var(--space-fixed-3) var(--space-fixed-3);
     }
 
     // A note already pads its content, and its surface matches the code
@@ -56,8 +56,8 @@
 
     &__copy {
       position: absolute;
-      inset-block-start: var(--space-3);
-      inset-inline-end: var(--space-3);
+      inset-block-start: var(--space-fixed-3);
+      inset-inline-end: var(--space-fixed-3);
       padding: 0.5em 0.75em;
       border: 1px solid var(--color-details);
       border-radius: 999px;

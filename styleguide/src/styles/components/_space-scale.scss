@@ -14,7 +14,7 @@
     }
 
     &__note {
-      margin-inline-start: var(--space-2);
+      margin-inline-start: var(--space-fixed-2);
       color: var(--color-text-secondary);
       font-weight: var(--font-weight-normal);
     }
@@ -34,7 +34,7 @@
         "token token token"
         "source value bar";
       align-items: center;
-      gap: var(--space-1) var(--space-3);
+      gap: var(--space-fixed-1) var(--space-fixed-3);
       font-family: var(--font-family-code);
       font-size: var(--text-xs);
 

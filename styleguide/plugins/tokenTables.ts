@@ -5,7 +5,7 @@ import type { Plugin } from 'vite'
 const kebab = (text: string) =>
   text
     .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    .replace(/([a-zA-Z])(\d)/g, '$1-$2')
+    .replace(/([a-zA-Z]{2})(\d)/g, '$1-$2')
     .replace(/\s+/g, '-')
     .toLowerCase()
 
@@ -100,22 +100,24 @@ function spaceScale(config: TrimscaleConfig) {
   const setup = config.spacingSetup
   if (!setup) return ''
 
+  // Under 'independent' the fluid scale is --space-*, built on --unit-macro,
+  // and the fixed one is --space-fixed-*, built on --unit-micro
   const groups =
     setup.approach === 'independent'
       ? [
-          { title: 'Micro', note: 'Fixed', unit: 'micro', scale: setup.tShirtScaleMicro },
-          { title: 'Macro', note: 'Fluid', unit: 'macro', scale: setup.tShirtScaleMacro },
+          { title: 'Fluid', note: 'Grows with the viewport', prefix: 'space', unit: 'macro', scale: setup.tShirtScaleMacro },
+          { title: 'Fixed', note: 'Stays put', prefix: 'space-fixed', unit: 'micro', scale: setup.tShirtScaleMicro },
         ]
-      : [{ title: 'Spacing', note: 'Follows the type scale', unit: 'unit', scale: setup.tShirtScale }]
+      : [{ title: 'Spacing', note: 'Follows the type scale', prefix: 'space', unit: 'unit', scale: setup.tShirtScale }]
 
   return groups
-    .map(({ title, note, unit, scale }) => {
+    .map(({ title, note, prefix, unit, scale }) => {
       const rows = Object.entries(scale).map(
         ([size, multiplier]) => `
           <li class="space-scale__row" data-token>
-            ${code(`--space-${size}`)}
+            ${code(`--${prefix}-${size}`)}
             <span class="space-scale__source">${unit} × ${multiplier}</span>
-            <span class="space-scale__track" style="--_bar: var(--space-${size})">
+            <span class="space-scale__track" style="--_bar: var(--${prefix}-${size})">
               <span class="space-scale__bar" data-measure="inline-size"></span>
             </span>
             ${liveValue}

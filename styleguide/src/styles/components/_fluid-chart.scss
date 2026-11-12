@@ -71,7 +71,7 @@ $font-size-steps: ();
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: var(--space-2) var(--space-3);
+      gap: var(--space-fixed-2) var(--space-fixed-3);
       // Plain, not font-setup: the trim fallback's ::before/::after would
       // become flex items here and push the first control in by a gap
       font-size: var(--text-xs);
@@ -93,7 +93,7 @@ $font-size-steps: ();
     &__toggle {
       display: flex;
       align-items: center;
-      gap: var(--space-2);
+      gap: var(--space-fixed-2);
 
       > input {
         margin: 0;

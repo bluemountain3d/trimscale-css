@@ -7,7 +7,7 @@
       display: grid;
       gap: var(--space-5);
       padding: var(--space-6);
-      border-radius: 0 var(--space-3);
+      border-radius: 0 var(--space-fixed-3);
       background-color: var(--color-surface-elevated);
 
       > :first-child {
