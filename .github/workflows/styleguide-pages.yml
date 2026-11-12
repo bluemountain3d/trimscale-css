@@ -45,9 +45,11 @@ jobs:
 
       # The bridge in src/styles/trimscale is committed, so no generate step.
       # base_path is /<repo> for a project site, Vite wants the trailing slash.
+      # Run from the root, not with working-directory: pnpm switches to the
+      # version pinned in the root lockfile, and only finds that pin from
+      # the workspace root.
       - name: Build
-        working-directory: styleguide
-        run: pnpm build
+        run: pnpm --filter styleguide build
         env:
           STYLEGUIDE_BASE: ${{ steps.pages.outputs.base_path }}/
 
