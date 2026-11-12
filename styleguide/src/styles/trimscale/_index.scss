@@ -15,6 +15,7 @@
     "desktop": 84.375rem, // 1350px
   ),
   $ultrawide-height-threshold-px: 944px,
+  $ultrawide-aspect-ratio: 2,
   $fluid-scale: (
     "min-width": 360,
     "max-width": 1440,
@@ -23,6 +24,8 @@
     "min-type-scale": 1.2,
     "max-type-scale": 1.333,
     "precision": 4,
+  ),
+  $fluid-ranges: (
   ),
   $font-metrics: (
     "roboto": (
@@ -35,6 +38,7 @@
       "descender": 0.25,
       "line-gap": 0.05,
       "family": '"roboto", "roboto Fallback"',
+      "leading-trim-fallback": true,
     ),
     "roboto-serif": (
       "avg-char-width": 0.501,
@@ -46,6 +50,7 @@
       "descender": 0.244,
       "line-gap": 0,
       "family": '"roboto-serif", "roboto-serif Fallback"',
+      "leading-trim-fallback": true,
     ),
     "roboto-mono": (
       "avg-char-width": 0.627,
@@ -57,13 +62,14 @@
       "descender": 0.271,
       "line-gap": 0,
       "family": '"roboto-mono", "roboto-mono Fallback"',
+      "leading-trim-fallback": true,
     ),
   ),
   $font-faces: (
     (
       "family": "roboto",
       "src": "/fonts/roboto/Roboto-VariableFont_wght-100-900-Italic_subset.woff2",
-      "ext": "woff2",
+      "format": "woff2",
       "weight": "100 900",
       "style": "italic",
       "ascent-override": 75,
@@ -72,7 +78,7 @@
     (
       "family": "roboto",
       "src": "/fonts/roboto/Roboto-VariableFont_wght-100-900_subset.woff2",
-      "ext": "woff2",
+      "format": "woff2",
       "weight": "100 900",
       "style": "normal",
       "ascent-override": 75,
@@ -81,7 +87,7 @@
     (
       "family": "roboto-serif",
       "src": "/fonts/roboto-serif/RobotoSerif-VariableFont_wght-100-900-Italic_subset.woff2",
-      "ext": "woff2",
+      "format": "woff2",
       "weight": "100 900",
       "style": "italic",
       "ascent-override": 84.15,
@@ -90,7 +96,7 @@
     (
       "family": "roboto-serif",
       "src": "/fonts/roboto-serif/RobotoSerif-VariableFont_wght-100-900_subset.woff2",
-      "ext": "woff2",
+      "format": "woff2",
       "weight": "100 900",
       "style": "normal",
       "ascent-override": 84.15,
@@ -99,7 +105,7 @@
     (
       "family": "roboto-mono",
       "src": "/fonts/roboto-mono/RobotoMono-VariableFont_wght-100-700-Italic_subset.woff2",
-      "ext": "woff2",
+      "format": "woff2",
       "weight": "100 700",
       "style": "italic",
       "ascent-override": 88.84,
@@ -108,7 +114,7 @@
     (
       "family": "roboto-mono",
       "src": "/fonts/roboto-mono/RobotoMono-VariableFont_wght-100-700_subset.woff2",
-      "ext": "woff2",
+      "format": "woff2",
       "weight": "100 700",
       "style": "normal",
       "ascent-override": 88.84,
@@ -523,9 +529,12 @@
   ),
   $numeric-scale-micro-end: 3,
   $numeric-scale-macro-end: 32,
+  $space-ranges: (
+  ),
   $utilities-spacing-base: false,
   $utilities-spacing-tshirt: false,
   $utilities-spacing-numeric: false,
+  $utilities-spacing-fixed: false,
   $utilities-typography-trim: true,
   $utilities-typography-family: true,
   $utilities-typography-size: true,
@@ -537,4 +546,8 @@
   $utilities-typography-numeric-figures: true,
   $utilities-a11y: true,
   $output-reset: true,
+  $cascade-layers: (
+    layouts,
+    components,
+  ),
 );
