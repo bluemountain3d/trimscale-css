@@ -28,6 +28,12 @@
     tbody th {
       font-weight: var(--font-weight-medium);
       white-space: nowrap;
+
+      // A row header long enough to set the column's width on its own. It
+      // wraps instead, so the column fits the next-longest header.
+      &.utility-table__wrap {
+        white-space: normal;
+      }
     }
 
     &__section th {
