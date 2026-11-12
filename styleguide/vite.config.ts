@@ -12,7 +12,7 @@ const publishedVersion = async (): Promise<string> => {
     const response = await fetch('https://registry.npmjs.org/-/package/trimscale-css/dist-tags', {
       signal: AbortSignal.timeout(3000),
     })
-    const { latest } = await response.json()
+    const { latest } = (await response.json()) as { latest?: unknown }
     if (typeof latest === 'string') return latest
   } catch {}
   return JSON.parse(readFileSync(path.resolve(__dirname, '../package.json'), 'utf-8')).version
