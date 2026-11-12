@@ -10,6 +10,12 @@
       border-block-end: 1px solid var(--color-details);
     }
 
+    &__panel {
+      > .code-block {
+        margin-block-start: 1em;
+      }
+    }
+
     &__tab {
       margin-block-end: -1px;
       padding-block: var(--space-fixed-3);
